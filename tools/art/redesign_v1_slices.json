@@ -1,0 +1,163 @@
+{
+ "source_dir": "concept_art/wisp_rush_redesign_v1/assets",
+ "legacy_dir": "assets/legacy_v1/art",
+ "out_dir": "assets/art",
+ "report_dir": "logs/redesign/assets",
+ "sheets": {
+  "wisp": {"file": "05_wisp_animation_sheet_v2.png", "cleanup": "alpha", "grid": [4, 3], "seed": 0.5, "grow": 0, "keep": "main", "attach": 4, "min_area": 200, "attach_min_area": 60, "halo": 3, "low": 0.03},
+  "enemies": {"file": "06_enemy_animation_sheet_v2.png", "cleanup": "alpha", "grid": [3, 4], "seed": 0.1, "grow": 1, "keep": "all", "min_area": 40, "min_frac": 0.001, "halo": 3},
+  "reaper": {"file": "07_reaper_animation_sheet_v2.png", "cleanup": "alpha", "grid": [4, 3], "seed": 0.1, "grow": 1, "keep": "all", "min_area": 25, "min_frac": 0.0005, "halo": 3},
+  "props": {"file": "08_hazards_pickups_sheet.png", "cleanup": "checker_local", "grid": [4, 3], "cut_rows": true, "match_tol": 14, "square": 9, "seed": 0.15, "grow": 1, "keep": "all", "min_area": 60, "min_frac": 0.002, "halo": 3},
+  "vfx": {"file": "09_additive_vfx_sheet.png", "cleanup": "black", "floor": 10, "grid": [4, 3], "seed": 0.06, "grow": 1, "keep": "all", "min_area": 10, "min_frac": 0.0005, "halo": 3, "low": 0.01},
+  "frames": {"file": "10_ui_frame_kit.png", "cleanup": "alpha", "seed": 0.03, "grow": 1, "keep": "main", "attach": 2, "min_area": 500, "halo": 2},
+  "icons": {"file": "11_ui_icon_sheet.png", "cleanup": "alpha", "grid": [4, 4], "seed": 0.1, "grow": 1, "keep": "all", "min_area": 30, "min_frac": 0.002, "halo": 3},
+  "forms": {"file": "12_form_portraits_sheet.png", "cleanup": "checker", "grid": [3, 2], "border": 12, "match_tol": 20, "seed": 0.15, "grow": 1, "keep": "all", "min_area": 60, "min_frac": 0.002, "halo": 3},
+  "mutations": {"file": "13_upgrade_icon_sheet_v2.png", "cleanup": "alpha", "grid": [4, 2], "seed": 0.1, "grow": 1, "keep": "all", "min_area": 30, "min_frac": 0.002, "halo": 3}
+ },
+ "groups": [
+  {"name": "backgrounds", "mode": "opaque", "dir": "environment", "items": [
+   {"file": "02_gameplay_arena_floor.png", "out": "wisp_rush_arena_background.png"},
+   {"file": "03_home_background.png", "out": "home_background.png"},
+   {"file": "04_shared_menu_background.png", "out": "menu_background.png"}
+  ]},
+  {"name": "wisp", "sheet": "wisp", "dir": "characters/wisp", "canvas": "legacy", "default_canvas": [362, 362], "scale": "group", "scale_ref": ["01_idle_a.png", "02_idle_b.png"], "center": "legacy", "items": [
+   {"cell": 0, "out": "01_idle_a.png"},
+   {"cell": 1, "out": "02_idle_b.png"},
+   {"cell": 2, "out": "03_charge_a.png"},
+   {"cell": 3, "out": "04_charge_b.png"},
+   {"cell": 4, "out": "05_dash_left.png"},
+   {"cell": 5, "out": "06_dash_right.png"},
+   {"cell": 7, "out": "07_wall_impact.png"},
+   {"cell": 6, "out": "08_soul_reap.png"},
+   {"cell": 8, "out": "09_hurt.png"},
+   {"cell": 9, "out": "10_death_dissolve.png"},
+   {"cell": 10, "out": "11_reform.png"},
+   {"cell": 11, "out": "12_victory_pulse.png"}
+  ]},
+  {"name": "enemy_soul_wisp", "sheet": "enemies", "dir": "characters/enemies", "canvas": "legacy", "scale": "group", "scale_ref": ["01_soul_wisp_idle_a.png", "02_soul_wisp_idle_b.png"], "center": "legacy", "items": [
+   {"cell": 0, "out": "01_soul_wisp_idle_a.png"},
+   {"cell": 3, "out": "02_soul_wisp_idle_b.png"},
+   {"rect": [0, 669, 392, 955], "out": "03_soul_wisp_hit.png"},
+   {"rect": [0, 955, 392, 1338], "out": "04_soul_wisp_dissolve.png"}
+  ]},
+  {"name": "enemy_shard_wraith", "sheet": "enemies", "dir": "characters/enemies", "canvas": "legacy", "scale": "group", "scale_ref": ["05_shard_wraith_idle_a.png", "06_shard_wraith_idle_b.png"], "center": "legacy", "items": [
+   {"cell": 1, "out": "05_shard_wraith_idle_a.png"},
+   {"cell": 4, "out": "06_shard_wraith_idle_b.png"},
+   {"rect": [392, 669, 784, 955], "out": "07_shard_wraith_hit.png"},
+   {"rect": [392, 955, 784, 1338], "out": "08_shard_wraith_shatter.png"}
+  ]},
+  {"name": "enemy_bone_mote", "sheet": "enemies", "dir": "characters/enemies", "canvas": "legacy", "scale": "group", "scale_ref": ["09_bone_mote_idle_a.png", "10_bone_mote_idle_b.png"], "center": "legacy", "items": [
+   {"cell": 2, "out": "09_bone_mote_idle_a.png"},
+   {"cell": 5, "out": "10_bone_mote_idle_b.png"},
+   {"rect": [784, 669, 1176, 955], "out": "11_bone_mote_hit.png"},
+   {"rect": [784, 955, 1176, 1338], "out": "12_bone_mote_dissolve.png"}
+  ]},
+  {"name": "reaper", "sheet": "reaper", "dir": "characters/reaper", "canvas": "legacy", "force_canvas": [444, 444], "default_canvas": [444, 444], "scale": "group", "scale_ref": ["01_idle_a.png", "02_idle_b.png"], "center": "legacy", "items": [
+   {"cell": 0, "out": "01_idle_a.png"},
+   {"cell": 1, "out": "02_idle_b.png"},
+   {"cell": 3, "out": "03_attack_windup.png"},
+   {"cell": 4, "out": "04_scythe_strike.png"},
+   {"cell": 5, "out": "05_teleport_vanish.png"},
+   {"cell": 6, "out": "06_teleport_appear.png", "clip": [0, 364, 1448, 1086]},
+   {"cell": 8, "out": "07_hit_recoil.png"},
+   {"cell": 11, "out": "08_defeated_dissolve.png"},
+   {"cell": 2, "out": "09_gate_arrival.png", "like": "01_idle_a.png", "register": true, "clip": [0, 0, 1448, 364]},
+   {"cell": 7, "out": "10_exposed_core.png", "like": "01_idle_a.png", "register": true},
+   {"cell": 9, "out": "11_corridor_cast.png", "like": "01_idle_a.png", "register": true},
+   {"cell": 10, "out": "12_stagger.png", "like": "01_idle_a.png", "register": true}
+  ]},
+  {"name": "forms", "sheet": "forms", "dir": "characters/forms", "canvas": "legacy", "scale": "group", "center": "median", "items": [
+   {"cell": 0, "out": "01_void.png"},
+   {"cell": 1, "out": "02_ash.png"},
+   {"cell": 2, "out": "03_venom.png"},
+   {"cell": 3, "out": "04_bloodmoon.png"},
+   {"cell": 4, "out": "05_frost.png"},
+   {"cell": 5, "out": "06_eclipse.png"}
+  ]},
+  {"name": "props", "sheet": "props", "dir": "environment/props", "canvas": "legacy", "scale": "item", "center": "legacy", "items": [
+   {"cell": 0, "out": "06_split_void_crystal.png"},
+   {"cell": 4, "out": "06_split_void_crystal_warning.png", "like": "06_split_void_crystal.png", "register": true},
+   {"cell": 8, "out": "06_split_void_crystal_active.png", "like": "06_split_void_crystal.png", "register": true},
+   {"cell": 9, "out": "07_floor_spike_bloom.png"},
+   {"cell": 1, "out": "07_floor_spike_bloom_closed.png", "like": "07_floor_spike_bloom.png", "register": true},
+   {"cell": 5, "out": "07_floor_spike_bloom_warning.png", "like": "07_floor_spike_bloom.png", "register": true},
+   {"cell": 2, "out": "08_blade_ring_hazard.png"},
+   {"cell": 6, "out": "08_blade_ring_hazard_warning.png", "like": "08_blade_ring_hazard.png", "register": true},
+   {"cell": 10, "out": "08_blade_ring_hazard_active.png", "like": "08_blade_ring_hazard.png", "register": true},
+   {"cell": 7, "out": "01_soul_shard.png"},
+   {"cell": 7, "out": "02_soul_shard_cluster.png"},
+   {"cell": 3, "out": "03_soul_spark_life.png"},
+   {"cell": 11, "out": "09_void_portal.png"}
+  ]},
+  {"name": "vfx", "sheet": "vfx", "dir": "vfx", "canvas": "legacy", "default_canvas": [362, 362], "scale": "item", "center": "legacy", "items": [
+   {"cell": 0, "out": "01_dash_trail_short.png"},
+   {"cell": 1, "out": "02_dash_trail_long.png"},
+   {"cell": 2, "out": "03_wall_impact_small.png"},
+   {"cell": 2, "out": "04_wall_impact_large.png"},
+   {"cell": 3, "out": "05_soul_slice.png"},
+   {"cell": 4, "out": "06_death_pulse.png"},
+   {"cell": 5, "out": "07_enemy_hit.png"},
+   {"cell": 6, "out": "08_enemy_dissolve.png"},
+   {"cell": 7, "out": "09_teleport_vanish.png"},
+   {"cell": 8, "out": "10_teleport_appear.png"},
+   {"cell": 9, "out": "11_boss_warning_ring.png"},
+   {"cell": 10, "out": "12_collectible_sparkle.png"},
+   {"cell": 11, "out": "13_victory_pulse.png", "center": [181, 181]}
+  ]},
+  {"name": "mutations", "sheet": "mutations", "dir": "ui/mutations", "canvas": [444, 444], "scale": "fit", "box": [392, 392], "center": [222, 222], "items": [
+   {"cell": 0, "out": "01_wide_reap.png"},
+   {"cell": 1, "out": "02_soul_hunger.png"},
+   {"cell": 2, "out": "03_death_pulse.png"},
+   {"cell": 3, "out": "04_soul_link.png"},
+   {"cell": 4, "out": "05_cold_wake.png"},
+   {"cell": 5, "out": "06_void_velocity.png"},
+   {"cell": 6, "out": "07_soul_vessel.png"},
+   {"cell": 7, "out": "08_reapers_gift.png"}
+  ]},
+  {"name": "system_icons", "sheet": "icons", "dir": "ui/system", "canvas": [362, 362], "scale": "fit", "box": [320, 320], "center": [181, 181], "items": [
+   {"cell": 10, "out": "01_soul_life.png"},
+   {"cell": 11, "out": "02_soul_shards.png"},
+   {"cell": 12, "out": "03_combo_chain.png"},
+   {"cell": 13, "out": "04_high_score.png"},
+   {"cell": 0, "out": "05_play.png"},
+   {"cell": 7, "out": "06_pause.png"},
+   {"cell": 8, "out": "07_restart.png"},
+   {"cell": 6, "out": "08_sound.png"},
+   {"cell": 1, "out": "10_forms.png"},
+   {"cell": 3, "out": "11_upgrades.png"},
+   {"cell": 2, "out": "13_daily.png"},
+   {"cell": 4, "out": "14_statistics.png"},
+   {"cell": 5, "out": "15_settings.png"},
+   {"cell": 9, "out": "16_home.png"},
+   {"cell": 14, "out": "17_lock.png"},
+   {"cell": 15, "out": "18_reaper.png"}
+  ]},
+  {"name": "frames", "sheet": "frames", "dir": "ui/frames", "canvas": "trim", "pad": 4, "scale": "native", "factor": 1.0, "items": [
+   {"near": [228, 350], "out": "banner.png"},
+   {"near": [632, 260], "out": "panel_crest.png"},
+   {"near": [952, 290], "out": "panel_card.png"},
+   {"near": [195, 622], "out": "button_primary.png"},
+   {"near": [542, 622], "out": "button_primary_active.png"},
+   {"near": [897, 622], "out": "button_disabled.png"},
+   {"near": [192, 910], "out": "plate.png"},
+   {"near": [542, 900], "out": "slot.png"},
+   {"near": [905, 905], "out": "portrait_ring.png"},
+   {"near": [210, 1222], "out": "bar_track.png"},
+   {"near": [205, 1292], "out": "bar_fill.png"},
+   {"near": [588, 1232], "out": "divider.png"},
+   {"near": [915, 1235], "out": "panel_amber.png"}
+  ]},
+  {"name": "brand_logo", "dir": "branding", "canvas": "trim", "pad": 8, "scale": "native", "factor": 1.0, "items": [
+   {"file": "16_wordmark_logo.png", "out": "wisp_rush_logo.png", "no_legacy": true}
+  ]},
+  {"name": "brand_icon", "dir": "branding", "canvas": [1254, 1254], "scale": "fit", "box": [1150, 1150], "center": [627, 627], "items": [
+   {"file": "14_brand_mark.png", "out": "wisp_rush_app_icon_master.png"}
+  ]},
+  {"name": "brand_icon_store", "dir": "branding", "canvas": [1254, 1254], "scale": "fit", "box": [940, 940], "center": [627, 627], "background": "#111521", "items": [
+   {"file": "14_brand_mark.png", "out": "wisp_rush_app_icon_store.png"}
+  ]},
+  {"name": "brand_splash", "dir": "branding", "canvas": [941, 1672], "scale": "fit", "box": [600, 600], "center": [470.5, 836], "background": "#111521", "items": [
+   {"file": "14_brand_mark.png", "out": "wisp_rush_splash_master.png"}
+  ]}
+ ]
+}

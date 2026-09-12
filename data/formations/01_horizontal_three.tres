@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="FormationData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/resources/formation_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+formation_id = &"horizontal_three"
+minimum_wave = 1
+threat_cost = 3
+enemy_kinds = Array[StringName]([&"soul_wisp", &"soul_wisp", &"soul_wisp"])
+normalized_positions = PackedVector2Array(0.28, 0.5, 0.5, 0.5, 0.72, 0.5)

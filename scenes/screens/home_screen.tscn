@@ -1,0 +1,207 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scenes/screens/home_screen.gd" id="1_home"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/home_background.png" id="2_background"]
+[ext_resource type="Texture2D" path="res://assets/art/branding/wisp_rush_logo.png" id="3_logo"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/forms/01_void.png" id="4_wisp"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/05_play.png" id="5_play"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/10_forms.png" id="6_forms"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/13_daily.png" id="7_daily"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/14_statistics.png" id="8_stats"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/15_settings.png" id="9_settings"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/02_soul_shards.png" id="10_shards"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/04_high_score.png" id="11_best"]
+
+[node name="HomeScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_home")
+
+[node name="Background" type="TextureRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_background")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="ContentMargin" type="MarginContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 44
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 44
+
+[node name="Content" type="VBoxContainer" parent="ContentMargin"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="TopStrip" type="HBoxContainer" parent="ContentMargin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="ShardsPlate" type="PanelContainer" parent="ContentMargin/Content/TopStrip"]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"PanelPlate"
+
+[node name="Row" type="HBoxContainer" parent="ContentMargin/Content/TopStrip/ShardsPlate"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="ShardsIcon" type="TextureRect" parent="ContentMargin/Content/TopStrip/ShardsPlate/Row"]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("10_shards")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ShardsLabel" type="Label" parent="ContentMargin/Content/TopStrip/ShardsPlate/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+theme_override_font_sizes/font_size = 40
+text = "0"
+vertical_alignment = 1
+
+[node name="BestPlate" type="PanelContainer" parent="ContentMargin/Content/TopStrip"]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"PanelPlate"
+
+[node name="Row" type="HBoxContainer" parent="ContentMargin/Content/TopStrip/BestPlate"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="BestIcon" type="TextureRect" parent="ContentMargin/Content/TopStrip/BestPlate/Row"]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("11_best")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BestLabel" type="Label" parent="ContentMargin/Content/TopStrip/BestPlate/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"AmberValueLabel"
+theme_override_font_sizes/font_size = 40
+text = "0"
+vertical_alignment = 1
+
+[node name="Spacer" type="Control" parent="ContentMargin/Content/TopStrip"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="StatsButton" type="Button" parent="ContentMargin/Content/TopStrip"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+tooltip_text = "Statistics"
+theme_type_variation = &"IconButton"
+icon = ExtResource("8_stats")
+icon_alignment = 1
+
+[node name="SettingsButton" type="Button" parent="ContentMargin/Content/TopStrip"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+tooltip_text = "Settings"
+theme_type_variation = &"IconButton"
+icon = ExtResource("9_settings")
+icon_alignment = 1
+
+[node name="Logo" type="TextureRect" parent="ContentMargin/Content"]
+custom_minimum_size = Vector2(0, 440)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("3_logo")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HeroArea" type="Control" parent="ContentMargin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 340)
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="HeroPocket" type="TextureRect" parent="ContentMargin/Content/HeroArea"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 400.0
+offset_bottom = 400.0
+mouse_filter = 2
+expand_mode = 1
+
+[node name="WispPreview" type="TextureRect" parent="ContentMargin/Content/HeroArea"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 400.0
+offset_bottom = 400.0
+mouse_filter = 2
+texture = ExtResource("4_wisp")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PlayButton" type="Button" parent="ContentMargin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(660, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"PrimaryButton"
+text = "PLAY"
+icon = ExtResource("5_play")
+
+[node name="SecondaryRow" type="HBoxContainer" parent="ContentMargin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="FormsButton" type="Button" parent="ContentMargin/Content/SecondaryRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_type_variation = &"SecondaryButton"
+text = "FORMS"
+icon = ExtResource("6_forms")
+
+[node name="DailyButton" type="Button" parent="ContentMargin/Content/SecondaryRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_type_variation = &"SecondaryButton"
+text = "DAILY RIFT"
+icon = ExtResource("7_daily")
+
+[node name="Footer" type="Label" parent="ContentMargin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+theme_override_font_sizes/font_size = 22
+text = "WISP RUSH"
+horizontal_alignment = 1

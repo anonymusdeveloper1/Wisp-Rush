@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="FormationData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/resources/formation_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+formation_id = &"alternating_rhythm"
+minimum_wave = 2
+threat_cost = 6
+enemy_kinds = Array[StringName]([&"soul_wisp", &"soul_wisp", &"soul_wisp", &"soul_wisp", &"soul_wisp", &"soul_wisp"])
+normalized_positions = PackedVector2Array(0.24, 0.18, 0.68, 0.29, 0.32, 0.4, 0.76, 0.51, 0.4, 0.62, 0.84, 0.73)

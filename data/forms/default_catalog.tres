@@ -1,0 +1,5 @@
+[gd_resource type="Resource" script_class="FormCatalog" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/resources/form_catalog.gd" id="1"]
+[resource]
+script = ExtResource("1")
+form_paths = PackedStringArray("res://data/forms/void.tres", "res://data/forms/ash.tres", "res://data/forms/venom.tres", "res://data/forms/bloodmoon.tres", "res://data/forms/frost.tres", "res://data/forms/eclipse.tres")

@@ -1,0 +1,62 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/screens/loading_screen.gd" id="1_loading"]
+[ext_resource type="Texture2D" path="res://assets/art/branding/wisp_rush_logo.png" id="2_logo"]
+
+[node name="LoadingScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_loading")
+
+[node name="Logo" type="TextureRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.42
+anchor_right = 0.5
+anchor_bottom = 0.42
+offset_left = -380.0
+offset_top = -276.0
+offset_right = 380.0
+offset_bottom = 276.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(380, 276)
+mouse_filter = 2
+texture = ExtResource("2_logo")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Footer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 240.0
+offset_top = -430.0
+offset_right = -240.0
+offset_bottom = -320.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 22
+
+[node name="StatusLabel" type="Label" parent="Footer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+theme_override_font_sizes/font_size = 28
+text = "GATHERING SOULS"
+horizontal_alignment = 1
+
+[node name="ProgressBar" type="ProgressBar" parent="Footer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"SlimProgressBar"
+max_value = 1.0
+show_percentage = false

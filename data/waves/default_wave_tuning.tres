@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="WaveTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/wave_tuning.gd" id="1_tuning"]
+
+[resource]
+script = ExtResource("1_tuning")
+wave_duration = 22.0
+base_threat_budget = 6
+threat_growth_per_wave = 2.2
+formation_gap = 0.7
+safe_spawn_distance = 0.16
+post_boss_budget_bonus = 4
+post_boss_gap_multiplier = 0.9

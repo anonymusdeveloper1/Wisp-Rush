@@ -1,0 +1,18 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# GDScript and Godot text resources use tabs (Godot style guide).
+[*.{gd,tscn,tres,godot,cfg,gdshader}]
+indent_style = tab
+
+[*.{md,json,mjs,js,yml,yaml,sh}]
+indent_style = space
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false

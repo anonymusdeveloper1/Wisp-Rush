@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="MutationData" load_steps=3 format=3]
+[ext_resource type="Script" path="res://scripts/resources/mutation_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/mutations/01_wide_reap.png" id="2"]
+[resource]
+script = ExtResource("1")
+mutation_id = &"wide_reap"
+display_name = "WIDE REAP"
+description_template = "Dash corridor width +{value}%."
+max_level = 5
+base_value = 0.0
+value_per_level = 27.0
+icon = ExtResource("2")

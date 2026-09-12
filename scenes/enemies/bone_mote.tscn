@@ -1,0 +1,46 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scenes/enemies/bone_mote.gd" id="1_enemy"]
+[ext_resource type="Resource" path="res://data/enemies/bone_mote.tres" id="2_tuning"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/enemies/09_bone_mote_idle_a.png" id="3_idle_a"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/enemies/10_bone_mote_idle_b.png" id="4_idle_b"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/enemies/11_bone_mote_hit.png" id="5_hit"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/enemies/12_bone_mote_dissolve.png" id="6_dissolve"]
+[ext_resource type="Texture2D" path="res://assets/art/vfx/11_boss_warning_ring.png" id="7_arrival"]
+[ext_resource type="Texture2D" path="res://assets/art/vfx/03_wall_impact_small.png" id="8_hit_flash"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_enemy"]
+animations = [{
+"frames": [{"duration": 1.0, "texture": ExtResource("6_dissolve")}],
+"loop": false,
+"name": &"dissolve",
+"speed": 4.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("5_hit")}],
+"loop": false,
+"name": &"hit",
+"speed": 7.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("3_idle_a")}, {"duration": 1.0, "texture": ExtResource("4_idle_b")}],
+"loop": true,
+"name": &"idle",
+"speed": 2.6
+}]
+
+[node name="BoneMote" type="Node2D" groups=["enemies"]]
+script = ExtResource("1_enemy")
+tuning = ExtResource("2_tuning")
+
+[node name="ArrivalRing" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+texture = ExtResource("7_arrival")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+unique_name_in_owner = true
+sprite_frames = SubResource("SpriteFrames_enemy")
+animation = &"idle"
+
+[node name="HitFlash" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+z_index = 2
+texture = ExtResource("8_hit_flash")

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="HazardTuning" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/resources/hazard_tuning.gd" id="1"]
+[resource]
+script = ExtResource("1")
+sprite_diameter = 224.0
+danger_radius = 49.0
+arrival_telegraph = 0.65
+safe_duration = 1.1
+pulse_duration = 0.55
+active_duration = 0.8
+threat_cost = 2

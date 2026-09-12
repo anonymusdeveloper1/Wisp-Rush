@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="FormationData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/resources/formation_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+formation_id = &"heavy_convoy"
+minimum_wave = 5
+threat_cost = 9
+enemy_kinds = Array[StringName]([&"soul_wisp", &"bone_mote", &"soul_wisp", &"bone_mote", &"soul_wisp"])
+normalized_positions = PackedVector2Array(0.28, 0.26, 0.4, 0.38, 0.5, 0.5, 0.6, 0.62, 0.72, 0.74)

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="FormationData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/resources/formation_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+formation_id = &"spike_lane"
+minimum_wave = 4
+threat_cost = 6
+enemy_kinds = Array[StringName]([&"soul_wisp", &"soul_wisp", &"soul_wisp", &"soul_wisp"])
+normalized_positions = PackedVector2Array(0.24, 0.28, 0.4, 0.38, 0.6, 0.62, 0.76, 0.72)
+hazard_kind = &"spike_bloom"
+hazard_position = Vector2(0.5, 0.5)

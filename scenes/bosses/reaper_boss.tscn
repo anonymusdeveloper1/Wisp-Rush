@@ -1,0 +1,147 @@
+[gd_scene load_steps=18 format=3]
+
+[ext_resource type="Script" path="res://scenes/bosses/reaper_boss.gd" id="1_boss"]
+[ext_resource type="Resource" path="res://data/bosses/default_reaper.tres" id="2_tuning"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/reaper/01_idle_a.png" id="3_idle_a"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/reaper/02_idle_b.png" id="4_idle_b"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/reaper/03_attack_windup.png" id="5_windup"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/reaper/04_scythe_strike.png" id="6_strike"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/reaper/05_teleport_vanish.png" id="7_vanish"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/reaper/06_teleport_appear.png" id="8_appear"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/reaper/07_hit_recoil.png" id="9_hit"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/reaper/08_defeated_dissolve.png" id="10_defeated"]
+[ext_resource type="Texture2D" path="res://assets/art/vfx/11_boss_warning_ring.png" id="11_warning"]
+[ext_resource type="Texture2D" path="res://assets/art/vfx/06_death_pulse.png" id="12_core"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/reaper/09_gate_arrival.png" id="13_arrival"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/reaper/10_exposed_core.png" id="14_exposed"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/reaper/11_corridor_cast.png" id="15_cast"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/reaper/12_stagger.png" id="16_stagger"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_reaper"]
+animations = [{
+"frames": [{"duration": 1.0, "texture": ExtResource("8_appear")}],
+"loop": false,
+"name": &"appear",
+"speed": 5.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("13_arrival")}],
+"loop": false,
+"name": &"arrival",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("15_cast")}],
+"loop": false,
+"name": &"cast",
+"speed": 2.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("10_defeated")}],
+"loop": false,
+"name": &"defeated",
+"speed": 4.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("14_exposed")}],
+"loop": true,
+"name": &"exposed",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("9_hit")}],
+"loop": false,
+"name": &"hit",
+"speed": 2.5
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("3_idle_a")}, {"duration": 1.0, "texture": ExtResource("4_idle_b")}],
+"loop": true,
+"name": &"idle",
+"speed": 3.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("16_stagger")}],
+"loop": false,
+"name": &"stagger",
+"speed": 3.5
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("6_strike")}],
+"loop": false,
+"name": &"strike",
+"speed": 8.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("7_vanish")}],
+"loop": false,
+"name": &"vanish",
+"speed": 5.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("5_windup")}],
+"loop": false,
+"name": &"windup",
+"speed": 6.0
+}]
+
+[node name="ReaperBoss" type="Node2D" groups=["bosses"]]
+z_index = 12
+script = ExtResource("1_boss")
+tuning = ExtResource("2_tuning")
+
+[node name="Shadow" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+z_index = -2
+position = Vector2(0, 78)
+texture = ExtResource("3_idle_a")
+modulate = Color(0.067, 0.082, 0.129, 0.5)
+
+[node name="SweepArc" type="Line2D" parent="."]
+unique_name_in_owner = true
+z_index = -1
+width = 36.0
+default_color = Color(1, 1, 1, 1)
+texture_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+joint_mode = 2
+antialiased = true
+
+[node name="LaneA" type="Line2D" parent="."]
+unique_name_in_owner = true
+z_index = -1
+width = 92.0
+default_color = Color(1, 1, 1, 1)
+texture_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+antialiased = true
+
+[node name="LaneB" type="Line2D" parent="."]
+unique_name_in_owner = true
+z_index = -1
+width = 92.0
+default_color = Color(1, 1, 1, 1)
+texture_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+antialiased = true
+
+[node name="TeleportFalse" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+top_level = true
+texture = ExtResource("11_warning")
+modulate = Color(1, 1, 1, 0.5)
+
+[node name="TeleportTrue" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+top_level = true
+texture = ExtResource("11_warning")
+
+[node name="WarningRing" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+z_index = -1
+texture = ExtResource("11_warning")
+
+[node name="CoreRing" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+z_index = 2
+texture = ExtResource("12_core")
+modulate = Color(0.918, 0.992, 1, 1)
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+unique_name_in_owner = true
+z_index = 1
+sprite_frames = SubResource("SpriteFrames_reaper")
+animation = &"idle"

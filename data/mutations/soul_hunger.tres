@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="MutationData" load_steps=3 format=3]
+[ext_resource type="Script" path="res://scripts/resources/mutation_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/mutations/02_soul_hunger.png" id="2"]
+[resource]
+script = ExtResource("1")
+mutation_id = &"soul_hunger"
+display_name = "SOUL HUNGER"
+description_template = "Dash damage +{value}; stronger shard pull."
+max_level = 5
+base_value = 0.0
+value_per_level = 1.0
+icon = ExtResource("2")

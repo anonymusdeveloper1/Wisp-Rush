@@ -1,0 +1,8 @@
+{
+  "name": "wisp-rush-mcp",
+  "private": true,
+  "description": "Pinned Godot MCP server for Claude Code (see docs/decisions/0002-godot-mcp-server.md)",
+  "dependencies": {
+    "@coding-solo/godot-mcp": "0.1.1"
+  }
+}

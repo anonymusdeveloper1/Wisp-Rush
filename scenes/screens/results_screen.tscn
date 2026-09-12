@@ -1,0 +1,457 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/screens/results_screen.gd" id="1_results"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/menu_background.png" id="2_background"]
+[ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/banner_top.tscn" id="3_banner_top"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/04_high_score.png" id="4_best"]
+[ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/card_top.tscn" id="5_card_top"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/18_reaper.png" id="6_souls"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/03_combo_chain.png" id="7_chain"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/13_daily.png" id="8_wave"]
+[ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/amber_top.tscn" id="9_amber_top"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/02_soul_shards.png" id="10_shards"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/07_restart.png" id="11_restart"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/16_home.png" id="12_home"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/10_forms.png" id="13_forms"]
+
+[node name="ResultsScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_results")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_background")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="SafeMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 36
+theme_override_constants/margin_top = 48
+theme_override_constants/margin_right = 36
+theme_override_constants/margin_bottom = 48
+
+[node name="Center" type="CenterContainer" parent="SafeMargin"]
+layout_mode = 2
+
+[node name="Panel" type="PanelContainer" parent="SafeMargin/Center"]
+self_modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(960, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="SafeMargin/Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+
+[node name="Content" type="VBoxContainer" parent="SafeMargin/Center/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 22
+alignment = 1
+
+[node name="BannerCenter" type="CenterContainer" parent="SafeMargin/Center/Panel/Margin/Content"]
+layout_mode = 2
+
+[node name="Banner" type="PanelContainer" parent="SafeMargin/Center/Panel/Margin/Content/BannerCenter"]
+custom_minimum_size = Vector2(640, 0)
+layout_mode = 2
+theme_type_variation = &"PanelBanner"
+
+[node name="Ornament" parent="SafeMargin/Center/Panel/Margin/Content/BannerCenter/Banner" instance=ExtResource("3_banner_top")]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/BannerCenter/Banner"]
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+text = "RUN COMPLETE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScoreCaption" type="Label" parent="SafeMargin/Center/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "RIFT SCORE"
+horizontal_alignment = 1
+
+[node name="ScoreValue" type="Label" parent="SafeMargin/Center/Panel/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"AmberValueLabel"
+theme_override_font_sizes/font_size = 150
+text = "000000"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScoreGlow" type="Control" parent="SafeMargin/Center/Panel/Margin/Content/ScoreValue"]
+unique_name_in_owner = true
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="BestCenter" type="CenterContainer" parent="SafeMargin/Center/Panel/Margin/Content"]
+layout_mode = 2
+
+[node name="BestPlate" type="PanelContainer" parent="SafeMargin/Center/Panel/Margin/Content/BestCenter"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 2
+theme_type_variation = &"PanelPlate"
+
+[node name="Pad" type="MarginContainer" parent="SafeMargin/Center/Panel/Margin/Content/BestCenter/BestPlate"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_right = 22
+
+[node name="Row" type="HBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/BestCenter/BestPlate/Pad"]
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="BestIcon" type="TextureRect" parent="SafeMargin/Center/Panel/Margin/Content/BestCenter/BestPlate/Pad/Row"]
+custom_minimum_size = Vector2(54, 54)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("4_best")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BestCaption" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/BestCenter/BestPlate/Pad/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+text = "BEST"
+vertical_alignment = 1
+
+[node name="BestValue" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/BestCenter/BestPlate/Pad/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"AmberValueLabel"
+theme_override_font_sizes/font_size = 44
+text = "000000"
+vertical_alignment = 1
+
+[node name="SpacerTop" type="Control" parent="SafeMargin/Center/Panel/Margin/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.35
+mouse_filter = 2
+
+[node name="Stats" type="HBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Kills" type="PanelContainer" parent="SafeMargin/Center/Panel/Margin/Content/Stats"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"PanelCard"
+
+[node name="Ornament" parent="SafeMargin/Center/Panel/Margin/Content/Stats/Kills" instance=ExtResource("5_card_top")]
+layout_mode = 2
+
+[node name="Box" type="VBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Stats/Kills"]
+layout_mode = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="Icon" type="TextureRect" parent="SafeMargin/Center/Panel/Margin/Content/Stats/Kills/Box"]
+custom_minimum_size = Vector2(0, 92)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("6_souls")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="KillsValue" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Stats/Kills/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+text = "0"
+horizontal_alignment = 1
+
+[node name="Caption" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Stats/Kills/Box"]
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+text = "SOULS REAPED"
+horizontal_alignment = 1
+
+[node name="Combo" type="PanelContainer" parent="SafeMargin/Center/Panel/Margin/Content/Stats"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"PanelCard"
+
+[node name="Ornament" parent="SafeMargin/Center/Panel/Margin/Content/Stats/Combo" instance=ExtResource("5_card_top")]
+layout_mode = 2
+
+[node name="Box" type="VBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Stats/Combo"]
+layout_mode = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="Icon" type="TextureRect" parent="SafeMargin/Center/Panel/Margin/Content/Stats/Combo/Box"]
+custom_minimum_size = Vector2(0, 92)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("7_chain")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ComboValue" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Stats/Combo/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+text = "×0"
+horizontal_alignment = 1
+
+[node name="Caption" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Stats/Combo/Box"]
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+text = "BEST CHAIN"
+horizontal_alignment = 1
+
+[node name="Wave" type="PanelContainer" parent="SafeMargin/Center/Panel/Margin/Content/Stats"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"PanelCard"
+
+[node name="Ornament" parent="SafeMargin/Center/Panel/Margin/Content/Stats/Wave" instance=ExtResource("5_card_top")]
+layout_mode = 2
+
+[node name="Box" type="VBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Stats/Wave"]
+layout_mode = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="Icon" type="TextureRect" parent="SafeMargin/Center/Panel/Margin/Content/Stats/Wave/Box"]
+custom_minimum_size = Vector2(0, 92)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("8_wave")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="WaveValue" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Stats/Wave/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+text = "01"
+horizontal_alignment = 1
+
+[node name="Caption" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Stats/Wave/Box"]
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+text = "WAVE"
+horizontal_alignment = 1
+
+[node name="RunStats" type="Label" parent="SafeMargin/Center/Panel/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "0 MULTI-REAPS   •   0 BOSSES"
+horizontal_alignment = 1
+
+[node name="Rewards" type="PanelContainer" parent="SafeMargin/Center/Panel/Margin/Content"]
+layout_mode = 2
+
+[node name="Ornament" parent="SafeMargin/Center/Panel/Margin/Content/Rewards" instance=ExtResource("9_amber_top")]
+layout_mode = 2
+
+[node name="Box" type="VBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box"]
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+text = "REWARDS"
+horizontal_alignment = 1
+
+[node name="Row" type="HBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="RunReward" type="VBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Plate" type="PanelContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/RunReward"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"PanelPlate"
+
+[node name="Pad" type="MarginContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/RunReward/Plate"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_right = 20
+
+[node name="Line" type="HBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/RunReward/Plate/Pad"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/RunReward/Plate/Pad/Line"]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("10_shards")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RunShardsValue" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/RunReward/Plate/Pad/Line"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"AmberValueLabel"
+theme_override_font_sizes/font_size = 42
+text = "+0"
+vertical_alignment = 1
+
+[node name="Caption" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/RunReward"]
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+text = "THIS RUN"
+horizontal_alignment = 1
+
+[node name="GoalReward" type="VBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Plate" type="PanelContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalReward"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"PanelPlate"
+
+[node name="Pad" type="MarginContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalReward/Plate"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_right = 20
+
+[node name="Line" type="HBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalReward/Plate/Pad"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalReward/Plate/Pad/Line"]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("10_shards")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="GoalShardsValue" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalReward/Plate/Pad/Line"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"AmberValueLabel"
+theme_override_font_sizes/font_size = 42
+text = "+0"
+vertical_alignment = 1
+
+[node name="Caption" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalReward"]
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+text = "GOALS"
+horizontal_alignment = 1
+
+[node name="TotalReward" type="VBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Plate" type="PanelContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/TotalReward"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"PanelPlate"
+
+[node name="Pad" type="MarginContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/TotalReward/Plate"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_right = 20
+
+[node name="Line" type="HBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/TotalReward/Plate/Pad"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/TotalReward/Plate/Pad/Line"]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("10_shards")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TotalShardsValue" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/TotalReward/Plate/Pad/Line"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+theme_override_font_sizes/font_size = 42
+text = "0"
+vertical_alignment = 1
+
+[node name="Caption" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/TotalReward"]
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+text = "TOTAL"
+horizontal_alignment = 1
+
+[node name="SpacerBottom" type="Control" parent="SafeMargin/Center/Panel/Margin/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="RestartButton" type="Button" parent="SafeMargin/Center/Panel/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(720, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"PrimaryButton"
+text = "RUSH AGAIN"
+icon = ExtResource("11_restart")
+
+[node name="SecondaryRow" type="HBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="HomeButton" type="Button" parent="SafeMargin/Center/Panel/Margin/Content/SecondaryRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(440, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"SecondaryButton"
+text = "RETURN HOME"
+icon = ExtResource("12_home")
+
+[node name="FormsButton" type="Button" parent="SafeMargin/Center/Panel/Margin/Content/SecondaryRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(440, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"SecondaryButton"
+text = "WISP FORMS"
+icon = ExtResource("13_forms")

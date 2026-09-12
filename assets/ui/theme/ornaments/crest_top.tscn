@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/theme/textures/ornament_crest_top.png" id="1_pcv1r"]
+
+[node name="CrestTopOrnament" type="Control" unique_id=1484911083]
+layout_mode = 3
+anchors_preset = 0
+size_flags_horizontal = 4
+size_flags_vertical = 0
+mouse_filter = 2
+
+[node name="Art" type="TextureRect" parent="." unique_id=1398009684]
+layout_mode = 0
+offset_left = -90.0
+offset_top = -126.0
+offset_right = 86.0
+offset_bottom = -31.0
+mouse_filter = 2
+texture = ExtResource("1_pcv1r")
+expand_mode = 1

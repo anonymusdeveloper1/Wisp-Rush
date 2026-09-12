@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="FormData" load_steps=3 format=3]
+[ext_resource type="Script" path="res://scripts/resources/form_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/forms/03_venom.png" id="2"]
+[resource]
+script = ExtResource("1")
+form_id = &"venom"
+display_name = "VENOM"
+description = "The rift blooms in poisonous green."
+price = 500
+texture = ExtResource("2")
+tint = Color(0.58, 1, 0.22, 1)

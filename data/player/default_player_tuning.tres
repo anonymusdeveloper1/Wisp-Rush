@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="PlayerTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/player_tuning.gd" id="1_player_tuning"]
+
+[resource]
+script = ExtResource("1_player_tuning")
+design_width = 1080.0
+dash_speed = 4400.0
+windup_duration = 0.065
+wall_impact_duration = 0.14
+focus_duration = 0.32
+focus_world_speed = 0.32
+minimum_swipe_distance = 28.0
+radius_viewport_ratio = 0.05
+minimum_radius = 30.0
+maximum_radius = 70.0
+blade_bonus = 14.0
+spawn_duration = 0.42
+maximum_health = 3
+hurt_duration = 0.22
+invulnerability_duration = 0.9
+death_duration = 0.55

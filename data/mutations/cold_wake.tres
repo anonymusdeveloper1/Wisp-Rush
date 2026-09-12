@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="MutationData" load_steps=3 format=3]
+[ext_resource type="Script" path="res://scripts/resources/mutation_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/mutations/05_cold_wake.png" id="2"]
+[resource]
+script = ExtResource("1")
+mutation_id = &"cold_wake"
+display_name = "COLD WAKE"
+description_template = "Dash trail slows crossed enemies for {value}s."
+max_level = 5
+base_value = 0.9
+value_per_level = 0.3
+icon = ExtResource("2")

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="FormData" load_steps=3 format=3]
+[ext_resource type="Script" path="res://scripts/resources/form_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/forms/06_eclipse.png" id="2"]
+[resource]
+script = ExtResource("1")
+form_id = &"eclipse"
+display_name = "ECLIPSE"
+description = "The Reaper's shadow, claimed and made radiant."
+price = 2000
+requires_boss_victory = true
+texture = ExtResource("2")
+tint = Color(1, 0.8, 0.36, 1)

@@ -1,0 +1,138 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/screens/statistics_screen.gd" id="1_stats"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/menu_background.png" id="2_background"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/16_home.png" id="3_home"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/14_statistics.png" id="4_statistics"]
+[ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/banner_top.tscn" id="5_banner_top"]
+
+[node name="StatisticsScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_stats")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_background")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Shade" type="ColorRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.067, 0.082, 0.129, 0.4)
+
+[node name="Margin" type="MarginContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 44
+theme_override_constants/margin_top = 36
+theme_override_constants/margin_right = 44
+theme_override_constants/margin_bottom = 40
+
+[node name="Content" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Header" type="HBoxContainer" parent="Margin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="BackButton" type="Button" parent="Margin/Content/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+tooltip_text = "Back to Home"
+theme_type_variation = &"IconButton"
+icon = ExtResource("3_home")
+icon_alignment = 1
+
+[node name="TitleBanner" type="PanelContainer" parent="Margin/Content/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"PanelBanner"
+
+[node name="BannerOrnament" parent="Margin/Content/Header/TitleBanner" instance=ExtResource("5_banner_top")]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Margin/Content/Header/TitleBanner"]
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+text = "STATISTICS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Badge" type="TextureRect" parent="Margin/Content/Header"]
+custom_minimum_size = Vector2(112, 112)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("4_statistics")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TopSpacer" type="Control" parent="Margin/Content"]
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="RecordsCaption" type="Label" parent="Margin/Content"]
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+text = "RECORDS"
+horizontal_alignment = 1
+
+[node name="RecordsRow" type="HBoxContainer" parent="Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="LifetimeGap" type="Control" parent="Margin/Content"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="LifetimeCaption" type="Label" parent="Margin/Content"]
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+text = "LIFETIME"
+horizontal_alignment = 1
+
+[node name="StatsCard" type="PanelContainer" parent="Margin/Content"]
+layout_mode = 2
+
+[node name="StatsGrid" type="GridContainer" parent="Margin/Content/StatsCard"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 14
+columns = 2
+
+[node name="BottomSpacer" type="Control" parent="Margin/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2

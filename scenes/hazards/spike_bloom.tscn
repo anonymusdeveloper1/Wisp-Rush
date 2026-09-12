@@ -1,0 +1,29 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scenes/hazards/spike_bloom.gd" id="1_hazard"]
+[ext_resource type="Resource" path="res://data/hazards/spike_bloom.tres" id="2_tuning"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/props/07_floor_spike_bloom.png" id="3_sprite"]
+[ext_resource type="Texture2D" path="res://assets/art/vfx/11_boss_warning_ring.png" id="4_warning"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/props/07_floor_spike_bloom_closed.png" id="5_telegraph"]
+
+[node name="SpikeBloom" type="Node2D" groups=["hazards"]]
+z_index = 2
+script = ExtResource("1_hazard")
+tuning = ExtResource("2_tuning")
+telegraph_texture = ExtResource("5_telegraph")
+
+[node name="Shadow" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+z_index = -2
+position = Vector2(0, 18)
+modulate = Color(0.067, 0.082, 0.129, 0.52)
+texture = ExtResource("3_sprite")
+
+[node name="Warning" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+z_index = -1
+texture = ExtResource("4_warning")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+texture = ExtResource("3_sprite")

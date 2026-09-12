@@ -1,0 +1,23 @@
+# Godot 4 engine cache (regenerated on import) — never commit
+.godot/
+/android/
+
+# Builds / exports
+/build/
+/export/
+
+# Validator & runtime logs (tools/validate.sh)
+/logs/
+*.log
+
+# Node tooling
+node_modules/
+
+# Claude Code: personal, machine-local overrides only
+.claude/settings.local.json
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.tmp

@@ -1,0 +1,115 @@
+[gd_scene load_steps=18 format=3]
+
+[ext_resource type="Script" path="res://scenes/player/wisp_player.gd" id="1_player"]
+[ext_resource type="Resource" path="res://data/player/default_player_tuning.tres" id="2_tuning"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/wisp/01_idle_a.png" id="3_idle_a"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/wisp/02_idle_b.png" id="4_idle_b"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/wisp/03_charge_a.png" id="5_charge_a"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/wisp/04_charge_b.png" id="6_charge_b"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/wisp/05_dash_left.png" id="7_dash_left"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/wisp/06_dash_right.png" id="8_dash_right"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/wisp/07_wall_impact.png" id="9_wall"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/wisp/09_hurt.png" id="10_hurt"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/wisp/10_death_dissolve.png" id="11_dead"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/wisp/11_reform.png" id="12_reform"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/wisp/12_victory_pulse.png" id="13_victory"]
+[ext_resource type="Texture2D" path="res://assets/art/vfx/03_wall_impact_small.png" id="14_impact"]
+[ext_resource type="Script" path="res://scripts/components/health_component.gd" id="15_health"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_wisp"]
+animations = [{
+"frames": [{"duration": 1.0, "texture": ExtResource("5_charge_a")}, {"duration": 1.0, "texture": ExtResource("6_charge_b")}],
+"loop": true,
+"name": &"charge",
+"speed": 18.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("7_dash_left")}],
+"loop": true,
+"name": &"dash_left",
+"speed": 8.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("8_dash_right")}],
+"loop": true,
+"name": &"dash_right",
+"speed": 8.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("11_dead")}],
+"loop": false,
+"name": &"dead",
+"speed": 5.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("10_hurt")}],
+"loop": false,
+"name": &"hurt",
+"speed": 6.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("3_idle_a")}, {"duration": 1.0, "texture": ExtResource("4_idle_b")}],
+"loop": true,
+"name": &"idle",
+"speed": 3.5
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("12_reform")}],
+"loop": false,
+"name": &"reform",
+"speed": 4.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("13_victory")}],
+"loop": true,
+"name": &"victory",
+"speed": 4.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("9_wall")}],
+"loop": false,
+"name": &"wall_impact",
+"speed": 7.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape_wisp"]
+radius = 32.0
+
+[node name="WispPlayer" type="CharacterBody2D"]
+z_index = 20
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("1_player")
+tuning = ExtResource("2_tuning")
+
+[node name="HealthComponent" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("15_health")
+maximum_health = 3
+
+[node name="AimLine" type="Line2D" parent="."]
+unique_name_in_owner = true
+z_index = -1
+width = 4.0
+default_color = Color(0.384, 0.91, 0.949, 0.72)
+begin_cap_mode = 2
+end_cap_mode = 2
+antialiased = true
+
+[node name="ImpactPoint" type="Polygon2D" parent="."]
+unique_name_in_owner = true
+z_index = 2
+polygon = PackedVector2Array(0, -12, 12, 0, 0, 12, -12, 0)
+color = Color(0.918, 0.992, 1, 0.9)
+
+[node name="ImpactBurst" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+z_index = 1
+texture = ExtResource("14_impact")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+unique_name_in_owner = true
+z_index = 3
+sprite_frames = SubResource("SpriteFrames_wisp")
+animation = &"idle"
+
+[node name="FormSprite" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+visible = false
+z_index = 4
+
+[node name="CollisionShape" type="CollisionShape2D" parent="."]
+unique_name_in_owner = true
+shape = SubResource("CircleShape_wisp")

@@ -1,0 +1,739 @@
+{
+ "bar_fill": {
+  "content": [
+   32,
+   0,
+   33,
+   0
+  ],
+  "expand": [
+   2,
+   2,
+   2,
+   2
+  ],
+  "margins": [
+   34,
+   21,
+   35,
+   22
+  ],
+  "scale": 0.6,
+  "size": [
+   72,
+   45
+  ]
+ },
+ "bar_fill_boss": {
+  "content": [
+   32,
+   0,
+   33,
+   0
+  ],
+  "expand": [
+   2,
+   2,
+   2,
+   2
+  ],
+  "margins": [
+   34,
+   21,
+   35,
+   22
+  ],
+  "scale": 0.6,
+  "size": [
+   72,
+   45
+  ]
+ },
+ "bar_track": {
+  "expand": [
+   2,
+   2,
+   2,
+   2
+  ],
+  "frame": [
+   66,
+   41
+  ],
+  "inner": [
+   23,
+   12,
+   24,
+   12
+  ],
+  "margins": [
+   34,
+   21,
+   34,
+   22
+  ],
+  "scale": 0.6,
+  "size": [
+   70,
+   45
+  ]
+ },
+ "button_danger": {
+  "expand": [
+   2,
+   4,
+   3,
+   3
+  ],
+  "frame": [
+   97,
+   94
+  ],
+  "inner": [
+   32,
+   18,
+   33,
+   18
+  ],
+  "margins": [
+   49,
+   22,
+   49,
+   76
+  ],
+  "scale": 0.85,
+  "size": [
+   102,
+   101
+  ]
+ },
+ "button_danger_pressed": {
+  "expand": [
+   2,
+   4,
+   3,
+   3
+  ],
+  "frame": [
+   97,
+   94
+  ],
+  "inner": [
+   32,
+   18,
+   34,
+   18
+  ],
+  "margins": [
+   49,
+   22,
+   49,
+   76
+  ],
+  "scale": 0.85,
+  "size": [
+   102,
+   101
+  ]
+ },
+ "button_disabled": {
+  "expand": [
+   4,
+   4,
+   1,
+   4
+  ],
+  "frame": [
+   115,
+   110
+  ],
+  "inner": [
+   39,
+   19,
+   41,
+   19
+  ],
+  "margins": [
+   58,
+   25,
+   58,
+   89
+  ],
+  "scale": 1.0,
+  "size": [
+   120,
+   118
+  ]
+ },
+ "button_disabled_small": {
+  "expand": [
+   4,
+   3,
+   1,
+   3
+  ],
+  "frame": [
+   97,
+   94
+  ],
+  "inner": [
+   33,
+   18,
+   35,
+   17
+  ],
+  "margins": [
+   49,
+   21,
+   49,
+   76
+  ],
+  "scale": 0.85,
+  "size": [
+   102,
+   100
+  ]
+ },
+ "button_focus_small": {
+  "expand": [
+   15,
+   20,
+   10,
+   21
+  ],
+  "frame": [
+   110,
+   94
+  ],
+  "inner": [
+   30,
+   20,
+   35,
+   20
+  ],
+  "margins": [
+   66,
+   43,
+   66,
+   89
+  ],
+  "scale": 0.8057,
+  "size": [
+   135,
+   135
+  ]
+ },
+ "button_primary": {
+  "expand": [
+   2,
+   5,
+   4,
+   4
+  ],
+  "frame": [
+   114,
+   110
+  ],
+  "inner": [
+   38,
+   19,
+   38,
+   19
+  ],
+  "margins": [
+   58,
+   26,
+   58,
+   89
+  ],
+  "scale": 1.0,
+  "size": [
+   120,
+   119
+  ]
+ },
+ "button_primary_focus": {
+  "expand": [
+   18,
+   23,
+   12,
+   24
+  ],
+  "frame": [
+   129,
+   111
+  ],
+  "inner": [
+   35,
+   24,
+   41,
+   24
+  ],
+  "margins": [
+   78,
+   50,
+   78,
+   104
+  ],
+  "scale": 0.9478,
+  "size": [
+   159,
+   158
+  ]
+ },
+ "button_primary_pressed": {
+  "expand": [
+   18,
+   23,
+   12,
+   24
+  ],
+  "frame": [
+   129,
+   111
+  ],
+  "inner": [
+   35,
+   24,
+   41,
+   24
+  ],
+  "margins": [
+   78,
+   50,
+   78,
+   104
+  ],
+  "scale": 0.9478,
+  "size": [
+   159,
+   158
+  ]
+ },
+ "button_secondary": {
+  "expand": [
+   2,
+   4,
+   3,
+   3
+  ],
+  "frame": [
+   97,
+   94
+  ],
+  "inner": [
+   32,
+   17,
+   33,
+   17
+  ],
+  "margins": [
+   49,
+   22,
+   49,
+   76
+  ],
+  "scale": 0.85,
+  "size": [
+   102,
+   101
+  ]
+ },
+ "button_secondary_pressed": {
+  "expand": [
+   2,
+   4,
+   3,
+   3
+  ],
+  "frame": [
+   97,
+   94
+  ],
+  "inner": [
+   32,
+   18,
+   34,
+   18
+  ],
+  "margins": [
+   49,
+   22,
+   49,
+   76
+  ],
+  "scale": 0.85,
+  "size": [
+   102,
+   101
+  ]
+ },
+ "divider_line": {
+  "expand": [
+   2,
+   2,
+   3,
+   1
+  ],
+  "frame": [
+   59,
+   19
+  ],
+  "margins": [
+   31,
+   0,
+   31,
+   0
+  ],
+  "scale": 0.75,
+  "size": [
+   64,
+   22
+  ]
+ },
+ "grabber": {
+  "size": [
+   62,
+   60
+  ]
+ },
+ "grabber_disabled": {
+  "size": [
+   62,
+   60
+  ]
+ },
+ "grabber_highlight": {
+  "size": [
+   62,
+   60
+  ]
+ },
+ "ornament_amber_top": {
+  "edge": "top",
+  "offset": [
+   -0.5,
+   -20.0
+  ],
+  "size": [
+   59,
+   45
+  ]
+ },
+ "ornament_banner_top": {
+  "edge": "top",
+  "offset": [
+   0.6,
+   -21.1
+  ],
+  "size": [
+   86,
+   51
+  ]
+ },
+ "ornament_card_top": {
+  "edge": "top",
+  "offset": [
+   0.0,
+   -18.0
+  ],
+  "size": [
+   68,
+   55
+  ]
+ },
+ "ornament_crest_bottom": {
+  "edge": "bottom",
+  "offset": [
+   -1.5,
+   8.0
+  ],
+  "size": [
+   96,
+   64
+  ]
+ },
+ "ornament_crest_top": {
+  "edge": "top",
+  "offset": [
+   -1.5,
+   -46.0
+  ],
+  "size": [
+   176,
+   95
+  ]
+ },
+ "ornament_diamond": {
+  "edge": "top",
+  "offset": [
+   0,
+   0
+  ],
+  "size": [
+   62,
+   60
+  ]
+ },
+ "panel_banner": {
+  "expand": [
+   2,
+   3,
+   4,
+   3
+  ],
+  "frame": [
+   116,
+   94
+  ],
+  "inner": [
+   21,
+   19,
+   19,
+   20
+  ],
+  "margins": [
+   60,
+   34,
+   60,
+   64
+  ],
+  "scale": 0.62,
+  "size": [
+   122,
+   100
+  ]
+ },
+ "panel_card": {
+  "expand": [
+   6,
+   3,
+   4,
+   2
+  ],
+  "frame": [
+   176,
+   246
+  ],
+  "inner": [
+   20,
+   24,
+   21,
+   34
+  ],
+  "margins": [
+   91,
+   129,
+   91,
+   118
+  ],
+  "scale": 1.0,
+  "size": [
+   186,
+   251
+  ]
+ },
+ "panel_card_selected": {
+  "expand": [
+   6,
+   3,
+   4,
+   2
+  ],
+  "frame": [
+   176,
+   246
+  ],
+  "inner": [
+   20,
+   24,
+   21,
+   34
+  ],
+  "margins": [
+   91,
+   129,
+   91,
+   118
+  ],
+  "scale": 1.0,
+  "size": [
+   186,
+   251
+  ]
+ },
+ "panel_crest": {
+  "expand": [
+   4,
+   1,
+   3,
+   1
+  ],
+  "frame": [
+   189,
+   306
+  ],
+  "inner": [
+   46,
+   24,
+   45,
+   28
+  ],
+  "margins": [
+   88,
+   179,
+   104,
+   125
+  ],
+  "scale": 1.0,
+  "size": [
+   196,
+   308
+  ]
+ },
+ "panel_default": {
+  "expand": [
+   4,
+   4,
+   3,
+   2
+  ],
+  "frame": [
+   109,
+   127
+  ],
+  "inner": [
+   12,
+   12,
+   12,
+   10
+  ],
+  "margins": [
+   56,
+   60,
+   56,
+   69
+  ],
+  "scale": 1.0,
+  "size": [
+   116,
+   133
+  ]
+ },
+ "plate_small": {
+  "expand": [
+   2,
+   2,
+   3,
+   2
+  ],
+  "frame": [
+   122,
+   60
+  ],
+  "inner": [
+   19,
+   12,
+   18,
+   11
+  ],
+  "margins": [
+   62,
+   30,
+   62,
+   32
+  ],
+  "scale": 0.65,
+  "size": [
+   127,
+   64
+  ]
+ },
+ "slot": {
+  "expand": [
+   3,
+   5,
+   4,
+   3
+  ],
+  "frame": [
+   109,
+   113
+  ],
+  "inner": [
+   19,
+   17,
+   20,
+   19
+  ],
+  "margins": [
+   56,
+   58,
+   56,
+   59
+  ],
+  "scale": 1.0,
+  "size": [
+   116,
+   121
+  ]
+ },
+ "slot_selected": {
+  "expand": [
+   3,
+   5,
+   4,
+   3
+  ],
+  "frame": [
+   109,
+   113
+  ],
+  "inner": [
+   19,
+   17,
+   20,
+   19
+  ],
+  "margins": [
+   56,
+   58,
+   56,
+   59
+  ],
+  "scale": 1.0,
+  "size": [
+   116,
+   121
+  ]
+ },
+ "slot_small": {
+  "expand": [
+   1,
+   3,
+   2,
+   2
+  ],
+  "frame": [
+   55,
+   55
+  ],
+  "inner": [
+   11,
+   8,
+   11,
+   9
+  ],
+  "margins": [
+   28,
+   29,
+   28,
+   30
+  ],
+  "scale": 0.5,
+  "size": [
+   58,
+   60
+  ]
+ }
+}

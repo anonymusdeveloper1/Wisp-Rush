@@ -1,0 +1,406 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/screens/forms_screen.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/menu_background.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/02_soul_shards.png" id="3"]
+[ext_resource type="Resource" path="res://data/forms/default_catalog.tres" id="4"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/16_home.png" id="5"]
+[ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/banner_top.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/card_top.tscn" id="7"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/17_lock.png" id="8"]
+
+[node name="FormsScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+catalog = ExtResource("4")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="SafeMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 64
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 56
+
+[node name="Content" type="VBoxContainer" parent="SafeMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="Header" type="HBoxContainer" parent="SafeMargin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="BackButton" type="Button" parent="SafeMargin/Content/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+tooltip_text = "Back to Home"
+theme_type_variation = &"IconButton"
+icon = ExtResource("5")
+icon_alignment = 1
+
+[node name="TitleBanner" type="PanelContainer" parent="SafeMargin/Content/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"PanelBanner"
+
+[node name="BannerOrnament" parent="SafeMargin/Content/Header/TitleBanner" instance=ExtResource("6")]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="SafeMargin/Content/Header/TitleBanner"]
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+text = "FORMS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BalancePlate" type="PanelContainer" parent="SafeMargin/Content/Header"]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"PanelPlate"
+
+[node name="BalanceRow" type="HBoxContainer" parent="SafeMargin/Content/Header/BalancePlate"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ShardIcon" type="TextureRect" parent="SafeMargin/Content/Header/BalancePlate/BalanceRow"]
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("3")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BalanceLabel" type="Label" parent="SafeMargin/Content/Header/BalancePlate/BalanceRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+theme_override_font_sizes/font_size = 40
+text = "0"
+vertical_alignment = 1
+
+[node name="PreviewSpacer" type="Control" parent="SafeMargin/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.6
+mouse_filter = 2
+
+[node name="PreviewRow" type="HBoxContainer" parent="SafeMargin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="PreviewRing" type="PanelContainer" parent="SafeMargin/Content/PreviewRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 420)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"PortraitRing"
+
+[node name="Preview" type="TextureRect" parent="SafeMargin/Content/PreviewRow/PreviewRing"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DetailPanel" type="PanelContainer" parent="SafeMargin/Content/PreviewRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_type_variation = &"PanelCard"
+
+[node name="CardOrnament" parent="SafeMargin/Content/PreviewRow/DetailPanel" instance=ExtResource("7")]
+layout_mode = 2
+
+[node name="DetailContent" type="VBoxContainer" parent="SafeMargin/Content/PreviewRow/DetailPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="NameLabel" type="Label" parent="SafeMargin/Content/PreviewRow/DetailPanel/DetailContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+text = "VOID"
+
+[node name="DescriptionLabel" type="Label" parent="SafeMargin/Content/PreviewRow/DetailPanel/DetailContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "The first light to answer the rift."
+autowrap_mode = 3
+
+[node name="Divider" type="HSeparator" parent="SafeMargin/Content/PreviewRow/DetailPanel/DetailContent"]
+layout_mode = 2
+
+[node name="PriceRow" type="HBoxContainer" parent="SafeMargin/Content/PreviewRow/DetailPanel/DetailContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PriceIcon" type="TextureRect" parent="SafeMargin/Content/PreviewRow/DetailPanel/DetailContent/PriceRow"]
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("3")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PriceLabel" type="Label" parent="SafeMargin/Content/PreviewRow/DetailPanel/DetailContent/PriceRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+theme_override_font_sizes/font_size = 40
+text = "0"
+vertical_alignment = 1
+
+[node name="PriceCaption" type="Label" parent="SafeMargin/Content/PreviewRow/DetailPanel/DetailContent/PriceRow"]
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+text = "SHARDS"
+vertical_alignment = 1
+
+[node name="StateRow" type="HBoxContainer" parent="SafeMargin/Content/PreviewRow/DetailPanel/DetailContent"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="StateIcon" type="TextureRect" parent="SafeMargin/Content/PreviewRow/DetailPanel/DetailContent/StateRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("8")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RequirementLabel" type="Label" parent="SafeMargin/Content/PreviewRow/DetailPanel/DetailContent/StateRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"CaptionLabel"
+text = "OWNED"
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="GridSpacer" type="Control" parent="SafeMargin/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="FormGrid" type="GridContainer" parent="SafeMargin/Content"]
+layout_mode = 2
+theme_override_constants/h_separation = 18
+theme_override_constants/v_separation = 18
+columns = 3
+
+[node name="FormButton0" type="Button" parent="SafeMargin/Content/FormGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SlotButton"
+theme_override_font_sizes/font_size = 28
+toggle_mode = true
+icon_alignment = 1
+vertical_icon_alignment = 0
+expand_icon = true
+
+[node name="LockBadge" type="TextureRect" parent="SafeMargin/Content/FormGrid/FormButton0"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -86.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = 86.0
+grow_horizontal = 0
+mouse_filter = 2
+texture = ExtResource("8")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FormButton1" type="Button" parent="SafeMargin/Content/FormGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SlotButton"
+theme_override_font_sizes/font_size = 28
+toggle_mode = true
+icon_alignment = 1
+vertical_icon_alignment = 0
+expand_icon = true
+
+[node name="LockBadge" type="TextureRect" parent="SafeMargin/Content/FormGrid/FormButton1"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -86.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = 86.0
+grow_horizontal = 0
+mouse_filter = 2
+texture = ExtResource("8")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FormButton2" type="Button" parent="SafeMargin/Content/FormGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SlotButton"
+theme_override_font_sizes/font_size = 28
+toggle_mode = true
+icon_alignment = 1
+vertical_icon_alignment = 0
+expand_icon = true
+
+[node name="LockBadge" type="TextureRect" parent="SafeMargin/Content/FormGrid/FormButton2"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -86.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = 86.0
+grow_horizontal = 0
+mouse_filter = 2
+texture = ExtResource("8")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FormButton3" type="Button" parent="SafeMargin/Content/FormGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SlotButton"
+theme_override_font_sizes/font_size = 28
+toggle_mode = true
+icon_alignment = 1
+vertical_icon_alignment = 0
+expand_icon = true
+
+[node name="LockBadge" type="TextureRect" parent="SafeMargin/Content/FormGrid/FormButton3"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -86.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = 86.0
+grow_horizontal = 0
+mouse_filter = 2
+texture = ExtResource("8")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FormButton4" type="Button" parent="SafeMargin/Content/FormGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SlotButton"
+theme_override_font_sizes/font_size = 28
+toggle_mode = true
+icon_alignment = 1
+vertical_icon_alignment = 0
+expand_icon = true
+
+[node name="LockBadge" type="TextureRect" parent="SafeMargin/Content/FormGrid/FormButton4"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -86.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = 86.0
+grow_horizontal = 0
+mouse_filter = 2
+texture = ExtResource("8")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FormButton5" type="Button" parent="SafeMargin/Content/FormGrid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"SlotButton"
+theme_override_font_sizes/font_size = 28
+toggle_mode = true
+icon_alignment = 1
+vertical_icon_alignment = 0
+expand_icon = true
+
+[node name="LockBadge" type="TextureRect" parent="SafeMargin/Content/FormGrid/FormButton5"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -86.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = 86.0
+grow_horizontal = 0
+mouse_filter = 2
+texture = ExtResource("8")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Spacer" type="Control" parent="SafeMargin/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="FeedbackLabel" type="Label" parent="SafeMargin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ActionButton" type="Button" parent="SafeMargin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(680, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"PrimaryButton"
+text = "EQUIPPED"

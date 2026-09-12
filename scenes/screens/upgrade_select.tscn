@@ -1,0 +1,305 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/screens/upgrade_select.gd" id="1_upgrade"]
+[ext_resource type="Texture2D" path="res://assets/ui/theme/textures/panel_card_selected.png" id="2_selected"]
+[ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/banner_top.tscn" id="3_banner_top"]
+
+[node name="UpgradeSelect" type="Control"]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+script = ExtResource("1_upgrade")
+
+[node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0.067, 0.082, 0.129, 0.72)
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 84
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 84
+
+[node name="Content" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 22
+alignment = 1
+
+[node name="Eyebrow" type="Label" parent="Margin/Content"]
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+text = "SOUL ASCENDANCY"
+horizontal_alignment = 1
+
+[node name="Banner" type="PanelContainer" parent="Margin/Content"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"PanelBanner"
+
+[node name="Title" type="Label" parent="Margin/Content/Banner"]
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+theme_override_font_sizes/font_size = 44
+text = "CHOOSE A MUTATION"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BannerTop" parent="Margin/Content/Banner" instance=ExtResource("3_banner_top")]
+layout_mode = 2
+
+[node name="Subtitle" type="Label" parent="Margin/Content"]
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+text = "The rift is paused. One choice shapes this run."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Cards" type="HBoxContainer" parent="Margin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="Choice0" type="Button" parent="Margin/Content/Cards"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 560)
+layout_mode = 2
+theme_type_variation = &"CardButton"
+
+[node name="Highlight0" type="NinePatchRect" parent="Margin/Content/Cards/Choice0"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -6.0
+offset_top = -3.0
+offset_right = 4.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_selected")
+patch_margin_left = 91
+patch_margin_top = 129
+patch_margin_right = 91
+patch_margin_bottom = 118
+
+[node name="Copy" type="VBoxContainer" parent="Margin/Content/Cards/Choice0"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 36.0
+offset_top = 52.0
+offset_right = -37.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Icon0" type="TextureRect" parent="Margin/Content/Cards/Choice0/Copy"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 170)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name0" type="Label" parent="Margin/Content/Cards/Choice0/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "WIDE REAP"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Description0" type="Label" parent="Margin/Content/Cards/Choice0/Copy"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+theme_override_font_sizes/font_size = 24
+text = "Dash corridor width +27%."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Level0" type="Label" parent="Margin/Content/Cards/Choice0/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+theme_override_font_sizes/font_size = 26
+text = "LEVEL 0  →  1"
+horizontal_alignment = 1
+
+[node name="Choice1" type="Button" parent="Margin/Content/Cards"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 560)
+layout_mode = 2
+theme_type_variation = &"CardButton"
+
+[node name="Highlight1" type="NinePatchRect" parent="Margin/Content/Cards/Choice1"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -6.0
+offset_top = -3.0
+offset_right = 4.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_selected")
+patch_margin_left = 91
+patch_margin_top = 129
+patch_margin_right = 91
+patch_margin_bottom = 118
+
+[node name="Copy" type="VBoxContainer" parent="Margin/Content/Cards/Choice1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 36.0
+offset_top = 52.0
+offset_right = -37.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Icon1" type="TextureRect" parent="Margin/Content/Cards/Choice1/Copy"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 170)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name1" type="Label" parent="Margin/Content/Cards/Choice1/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "SOUL HUNGER"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Description1" type="Label" parent="Margin/Content/Cards/Choice1/Copy"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+theme_override_font_sizes/font_size = 24
+text = "Dash damage +1; stronger shard pull."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Level1" type="Label" parent="Margin/Content/Cards/Choice1/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+theme_override_font_sizes/font_size = 26
+text = "LEVEL 0  →  1"
+horizontal_alignment = 1
+
+[node name="Choice2" type="Button" parent="Margin/Content/Cards"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 560)
+layout_mode = 2
+theme_type_variation = &"CardButton"
+
+[node name="Highlight2" type="NinePatchRect" parent="Margin/Content/Cards/Choice2"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -6.0
+offset_top = -3.0
+offset_right = 4.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_selected")
+patch_margin_left = 91
+patch_margin_top = 129
+patch_margin_right = 91
+patch_margin_bottom = 118
+
+[node name="Copy" type="VBoxContainer" parent="Margin/Content/Cards/Choice2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 36.0
+offset_top = 52.0
+offset_right = -37.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Icon2" type="TextureRect" parent="Margin/Content/Cards/Choice2/Copy"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 170)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name2" type="Label" parent="Margin/Content/Cards/Choice2/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "DEATH PULSE"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Description2" type="Label" parent="Margin/Content/Cards/Choice2/Copy"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+theme_override_font_sizes/font_size = 24
+text = "Wall impacts release a damaging soul pulse."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Level2" type="Label" parent="Margin/Content/Cards/Choice2/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+theme_override_font_sizes/font_size = 26
+text = "LEVEL 0  →  1"
+horizontal_alignment = 1

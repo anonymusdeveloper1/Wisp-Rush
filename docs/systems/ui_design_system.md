@@ -1,0 +1,136 @@
+# System: UI design system (redesign v1 theme)
+
+> **Status:** ✅ done (all screens migrated 2026-09-11) ·
+> **Last updated:** 2026-09-11 · **GDD section:** §UI / presentation
+>
+> Source of truth for the look: `concept_art/wisp_rush_redesign_v1/STYLE_GUIDE.md` (palette, UI and
+> UX rules) and `assets/15_six_screen_ui_handoff_board.png` (layouts). Never edit `concept_art/`.
+
+## Purpose
+One project-wide Godot `Theme` built from the redesign frame kit, so every screen gets the
+stone-and-cyan look by picking a **type variation** instead of hand-made StyleBoxes and colours.
+It is set as `gui/theme/custom` in `project.godot`, so every Control uses it with no extra setup.
+
+## Files
+| Path | Role |
+|---|---|
+| `res://assets/ui/theme/wisp_theme.tres` | The theme (generated; do not hand-edit) |
+| `res://assets/ui/theme/textures/*.png` + `slices.json` | Nine-patch-safe textures derived from `assets/art/ui/frames/` + their margins |
+| `res://assets/ui/theme/ornaments/*.tscn` | Optional centre ornaments (crest medallion, diamonds, amber gem) |
+| `res://assets/ui/theme/tools/build_theme_textures.py` | Step 1: splice/recolour frame pieces → textures + `slices.json` |
+| `res://assets/ui/theme/tools/build_wisp_theme.gd` | Step 3: builds the `.tres` + ornament scenes from `slices.json` + `Palette` |
+| `res://scripts/utils/palette.gd` | `class_name Palette` — typed palette constants |
+| `res://scenes/debug/theme_gallery.tscn` (+ `.gd`) | Every variation on one screen (visual reference) |
+
+Rebuild (repo root): `python3 assets/ui/theme/tools/build_theme_textures.py --preview` →
+`$GODOT --headless --path . --import` → `$GODOT --headless --path . --script res://assets/ui/theme/tools/build_wisp_theme.gd`.
+To retune colours/fonts/margins edit `palette.gd` or the builder constants, never the `.tres`.
+
+## Type variations (set `theme_type_variation`)
+Sizes are in the 1080×1920 design space (≈ ×0.36 on a 390 pt phone).
+
+| Variation | Base | Use it for |
+|---|---|---|
+| *(default)* `Button` | Button | Same as `SecondaryButton`. Any button that is not the screen's one main action |
+| `PrimaryButton` | Button | The single dominant, bottom-reachable action: Play, Restart, Daily Play, Buy/Equip form. ~110 px tall, 44 px text, glowing cyan when pressed or focused. One per screen |
+| `SecondaryButton` | Button | Quieter tier: Home on Results, Forms/Daily on Home, Back, Resume/Quit in Pause, settings actions. ~94 px, 34 px text |
+| `DangerButton` | Button | Destructive/irreversible (reset progress, abandon run). Amber inlay + text; always confirm |
+| `IconButton` | Button | Square icon-only slot: Pause, Settings, Back, Stats. Set `icon`, no text. 112×112 min, icon ≤ 64 px |
+| `SlotButton` | Button | Grid slots (Forms collection, reward tiles). Use `toggle_mode`; **pressed/toggled = magenta selection**. Set `expand_icon = true` for portraits |
+| `CardButton` *(extra)* | Button | Tappable tall cards: the three upgrade choices. Pressed/toggled = magenta card. `vertical_icon_alignment = TOP` puts the icon above the text |
+| *(default)* `PanelContainer` | PanelContainer | Plain framed panel: info boxes, goal rows, settings groups, pause panel |
+| `PanelCard` | PanelContainer | Non-interactive tall card/tile: run-metric tiles, stat tiles, form details |
+| `PanelCrest` | PanelContainer | One hero panel per screen: Daily Rift portal card, Results score block. Needs ≥ ~380×310 |
+| `PanelBanner` | PanelContainer | Screen title banner ("FORMS", "DAILY RIFT", "RUN COMPLETE", "CHOOSE AN UPGRADE"); put a `TitleLabel` inside |
+| `PanelPlate` | PanelContainer | Small value pill: shards counter, best score, rewards. Icon + `ValueLabel` / `AmberValueLabel` (font size override 36–44 is fine) |
+| `PortraitRing` | PanelContainer | Circular ring (magenta gems = selected): the selected-form preview. Keep it square (≥ 280 px); child `TextureRect` with keep-aspect-centred |
+| `TitleLabel` | Label | Screen/banner titles. 48 px, letter-spaced, bold, cyan halo. UPPERCASE text |
+| `CaptionLabel` | Label | Secondary text, units, "BEST", row descriptions. 26 px muted slate-cyan |
+| `ValueLabel` | Label | Large numerals (wave, kills, counts). 56 px, tabular figures |
+| `AmberValueLabel` | Label | Score and rewards (results score, best, shards earned). 64 px amber, tabular, amber glow; raise the size for the Results hero score |
+| `ProgressBar` | ProgressBar | Stone track + cyan fill: XP, goal progress. Native height 41 px — don't make it taller |
+| `BossProgressBar` *(extra)* | ProgressBar | Reaper health: same track, magenta fill |
+| `SlimProgressBar` *(extra)* | ProgressBar | Thin flat bar (18 px) for dense rows (Daily goal rows, HUD XP strip) |
+| `HSlider` / `HSeparator` / `VScrollBar` | — | Default styles: cyan fill + diamond grabber / divider line / thin cyan grabber |
+| plain `Label` | Label | Body text 30 px soul white |
+
+Every Button/slider has a cyan focus state (glow ring or chamfered outline) for keyboard/controller.
+Hover is deliberately subtle (touch leaves hover stuck on the last tapped button).
+
+## Ornaments (optional, `assets/ui/theme/ornaments/`)
+Centre ornaments cannot live in a nine-patch (they would stretch), so they are separate scenes.
+Instance one as a **child of a PanelContainer with the matching variation** (any position among
+its children); it centres itself on the frame edge. They are pure decoration (`mouse_filter` ignore).
+
+| Scene | Goes in | Look |
+|---|---|---|
+| `crest_top.tscn` / `crest_bottom.tscn` | `PanelCrest` | Crescent medallion on top / diamond at the bottom |
+| `card_top.tscn` | `PanelCard` | Cyan diamond on top |
+| `banner_top.tscn` | `PanelBanner` | Small crescent medallion on top (leave ~24 px free above the banner) |
+| `amber_top.tscn` | default `PanelContainer` | Amber gem on top — reward/landmark panels only |
+
+They assume the variation's content margins; if you override a panel's content margins, don't use them.
+In non-container parents (e.g. inside a `CardButton`) place `textures/ornament_*.png` yourself.
+
+## Palette (`Palette.*`, see `scripts/utils/palette.gd`)
+`VOID_CHARCOAL #111521` · `SLATE_TEAL #263D42` · `SOUL_CYAN #62E8F2` · `SOUL_WHITE #EAFDFF` ·
+`WARNING_AMBER #F3A847` · `RIFT_MAGENTA #B14CD9` · `MOSS_GREEN #5E7D4C` · derived: `PANEL_BG`
+(near-black blue, 92 %), `TEXT_MUTED #8FB3BA`, `TEXT_DISABLED`, `STEEL_BORDER`, `CYAN_GLOW`,
+`AMBER_GLOW`, `SCRIM` (void 72 % — modal dim), `TEXT_OUTLINE`.
+Cyan = friendly/navigation/focus, amber = warnings/rewards/landmarks, magenta = enemy/boss/selection
+only. Never communicate meaning by hue alone — pair with an icon, shape or text.
+
+## Art to use
+- **Backgrounds:** `res://assets/art/environment/home_background.png` for Home only;
+  `menu_background.png` for every other menu (Forms, Daily, Stats, Settings, Results, loading);
+  `wisp_rush_arena_background.png` for gameplay (pause and upgrade overlays sit over the frozen
+  arena with a `Palette.SCRIM` ColorRect). `TextureRect` with `expand_mode = 1` (ignore size),
+  `stretch_mode = 6` (keep aspect covered).
+- **Icons:** `res://assets/art/ui/system/` — `01_soul_life`, `02_soul_shards`, `03_combo_chain`,
+  `04_high_score`, `05_play`, `06_pause`, `07_restart`, `08_sound`, `10_forms`, `11_upgrades`,
+  `13_daily`, `14_statistics`, `15_settings`, `16_home`, `17_lock`, `18_reaper` (`09_mute` and
+  `12_store` no longer exist). They are bare glyphs — put them in an `IconButton`/`SlotButton`
+  or next to a value in a `PanelPlate`. Mutation icons: `assets/art/ui/mutations/`.
+- **Frame pieces** in `assets/art/ui/frames/` are the sources; screens use the theme, not the PNGs.
+
+## Rules for screen agents
+1. **Delete per-node style overrides** from the old violet design: every
+   `theme_override_styles/*` StyleBoxFlat, `theme_override_colors/*`, and old violet/plum colour
+   literals in scripts. Replace them with `theme_type_variation = &"…"` from the table above.
+   Colours in code come from `Palette`, never literals.
+2. Allowed overrides: `theme_override_font_sizes/font_size` (sizing to the layout) and container
+   `theme_override_constants` (separation/margins). Nothing else without updating the theme.
+3. One `PrimaryButton` per screen; everything else Secondary/Icon. Home is always quieter than
+   Restart/Play.
+4. Keep native heights: Primary ~110, Secondary ~94, ProgressBar 41. Use `custom_minimum_size`
+   only for **width** on buttons (and square size on slots/rings/cards). Inside an
+   `HBoxContainer`/`GridContainer` row set `size_flags_vertical = 4` (shrink centre) on buttons and
+   bars, otherwise the row stretches them to its tallest child. (Buttons survive moderate extra
+   height, which lengthens their sides; bars do not.)
+5. Touch targets ≥ 48 px in the design space, and prefer ≥ 96 px (≈ 35 pt). An `HSlider` accepts
+   touches over its whole rect: give it `custom_minimum_size.y = 96`.
+6. Tabular numerals are automatic in `ValueLabel`/`AmberValueLabel`; use them for score, wave,
+   shards and goal progress (`12 / 20`).
+7. All text stays code-rendered; never bake words into textures.
+8. Keep node names/paths that scripts and tests reference; restyle, don't re-parent.
+
+## Dependencies
+`project.godot`: `gui/theme/custom`, `rendering/environment/defaults/default_clear_color` = void
+charcoal. Uses Godot's default font (Open Sans SemiBold, supports `tnum`). No autoloads.
+
+## How to test
+- Visual: `WISP_ISOLATED_SAVE=1 tools/screenshot.sh res://scenes/debug/theme_gallery.tscn 20`,
+  then Read `logs/screenshot.png`. Texture preview without Godot: the `--preview` flag writes
+  `logs/redesign/design/theme_textures_preview.png` (native + stretched nine-patch).
+- Parse: `tools/godot/check_scripts.gd` covers the builder and gallery scripts.
+
+## Known issues / TODO
+- Buttons, ProgressBars and plates have side tips/diamonds on their vertical stretch row: making
+  them much taller than native elongates the tips. Change width, not height.
+- Magenta corner ticks of the source frames are recoloured to steel cyan on default pieces.
+- Hover uses `modulate_color` > 1 (brighten); on touch hover is nearly invisible by design.
+
+## Change history
+| Date | Change |
+|---|---|
+| 2026-09-11 | Created: redesign v1 theme, Palette, ornaments, gallery (replaces the violet per-node styling) |

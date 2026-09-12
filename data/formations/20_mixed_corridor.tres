@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="FormationData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/resources/formation_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+formation_id = &"mixed_corridor"
+minimum_wave = 5
+threat_cost = 10
+enemy_kinds = Array[StringName]([&"shard_wraith", &"soul_wisp", &"bone_mote", &"soul_wisp", &"soul_wisp"])
+normalized_positions = PackedVector2Array(0.2, 0.24, 0.34, 0.38, 0.5, 0.52, 0.66, 0.66, 0.8, 0.78)
+hazard_kind = &"blade_ring"
+hazard_position = Vector2(0.72, 0.34)

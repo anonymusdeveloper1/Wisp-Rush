@@ -1,0 +1,30 @@
+{
+  "pack": "Wisp Rush visual redesign v1",
+  "created": "2026-09-11",
+  "integrated": false,
+  "generator": "built-in image generation",
+  "target_canvas": "1080x1920 portrait",
+  "assets": [
+    {"file":"assets/01_visual_target_key_art.png","width":941,"height":1672,"alpha":false,"status":"reference"},
+    {"file":"assets/02_gameplay_arena_floor.png","width":941,"height":1672,"alpha":false,"status":"ready_candidate"},
+    {"file":"assets/03_home_background.png","width":941,"height":1672,"alpha":false,"status":"ready_candidate"},
+    {"file":"assets/04_shared_menu_background.png","width":941,"height":1672,"alpha":false,"status":"ready_candidate"},
+    {"file":"assets/05_wisp_animation_sheet.png","width":1448,"height":1086,"alpha":true,"status":"archive_draft"},
+    {"file":"assets/05_wisp_animation_sheet_v2.png","width":1448,"height":1086,"alpha":true,"status":"prep_required"},
+    {"file":"assets/06_enemy_animation_sheet.png","width":1175,"height":1338,"alpha":false,"status":"archive_draft"},
+    {"file":"assets/06_enemy_animation_sheet_v2.png","width":1176,"height":1338,"alpha":true,"status":"ready_candidate"},
+    {"file":"assets/07_reaper_animation_sheet.png","width":1448,"height":1086,"alpha":false,"status":"archive_draft"},
+    {"file":"assets/07_reaper_animation_sheet_v2.png","width":1448,"height":1086,"alpha":true,"status":"ready_candidate"},
+    {"file":"assets/08_hazards_pickups_sheet.png","width":1448,"height":1086,"alpha":false,"status":"prep_required"},
+    {"file":"assets/09_additive_vfx_sheet.png","width":1448,"height":1086,"alpha":false,"status":"ready_candidate_additive"},
+    {"file":"assets/10_ui_frame_kit.png","width":1086,"height":1448,"alpha":true,"status":"ready_candidate"},
+    {"file":"assets/11_ui_icon_sheet.png","width":1230,"height":1278,"alpha":true,"status":"ready_candidate"},
+    {"file":"assets/12_form_portraits_sheet.png","width":1536,"height":1024,"alpha":false,"status":"prep_required"},
+    {"file":"assets/13_upgrade_icon_sheet.png","width":1774,"height":887,"alpha":false,"status":"archive_draft"},
+    {"file":"assets/13_upgrade_icon_sheet_v2.png","width":1774,"height":887,"alpha":true,"status":"ready_candidate"},
+    {"file":"assets/14_brand_mark.png","width":1254,"height":1254,"alpha":true,"status":"ready_candidate"},
+    {"file":"assets/15_six_screen_ui_handoff_board.png","width":1225,"height":1284,"alpha":false,"status":"reference"},
+    {"file":"assets/16_wordmark_logo.png","width":1536,"height":1024,"alpha":true,"status":"ready_candidate"},
+    {"file":"assets/17_wisp_gameplay_master.png","width":1254,"height":1254,"alpha":true,"status":"ready_candidate"}
+  ]
+}

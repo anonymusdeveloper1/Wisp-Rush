@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="RunProgressionTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/run_progression_tuning.gd" id="1_tuning"]
+
+[resource]
+script = ExtResource("1_tuning")
+mutation_paths = PackedStringArray("res://data/mutations/wide_reap.tres", "res://data/mutations/soul_hunger.tres", "res://data/mutations/death_pulse.tres", "res://data/mutations/soul_link.tres", "res://data/mutations/cold_wake.tres", "res://data/mutations/void_velocity.tres", "res://data/mutations/soul_vessel.tres", "res://data/mutations/reapers_gift.tres")
+base_xp_threshold = 30
+xp_growth = 1.32
+wide_reap_per_level = 0.27
+velocity_per_level = 0.1
+velocity_score_bonus = 0.05
+pulse_base_radius = 120.0
+pulse_radius_per_level = 55.0
+cold_wake_base_duration = 1.2
+cold_wake_duration_per_level = 0.3
+cold_wake_speed = 0.55
+gift_base_streak = 33
+gift_reduction_per_level = 3
+gift_minimum_streak = 15
+shard_attraction_radius = 150.0
+hunger_attraction_per_level = 35.0
