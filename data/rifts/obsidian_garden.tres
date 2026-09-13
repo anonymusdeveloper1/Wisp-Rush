@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="RiftData" load_steps=3 format=3]
+[ext_resource type="Script" path="res://scripts/resources/rift_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/wisp_rush_arena_background.png" id="2"]
+[resource]
+script = ExtResource("1")
+rift_id = &"obsidian_garden"
+display_name = "OBSIDIAN GARDEN"
+description = "Where every wisp first wakes."
+rule_summary = "The rift as it was made. No twist."
+rule_key = &"none"
+background = ExtResource("2")
+unlock_wave = 0
+accent = Color(0.384, 0.91, 0.949, 1)
+difficulty_tier = 1
+level_count = 8
+waves_per_level = 4
+level_one_threat = 1.00
+threat_per_level = 0.12
+enemy_speed_scale = 1.00
+boss_id = &"reaper"
+floor_polygon = PackedVector2Array(0.80223, 0.48803, 0.87933, 0.54875, 0.82745, 0.60199, 0.86361, 0.70578, 0.71879, 0.72390, 0.61002, 0.76763, 0.47701, 0.80940, 0.33068, 0.79562, 0.27534, 0.68476, 0.09776, 0.70164, 0.02833, 0.63393, 0.12061, 0.54181, 0.15749, 0.48803, 0.11740, 0.43375, 0.14265, 0.37930, 0.23359, 0.35092, 0.30584, 0.32104, 0.35591, 0.25500, 0.47701, 0.25500, 0.61892, 0.25500, 0.70952, 0.26120, 0.70754, 0.35818, 0.80313, 0.38197, 0.84443, 0.43257)

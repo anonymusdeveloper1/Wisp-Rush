@@ -16,6 +16,7 @@ safe across app interruptions and back presses.
 | `res://scenes/gameplay/game_world.gd` | Trauma shake, hit-stop, feedback hooks, auto-pause, back handling, pause/confirm/settings overlays |
 | `res://scenes/gameplay/game_world.tscn` | PauseOverlay (Resume, Restart, Settings, Home) and ConfirmOverlay |
 | `res://scripts/components/vfx_pool.gd` | `VfxPool`: 24 pooled Sprite2D one-shots, no per-effect allocation |
+| `res://scenes/gameplay/wall_splash_fx.gd` | `WallSplashFx`: the splash where the Wisp hits a wall — pooled droplet emitters plus a splat and flash through `VfxPool` |
 | `res://scripts/utils/haptics.gd` | `Haptics.pulse()` — mobile-only, settings-gated vibration |
 | `res://scripts/utils/sound_fx.gd` | `SoundFx` — null-safe Audio shortcuts and UI click binding |
 | `res://scenes/debug/debug_overlay.gd` | `DebugOverlay` — F3 performance overlay, debug builds only |
@@ -93,3 +94,20 @@ trauma decays 1.8/s. Strength = Screen Shake × (`REDUCED_MOTION_SHAKE` 0.3 when
 |---|---|
 | 2026-09-12 | Redesign v1 colours; VFX converted to straight alpha (ADR-0005) |
 | 2026-09-11 | Created and verified in Milestone 4 |
+
+## Wall splash (2026-09-12)
+
+When the Wisp hits a wall it plays a **splash at the point of impact only** — no wall highlight.
+The owner asked for this explicitly after trying a glow that ran along the painted edge, and the old
+full-side `WallFlash` rectangle was removed at the same time (node, colour constant and tween).
+
+- Droplets fan out 124° around the inward normal, so they splash sideways along the wall and back
+  into the floor, never through the wall. High damping makes them burst and hang rather than drift.
+- A splat is stretched ~3× along the wall surface, with a short white contact flash on top.
+- The splash sits `LANDING_INSET - 0.1` radii back from the Wisp's centre, i.e. on the wall itself.
+- Grows with the dash's kills; Reduced Motion cuts droplets to 40 % and speed to 55 %.
+- `WallSplashFx` is a persistent pool, so it is a **sibling** of `EffectsLayer`, like `VfxPool`.
+  `EffectsLayer` holds only transient per-effect nodes — `test_mutation_effects.gd` counts its
+  children, and parenting the pool inside it broke the Death Pulse check.
+- Visual QA: `tools/godot/render_wall_splash_showcase.gd` (usage in its header).
+

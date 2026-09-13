@@ -14,7 +14,8 @@ About, reset progress), lifetime statistics, and the boot Loading screen.
 | `res://scenes/screens/settings_screen.tscn` / `.gd` | Settings, About panel, armed reset panel; Home screen or in-run overlay |
 | `res://scenes/screens/statistics_screen.tscn` / `.gd` | Lifetime statistics grid built from the save snapshot |
 | `res://scenes/screens/loading_screen.tscn` / `.gd` | Pulsing soul-core boot screen, threaded scene streaming |
-| `res://scripts/autoload/save_manager.gd` | `get_settings`, `update_settings`, `reset_tutorial`, `settings_changed` |
+| `res://scripts/autoload/save_manager.gd` | `get_settings`, `update_settings`, `reset_tutorial`, `settings_changed`, guarded `debug_*` unlocks |
+| `res://scripts/utils/dev_unlock.gd` | `DevUnlock` — debug-only progression unlocks used by the developer card |
 
 ## Scene / node structure
 
@@ -74,3 +75,19 @@ SaveManager (authority, ADR-0003), Audio (live volume preview), GameWorld (liste
 |---|---|
 | 2026-09-12 | Restyled to redesign v1 (ADR-0005) |
 | 2026-09-11 | Created and verified in Milestone 4 |
+
+## Developer card (debug builds only)
+
+Settings appends a **DEVELOPER** card built in `_build_developer_card()` with six actions: unlock
+everything, unlock all Rifts, unlock all forms, max the Soul Sanctum, complete all Trials, and grant
+shards. It exists so features gated behind progression can be reached without playing to them.
+
+It is gated twice, because GDD §13 forbids debug panels in a release:
+
+1. The card is only built when `SaveManagerService.debug_tools_allowed()` is true, which is
+   `OS.is_debug_build()`.
+2. Every `SaveManagerService.debug_*` method independently refuses to act in a release build, so
+   even a caller that bypassed the UI would change nothing.
+
+`tools/run_tests.sh dev_unlock` asserts what each action unlocks, that null saves and unknown rift
+ids are refused, and that exactly one developer card is present in a debug build.

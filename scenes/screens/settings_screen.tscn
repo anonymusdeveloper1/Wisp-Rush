@@ -102,6 +102,7 @@ size_flags_vertical = 3
 mouse_filter = 2
 
 [node name="Groups" type="VBoxContainer" parent="Margin/Content"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 40
 
@@ -259,6 +260,35 @@ theme_type_variation = &"SecondaryButton"
 toggle_mode = true
 button_pressed = true
 text = "ON"
+
+[node name="AimArrowRow" type="HBoxContainer" parent="Margin/Content/Groups/FeelCard/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="AimArrowText" type="VBoxContainer" parent="Margin/Content/Groups/FeelCard/Rows/AimArrowRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_constants/separation = 0
+
+[node name="AimArrowLabel" type="Label" parent="Margin/Content/Groups/FeelCard/Rows/AimArrowRow/AimArrowText"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "AIM ARROW"
+
+[node name="AimArrowCaption" type="Label" parent="Margin/Content/Groups/FeelCard/Rows/AimArrowRow/AimArrowText"]
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+text = "Show which way the dash will go"
+
+[node name="AimArrowToggle" type="Button" parent="Margin/Content/Groups/FeelCard/Rows/AimArrowRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(230, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"SecondaryButton"
+toggle_mode = true
+text = "OFF"
 
 [node name="ReducedMotionRow" type="HBoxContainer" parent="Margin/Content/Groups/FeelCard/Rows"]
 layout_mode = 2

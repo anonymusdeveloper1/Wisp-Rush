@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="RiftData" load_steps=3 format=3]
+[ext_resource type="Script" path="res://scripts/resources/rift_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/rifts/reapers_court_background.png" id="2"]
+[resource]
+script = ExtResource("1")
+rift_id = &"reapers_court"
+display_name = "REAPER'S COURT"
+description = "He is always already waiting."
+rule_summary = "The Reaper returns twice as often. So do its rewards."
+rule_key = &"boss_rush"
+background = ExtResource("2")
+unlock_wave = 20
+accent = Color(0.694, 0.298, 0.851, 1)
+difficulty_tier = 5
+level_count = 8
+waves_per_level = 4
+level_one_threat = 1.00
+threat_per_level = 0.25
+enemy_speed_scale = 1.20
+boss_id = &"reaper_ascended"
+enemy_substitutions = {&"soul_wisp": &"court_shade", &"shard_wraith": &"warden", &"bone_mote": &"slag_hulk"}
+floor_polygon = PackedVector2Array(0.84987, 0.54921, 0.85749, 0.60319, 0.88533, 0.67457, 0.89042, 0.76921, 0.74770, 0.79101, 0.64438, 0.85303, 0.49984, 0.85691, 0.35636, 0.85083, 0.25401, 0.78904, 0.10902, 0.76934, 0.11435, 0.67457, 0.14610, 0.60260, 0.15183, 0.54921, 0.17933, 0.50084, 0.17393, 0.44323, 0.19940, 0.37999, 0.23985, 0.29557, 0.34431, 0.25500, 0.49984, 0.25500, 0.65851, 0.25500, 0.76085, 0.29458, 0.79600, 0.38241, 0.81349, 0.44722, 0.82818, 0.49966)

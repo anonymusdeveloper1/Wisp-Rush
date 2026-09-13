@@ -17,7 +17,7 @@ mkdir -p "$OUT"
 # 320×568, 360×800, 375×812, 390×844, and 412×915 scaled to 860 px tall so the window fits a
 # laptop display (the layout only sees the aspect ratio).
 SIZES=(320x568 360x800 375x812 390x844 387x860)
-SCREENS=(home forms daily stats settings results game pause upgrade tutorial)
+SCREENS=(home forms rifts daily stats settings results game pause upgrade tutorial)
 [[ $# -gt 0 ]] && SCREENS=("$@")
 
 status=0

@@ -25,6 +25,8 @@ var _formation_gap_remaining: float = 0.0
 var _current_health: int = 3
 var _maximum_health: int = 3
 var _total_upgrade_levels: int = 0
+## Threat-budget multiplier for the active Rift and level (RiftData.get_threat_multiplier).
+var _rift_threat_multiplier: float = 1.0
 
 
 func _ready() -> void:
@@ -57,6 +59,11 @@ func advance(delta: float, live_threat: int) -> void:
 	if live_threat > 0 or _formation_gap_remaining > 0.0 or _spent_budget >= _wave_budget:
 		return
 	_request_affordable_formation()
+
+
+## Scales every wave budget for the active Rift and level; call before start() and on level up.
+func set_rift_threat_multiplier(multiplier: float) -> void:
+	_rift_threat_multiplier = clampf(multiplier, 0.25, 4.0)
 
 
 ## Supplies health and upgrade context used to soften unsafe low-health requests.
@@ -108,9 +115,10 @@ func is_suspended() -> bool:
 func _begin_next_wave() -> void:
 	_current_wave += 1
 	_wave_remaining = tuning.wave_duration
-	_wave_budget = tuning.base_threat_budget + roundi(
+	var base_budget: int = tuning.base_threat_budget + roundi(
 		float(_current_wave - 1) * tuning.threat_growth_per_wave
 	) + _difficulty_tier * tuning.post_boss_budget_bonus
+	_wave_budget = maxi(1, roundi(float(base_budget) * _rift_threat_multiplier))
 	_spent_budget = 0
 	_formation_gap_remaining = 0.0
 	wave_started.emit(_current_wave, _wave_budget)

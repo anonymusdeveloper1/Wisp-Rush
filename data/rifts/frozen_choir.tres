@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="RiftData" load_steps=3 format=3]
+[ext_resource type="Script" path="res://scripts/resources/rift_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/rifts/frozen_choir_background.png" id="2"]
+[resource]
+script = ExtResource("1")
+rift_id = &"frozen_choir"
+display_name = "FROZEN CHOIR"
+description = "A cathedral holding its breath."
+rule_summary = "Ice keeps you drifting after every impact."
+rule_key = &"drift"
+background = ExtResource("2")
+unlock_wave = 15
+accent = Color(0.788, 0.929, 0.965, 1)
+difficulty_tier = 4
+level_count = 8
+waves_per_level = 4
+level_one_threat = 1.00
+threat_per_level = 0.21
+enemy_speed_scale = 1.15
+boss_id = &"hollow_choir"
+enemy_substitutions = {&"shard_wraith": &"warden", &"soul_wisp": &"frost_wisp"}
+floor_polygon = PackedVector2Array(0.81709, 0.47994, 0.79213, 0.52555, 0.83687, 0.59276, 0.81183, 0.66125, 0.76813, 0.75135, 0.63446, 0.78376, 0.48992, 0.81727, 0.35220, 0.76945, 0.23903, 0.72470, 0.19520, 0.64594, 0.13773, 0.59447, 0.10230, 0.53844, 0.15138, 0.47994, 0.11469, 0.42331, 0.11845, 0.35914, 0.14084, 0.28332, 0.23094, 0.25500, 0.35272, 0.25500, 0.48992, 0.25500, 0.63079, 0.25500, 0.76004, 0.25500, 0.83615, 0.28493, 0.85264, 0.36199, 0.88080, 0.42095)

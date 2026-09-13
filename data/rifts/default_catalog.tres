@@ -1,0 +1,5 @@
+[gd_resource type="Resource" script_class="RiftCatalog" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/resources/rift_catalog.gd" id="1"]
+[resource]
+script = ExtResource("1")
+rift_paths = PackedStringArray("res://data/rifts/obsidian_garden.tres", "res://data/rifts/shattered_rift.tres", "res://data/rifts/ember_hollow.tres", "res://data/rifts/frozen_choir.tres", "res://data/rifts/reapers_court.tres")

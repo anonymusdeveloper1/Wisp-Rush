@@ -1,7 +1,7 @@
 # System: UI design system (redesign v1 theme)
 
 > **Status:** ✅ done (all screens migrated 2026-09-11) ·
-> **Last updated:** 2026-09-11 · **GDD section:** §UI / presentation
+> **Last updated:** 2026-09-13 · **GDD section:** §UI / presentation
 >
 > Source of truth for the look: `concept_art/wisp_rush_redesign_v1/STYLE_GUIDE.md` (palette, UI and
 > UX rules) and `assets/15_six_screen_ui_handoff_board.png` (layouts). Never edit `concept_art/`.
@@ -20,6 +20,8 @@ It is set as `gui/theme/custom` in `project.godot`, so every Control uses it wit
 | `res://assets/ui/theme/tools/build_theme_textures.py` | Step 1: splice/recolour frame pieces → textures + `slices.json` |
 | `res://assets/ui/theme/tools/build_wisp_theme.gd` | Step 3: builds the `.tres` + ornament scenes from `slices.json` + `Palette` |
 | `res://scripts/utils/palette.gd` | `class_name Palette` — typed palette constants |
+| `res://scripts/components/focus_carousel.gd` | `FocusCarousel` — shared portrait card picker (Forms, Rift Map) |
+| `res://scripts/components/page_dots.gd` | `PageDots` — diamond page indicator that follows a carousel |
 | `res://scenes/debug/theme_gallery.tscn` (+ `.gd`) | Every variation on one screen (visual reference) |
 
 Rebuild (repo root): `python3 assets/ui/theme/tools/build_theme_textures.py --preview` →
@@ -33,17 +35,19 @@ Sizes are in the 1080×1920 design space (≈ ×0.36 on a 390 pt phone).
 |---|---|---|
 | *(default)* `Button` | Button | Same as `SecondaryButton`. Any button that is not the screen's one main action |
 | `PrimaryButton` | Button | The single dominant, bottom-reachable action: Play, Restart, Daily Play, Buy/Equip form. ~110 px tall, 44 px text, glowing cyan when pressed or focused. One per screen |
-| `SecondaryButton` | Button | Quieter tier: Home on Results, Forms/Daily on Home, Back, Resume/Quit in Pause, settings actions. ~94 px, 34 px text |
+| `SecondaryButton` | Button | Quieter tier: Home on Results, Back, Resume/Quit in Pause, settings actions. ~94 px, 34 px text |
 | `DangerButton` | Button | Destructive/irreversible (reset progress, abandon run). Amber inlay + text; always confirm |
 | `IconButton` | Button | Square icon-only slot: Pause, Settings, Back, Stats. Set `icon`, no text. 112×112 min, icon ≤ 64 px |
-| `SlotButton` | Button | Grid slots (Forms collection, reward tiles). Use `toggle_mode`; **pressed/toggled = magenta selection**. Set `expand_icon = true` for portraits |
-| `CardButton` *(extra)* | Button | Tappable tall cards: the three upgrade choices. Pressed/toggled = magenta card. `vertical_icon_alignment = TOP` puts the icon above the text |
+| `SlotButton` | Button | Grid slots (reward tiles). Use `toggle_mode`; **pressed/toggled = magenta selection**. Set `expand_icon = true` for portraits |
+| `CardButton` *(extra)* | Button | Tappable tall cards: the three upgrade choices and every `FocusCarousel` card (Forms, Rift Map). Pressed/toggled = magenta card. `vertical_icon_alignment = TOP` puts the icon above the text |
+| `NavButton` *(extra)* | Button | One tab of the Home bottom navigation bar: flat, icon (box `NAV_ICON` 96) above a 26 px caption (`FONT_NAV`), muted text that turns soul white; pressed/focused = chamfered cyan lozenge. Only inside a `NavBar` |
 | *(default)* `PanelContainer` | PanelContainer | Plain framed panel: info boxes, goal rows, settings groups, pause panel |
 | `PanelCard` | PanelContainer | Non-interactive tall card/tile: run-metric tiles, stat tiles, form details |
 | `PanelCrest` | PanelContainer | One hero panel per screen: Daily Rift portal card, Results score block. Needs ≥ ~380×310 |
 | `PanelBanner` | PanelContainer | Screen title banner ("FORMS", "DAILY RIFT", "RUN COMPLETE", "CHOOSE AN UPGRADE"); put a `TitleLabel` inside |
 | `PanelPlate` | PanelContainer | Small value pill: shards counter, best score, rewards. Icon + `ValueLabel` / `AmberValueLabel` (font size override 36–44 is fine) |
-| `PortraitRing` | PanelContainer | Circular ring (magenta gems = selected): the selected-form preview. Keep it square (≥ 280 px); child `TextureRect` with keep-aspect-centred |
+| `NavBar` *(extra)* | PanelContainer | The Home bottom navigation dock: default stone panel with tight vertical padding; holds an `HBoxContainer` of `NavButton`s (expand-fill, separation 0) |
+| `PortraitRing` | PanelContainer | Circular ring (magenta gems = selected) for a single portrait. Keep it square (≥ 280 px); child `TextureRect` with keep-aspect-centred |
 | `TitleLabel` | Label | Screen/banner titles. 48 px, letter-spaced, bold, cyan halo. UPPERCASE text |
 | `CaptionLabel` | Label | Secondary text, units, "BEST", row descriptions. 26 px muted slate-cyan |
 | `ValueLabel` | Label | Large numerals (wave, kills, counts). 56 px, tabular figures |
@@ -72,6 +76,18 @@ its children); it centres itself on the frame edge. They are pure decoration (`m
 They assume the variation's content margins; if you override a panel's content margins, don't use them.
 In non-container parents (e.g. inside a `CardButton`) place `textures/ornament_*.png` yourself.
 
+## Shared components (`scripts/components/`)
+**Card-picker pattern** (owner decision 2026-09-13, Forms and Rift Map): a vertical screen with a
+title, one big tall focused card in the centre (larger, lifted, magenta-framed), dimmed neighbours
+peeking in at the sides, `PageDots` under it, one description/status block, then Back
+(`SecondaryButton`) and the one main action (`PrimaryButton`). Swipe sideways to browse; tapping the
+focused card does the same as the main action. Locked entries stay previewable and say why in text.
+
+| Component | Behaviour and API |
+|---|---|
+| `FocusCarousel` (Control) | `set_cards(cards, selected)` adopts screen-built cards (sets them mouse-ignore; a `BaseButton` card becomes toggle-mode and is pressed while focused, so `CardButton` draws the selection frame). Swipe with exponential snap and rubber band at the ends; a flick advances one card (not if the finger stopped > 80 ms before lifting); tap a side card to focus it, tap the focused card → `activated(index)`. Taps are hit-tested against the resting layout, so a quick double tap on a peek strip browses two cards instead of activating the card still sliding in; a cancelled touch, any drag past `tap_slop`, or app focus loss / pause / hide mid-press never counts as a tap (the press snaps instead); `ui_left`/`ui_right`/`ui_accept` when focused. Mouse events only (touch arrives as emulated mouse; handling both would act twice). Signals `selection_changed(index)`, `activated(index)`. Methods `select(index, animate)`, `get_selected_index`, `get_card_count`, `get_card`, `get_scroll`, `is_settled`, `get_focus_card_size`. Exports: `focus_width_share`, `max_width_share` + `max_card_aspect` (spare height grows the card instead of leaving a gap), `card_aspect`, `pitch_share`, `side_scale`, `side_brightness`, `lift_share`, `snap_speed`, `tap_slop`, `flick_speed` |
+| `PageDots` (Control) | Drawn diamonds; set `count`, feed `position_value = carousel.get_scroll()` each frame so it slides with a drag; indices in `hollow` draw as outlines (locked entries) |
+
 ## Palette (`Palette.*`, see `scripts/utils/palette.gd`)
 `VOID_CHARCOAL #111521` · `SLATE_TEAL #263D42` · `SOUL_CYAN #62E8F2` · `SOUL_WHITE #EAFDFF` ·
 `WARNING_AMBER #F3A847` · `RIFT_MAGENTA #B14CD9` · `MOSS_GREEN #5E7D4C` · derived: `PANEL_BG`
@@ -81,7 +97,8 @@ Cyan = friendly/navigation/focus, amber = warnings/rewards/landmarks, magenta = 
 only. Never communicate meaning by hue alone — pair with an icon, shape or text.
 
 ## Art to use
-- **Backgrounds:** `res://assets/art/environment/home_background.png` for Home only;
+- **Backgrounds:** `res://assets/art/environment/home_background.png` for Home only (animated over,
+  never altered, by `HomeAmbience`); the Rift Map shows the focused Rift's arena (crossfade);
   `menu_background.png` for every other menu (Forms, Daily, Stats, Settings, Results, loading);
   `wisp_rush_arena_background.png` for gameplay (pause and upgrade overlays sit over the frozen
   arena with a `Palette.SCRIM` ColorRect). `TextureRect` with `expand_mode = 1` (ignore size),
@@ -123,6 +140,8 @@ charcoal. Uses Godot's default font (Open Sans SemiBold, supports `tnum`). No au
   then Read `logs/screenshot.png`. Texture preview without Godot: the `--preview` flag writes
   `logs/redesign/design/theme_textures_preview.png` (native + stretched nine-patch).
 - Parse: `tools/godot/check_scripts.gd` covers the builder and gallery scripts.
+- Components: `tools/run_tests.sh focus_carousel` (layout, swipe-snap, flick, hold-then-release, tap, rapid double tap, cancelled / focus-lost presses, damped rubber band, keys, clamping, card replacement — real GUI input).
+- Phone layouts: `tools/qa_matrix.sh home forms rifts rifts_locked` → `logs/qa/<screen>_sheet.png`.
 
 ## Known issues / TODO
 - Buttons, ProgressBars and plates have side tips/diamonds on their vertical stretch row: making
@@ -133,4 +152,5 @@ charcoal. Uses Godot's default font (Open Sans SemiBold, supports `tnum`). No au
 ## Change history
 | Date | Change |
 |---|---|
+| 2026-09-13 | `NavButton`/`NavBar` variations; shared `FocusCarousel` + `PageDots` and the card-picker pattern |
 | 2026-09-11 | Created: redesign v1 theme, Palette, ornaments, gallery (replaces the violet per-node styling) |

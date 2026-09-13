@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="TrialData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/trial_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+trial_id = &"t02_multi_kill_dashes_m"
+title = "CLEAN LINES"
+description = "Land 3 multi-kill dashes in one run."
+metric = &"multi_kill_dashes"
+target = 3
+reward_shards = 25
+tier = 2
+cumulative = false

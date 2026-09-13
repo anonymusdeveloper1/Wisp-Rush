@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="RiftData" load_steps=3 format=3]
+[ext_resource type="Script" path="res://scripts/resources/rift_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/rifts/ember_hollow_background.png" id="2"]
+[resource]
+script = ExtResource("1")
+rift_id = &"ember_hollow"
+display_name = "EMBER HOLLOW"
+description = "The forge beneath the sanctuary."
+rule_summary = "The floor burns away as the run goes on."
+rule_key = &"shrinking_floor"
+background = ExtResource("2")
+unlock_wave = 10
+accent = Color(0.953, 0.659, 0.278, 1)
+difficulty_tier = 3
+level_count = 8
+waves_per_level = 4
+level_one_threat = 1.00
+threat_per_level = 0.18
+enemy_speed_scale = 1.10
+boss_id = &"cinder_maw"
+enemy_substitutions = {&"soul_wisp": &"cinder_shade", &"bone_mote": &"slag_hulk"}
+floor_polygon = PackedVector2Array(0.92136, 0.46467, 0.93473, 0.52867, 0.88561, 0.58661, 0.82967, 0.64437, 0.74456, 0.69289, 0.64747, 0.75232, 0.51063, 0.79630, 0.37343, 0.75307, 0.26884, 0.70054, 0.20017, 0.63953, 0.12689, 0.58945, 0.07871, 0.52985, 0.11884, 0.46467, 0.12667, 0.40672, 0.10411, 0.33247, 0.17442, 0.27530, 0.24861, 0.25500, 0.37500, 0.25500, 0.51063, 0.25500, 0.65254, 0.25500, 0.76455, 0.25500, 0.81680, 0.29222, 0.89612, 0.33931, 0.97577, 0.39447)

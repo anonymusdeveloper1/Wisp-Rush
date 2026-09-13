@@ -53,6 +53,21 @@ func add_experience(amount: int) -> void:
 
 
 ## Returns up to count distinct non-capped choices in deterministic shuffled order.
+## Immediately grants one random non-maxed mutation, for the Sanctum's First Gift node.
+##
+## Returns the granted mutation, or null when every mutation is already at its cap.
+func grant_random_mutation() -> MutationData:
+	var available: Array[MutationData] = []
+	for mutation: MutationData in _mutations:
+		if get_mutation_level(mutation.mutation_id) < mutation.max_level:
+			available.append(mutation)
+	if available.is_empty():
+		return null
+	var chosen: MutationData = available[_random.randi_range(0, available.size() - 1)]
+	apply_choice(chosen.mutation_id)
+	return chosen
+
+
 func offer_choices(count: int = 3) -> Array[MutationData]:
 	var eligible: Array[MutationData] = []
 	for mutation: MutationData in _mutations:

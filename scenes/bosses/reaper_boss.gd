@@ -40,6 +40,8 @@ const SWEEP_ARC_POINTS: int = 15
 var phase: Phase = Phase.SCYTHE_SWEEP
 var cycle_state: CycleState = CycleState.INTRO
 var _arena_rect: Rect2 = Rect2()
+## Painted floor in screen space; empty keeps rectangle-only behaviour.
+var _arena_polygon: PackedVector2Array = PackedVector2Array()
 var _target_position: Vector2 = Vector2.ZERO
 var _last_edge_position: Vector2 = Vector2.ZERO
 var _viewport_scale: float = 1.0
@@ -103,6 +105,24 @@ func _physics_process(delta: float) -> void:
 
 
 ## Configures arena scale, encounter difficulty and deterministic phase variants.
+## Applies a boss variant's atlas, tuning and colours. Call before configure().
+##
+## Every Rift boss shares this phase machine; only presentation and tuning differ (ADR-0010).
+## A variant with no `frames` keeps the scene's own animation set, which is how the base Reaper
+## and its Ascended recolour both work.
+func configure_variant(data: BossData) -> void:
+	if data == null:
+		return
+	if data.tuning != null:
+		tuning = data.tuning
+	# add_child() runs _ready() synchronously, so the @onready nodes are already resolved here.
+	if data.frames != null:
+		_sprite.sprite_frames = data.frames
+	_sprite.modulate = data.tint
+	_warning_ring.modulate = data.accent
+	_core_ring.modulate = data.accent
+
+
 func configure(
 	arena_rect: Rect2,
 	target_position: Vector2,
@@ -143,6 +163,29 @@ func set_target_position(world_position: Vector2) -> void:
 
 
 ## Updates live arena bounds and visual scale without resetting encounter health or phase.
+## Applies the painted floor, so the boss and its teleport marks stay on the stone.
+func set_arena_polygon(polygon: PackedVector2Array) -> void:
+	_arena_polygon = polygon
+	if polygon.size() >= 3:
+		global_position = _onto_floor(global_position)
+
+
+## Moves a boss-owned point onto the floor polygon, when one is set.
+##
+## Teleport Hunt picks destinations from the bounding rectangle's edges, which sit in the lava on
+## an oval arena. The attack grammar stays rectangle-authored; only the resulting point is made
+## legal, so every boss variant keeps its tuned timing and silhouette.
+func _onto_floor(point: Vector2) -> Vector2:
+	if _arena_polygon.size() < 3:
+		return point
+	var margin: float = tuning.core_radius * _viewport_scale
+	if DashGeometry.is_inside_polygon(point, _arena_polygon):
+		var boundary: Vector2 = DashGeometry.nearest_polygon_point(point, _arena_polygon)
+		if point.distance_to(boundary) >= margin:
+			return point
+	return DashGeometry.clamp_to_polygon(point, _arena_polygon, margin)
+
+
 func set_arena_rect(arena_rect: Rect2) -> void:
 	_arena_rect = arena_rect
 	_viewport_scale = maxf(0.1, arena_rect.size.x / tuning.design_width)
@@ -351,7 +394,7 @@ func _begin_teleport_warning() -> void:
 	var second: Vector2 = _arena_rect.position + _arena_rect.size - (
 		first - _arena_rect.position
 	)
-	_teleport_points = PackedVector2Array([first, second])
+	_teleport_points = PackedVector2Array([_onto_floor(first), _onto_floor(second)])
 	_true_teleport_index = _random.randi_range(0, 1)
 	_teleport_false.global_position = _teleport_points[1 - _true_teleport_index]
 	_teleport_true.global_position = _teleport_points[_true_teleport_index]

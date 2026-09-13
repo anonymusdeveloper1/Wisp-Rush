@@ -19,12 +19,12 @@ func _run_check() -> void:
 	if forms.get_selected_form_id() != &"eclipse":
 		failures += 1
 		push_error("progression_screens: locked Eclipse could not be previewed")
-	var eclipse_action := forms.get_node("SafeMargin/Content/ActionButton") as Button
+	var eclipse_action := forms.get_node("%ActionButton") as Button
 	if not eclipse_action.disabled or eclipse_action.text != "REAPER REQUIRED":
 		failures += 1
 		push_error("progression_screens: Eclipse boss gate was not presented")
 	forms.select_form(&"venom")
-	var venom_action := forms.get_node("SafeMargin/Content/ActionButton") as Button
+	var venom_action := forms.get_node("%ActionButton") as Button
 	if venom_action.disabled or "500" not in venom_action.text:
 		failures += 1
 		push_error("progression_screens: eligible purchase state was incorrect")

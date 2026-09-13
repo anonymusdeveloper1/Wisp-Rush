@@ -57,13 +57,6 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.067, 0.082, 0.129, 0.14)
 
-[node name="WallFlash" type="ColorRect" parent="."]
-unique_name_in_owner = true
-z_index = 5
-layout_mode = 0
-mouse_filter = 2
-color = Color(0.384, 0.91, 0.949, 0.9)
-
 [node name="WorldContent" type="Node2D" parent="."]
 unique_name_in_owner = true
 process_mode = 1

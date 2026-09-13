@@ -17,7 +17,36 @@ const ENEMY_SCENES: Dictionary = {
 	&"soul_wisp": preload("res://scenes/enemies/soul_wisp.tscn"),
 	&"shard_wraith": preload("res://scenes/enemies/shard_wraith.tscn"),
 	&"bone_mote": preload("res://scenes/enemies/bone_mote.tscn"),
+	&"cinder_shade": preload("res://scenes/enemies/cinder_shade.tscn"),
+	&"warden": preload("res://scenes/enemies/warden.tscn"),
+	&"rift_spawn": preload("res://scenes/enemies/rift_spawn.tscn"),
+	&"echo": preload("res://scenes/enemies/echo.tscn"),
+	&"slag_hulk": preload("res://scenes/enemies/slag_hulk.tscn"),
+	&"frost_wisp": preload("res://scenes/enemies/frost_wisp.tscn"),
+	&"court_shade": preload("res://scenes/enemies/court_shade.tscn"),
 }
+## Children spawned by a splitter never split again, so a chain cannot run away.
+const SPLIT_SPREAD: float = 68.0
+## Hard ceiling on concurrent enemies; splits are refused above it.
+const MAX_LIVE_ENEMIES: int = 60
+## Ember Hollow: the playfield contracts to this fraction by the last wave of a level.
+const SHRINK_FLOOR_MINIMUM: float = 0.74
+## Reaper's Court: boss rewards are doubled to pay for the doubled boss cadence.
+const BOSS_RUSH_REWARD_SCALE: float = 2.0
+## Frozen Choir: the Wisp slides along the edge it is resting on, in design px/s.
+const DRIFT_EDGE_SPEED: float = 110.0
+## Shattered Rift portal pair, in normalised playfield coordinates.
+const PORTAL_A_UV := Vector2(0.26, 0.34)
+const PORTAL_B_UV := Vector2(0.74, 0.66)
+## Portal mouth radius in design pixels; a dash passing within this is swallowed.
+const PORTAL_RADIUS: float = 74.0
+const PORTAL_ENTRANCE_TEXTURE: Texture2D = preload(
+	"res://assets/art/environment/props/10_void_portal_entrance_active.png"
+)
+const PORTAL_EXIT_TEXTURE: Texture2D = preload(
+	"res://assets/art/environment/props/11_void_portal_exit_active.png"
+)
+const SANCTUM_CATALOG: SanctumCatalog = preload("res://data/sanctum/default_catalog.tres")
 const HAZARD_SCENES: Dictionary = {
 	&"split_crystal": preload("res://scenes/hazards/split_void_crystal.tscn"),
 	&"spike_bloom": preload("res://scenes/hazards/spike_bloom.tscn"),
@@ -25,6 +54,14 @@ const HAZARD_SCENES: Dictionary = {
 }
 const SOUL_SHARD_SCENE: PackedScene = preload("res://scenes/pickups/soul_shard_pickup.tscn")
 const REAPER_SCENE: PackedScene = preload("res://scenes/bosses/reaper_boss.tscn")
+## Boss variants keyed by `RiftData.boss_id`; every Rift resolves to one of these.
+const BOSS_VARIANTS: Dictionary = {
+	&"reaper": preload("res://data/bosses/reaper.tres"),
+	&"the_fracture": preload("res://data/bosses/the_fracture.tres"),
+	&"cinder_maw": preload("res://data/bosses/cinder_maw.tres"),
+	&"hollow_choir": preload("res://data/bosses/hollow_choir.tres"),
+	&"reaper_ascended": preload("res://data/bosses/reaper_ascended.tres"),
+}
 const DEATH_PULSE_TEXTURE: Texture2D = preload("res://assets/art/vfx/06_death_pulse.png")
 const COMBO_TIMEOUT: float = 2.2
 const TUTORIAL_ENDLESS_DELAY: float = 0.75
@@ -53,6 +90,16 @@ const HIT_STOP_TIME_SCALE: float = 0.08
 const ARENA_FLOOR_UV := Rect2(0.145, 0.255, 0.700, 0.515)
 ## The playfield never shrinks below this fraction of the viewport, whatever the aspect ratio.
 const ARENA_MIN_VIEWPORT_FRACTION := Vector2(0.70, 0.50)
+## The playfield is inset by this multiple of the Wisp's collision radius, so its sprite stays
+## visible at the wall. Defined once here and pushed down: it used to be repeated as a bare 1.35 in
+## the player, the tutorial chain and the safe-reform search, which could silently disagree.
+const LANDING_INSET: float = 1.35
+## Launch haptic: a crisp tick when a dash fires from rest or a wall. Redirects use a lighter one so
+## a fast chain feels rhythmic rather than buzzy.
+const LAUNCH_HAPTIC_MS: int = 18
+const LAUNCH_HAPTIC_AMPLITUDE: float = 0.6
+const REDIRECT_HAPTIC_MS: int = 10
+const REDIRECT_HAPTIC_AMPLITUDE: float = 0.4
 ## Design pixels the backdrop extends past the viewport so shake never reveals its edges.
 const BACKGROUND_OVERSCAN: float = 16.0
 ## HUD geometry in design pixels (1080-wide canvas), measured from the safe-area insets.
@@ -69,8 +116,6 @@ const HUD_FOCUS_TOP: float = 530.0
 const SHADE_CALM: Color = Color(Palette.VOID_CHARCOAL, 0.14)
 const SHADE_BOSS: Color = Color(Palette.VOID_CHARCOAL * 0.8 + Palette.RIFT_MAGENTA * 0.2, 0.5)
 const SHADE_VICTORY: Color = Color(Palette.SLATE_TEAL, 0.26)
-## Edge flash on wall impacts (friendly feedback, so soul cyan).
-const WALL_FLASH_COLOR: Color = Color(Palette.SOUL_CYAN, 0.9)
 
 ## Enables the integrated three-step lesson for this run.
 @export var tutorial_enabled: bool = true
@@ -107,10 +152,38 @@ var _rapid_redirect_dashes: Dictionary[int, bool] = {}
 var _link_remaining_by_event: Dictionary[int, int] = {}
 var _random := RandomNumberGenerator.new()
 var _callout_tween: Tween
-var _wall_flash_tween: Tween
 var _cosmetic_form: FormData
+var _rift: RiftData
+## Rule twist for the active Rift; `&"none"` is the unmodified Obsidian Garden baseline.
+var _rift_rule: StringName = &"none"
+## One-based level being played in the active Rift; each boss defeat advances it.
+var _rift_level: int = 1
+## Deepest level cleared this run, banked into the save through the run summary.
+var _rift_levels_cleared: int = 0
+## Waves between boss encounters; the Rift overrides the baseline cadence.
+var _boss_wave_interval: int = REAPER_WAVE_INTERVAL
+## Playfield contraction from the `shrinking_floor` rule; 1.0 is the full painted floor.
+var _arena_shrink: float = 1.0
+## The active Rift's painted floor in screen space. Empty means fall back to the rectangle.
+var _arena_polygon: PackedVector2Array = PackedVector2Array()
+## `_arena_polygon` inset by the Wisp's radius: the wall a dash actually lands on.
+var _landing_polygon: PackedVector2Array = PackedVector2Array()
+## Boss reward multiplier from the `boss_rush` rule.
+var _rift_reward_multiplier: float = 1.0
+## Permanent Soul Sanctum bonuses resolved once at run start; never changes mid-run.
+var _sanctum: SanctumEffects = SanctumEffects.new(null, {})
+## Combo grace extended by the Sanctum's Long Chain node.
+var _combo_timeout: float = COMBO_TIMEOUT
+## The Shattered Rift's linked portal sprites; empty in every other Rift.
+var _portals: Array[Sprite2D] = []
+## Dash id already teleported, so one dash can never loop between the pair.
+var _portal_used_dash_id: int = -1
 var _daily_date_key: String = ""
 var _vfx: VfxPool
+## Splash played where the Wisp hits a wall.
+var _wall_splash: WallSplashFx
+## Set between `dash_redirected` and the `dash_started` that follows it, to pick the lighter haptic.
+var _redirect_pending: bool = false
 var _settings_overlay: SettingsScreen
 var _confirm_action: StringName = &""
 var _dash_origin: Vector2 = Vector2.ZERO
@@ -128,7 +201,6 @@ var _reduced_motion: bool = false
 @onready var _player: WispPlayer = %WispPlayer
 @onready var _wave_director: WaveDirector = %WaveDirector
 @onready var _run_progression: RunProgression = %RunProgression
-@onready var _wall_flash: ColorRect = %WallFlash
 @onready var _world_shade: ColorRect = %WorldShade
 @onready var _health_row: HBoxContainer = %HealthRow
 @onready var _life_count: Label = %LifeCount
@@ -167,6 +239,7 @@ func _ready() -> void:
 	_random.seed = run_seed
 	get_viewport().size_changed.connect(_on_viewport_size_changed)
 	_player.dash_started.connect(_on_player_dash_started)
+	_player.dash_redirected.connect(_on_player_dash_redirected)
 	_player.dash_segment_swept.connect(_on_player_dash_segment_swept)
 	_player.wall_impacted.connect(_on_player_wall_impacted)
 	_player.obstacle_impacted.connect(_on_player_obstacle_impacted)
@@ -192,6 +265,12 @@ func _ready() -> void:
 	_vfx = VfxPool.new()
 	_vfx.name = "VfxPool"
 	_effects_layer.add_sibling(_vfx)
+	_wall_splash = WallSplashFx.new()
+	_wall_splash.name = "WallSplashFx"
+	# A persistent pool, so a sibling of EffectsLayer like VfxPool - EffectsLayer holds only the
+	# transient per-effect nodes (such as Death Pulse), and code counts on that.
+	_effects_layer.add_sibling(_wall_splash)
+	_wall_splash.setup(_vfx)
 	for button: Node in _upgrade_select.find_children("*", "BaseButton", true, false):
 		button.set_meta(SoundFx.SKIP_META, true)
 	var save_manager := get_node_or_null(^"/root/SaveManager") as SaveManagerService
@@ -199,8 +278,6 @@ func _ready() -> void:
 		_apply_feel_settings(save_manager.get_settings())
 		save_manager.settings_changed.connect(_apply_feel_settings)
 	_upgrade_select.visible = false
-	_wall_flash.visible = false
-	_wall_flash.color = WALL_FLASH_COLOR
 	_world_shade.color = SHADE_CALM
 	_combo_label.visible = false
 	_focus_label.visible = false
@@ -209,6 +286,12 @@ func _ready() -> void:
 	if _cosmetic_form != null:
 		_player.set_cosmetic_form(_cosmetic_form.texture, _cosmetic_form.tint)
 		_form_portrait.texture = _cosmetic_form.texture
+	_apply_rift()
+	_apply_sanctum()
+	# Clears per-run rewarded placement locks; a no-op on the shipped build (ADR-0009).
+	var monetisation := get_node_or_null(^"/root/Monetisation") as MonetisationService
+	if monetisation != null:
+		monetisation.begin_run()
 	_life_count.text = str(_player.get_current_health())
 	_shard_count.text = "0"
 	_layout_for_viewport()
@@ -315,7 +398,7 @@ func is_tutorial_complete() -> bool:
 
 ## Adds run XP through the same progression path as enemy rewards.
 func add_experience(amount: int) -> void:
-	_run_progression.add_experience(amount)
+	_grant_experience(amount)
 
 
 ## Returns the current run-only level for one mutation identifier.
@@ -324,12 +407,259 @@ func get_mutation_level(mutation_id: StringName) -> int:
 
 
 ## Supplies persistent cosmetic presentation and optional daily-run identity before play begins.
-func configure_run_profile(cosmetic_form: FormData, daily_date_key: String = "") -> void:
+func configure_run_profile(
+	cosmetic_form: FormData,
+	daily_date_key: String = "",
+	rift: RiftData = null,
+	rift_level: int = 1,
+	sanctum_levels: Dictionary = {},
+) -> void:
+	_sanctum = SanctumEffects.new(SANCTUM_CATALOG, sanctum_levels)
+	_combo_timeout = COMBO_TIMEOUT + _sanctum.get_value(&"combo_grace_bonus")
 	_cosmetic_form = cosmetic_form
 	_daily_date_key = daily_date_key
+	_rift = rift
+	_rift_level = maxi(1, rift_level)
 	if is_node_ready() and _cosmetic_form != null:
 		_player.set_cosmetic_form(_cosmetic_form.texture, _cosmetic_form.tint)
 		_form_portrait.texture = _cosmetic_form.texture
+	if is_node_ready():
+		_apply_rift()
+		_layout_for_viewport()
+
+
+## Swaps in the active Rift's backdrop and latches its rule twist.
+##
+## Every Rift background shares the arena's native size, so ARENA_FLOOR_UV stays valid and
+## _compute_arena_rect() derives the new playfield from the swapped texture automatically.
+func _apply_rift() -> void:
+	if _rift == null:
+		return
+	_rift_rule = _rift.rule_key
+	if _rift.background != null:
+		_background.texture = _rift.background
+	_boss_wave_interval = maxi(1, _rift.waves_per_level)
+	_rift_reward_multiplier = 1.0
+	_arena_shrink = 1.0
+	_build_portals()
+	# Reaper's Court trades twice the boss cadence for twice the boss payout.
+	if _rift_rule == &"boss_rush":
+		_boss_wave_interval = maxi(1, _rift.waves_per_level / 2)
+		_rift_reward_multiplier = BOSS_RUSH_REWARD_SCALE
+	# Frozen Choir: the Wisp never quite stands still between dashes.
+	_player.set_edge_drift(DRIFT_EDGE_SPEED if _rift_rule == &"drift" else 0.0)
+	_apply_rift_difficulty()
+
+
+## Creates or clears the Shattered Rift's linked portal pair.
+func _build_portals() -> void:
+	for portal: Sprite2D in _portals:
+		if is_instance_valid(portal):
+			portal.queue_free()
+	_portals.clear()
+	if _rift == null or _rift_rule != &"portals":
+		return
+	for texture: Texture2D in [PORTAL_ENTRANCE_TEXTURE, PORTAL_EXIT_TEXTURE]:
+		var portal := Sprite2D.new()
+		portal.texture = texture
+		portal.z_index = -1
+		_hazard_layer.add_child(portal)
+		_portals.append(portal)
+	_layout_portals()
+
+
+## Places the portal pair inside the current playfield and scales it to the viewport.
+func _layout_portals() -> void:
+	if _portals.size() != 2 or _arena_rect.size.x <= 0.0:
+		return
+	var scale_factor: float = _arena_rect.size.x / 1080.0
+	var uvs: Array[Vector2] = [PORTAL_A_UV, PORTAL_B_UV]
+	for index: int in _portals.size():
+		var portal: Sprite2D = _portals[index]
+		portal.global_position = _place_on_floor(
+			_arena_rect.position + uvs[index] * _arena_rect.size,
+			PORTAL_RADIUS * scale_factor * 1.4,
+		)
+		portal.scale = Vector2.ONE * (PORTAL_RADIUS * 2.4 / VFX_SOURCE_SIZE) * scale_factor
+
+
+## Teleports a dash that crosses one portal to its pair, once per dash.
+##
+## Returns true when the dash was moved, so the caller stops applying this segment: everything
+## beyond the portal mouth belongs to the new segment emitted from the exit.
+func _try_portal_transit(segment_start: Vector2, segment_end: Vector2, dash_id: int) -> bool:
+	if _portals.size() != 2 or dash_id == _portal_used_dash_id:
+		return false
+	var radius: float = PORTAL_RADIUS * (_arena_rect.size.x / 1080.0)
+	for index: int in _portals.size():
+		var portal: Sprite2D = _portals[index]
+		if not is_instance_valid(portal):
+			continue
+		if DashGeometry.distance_to_segment(
+			portal.global_position, segment_start, segment_end
+		) > radius:
+			continue
+		var exit_portal: Sprite2D = _portals[1 - index]
+		if not is_instance_valid(exit_portal):
+			continue
+		# Leave the exit mouth immediately so the pair cannot swallow the dash again.
+		var direction: Vector2 = (segment_end - segment_start).normalized()
+		var exit_point: Vector2 = exit_portal.global_position + direction * (radius * 1.15)
+		if _player.teleport_dash_to(exit_point):
+			_portal_used_dash_id = dash_id
+			var flare: float = radius * 3.0 / VFX_SOURCE_SIZE
+			_vfx.play(
+				PORTAL_ENTRANCE_TEXTURE,
+				portal.global_position,
+				0.0,
+				Vector2.ONE * flare,
+				Vector2.ONE * flare * 1.7,
+				0.24,
+				Color(Palette.SOUL_CYAN, 0.9),
+			)
+			_vfx.play(
+				PORTAL_EXIT_TEXTURE,
+				exit_portal.global_position,
+				0.0,
+				Vector2.ONE * flare * 1.7,
+				Vector2.ONE * flare,
+				0.24,
+				Color(Palette.RIFT_MAGENTA, 0.9),
+			)
+			SoundFx.play(&"dash")
+			return true
+	return false
+
+
+## Applies per-wave rule effects for the active Rift.
+##
+## Only `shrinking_floor` varies within a level; the other rules are latched once at run start.
+func _update_rift_rules(wave: int) -> void:
+	if _rift == null or _rift_rule != &"shrinking_floor":
+		return
+	# Contract smoothly across the level, then reset when the next level's first wave begins.
+	var step: int = posmod(wave - 1, maxi(1, _boss_wave_interval))
+	var progress: float = float(step) / float(maxi(1, _boss_wave_interval))
+	var shrink: float = lerpf(1.0, SHRINK_FLOOR_MINIMUM, progress)
+	if is_equal_approx(shrink, _arena_shrink):
+		return
+	_arena_shrink = shrink
+	_layout_for_viewport()
+
+
+## Applies permanent Soul Sanctum bonuses once, before the first wave.
+##
+## Only additive, run-start effects live here. Anything that would mutate a shared tuning Resource
+## is applied as a runtime field on the player instead, so the .tres on disk is never changed.
+func _apply_sanctum() -> void:
+	var bonus_health: int = _sanctum.get_count(&"bonus_max_health")
+	if bonus_health > 0:
+		_player.increase_maximum_health(bonus_health, bonus_health)
+	var invulnerability: float = _sanctum.get_value(&"invulnerability_bonus")
+	if invulnerability > 0.0:
+		_player.set_bonus_invulnerability(invulnerability)
+	_update_player_mutation_stats()
+	_update_pickup_attraction()
+	var starting: int = _sanctum.get_count(&"starting_mutations")
+	for index: int in starting:
+		_run_progression.grant_random_mutation()
+	_update_player_mutation_stats()
+
+
+## Pushes the current Rift and level difficulty into the wave director and live enemies.
+##
+## Called at run start and again after every boss defeat, because clearing a level raises the
+## threat multiplier for the rest of the run.
+func _apply_rift_difficulty() -> void:
+	if _rift == null:
+		return
+	_wave_director.set_rift_threat_multiplier(_rift.get_threat_multiplier(_rift_level))
+
+
+## Boss variant for the active Rift, falling back to the Reaper for unknown ids.
+func _get_boss_variant() -> BossData:
+	var id: StringName = _rift.boss_id if _rift != null else &"reaper"
+	if not BOSS_VARIANTS.has(id):
+		push_warning("Unknown boss id %s; falling back to the Reaper" % id)
+		id = &"reaper"
+	return BOSS_VARIANTS[id] as BossData
+
+
+## Waves between boss encounters in the active Rift.
+func get_boss_wave_interval() -> int:
+	return _boss_wave_interval
+
+
+## Current playfield contraction from the `shrinking_floor` rule; 1.0 is the full floor.
+func get_arena_shrink() -> float:
+	return _arena_shrink
+
+
+## Boss reward multiplier from the `boss_rush` rule.
+func get_reward_multiplier() -> float:
+	return _rift_reward_multiplier
+
+
+## World positions of the active Rift's portal pair; empty when the Rift has none.
+func get_portal_positions() -> PackedVector2Array:
+	var points := PackedVector2Array()
+	for portal: Sprite2D in _portals:
+		if is_instance_valid(portal):
+			points.append(portal.global_position)
+	return points
+
+
+## The active Rift's painted floor in screen space; empty when running on the legacy rectangle.
+func get_arena_polygon() -> PackedVector2Array:
+	return _arena_polygon
+
+
+## The floor inset by the Wisp's radius — the wall a dash lands on, and where the Wisp may rest.
+func get_landing_polygon() -> PackedVector2Array:
+	return _landing_polygon
+
+
+## The wall splash effect node, for tests.
+func get_wall_splash_fx() -> WallSplashFx:
+	return _wall_splash
+
+
+## Live playfield rectangle, for tests and layout checks.
+func get_arena_rect() -> Rect2:
+	return _arena_rect
+
+
+## Test hook: stops wave spawning and clears the arena, so a test starts from an empty playfield.
+func debug_quiet_arena() -> void:
+	_wave_director.suspend_for_boss()
+	_clear_enemies()
+	_clear_hazards()
+
+
+## Test hook: spawns one enemy of an exact kind, bypassing the Rift roster remap.
+func debug_spawn_enemy(kind: StringName, world_position: Vector2) -> EnemyActor:
+	if not ENEMY_SCENES.has(kind):
+		return null
+	return _spawn_enemy(kind, world_position, false, false)
+
+
+## Live enemies currently tracked by the wave accounting.
+func debug_live_enemy_count() -> int:
+	return _remaining_live_enemies
+
+
+## Enemies actually present in the enemy layer.
+func debug_enemy_layer_count() -> int:
+	var total: int = 0
+	for child: Node in _enemy_layer.get_children():
+		if child is EnemyActor:
+			total += 1
+	return total
+
+
+## Test hook: applies the per-wave rule effects for an arbitrary wave without waiting for it.
+func debug_apply_rift_rules(wave: int) -> void:
+	_update_rift_rules(wave)
 
 
 ## Handles Android back and Escape: closes the topmost overlay, otherwise toggles pause.
@@ -392,15 +722,25 @@ func _layout_for_viewport() -> void:
 		backdrop.offset_top = -BACKGROUND_OVERSCAN
 		backdrop.offset_right = BACKGROUND_OVERSCAN
 		backdrop.offset_bottom = BACKGROUND_OVERSCAN
+	# The rect stays the design-pixel scale and the distribution domain; the polygon is the wall.
 	_player.set_arena_rect(_arena_rect)
+	_arena_polygon = _compute_arena_polygon()
+	_landing_polygon = DashGeometry.inset_polygon(
+		_arena_polygon, _player.get_collision_radius() * LANDING_INSET
+	)
+	_player.set_arena_polygon(_landing_polygon)
 	for child: Node in _enemy_layer.get_children():
 		if child is EnemyActor:
-			(child as EnemyActor).set_arena_rect(_arena_rect)
+			var enemy := child as EnemyActor
+			enemy.set_arena_rect(_arena_rect)
+			enemy.set_arena_polygon(_arena_polygon)
 	for child: Node in _hazard_layer.get_children():
 		if child is HazardActor:
 			(child as HazardActor).set_viewport_width(_arena_rect.size.x)
 	if is_instance_valid(_boss):
 		_boss.set_arena_rect(_arena_rect)
+		_boss.set_arena_polygon(_arena_polygon)
+	_layout_portals()
 	_update_pickup_attraction()
 	_layout_safe_hud()
 
@@ -439,19 +779,98 @@ func _layout_safe_hud() -> void:
 
 
 ## Maps the painted floor of the cover-scaled backdrop into screen space and keeps it on screen.
+## Screen-space rectangle the cover-scaled backdrop image occupies.
+##
+## Shared by the legacy floor rect and the Rift floor polygon so both are mapped through exactly
+## the same transform; if they diverged, the wall and the art would disagree.
+func _backdrop_image_rect() -> Rect2:
+	var view: Rect2 = get_viewport_rect()
+	var texture: Texture2D = _background.texture
+	if texture == null or texture.get_size().x <= 0.0 or texture.get_size().y <= 0.0:
+		return view
+	var texture_size: Vector2 = texture.get_size()
+	var cover: float = maxf(view.size.x / texture_size.x, view.size.y / texture_size.y)
+	var image_size: Vector2 = texture_size * cover
+	return Rect2(view.position + (view.size - image_size) * 0.5, image_size)
+
+
+## Moves a point that should be on the floor onto the painted floor, [param margin] px clear.
+##
+## Formations, hazards and portals are authored in a unit square and mapped over the bounding
+## rect, which is correct as a distribution domain but puts corner positions in the lava on an oval
+## arena. Every placement routes through here so the rect stays the domain and the polygon decides
+## legality. A no-op on the legacy rectangle.
+func _place_on_floor(point: Vector2, margin: float = 0.0) -> Vector2:
+	if _arena_polygon.size() < 3:
+		return point
+	if DashGeometry.is_inside_polygon(point, _arena_polygon):
+		var boundary: Vector2 = DashGeometry.nearest_polygon_point(point, _arena_polygon)
+		if point.distance_to(boundary) >= margin:
+			return point
+	return DashGeometry.clamp_to_polygon(point, _arena_polygon, margin)
+
+
+## Clearance kept between a placed enemy and the painted wall, in screen pixels.
+func _floor_margin() -> float:
+	return maxf(12.0, _player.get_collision_radius() * 1.2)
+
+
+## Points on the wall the Wisp may reform at after a hit, before threat scoring picks one.
+##
+## On a polygon floor these are sampled ON the landing polygon. Scoring rectangle points and then
+## projecting the winner onto the polygon would move it somewhere the clearance search never
+## measured - potentially right next to the threat it was chosen to avoid.
+func _get_reform_candidates() -> Array[Vector2]:
+	var candidates: Array[Vector2] = []
+	if _landing_polygon.size() >= 3:
+		var count: int = _landing_polygon.size()
+		for index: int in count:
+			var start: Vector2 = _landing_polygon[index]
+			var end: Vector2 = _landing_polygon[(index + 1) % count]
+			candidates.append(start)
+			candidates.append((start + end) * 0.5)
+		return candidates
+	var bounds: Rect2 = _arena_rect.grow(-_player.get_collision_radius() * LANDING_INSET)
+	for progress: float in [0.14, 0.5, 0.86]:
+		candidates.append(Vector2(lerpf(bounds.position.x, bounds.end.x, progress), bounds.position.y))
+		candidates.append(Vector2(lerpf(bounds.position.x, bounds.end.x, progress), bounds.end.y))
+		candidates.append(Vector2(bounds.position.x, lerpf(bounds.position.y, bounds.end.y, progress)))
+		candidates.append(Vector2(bounds.end.x, lerpf(bounds.position.y, bounds.end.y, progress)))
+	return candidates
+
+
+## The active Rift's painted floor in screen space, contracted by the current shrink.
+func _compute_arena_polygon() -> PackedVector2Array:
+	if _rift == null or not _rift.has_floor_polygon():
+		return PackedVector2Array()
+	var polygon: PackedVector2Array = DashGeometry.polygon_from_uv(
+		_rift.floor_polygon, _backdrop_image_rect()
+	)
+	if is_equal_approx(_arena_shrink, 1.0):
+		return polygon
+	# Ember Hollow's floor burns away; scale about the centroid so the shape is preserved.
+	var centre: Vector2 = DashGeometry.polygon_centroid(polygon)
+	var scaled := PackedVector2Array()
+	for point: Vector2 in polygon:
+		scaled.append(centre + (point - centre) * _arena_shrink)
+	return scaled
+
+
 func _compute_arena_rect() -> Rect2:
 	var view: Rect2 = get_viewport_rect()
 	var texture: Texture2D = _background.texture
 	var rect: Rect2 = view
 	if texture != null and texture.get_size().x > 0.0 and texture.get_size().y > 0.0:
-		var texture_size: Vector2 = texture.get_size()
-		var cover: float = maxf(view.size.x / texture_size.x, view.size.y / texture_size.y)
-		var image_size: Vector2 = texture_size * cover
-		var image_origin: Vector2 = view.position + (view.size - image_size) * 0.5
+		var image: Rect2 = _backdrop_image_rect()
 		rect = Rect2(
-			image_origin + ARENA_FLOOR_UV.position * image_size,
-			ARENA_FLOOR_UV.size * image_size,
+			image.position + ARENA_FLOOR_UV.position * image.size,
+			ARENA_FLOOR_UV.size * image.size,
 		)
+	# Ember Hollow's floor burns away: contract around the centre, before the safety floor below.
+	if not is_equal_approx(_arena_shrink, 1.0):
+		var centre: Vector2 = rect.get_center()
+		rect.size *= _arena_shrink
+		rect.position = centre - rect.size * 0.5
 	var minimum: Vector2 = view.size * ARENA_MIN_VIEWPORT_FRACTION
 	rect.size = rect.size.max(minimum)
 	rect.position = rect.position.clamp(view.position, view.end - rect.size)
@@ -540,13 +959,16 @@ func _on_wave_started(wave: int, threat_budget: int) -> void:
 	_current_wave = wave
 	_update_music_state()
 	_clear_hazards()
-	if wave >= REAPER_WAVE_INTERVAL and wave % REAPER_WAVE_INTERVAL == 0:
+	if wave >= _boss_wave_interval and wave % _boss_wave_interval == 0:
 		_wave_director.suspend_for_boss()
 		_boss_pending = true
-		_wave_label.text = "RIFT %02d  •  REAPER APPROACHING" % wave
+		_wave_label.text = "LEVEL %d  •  REAPER APPROACHING" % _rift_level
 		_show_callout("THE REAPER APPROACHES")
 		return
-	_wave_label.text = "RIFT %02d  •  THREAT %02d" % [wave, threat_budget]
+	_update_rift_rules(wave)
+	_wave_label.text = "LEVEL %d  •  WAVE %02d  •  THREAT %02d" % [
+		_rift_level, wave, threat_budget,
+	]
 	if wave > 1:
 		_show_callout("RIFT %02d" % wave)
 
@@ -558,11 +980,14 @@ func _start_boss_encounter() -> void:
 	_clear_enemies()
 	_clear_hazards()
 	_boss = REAPER_SCENE.instantiate() as ReaperBoss
+	var variant: BossData = _get_boss_variant()
 	_boss_layer.add_child(_boss)
+	_boss.configure_variant(variant)
 	_boss.health_changed.connect(_on_reaper_health_changed)
 	_boss.phase_changed.connect(_on_reaper_phase_changed)
 	_boss.summon_requested.connect(_on_reaper_summon_requested)
 	_boss.defeated.connect(_on_reaper_defeated)
+	_boss.set_arena_polygon(_arena_polygon)
 	_boss.configure(
 		_arena_rect,
 		_player.global_position,
@@ -571,8 +996,8 @@ func _start_boss_encounter() -> void:
 	)
 	_world_shade.color = SHADE_BOSS
 	_boss_hud.visible = true
-	_boss_warning.text = "THE REAPER"
-	_show_callout("THE REAPER")
+	_boss_warning.text = variant.display_name
+	_show_callout(variant.display_name)
 	SoundFx.play(&"reaper_appear")
 	_update_music_state()
 
@@ -620,14 +1045,18 @@ func _on_reaper_defeated(
 	_boss = null
 	_bosses_defeated += 1
 	_update_music_state()
-	_score += _apply_velocity_score_bonus(score_reward)
+	_score += _apply_velocity_score_bonus(roundi(float(score_reward) * _rift_reward_multiplier))
 	_score_label.text = "%06d" % _score
-	_award_soul_shards(shard_reward)
-	_run_progression.add_experience(experience_reward)
+	_award_soul_shards(roundi(float(shard_reward) * _rift_reward_multiplier))
+	_grant_experience(experience_reward)
 	_clear_enemies()
 	_clear_hazards()
 	_boss_hud.visible = false
-	_wave_label.text = "REAPER VANQUISHED  •  RIFT DEEPENS"
+	_rift_levels_cleared = maxi(_rift_levels_cleared, _rift_level)
+	if _rift != null and _rift_level < _rift.level_count:
+		_rift_level += 1
+	_apply_rift_difficulty()
+	_wave_label.text = "LEVEL %d CLEARED  •  RIFT DEEPENS" % _rift_levels_cleared
 	_world_shade.color = SHADE_VICTORY
 	_player.play_victory(victory_duration)
 	_post_boss_remaining = victory_duration
@@ -647,7 +1076,10 @@ func _on_formation_requested(
 	)
 	for index: int in formation.enemy_kinds.size():
 		var world_position: Vector2 = _arena_rect.position + _arena_rect.size * positions[index]
-		_spawn_enemy(formation.enemy_kinds[index], _ensure_spawn_clear(world_position), true)
+		var placed: Vector2 = _place_on_floor(
+			_ensure_spawn_clear(world_position), _floor_margin()
+		)
+		_spawn_enemy(formation.enemy_kinds[index], placed, true)
 	if not formation.hazard_kind.is_empty():
 		var hazard_normalized: Vector2 = formation.get_transformed_hazard_position(
 			mirrored,
@@ -655,7 +1087,9 @@ func _on_formation_requested(
 		)
 		_spawn_hazard(
 			formation.hazard_kind,
-			_arena_rect.position + _arena_rect.size * hazard_normalized,
+			_place_on_floor(
+				_arena_rect.position + _arena_rect.size * hazard_normalized, _floor_margin() * 2.0
+			),
 		)
 
 
@@ -668,27 +1102,68 @@ func _ensure_spawn_clear(world_position: Vector2) -> Vector2:
 	var opposite: Vector2 = _arena_rect.position + _arena_rect.size - (
 		world_position - _arena_rect.position
 	)
-	return opposite
+	return _place_on_floor(opposite, _floor_margin())
 
 
+## Spawns one enemy, optionally remapped onto the active Rift's roster.
+##
+## `apply_rift_roster` must be false for split children: the roster remap is what turns a harmless
+## `split_kind` into a splitter. In Ember Hollow `soul_wisp` maps to `cinder_shade`, whose own
+## `split_kind` is `soul_wisp` — remapping a child there spawns two more splitters per death, which
+## is an unbounded chain reaction.
 func _spawn_enemy(
 		kind: StringName,
 		world_position: Vector2,
 		movement_enabled: bool,
+		apply_rift_roster: bool = true,
 	) -> EnemyActor:
-	assert(ENEMY_SCENES.has(kind), "Unknown enemy kind: %s" % kind)
-	var scene := ENEMY_SCENES[kind] as PackedScene
+	var resolved: StringName = kind
+	if apply_rift_roster and _rift != null:
+		resolved = _rift.substitute_enemy(kind)
+	assert(ENEMY_SCENES.has(resolved), "Unknown enemy kind: %s" % resolved)
+	var scene := ENEMY_SCENES[resolved] as PackedScene
 	var enemy := scene.instantiate() as EnemyActor
 	enemy.movement_enabled = movement_enabled
 	_enemy_layer.add_child(enemy)
 	enemy.global_position = world_position
 	enemy.set_arena_rect(_arena_rect)
+	enemy.set_arena_polygon(_arena_polygon)
 	enemy.set_target_position(_player.global_position)
 	enemy.set_last_edge_position(_player.global_position)
 	enemy.set_world_speed(0.32 if _focus_remaining > 0.0 else 1.0)
 	enemy.killed.connect(_on_enemy_killed)
 	_remaining_live_enemies += 1
 	return enemy
+
+
+## Spawns a splitter's children around its death point, clamped inside the playfield.
+##
+## Children are spawned with the Rift roster remap DISABLED, so `split_kind` is taken literally and
+## a split can never produce another splitter. `test_rift_enemies.gd` also asserts that no Rift maps
+## a `split_kind` onto a splitting enemy, so the invariant is checked from both directions.
+func _spawn_split_children(enemy: EnemyActor, world_position: Vector2) -> void:
+	if enemy == null or enemy.tuning == null:
+		return
+	var kind: StringName = enemy.tuning.split_kind
+	var count: int = enemy.tuning.split_count
+	if kind.is_empty() or count <= 0 or not ENEMY_SCENES.has(kind):
+		return
+	if _run_over or _boss_pending:
+		return
+	# Safety net independent of the invariant above, so a data mistake degrades instead of hanging.
+	if _remaining_live_enemies >= MAX_LIVE_ENEMIES:
+		return
+	var spread: float = SPLIT_SPREAD * (_arena_rect.size.x / 1080.0)
+	for index: int in count:
+		var angle: float = TAU * (float(index) / float(count)) + randf() * 0.4
+		var offset: Vector2 = Vector2.RIGHT.rotated(angle) * spread
+		var spawn_point: Vector2 = _arena_rect.position + Vector2(
+			clampf(world_position.x + offset.x - _arena_rect.position.x, 0.0, _arena_rect.size.x),
+			clampf(world_position.y + offset.y - _arena_rect.position.y, 0.0, _arena_rect.size.y),
+		)
+		spawn_point = _place_on_floor(spawn_point, _floor_margin())
+		var child: EnemyActor = _spawn_enemy(kind, spawn_point, true, false)
+		child.scale = Vector2.ONE * enemy.tuning.split_scale
 
 
 func _spawn_hazard(kind: StringName, world_position: Vector2) -> HazardActor:
@@ -708,13 +1183,19 @@ func _spawn_single_tutorial_target() -> void:
 
 
 func _spawn_tutorial_chain() -> void:
-	var bounds: Rect2 = _arena_rect.grow(-_player.get_collision_radius() * 1.35)
-	var direction: Vector2 = (bounds.get_center() - _player.global_position).normalized()
-	var far_edge: Vector2 = DashGeometry.ray_to_rect_edge(
-		_player.global_position,
-		direction,
-		bounds,
-	)
+	var far_edge: Vector2
+	if _landing_polygon.size() >= 3:
+		# Aim across the floor and cast on the landing polygon, so the lesson's third target never
+		# sits past the point the dash will really stop at.
+		var centre: Vector2 = DashGeometry.polygon_centroid(_landing_polygon)
+		var aim: Vector2 = (centre - _player.global_position).normalized()
+		far_edge = DashGeometry.ray_to_polygon_edge(
+			_player.global_position, aim, _landing_polygon, 2.0
+		)
+	else:
+		var bounds: Rect2 = _arena_rect.grow(-_player.get_collision_radius() * LANDING_INSET)
+		var direction: Vector2 = (bounds.get_center() - _player.global_position).normalized()
+		far_edge = DashGeometry.ray_to_rect_edge(_player.global_position, direction, bounds)
 	for progress: float in [0.27, 0.5, 0.73]:
 		_spawn_enemy(&"soul_wisp", _player.global_position.lerp(far_edge, progress), false)
 	print("[Tutorial] lesson 3 chain spawned")
@@ -790,13 +1271,7 @@ func _check_world_contacts() -> void:
 
 
 func _find_safest_edge_position() -> Vector2:
-	var bounds: Rect2 = _arena_rect.grow(-_player.get_collision_radius() * 1.35)
-	var candidates: Array[Vector2] = []
-	for progress: float in [0.14, 0.5, 0.86]:
-		candidates.append(Vector2(lerpf(bounds.position.x, bounds.end.x, progress), bounds.position.y))
-		candidates.append(Vector2(lerpf(bounds.position.x, bounds.end.x, progress), bounds.end.y))
-		candidates.append(Vector2(bounds.position.x, lerpf(bounds.position.y, bounds.end.y, progress)))
-		candidates.append(Vector2(bounds.end.x, lerpf(bounds.position.y, bounds.end.y, progress)))
+	var candidates: Array[Vector2] = _get_reform_candidates()
 	var safest_position: Vector2 = candidates[0]
 	var safest_clearance_squared: float = -1.0
 	for candidate: Vector2 in candidates:
@@ -873,11 +1348,18 @@ func _on_player_dash_started(direction: Vector2, dash_id: int) -> void:
 	_dash_origin = _player.global_position
 	_dash_direction = direction.normalized() if not direction.is_zero_approx() else Vector2.RIGHT
 	SoundFx.play(&"dash")
-	Haptics.pulse(Haptics.LIGHT_MS, 0.35)
+	var from_redirect: bool = _redirect_pending
+	_redirect_pending = false
+	if from_redirect:
+		Haptics.pulse(REDIRECT_HAPTIC_MS, REDIRECT_HAPTIC_AMPLITUDE)
+	else:
+		Haptics.pulse(LAUNCH_HAPTIC_MS, LAUNCH_HAPTIC_AMPLITUDE)
 	_play_dash_trail()
 	if is_instance_valid(_boss):
 		_boss.skip_intro()
-	if _last_wall_impact_msec >= 0:
+	# Only a launch off a wall counts as a rapid ricochet. A redirect never touches a wall, so without
+	# this guard every mid-air leg within the window scored it again and inflated the Trials metric.
+	if not from_redirect and _last_wall_impact_msec >= 0:
 		var elapsed_msec: int = Time.get_ticks_msec() - _last_wall_impact_msec
 		if elapsed_msec <= RAPID_REDIRECT_WINDOW_MSEC:
 			_rapid_redirect_dashes[dash_id] = true
@@ -889,6 +1371,15 @@ func _on_player_dash_started(direction: Vector2, dash_id: int) -> void:
 		instruction_tween.tween_property(_instruction_label, "modulate:a", 0.0, 0.45)
 
 
+## A swipe turned the dash mid-flight: score the leg that ended without touching a wall.
+##
+## Without this the first leg's kills would sit in `_kills_by_dash` forever - never counted toward a
+## multi-kill, never cleared - because only a wall impact resolves a dash.
+func _on_player_dash_redirected(_world_position: Vector2, previous_dash_id: int) -> void:
+	_redirect_pending = true
+	_resolve_completed_dash(previous_dash_id, true)
+
+
 func _on_player_dash_segment_swept(
 		segment_start: Vector2,
 		segment_end: Vector2,
@@ -896,6 +1387,14 @@ func _on_player_dash_segment_swept(
 		corridor_radius: float,
 	) -> void:
 	if _run_over:
+		return
+	# Track the TRUE travel direction from the swept motion itself. Redirects and windup retargets
+	# change heading without a new `dash_started`, and slice/trail effects orient from this.
+	var travel: Vector2 = segment_end - segment_start
+	if travel.length_squared() > 0.01:
+		_dash_direction = travel.normalized()
+	# Portals consume the rest of this segment; the exit emits its own segments from next frame.
+	if _try_portal_transit(segment_start, segment_end, dash_id):
 		return
 	var hazard_event: Dictionary = _find_dash_hazard_event(segment_start, segment_end)
 	var hit_end: Vector2 = hazard_event.get(&"point", segment_end)
@@ -1056,6 +1555,7 @@ func _segment_lane_entry_t(
 	) -> float:
 	if DashGeometry.distance_to_segment(segment_start, lane_start, lane_end) <= radius:
 		return 0.0
+	var length: float = maxf(segment_start.distance_to(segment_end), 0.001)
 	var intersection: Variant = Geometry2D.segment_intersects_segment(
 		segment_start,
 		segment_end,
@@ -1063,12 +1563,18 @@ func _segment_lane_entry_t(
 		lane_end,
 	)
 	if intersection is Vector2:
-		return segment_start.distance_to(intersection as Vector2) / maxf(
-			segment_start.distance_to(segment_end),
-			0.001,
-		)
-	if DashGeometry.distance_to_segment(segment_end, lane_start, lane_end) <= radius:
-		return 1.0
+		return segment_start.distance_to(intersection as Vector2) / length
+	# True segment-to-segment closest approach. Testing only the start, the end and an exact crossing
+	# misses a dash that passes within the corridor radius near a lane's END without crossing it -
+	# and faster dashes (launch burst, momentum) make that gap far easier to slip through.
+	var closest: PackedVector2Array = Geometry2D.get_closest_points_between_segments(
+		segment_start,
+		segment_end,
+		lane_start,
+		lane_end,
+	)
+	if closest[0].distance_to(closest[1]) <= radius:
+		return segment_start.distance_to(closest[0]) / length
 	return INF
 
 
@@ -1077,7 +1583,6 @@ func _on_player_wall_impacted(
 		inward_normal: Vector2,
 		dash_id: int,
 	) -> void:
-	_play_wall_flash(world_position, inward_normal)
 	_last_wall_impact_msec = Time.get_ticks_msec()
 	for child: Node in _enemy_layer.get_children():
 		if child is EnemyActor:
@@ -1085,6 +1590,7 @@ func _on_player_wall_impacted(
 	if is_instance_valid(_boss):
 		_boss.set_last_edge_position(world_position)
 	var dash_kills: int = _resolve_completed_dash(dash_id)
+	_play_wall_splash(world_position, inward_normal, dash_kills)
 	_play_impact_feedback(world_position, inward_normal, dash_kills)
 	_release_death_pulse(world_position, dash_id)
 	_advance_tutorial_after_impact(dash_kills)
@@ -1101,11 +1607,13 @@ func _on_player_obstacle_impacted(
 	add_trauma(0.35)
 
 
-func _resolve_completed_dash(dash_id: int) -> int:
+func _resolve_completed_dash(dash_id: int, from_redirect: bool = false) -> int:
 	var dash_kills: int = _kills_by_dash.get(dash_id, 0)
 	_kills_by_dash.erase(dash_id)
 	_link_remaining_by_event.erase(dash_id)
-	if dash_kills == 0 and _combo > 0:
+	# An empty WALL dash wastes the combo window. An empty redirect leg is a deliberate turn in open
+	# floor; decaying the combo for each one would punish exactly the fast play redirect exists for.
+	if dash_kills == 0 and _combo > 0 and not from_redirect:
 		_combo_remaining *= 0.72
 	if dash_kills >= 2:
 		_multi_kill_dashes += 1
@@ -1213,15 +1721,16 @@ func _on_enemy_killed(
 	_highest_combo = maxi(_highest_combo, _combo)
 	_total_kills += 1
 	_kill_streak += 1
-	_combo_remaining = COMBO_TIMEOUT
+	_combo_remaining = _combo_timeout
 	_score += _apply_velocity_score_bonus(score_reward * _combo)
 	if damage_event_id > 0:
 		_kills_by_dash[damage_event_id] = _kills_by_dash.get(damage_event_id, 0) + 1
 	_remaining_live_enemies = maxi(0, _remaining_live_enemies - 1)
+	_spawn_split_children(enemy, world_position)
 	SoundFx.multi_kill(int(_kills_by_dash.get(damage_event_id, 1)) if damage_event_id > 0 else 1)
 	_play_kill_effects(world_position)
 	_update_music_state()
-	_run_progression.add_experience(experience_reward)
+	_grant_experience(experience_reward)
 	_score_label.text = "%06d" % _score
 	_combo_label.text = "×%d SOUL CHAIN" % _combo
 	_style_callout(false)
@@ -1287,19 +1796,31 @@ func _on_soul_shard_collected(amount: int) -> void:
 	SoundFx.play(&"shard_pickup")
 
 
+## Adds run XP with the Sanctum's Rift Scholar bonus applied. Every XP award goes through here.
+func _grant_experience(amount: int) -> void:
+	if amount <= 0:
+		return
+	_run_progression.add_experience(
+		maxi(1, roundi(float(amount) * _sanctum.get_multiplier(&"experience_bonus")))
+	)
+
+
 func _award_soul_shards(amount: int) -> void:
 	if amount <= 0:
 		return
-	_soul_shards += amount
+	# Shard Finder is applied here, the one place every shard award passes through.
+	var granted: int = maxi(1, roundi(float(amount) * _sanctum.get_multiplier(&"shard_find_bonus")))
+	_soul_shards += granted
 	_shard_count.text = str(_soul_shards)
 
 
 func _get_shard_attraction_radius() -> float:
+	var magnet: float = _sanctum.get_multiplier(&"attraction_bonus")
 	var hunger_level: int = _run_progression.get_mutation_level(&"soul_hunger")
 	return (
 		_run_progression.tuning.shard_attraction_radius
 		+ float(hunger_level) * _run_progression.tuning.hunger_attraction_per_level
-	)
+	) * magnet
 
 
 func _update_pickup_attraction() -> void:
@@ -1374,8 +1895,10 @@ func _update_player_mutation_stats() -> void:
 	var velocity_level: int = _run_progression.get_mutation_level(&"void_velocity")
 	_player.set_run_combat_modifiers(
 		1 + hunger_level,
-		1.0 + float(wide_level) * _run_progression.tuning.wide_reap_per_level,
-		1.0 + float(velocity_level) * _run_progression.tuning.velocity_per_level,
+		(1.0 + float(wide_level) * _run_progression.tuning.wide_reap_per_level)
+			* _sanctum.get_multiplier(&"blade_width_bonus"),
+		(1.0 + float(velocity_level) * _run_progression.tuning.velocity_per_level)
+			* _sanctum.get_multiplier(&"dash_speed_bonus"),
 	)
 
 
@@ -1417,6 +1940,10 @@ func _on_player_died() -> void:
 		&"run_level": _run_progression.get_run_level(),
 		&"daily_date": _daily_date_key,
 		&"is_daily": not _daily_date_key.is_empty(),
+		&"rift": String(_rift.rift_id) if _rift != null else "obsidian_garden",
+		&"rift_rule": String(_rift_rule),
+		&"rift_level": _rift_level,
+		&"rift_levels_cleared": _rift_levels_cleared,
 	}
 	print(
 		"[GameWorld] run ended | score=%d kills=%d wave=%d shards=%d"
@@ -1448,30 +1975,18 @@ func _style_callout(is_reward: bool) -> void:
 	_combo_label.theme_type_variation = &"AmberValueLabel" if is_reward else &"TitleLabel"
 
 
-func _play_wall_flash(world_position: Vector2, inward_normal: Vector2) -> void:
-	if _wall_flash_tween != null and _wall_flash_tween.is_valid():
-		_wall_flash_tween.kill()
-	var thickness: float = clampf(_arena_rect.size.x * 0.016, 8.0, 22.0)
-	if absf(inward_normal.x) > 0.5:
-		_wall_flash.size = Vector2(thickness, _arena_rect.size.y)
-		_wall_flash.position = Vector2(
-			_arena_rect.position.x if inward_normal.x > 0.0 else _arena_rect.end.x - thickness,
-			_arena_rect.position.y,
-		)
-	else:
-		_wall_flash.size = Vector2(_arena_rect.size.x, thickness)
-		_wall_flash.position = Vector2(
-			_arena_rect.position.x,
-			_arena_rect.position.y if inward_normal.y > 0.0 else _arena_rect.end.y - thickness,
-		)
-	_wall_flash.visible = true
-	_wall_flash.modulate.a = 0.5 if _reduced_motion else 0.95
-	_wall_flash_tween = create_tween()
-	_wall_flash_tween.tween_property(_wall_flash, "modulate:a", 0.0, 0.18).set_trans(
-		Tween.TRANS_QUAD
-	).set_ease(Tween.EASE_OUT)
-	_wall_flash_tween.tween_callback(func() -> void: _wall_flash.visible = false)
-	print("[GameWorld] wall impact | position=%s normal=%s" % [world_position, inward_normal])
+## Plays the splash where the Wisp hit the wall. No wall highlight: the effect lives only at impact.
+func _play_wall_splash(world_position: Vector2, inward_normal: Vector2, dash_kills: int) -> void:
+	_wall_splash.play(
+		world_position,
+		inward_normal,
+		1.0 + 0.35 * float(mini(dash_kills, 4)),
+		_get_form_tint(),
+		_arena_rect.size.x,
+		_reduced_motion,
+		# The Wisp's centre rests LANDING_INSET radii from the wall; this lands the splash on it.
+		_player.get_collision_radius() * (LANDING_INSET - 0.1),
+	)
 
 
 func _set_paused(paused: bool) -> void:
@@ -1569,6 +2084,7 @@ func _close_settings_overlay() -> void:
 
 func _apply_feel_settings(settings: Dictionary) -> void:
 	_reduced_motion = bool(settings.get(&"reduced_motion", false))
+	_player.set_aim_arrow_enabled(bool(settings.get(&"aim_arrow", true)))
 	_shake_strength = clampf(float(settings.get(&"screen_shake", 1.0)), 0.0, 1.0) * (
 		REDUCED_MOTION_SHAKE if _reduced_motion else 1.0
 	)

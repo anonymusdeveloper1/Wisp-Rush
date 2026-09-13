@@ -4,6 +4,344 @@
 > [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) §7.6. Keep entries short — details belong in the docs
 > they changed.
 
+## 2026-09-13 — Living Home, bottom nav, card-carousel Forms and Rift Map
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Owner asked for a Home that looks different and feels alive, with a minimal Material-like UI in
+    the stone-and-cyan style, and Forms / Rift Map pickers modelled on two card-picker references.
+    Owner decisions (not ASSUMPTIONs): portrait carousel pickers; bottom navigation (Rifts, Forms,
+    Sanctum, Trials, Daily) under a slim top bar, logo, animated Wisp and one PLAY with a Rift
+    caption; Wisp float/breathe/sway/glow + orbiting motes + living background; no entrance
+    animation or PLAY pulse; Reduced Motion stills everything.
+  - New shared `FocusCarousel` (swipe + snap, rubber band, flick, tap side/focused card, keys) and
+    `PageDots` (hollow = locked).
+  - Home rewritten with `HomeAmbience` (brazier flicker, rune pulse, mist, rising motes over the
+    unchanged art) and `OrbitMotes` (back/front halves so sparks pass behind and in front of the
+    Wisp). Signals and `setup` unchanged.
+  - Forms and Rift Map rebuilt on the carousel; public APIs and signals unchanged. Forms main action
+    is `%ActionButton`; Rift Map crossfades to the focused arena, previews locked Rifts but never
+    enters them, and adds `is_rift_unlocked()`.
+  - Theme builder: `NavButton` and `NavBar` variations (`FONT_NAV` 26, `NAV_ICON` 96).
+- **Files/systems:** `scripts/components/{focus_carousel,page_dots}.gd`,
+  `scenes/screens/{home_screen.gd,home_screen.tscn,home_ambience.gd,orbit_motes.gd}`,
+  `scenes/screens/{forms_screen,rift_map_screen}.{gd,tscn}`, `assets/ui/theme/tools/build_wisp_theme.gd`,
+  `tools/godot/{test_focus_carousel,test_menu_screens,test_screen_setup_order,test_progression_screens,qa_capture}.gd`,
+  `tools/qa_matrix.sh`; docs `systems/{ui_design_system,game_flow,forms,rifts}.md`, `GDD.md` §11,
+  `PROJECT_CONTEXT.md`.
+  - Independent review (4 reviewers + adversarial verify, 9 confirmed) fixed:
+    - Carousel taps: a rapid double tap on a peek card could buy a form or start a run. Taps are now hit-tested against the resting layout.
+    - Carousel presses: a cancelled touch, app focus loss mid-press, or a drag past the tap slop in any direction no longer counts as a tap.
+    - Flicks: a stale flick after the finger stopped no longer advances a card.
+    - Home motes now respawn when the screen resizes.
+    - The brazier glow colour now comes from `Palette.WARNING_AMBER`.
+    - The missing `##` docs are added.
+    - `test_screen_setup_order` never awaited its checks, so it passed without asserting anything.
+    - The carousel rubber-band and short-drag tests are now meaningful and no longer flaky.
+- **Verified:**
+  - `tools/validate.sh` → OK.
+  - `tools/run_tests.sh` → **33 passed, 0 failed** (new `test_focus_carousel`, `test_menu_screens`).
+  - Each carousel fix was checked by mutation: reverting it makes the test fail.
+  - QA sheets for home, forms, rifts and rifts_locked reviewed at 5 phone sizes; no clipping.
+- **Follow-ups:**
+  - Deployed the debug APK to a Samsung SM-S921B. It booted, and Home, Forms, Daily and a short run all ran with no engine errors or warnings in logcat.
+  - Status mismatch: `rifts.md` says ✅ while PROJECT_CONTEXT §5.1 says 🔄.
+
+## 2026-09-12 — Generated Rift Wave 2 boss and enemy handoff
+- **Who:** Codex (GPT-5)
+- **Did:** Generated The Fracture, The Cinder Maw and four per-arena enemy families from the
+  owner's Wave 2 prompts; packaged the three exact sheets at `~/Desktop/wisp_rush_rifts_v2.zip`.
+- **Files/systems:** External Milestone 8 art handoff and roadmap status; no runtime assets or code.
+- **Verified:** Three sheets inspected at 1448×1086 RGBA with genuine alpha; ZIP contains only the
+  requested folder and three PNGs; `tools/validate.sh` → OK; `tools/run_tests.sh` → 23 passed,
+  0 failed.
+- **Follow-ups:** Claude to intake, register and slice the sheets, then implement the two bosses and
+  four arena-specific enemy families.
+
+## 2026-09-12 — Extended Rift handoff with enemies and Hollow Choir
+- **Who:** Codex (GPT-5)
+- **Did:** Generated the 12-pose Cinder Shade/Warden/Rift Spawn sheet and the 12-state Hollow Choir
+  boss sheet from `GENERATION_PROMPTS-enemies.md`; added both to the existing Rift pack and rebuilt
+  `~/Desktop/wisp_rush_rifts_v1.zip` with all seven requested images.
+- **Files/systems:** External art handoff and Milestone 8 roadmap status; no runtime assets or code.
+- **Verified:** Both new sheets inspected at 1448×1086 RGBA with genuine alpha; ZIP inventory has
+  the requested seven PNGs only; `tools/validate.sh` → OK; `tools/run_tests.sh` → 20 passed, 0 failed.
+- **Follow-ups:** Claude to intake the pack, register asset provenance, slice the sheets, and
+  implement the three enemy families plus Hollow Choir encounter.
+
+## 2026-09-12 — Generated Milestone 8 Rift art handoff
+- **Who:** Codex (GPT-5)
+- **Did:** Generated four visually distinct Rift arena backgrounds and one 12-prop transparent
+  sprite sheet from `concept_art/wisp_rush_rifts_v1/GENERATION_PROMPTS.md`; packaged the five exact
+  filenames for the owner/Claude handoff at `~/Desktop/wisp_rush_rifts_v1.zip`.
+- **Files/systems:** External art handoff only; no runtime or `concept_art/` assets changed.
+- **Verified:** Five PNGs inspected; backgrounds are 941×1672 RGB, props are 1448×1086 RGBA with
+  genuine alpha; ZIP inventory contains only the requested folder and five images;
+  `tools/validate.sh` → OK; `tools/run_tests.sh` → 20 passed, 0 failed.
+- **Follow-ups:** Claude to intake the ZIP, add sources to `concept_art/`, register provenance in
+  `docs/ASSETS.md`, wire the v2 slice spec, and re-run the art pipeline.
+
+## 2026-09-12 — Faster movement: no lost swipes, redirect, burst, momentum, aim arrow
+
+- **Who:** Claude Code (Opus 5), plus a background `gdscript-reviewer` pass
+- **Did:**
+  - Measured the delay first. Touches were **refused** outside rest, so a swipe begun mid-dash was
+    silently discarded — its release then ignored too — about 400 ms of dead time per dash cycle.
+  - Owner chose: input buffering, landing-lock cancel, launch burst, chain momentum, a crisper launch
+    haptic (one already existed, 12 ms at 0.35 — strengthened, not duplicated), **mid-dash redirect**
+    (changes GDD §5.1), and a direction **arrow that replaces the full aim line** (on by default).
+  - The reviewer found 4 bugs and 3 risks, all verified against the code and fixed: redirect legs
+    farmed the rapid-ricochet score and Trials metric; a buffered dash threw away a second touch in
+    progress; a windup swipe became a zero-length redirect that scored an empty leg and gave free
+    momentum; the arrow went stale through landings; cancelled touches acted; faster dashes widened
+    a boss-lane blind spot; damage left chain state behind. Also fixed doc/order convention issues.
+  - The buffer now counts physics time, not the wall clock, and its window is 0.3 s against the
+    0.22 s hurt reaction it bridges — the reviewer had observed the test flaking 1 run in 3.
+- **Files/systems:** `scenes/player/wisp_player.{gd,tscn}`, `scripts/resources/player_tuning.gd`,
+  `data/player/default_player_tuning.tres`, `scenes/gameplay/game_world.gd`,
+  `scripts/autoload/save_manager.gd`, `scenes/screens/settings_screen.{gd,tscn}`,
+  `tools/godot/{test_movement,render_aim_arrow_showcase}.gd`, `docs/{GDD.md,systems/player_dash.md}`.
+- **Verified:** `tools/validate.sh` → OK; `tools/run_tests.sh` → **31 passed, 0 failed**;
+  `test_movement` **5/5 consecutive passes**. The test routes events through `Input.parse_input_event`
+  (real viewport, GUI and touch-to-mouse emulation) rather than calling `_unhandled_input`.
+  - Doing that exposed a real device-path bug: **Godot's emulated mouse press arrives before the touch
+    press**, so on a phone the mouse branch owns touch input — and cancelled touches arrive there as a
+    cancelled mouse release. The earlier direct-call test only exercised the path a phone does not use.
+  - Mutation-proven: restoring the original input gate fails five named lost-swipe checks; reverting
+    fixes #1 and #2 each fails its own named check.
+  - The arrow was rendered in three arenas; it was near-invisible on Frozen Choir's pale ice until a
+    dark outline was added.
+- **Follow-ups:** device feel of burst strength and momentum cap; momentum has no visual cue yet.
+
+## 2026-09-12 — Wall splash on impact; wall highlight removed
+
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - First built a glow that ran along the painted floor edge from the contact point. Rendering it
+    showed two real problems — it floated on the stone, because the baked polygon sits a margin
+    inside the painted edge, and it read as another slash — and a retune pushed it onto the edge.
+  - The owner then asked for no wall highlight at all, just a splash where the Wisp hits. Replaced
+    it with `WallSplashFx` and removed the old axis-aligned `WallFlash` rectangle entirely.
+  - Tuned from captured frames: the first pass sat on top of the Wisp and read as a sparkle, so the
+    fan was widened to 124°, droplets given more speed and less damping, and the splash pushed back
+    onto the wall surface.
+- **Files/systems:** `scenes/gameplay/wall_splash_fx.gd`, `scenes/gameplay/game_world.{gd,tscn}`,
+  `tools/godot/test_wall_splash.gd`, `tools/godot/render_wall_splash_showcase.gd`, docs.
+- **Verified:** `tools/validate.sh` → OK; `tools/run_tests.sh` → **30 passed, 0 failed**. The new test
+  asserts the splash fires on impact, sits closer to the wall than the Wisp, sprays into the floor,
+  shrinks under Reduced Motion, and that **no `WallFlash` node or wall line exists**. Installed on
+  the Galaxy S24: running in Obsidian Garden with zero script errors, Wisp resting on the painted wall.
+  - The full suite caught a regression the targeted test did not: I had parented the pooled splash
+    inside `EffectsLayer`, and `test_mutation_effects` counts that layer's children for Death Pulse.
+    Fixed by following the existing `VfxPool` convention (sibling, not child).
+- **Follow-ups:** device feel of the splash size; the impact squash still picks one of two presets by
+  the dominant axis of the normal, so it is approximate on slanted walls.
+
+## 2026-09-12 — Walls now follow each arena's painted floor
+
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Owner saw the Ember Hollow rectangle's corners sitting over the lava and chose, from six
+    options, to derive the wall from the art ([ADR-0011](decisions/0011-polygon-playfield-from-art.md)).
+  - `tools/art/extract_floor_polygons.py` bakes a 24-vertex polygon per Rift. Four iterations, each
+    from a real failure: ANDed thresholds gave an empty mask and the luminance cut excluded Frozen
+    Choir's pale ice; a centre seed landed on Obsidian Garden's central rune; rays stopped on
+    cracks; single rays spiked into the scenery.
+  - Runtime: winding-based normals, resting edge excluded by **identity** (a distance skip swallowed
+    short corner dashes), one `_resolve_dash()` shared by the dash and the aim preview, polygon rest
+    snap and edge drift, polygon enemy containment, reform candidates sampled on the polygon, and
+    every placement routed through `_place_on_floor()`. The rectangle stays as the design scale.
+  - A parallel read-only mapping pass (5 agents) found two things I had missed: the polygon is not
+    a superset of the rectangle (0/4 corners inside on four arenas — the rectangle overhung), and
+    the painted floors reach above the HUD band. The bake now clamps the top to V 0.255.
+- **Files/systems:** `tools/art/extract_floor_polygons.py`, `data/rifts/*.tres`,
+  `scripts/utils/dash_geometry.gd`, `scripts/resources/rift_data.gd`, `scenes/player/wisp_player.gd`,
+  `scenes/gameplay/game_world.gd`, `scripts/components/enemy_actor.gd`, `scenes/bosses/reaper_boss.gd`,
+  `tools/godot/{test_dash_geometry,test_rift_rules}.gd`, docs.
+- **Verified:** `tools/validate.sh` → OK; `tools/run_tests.sh` → **29 passed, 0 failed**.
+  - An on-boundary property test sweeps every edge of every real Rift against 16 directions
+    (1,920 cases): the resolved aim points inward, the landing is forward on a different edge, and
+    the inset polygon never empties.
+  - A live test dashes in 8 directions in each of the five Rifts and asserts every landing is on
+    the floor. **Proven to detect a regression**: with the polygon disabled it fails 77 ways.
+  - Formation audit: 3,520 placements, 19 (2.7 %) corrected, zero formations collapsed.
+  - Bugs caught along the way: `bounce(normal.orthogonal())` flipped the tangent and would have sent
+    every reflected dash off the floor; and the rules suite had been running **frozen** — an earlier
+    check's XP opened the upgrade picker, which pauses the tree, and freeing that GameWorld never
+    unpaused it. That is also why the old drift check "passed": it silently skipped.
+- **Follow-ups:**
+  - **Not yet felt on device** — the phone dropped off adb before the new APK could be installed.
+  - Impact squash and the wall flash still assume axis-aligned walls; approximate on slanted edges.
+  - No live test drives the boss into Teleport Hunt, so boss teleport clamping is covered only by
+    the shared `DashGeometry` tests.
+
+## 2026-09-12 — Device run found three screen crashes; developer unlock card added
+
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Built and installed the debug APK (72.6 MB, up from 53 MB with the new art) on the owner's
+    Galaxy S24 and drove it with `adb input`. **Three real crashes the headless suite could not
+    see:** `Main` configures a screen immediately after instancing it, *before* `_replace_screen()`
+    puts it in the tree, so every `@onready` reference in `RiftMapScreen.setup()`,
+    `SanctumScreen.setup()` and `TrialsScreen.setup()` was null. Screenshot fixtures missed it
+    because loading a scene standalone runs `_ready()` first.
+  - Fixed by making all three `setup()` calls order-independent: they store their arguments and
+    defer the rebuild to `_ready()` when the node is not in the tree yet. `show_feedback()` on the
+    Sanctum defers the same way.
+  - Added `tools/godot/test_screen_setup_order.gd`, which reproduces Main's call order across six
+    screens and asserts the **generated rows** exist — a whole-tree node count would have passed
+    even with every row missing. Verified it actually catches the bug by reintroducing it
+    (`trials built 0 rows, expected at least 3`) and then restoring the fix.
+  - **Developer card in Settings** (owner request): unlock everything / all Rifts / all forms / max
+    Sanctum / complete Trials / +5,000 shards, via `DevUnlock` and guarded
+    `SaveManagerService.debug_*` methods. Gated twice on `OS.is_debug_build()` — the card is not
+    built, and every method refuses independently — so GDD §13's "no debug panels in release" holds.
+  - Corrected the Android launch command in AGENTS.md §4 and PROJECT_CONTEXT §6: the launcher
+    activity is `GodotAppLauncher` and is **not exported**, so the documented
+    `am start -n …/GodotApp` is denied by Android. Use `adb shell monkey … LAUNCHER 1`.
+- **Files/systems:** `scenes/screens/{rift_map,sanctum,trials,settings}_screen.{gd,tscn}`,
+  `scripts/autoload/save_manager.gd`, `scripts/utils/dev_unlock.gd`,
+  `tools/godot/{test_screen_setup_order,test_dev_unlock}.gd`, `AGENTS.md`, docs.
+- **Verified:** `tools/validate.sh` → OK; `tools/run_tests.sh` → **29 passed, 0 failed**. On device:
+  Home and the Rift Map render correctly at 1080×2340 and the log is clean of the three errors on
+  the screens reached before the USB connection dropped.
+- **Follow-ups:**
+  - **The fixed build has not been re-run on device** — the phone disconnected from USB mid-session.
+    Re-verify Sanctum, Trials and a full run before shipping.
+  - Android back from the Rift Map appeared to exit the app rather than return Home. Not yet
+    diagnosed; it may be an artefact of driving `KEYCODE_BACK` through `adb input`, or a real gap in
+    `Main._handle_back()` for the new screens. **Worth checking first on the next device run.**
+
+## 2026-09-12 — M7 and M9 built, M8 finished: Sanctum, Trials, portals, five bosses
+
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - **M7 complete.** *Soul Sanctum*: nine permanent nodes in a prerequisite tree, 8,970 shards to
+    max, **0.167 combat power against a hard 0.20 budget that `validate()` enforces** — GDD §6's
+    "must not trivialise a fresh start" is now a build failure, not a memo. *Trials*: 36 goals in
+    12 tiers, three active at a time, rank up by clearing all three. *Depth milestones*: one-time
+    rewards at waves 5/10/15/20/25. Plus an enemy arrival pop.
+  - **M8 finished.** *Void portals* teleport a live dash to their pair, once per dash so the pair
+    cannot loop it. *Five bosses* ([ADR-0010](decisions/0010-data-driven-boss-variants.md)):
+    `BossData` carries atlas, tuning, tint and accent, and all four variants run the Reaper's
+    proven three-phase machine rather than four hand-written ones. Base health escalates 6→15
+    along the Rift ladder.
+  - **M9 plumbing.** `MonetisationService` behind an injectable `AdProvider`; the shipped default
+    is `NullAdProvider`, so `is_available()` is false and **no ad or purchase surface renders** —
+    GDD §13's "no dead buttons, no fake purchases" still holds today ([ADR-0009](decisions/0009-monetisation-model.md)).
+    Three rewarded placements, one Remove Ads product, consent gating, restore-safe shard grant.
+  - Save schema **v2 → v5** across the three milestones, each step migrating older saves.
+- **Files/systems:** `scripts/resources/{sanctum_node,sanctum_catalog,trial_data,trial_catalog,boss_data}.gd`,
+  `scripts/utils/{sanctum_effects,trial_tracker}.gd`, `scripts/autoload/{save_manager,monetisation_service}.gd`,
+  `scenes/screens/{sanctum,trials}_screen.*`, `scenes/gameplay/game_world.gd`,
+  `scenes/player/wisp_player.gd`, `scenes/bosses/reaper_boss.gd`, `data/{sanctum,trials,bosses}/*`, docs.
+- **Verified:** `tools/validate.sh` → OK; `tools/run_tests.sh` → **27 passed, 0 failed**, with four
+  new suites (`sanctum`, `trials`, `monetisation`, `boss_variants`). The rules suite now boots a
+  live GameWorld per Rift and dashes through a portal to prove the transit.
+  Bugs the tests caught: a depth-milestone test that silently depended on the shared isolated save
+  persisting between suite runs (now uses its own save, and a repeat run confirms the fix); a
+  `_refresh_combat_modifiers()` I invented that never existed; and a `_spawn_effect()` likewise.
+- **Follow-ups:**
+  - **No real ad SDK.** `AdProvider` needs the owner's AdMob/Play accounts, app ids, a privacy
+    policy, a consent UI and signing — not doable from this repo. No monetisation UI exists yet,
+    deliberately, so nothing inert ships.
+  - Sanctum nodes are gated by shards and prerequisites, **not** by Rift level progress.
+  - Per-Rift mission chains are still unbuilt; Rift unlocking remains wave-gated.
+  - Nothing has been played on a device since these landed; the combined difficulty curve
+    (per-wave × Rift level × post-boss tier) needs a real phone pass.
+
+## 2026-09-12 — Wave-2 art integrated; seven enemies across five rosters
+
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Owner delivered `wisp_rush_rifts_v2.zip` (The Fracture, the Cinder Maw, four arena enemies).
+    Inspected the grid before wiring: the enemy sheet is four creatures of three poses laid out
+    **row-major**, so a creature owns cells 3N..3N+2 and crosses the grid's row boundaries — the
+    extractor groups by index triple, not by row. My wave-2 prompt had described it as "4 rows of 3"
+    while specifying a 4×3 grid, which disagreed; the art follows the grid.
+  - `extract_rifts.py` extended to 76 outputs: three 12-frame boss atlases at the Reaper's 444×444
+    canvas, and Echo / Slag Hulk / Frost Wisp / Court Shade at 362×362.
+  - The four new enemies reuse the Cinder Shade, Bone Mote and Shard Wraith behaviours with their
+    own art, tuning and roster slot. All five Rifts now field visibly different rosters, and
+    `test_rift_enemies.gd` fails if any Rift silently falls back to the baseline roster.
+- **Files/systems:** `tools/art/extract_rifts.py`, `assets/art/characters/{the_fracture,cinder_maw,
+  enemies}/`, `scenes/enemies/{echo,slag_hulk,frost_wisp,court_shade}.tscn`, `data/enemies/*`,
+  `data/rifts/*`, `scenes/gameplay/game_world.gd`, docs.
+- **Verified:** `tools/validate.sh` → OK; `tools/run_tests.sh` → **23 passed, 0 failed**; extracted
+  sprites reviewed on the dark ground they render against — consistent scale, clean alpha.
+- **Follow-ups:** boss art is extracted but **no boss scene or phase machine exists for any of the
+  three**, so every Rift still spawns the Reaper; `portals`, abilities, per-Rift missions, all of
+  M7 and M9 remain.
+
+## 2026-09-12 — Rift difficulty ladder, three enemies, three rule twists
+
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Difficulty ladder ([ADR-0008](decisions/0008-rift-levels-and-difficulty-ladder.md)): 8 levels ×
+    4 waves per Rift, threat ×1.00 at level 1 in **every** arena (validated, build fails above
+    ×1.1) rising to ×1.84 in Obsidian Garden and ×2.75 in Reaper's Court, plus enemy speed
+    ×1.00→×1.20. Levels advance mid-run on each boss defeat and persist as `rift_levels`.
+  - Three enemy families from the delivered art: **Cinder Shade** (splits into two on death),
+    **Warden** (140° shield arc blocks dashes into its plate, so it must be cut from behind),
+    **Rift Spawn** (only the tether between its two bodies is damageable).
+  - Per-arena rosters via `RiftData.enemy_substitutions`, so the 20 authored formations are reused
+    rather than duplicated.
+  - Rule twists: **boss_rush** (Reaper's Court — half the boss cadence, double rewards),
+    **shrinking_floor** (Ember Hollow — the playfield contracts to 74 % across a level),
+    **drift** (Frozen Choir — the resting Wisp slides along its edge and reverses at corners).
+- **Files/systems:** `scripts/resources/{rift_data,rift_catalog,enemy_tuning}.gd`, `data/rifts/*`,
+  `data/enemies/{cinder_shade,warden,rift_spawn}.tres`, `scenes/enemies/*`,
+  `scenes/gameplay/{game_world,wave_director}.gd`, `scenes/player/wisp_player.gd`,
+  `scenes/screens/rift_map_screen.gd`, `scripts/autoload/save_manager.gd`, docs.
+- **Verified:** `tools/validate.sh` → OK (57 scripts); `tools/run_tests.sh` → **23 passed, 0 failed**,
+  including two new suites. `test_rift_rules.gd` boots a live GameWorld per Rift and asserts the
+  boss cadence halves, the floor actually contracts (and leaves the Wisp inside it), and the
+  resting Wisp slides — the twists are verified in a running game, not just parsed.
+  Two real bugs caught by the tests: the Warden scene was missing the `hit` animation EnemyActor
+  plays, and a mis-anchored patch left `game_world.gd` calling a `set_edge_drift()` that did not
+  exist — a crash that only fires inside a run, so validation alone would not have caught it.
+- **Follow-ups:**
+  - **`portals` (Shattered Rift) is still unimplemented** — the one remaining rule twist; art ready.
+  - Per-Rift bosses still fall back to the Reaper; `the_fracture` and `cinder_maw` await art
+    (`GENERATION_PROMPTS_WAVE2.md`), Hollow Choir has art but no scene or phase machine.
+  - Abilities, per-Rift missions, all of M7, and M9 remain.
+  - Substitution raises real difficulty without changing authored `threat_cost`; intentional for
+    higher tiers but unmodelled — worth a device pass.
+
+## 2026-09-12 — Rifts: five arenas, the map UI, and the M8 art pack
+
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Direction agreed with the owner: keep one endless mode and layer engagement around it.
+    ROADMAP gained M7 (engagement core), M8 (Rifts and bosses) and M9 (monetisation: opt-in
+    rewarded video plus one remove-ads IAP, never interstitials).
+  - Wrote `concept_art/wisp_rush_rifts_v1/GENERATION_PROMPTS.md` (7 sheets) for the owner to run
+    through Codex image generation; owner delivered `wisp_rush_rifts_v1.zip`.
+  - New reproducible pipeline `tools/art/extract_rifts.py` → 40 runtime files: 4 Rift backdrops,
+    12 props, 12 new-enemy frames, 12 Hollow Choir frames. Frozen Choir's ice floor was brighter
+    than the Wisp (breaks the STYLE_GUIDE's first rule) so it is dimmed 0.52 inside the playfield;
+    Shattered Rift's magenta is desaturated to 0.72 so it stops competing with enemy cores.
+  - Rifts system ([ADR-0007](decisions/0007-rifts-as-rule-variant-arenas.md)): `RiftData` /
+    `RiftCatalog` + five `.tres`, save schema **v2** (`selected_rift`, `rift_bests`, v1 migration),
+    a Rift map screen built from the catalog, a Home entry, and a GameWorld backdrop swap.
+    Unlock is derived from lifetime `highest_wave`, so it cannot desync.
+- **Files/systems:** `scripts/resources/rift_{data,catalog}.gd`, `data/rifts/*`,
+  `scenes/screens/rift_map_screen.*`, `scenes/main/main.gd`, `scenes/screens/home_screen.*`,
+  `scenes/gameplay/game_world.gd`, `scripts/autoload/save_manager.gd`, `tools/art/extract_rifts.py`,
+  `tools/godot/test_rift_catalog.gd`, docs.
+- **Verified:** `tools/validate.sh` → OK (52 scripts); `tools/run_tests.sh` → **21 passed, 0 failed**
+  (new `test_rift_catalog`, and `test_save_manager` extended with v1→v2 migration coverage);
+  Rift map and Home captured at 1080×1920 and reviewed. `test_rift_catalog` asserts every backdrop
+  is exactly 941×1672, the constraint `ARENA_FLOOR_UV` depends on.
+- **Follow-ups:**
+  - **No rule twist is implemented** — `rule_key` is latched and read by nothing, so all five Rifts
+    play identically. The map advertises rules the game does not honour; not shippable to players
+    in this state.
+  - New enemies and the Hollow Choir are **art only** — no tuning, behaviour or scene. Recorded as
+    GDD §14 assumptions #9–10 because the GDD never specified them; owner may reject or redesign.
+  - M7 (Soul Sanctum, Trials ladder, depth milestones) and per-Rift mission chains not started.
+  - README "Current build" still claims Milestone 2; PROJECT_CONTEXT §4 still says no autoload is
+    needed; `tests/` is still an empty folder. Pre-existing drift, not fixed here.
+
 ## 2026-09-12 — Playfield inset and larger sprites
 - **Who:** Claude Code (Opus 5), at the owner's decision (both options)
 - **Did:**

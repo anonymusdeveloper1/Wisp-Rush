@@ -85,3 +85,19 @@ These options control which components are kept:
   - `like` + `register: true`: state variants reuse another item's scale and keep the sheet's cell-relative registration.
 - Content never leaves the canvas. If it would, it is shifted inward first and scaled down only as a last resort; both cases are listed in the report.
 - `background: "#rrggbb"` flattens the output to an opaque RGB file.
+
+## Floor polygons (`extract_floor_polygons.py`)
+
+Bakes each Rift's playable floor into `RiftData.floor_polygon` from its **runtime** background
+(ADR-0011). Run it after `extract_rifts.py` or any background change:
+
+```sh
+python3 tools/art/extract_floor_polygons.py
+```
+
+Then **look at** `logs/rifts/floor_<rift>.png` — the bake is a heuristic. Pipeline: score pixels as
+smooth and desaturated (never by brightness), keep the top share, close, keep the largest region,
+fill enclosed holes (runes, cracks), erode, then cast 24 rays from the centroid, clamp single-ray
+spikes against their neighbours and pull in any edge whose midpoint leaves the floor. The top is
+clamped to V 0.255 so the resting Wisp never sits behind the HUD.
+

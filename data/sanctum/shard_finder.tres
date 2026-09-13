@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SanctumNode" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/sanctum_node.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/02_soul_shards.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+node_id = &"shard_finder"
+display_name = "SHARD FINDER"
+description_template = "Fallen souls yield {value} more shards."
+effect_key = &"shard_find_bonus"
+max_level = 4
+value_per_level = 8.0
+unit = "%"
+cost_first_level = 150
+cost_step = 90
+prerequisite_id = &""
+is_combat_power = false
+icon = ExtResource("2")

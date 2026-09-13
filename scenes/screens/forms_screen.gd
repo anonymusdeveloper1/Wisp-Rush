@@ -1,12 +1,12 @@
 class_name FormsScreen
 extends Control
-## Collection screen for previewing, purchasing and equipping gameplay-neutral Wisp forms.
+## Wisp picker: a portrait card carousel of the six gameplay-neutral forms, buy or equip below.
 ##
-## Redesign v1 layout (handoff board panel 4): header (Home IconButton, "FORMS" banner, shard
-## plate), selected-form preview in a PortraitRing beside a detail card, a 3x2 SlotButton grid
-## (toggled slot = magenta selection) and one persistent PrimaryButton action at the bottom.
-## Locked forms stay previewable; lock state, price and the Reaper gate are always shown with an
-## icon plus text, never by colour alone. Styling comes from the project theme variations.
+## Owner reference (2026-09-13): a focus card picker - the selected card is larger, lifted and
+## framed, its neighbours peek in dimmed, one description line sits underneath and a single main
+## action is at the bottom. Swipe or tap a side card to browse; tapping the focused card runs the
+## action. Locked forms stay previewable; lock state, price and the Reaper gate are always shown
+## with text as well as colour. Styling comes from the project theme variations.
 
 ## Requests a validated purchase through Main and SaveManager.
 signal purchase_requested(form_id: StringName)
@@ -18,18 +18,16 @@ signal back_requested
 const SHARD_ICON: Texture2D = preload("res://assets/art/ui/system/02_soul_shards.png")
 const LOCK_ICON: Texture2D = preload("res://assets/art/ui/system/17_lock.png")
 const FORMS_ICON: Texture2D = preload("res://assets/art/ui/system/10_forms.png")
-## Idle breathing of the preview portrait (style guide: 2-3 % scale), off with reduced motion.
-const PULSE_AMOUNT: float = 0.02
-const PULSE_SPEED: float = 2.2
-## Native collection slot height and preview ring size (1080-wide design space, short phones).
-const SLOT_BASE_HEIGHT: float = 300.0
-const RING_BASE_SIZE: float = 420.0
-## Taller phones grow the slots and ring by a share of the spare height, up to these caps; the
-## rest goes to the spacers so the action button stays at the bottom.
-const SLOT_MAX_GROW: float = 100.0
-const RING_MAX_GROW: float = 60.0
-const SLOT_GROW_SHARE: float = 0.25
-const RING_GROW_SHARE: float = 0.15
+const REAPER_ICON: Texture2D = preload("res://assets/art/ui/system/18_reaper.png")
+## Brightness of a locked form's portrait, so ownership reads at a glance on every card.
+const LOCKED_PORTRAIT_BRIGHTNESS: float = 0.42
+## Card text sizes in the 1080-wide design space.
+const CARD_NAME_SIZE: int = 44
+const CARD_STATE_SIZE: int = 34
+const STATE_ICON_SIZE := Vector2(48, 48)
+## Soft halo in the form's own tint behind its portrait, so each card carries the form's colour.
+const PORTRAIT_GLOW_ALPHA: float = 0.42
+const LOCKED_GLOW_ALPHA: float = 0.14
 
 @export var catalog: FormCatalog
 
@@ -39,67 +37,53 @@ var _owned: Array[String] = ["void"]
 var _equipped: StringName = &"void"
 var _bosses_defeated: int = 0
 var _selected_form_id: StringName = &""
-var _animation_time: float = 0.0
-## True once a form was picked explicitly; until then the preview follows the equipped form.
+## True once a form was picked explicitly; until then the carousel follows the equipped form.
 var _has_user_selection: bool = false
+var _pending_feedback: Array = []
+## True while the screen itself moves the carousel, so that move is not mistaken for a player pick.
+var _syncing: bool = false
+var _glow_texture: GradientTexture2D
 
-@onready var _safe_margin: MarginContainer = $SafeMargin
-@onready var _content: VBoxContainer = %Content
-@onready var _preview_ring: PanelContainer = %PreviewRing
+@onready var _carousel: FocusCarousel = %Carousel
+@onready var _dots: PageDots = %Dots
 @onready var _balance_label: Label = %BalanceLabel
-@onready var _preview: TextureRect = %Preview
-@onready var _name_label: Label = %NameLabel
 @onready var _description_label: Label = %DescriptionLabel
-@onready var _price_row: HBoxContainer = %PriceRow
-@onready var _price_label: Label = %PriceLabel
-@onready var _state_icon: TextureRect = %StateIcon
 @onready var _requirement_label: Label = %RequirementLabel
-@onready var _action_button: Button = %ActionButton
 @onready var _feedback_label: Label = %FeedbackLabel
+@onready var _action_button: Button = %ActionButton
 @onready var _back_button: Button = %BackButton
-@onready var _form_buttons: Array[Button] = [
-	%FormButton0,
-	%FormButton1,
-	%FormButton2,
-	%FormButton3,
-	%FormButton4,
-	%FormButton5,
-]
 
 
 func _ready() -> void:
 	assert(catalog != null, "FormsScreen requires a FormCatalog")
 	_forms = catalog.load_forms()
-	assert(_forms.size() == _form_buttons.size(), "FormsScreen requires six forms")
-	for index: int in _form_buttons.size():
-		var button: Button = _form_buttons[index]
-		button.pressed.connect(_select_form.bind(_forms[index].form_id))
 	_action_button.pressed.connect(_on_action_pressed)
 	_back_button.pressed.connect(func() -> void: back_requested.emit())
-	_preview.resized.connect(func() -> void: _preview.pivot_offset = _preview.size * 0.5)
-	set_process(not _is_reduced_motion())
+	_carousel.selection_changed.connect(_on_carousel_selection_changed)
+	_carousel.activated.connect(func(_index: int) -> void: _on_action_pressed())
+	_dots.count = _forms.size()
+	var cards: Array[Control] = []
+	for form: FormData in _forms:
+		cards.append(_build_card(form))
 	if _selected_form_id.is_empty():
 		_selected_form_id = _equipped
+	_carousel.set_cards(cards, _index_of(_selected_form_id))
 	_refresh()
-	# Deferred: autowrap labels only report their real height after the first layout pass.
-	_fit_layout.call_deferred()
-	# Deferred so a setup() right after add_child moves focus to the equipped form's slot.
-	_focus_selected_slot.call_deferred()
+	if not _pending_feedback.is_empty():
+		show_feedback(str(_pending_feedback[0]), bool(_pending_feedback[1]))
+		_pending_feedback.clear()
+	_carousel.grab_focus.call_deferred()
 	print("[Forms] ready | collection=%d" % _forms.size())
 
 
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_RESIZED and is_node_ready():
-		_fit_layout.call_deferred()
-
-
-func _process(delta: float) -> void:
-	_animation_time += delta
-	var pulse: float = 1.0 + sin(_animation_time * PULSE_SPEED) * PULSE_AMOUNT
-	_preview.scale = Vector2.ONE * pulse
+func _process(_delta: float) -> void:
+	_dots.position_value = _carousel.get_scroll()
 
 
 ## Refreshes balance, ownership, equip and boss-gate state from a persistent snapshot.
+##
+## Safe before or after the screen enters the tree (Main configures screens straight after
+## instancing them, while @onready references are still null).
 func setup(balance: int, owned: Array, equipped: StringName, bosses_defeated: int) -> void:
 	_balance = maxi(0, balance)
 	_owned.clear()
@@ -114,12 +98,21 @@ func setup(balance: int, owned: Array, equipped: StringName, bosses_defeated: in
 	if not _has_user_selection:
 		_selected_form_id = _equipped
 	if is_node_ready():
+		_syncing = true
+		_carousel.select(_index_of(_selected_form_id), false)
+		_syncing = false
 		_refresh()
 
 
 ## Selects any valid form for preview, including locked forms.
 func select_form(form_id: StringName) -> void:
-	_select_form(form_id)
+	if catalog.get_form(form_id).form_id != form_id:
+		return
+	_selected_form_id = form_id
+	_has_user_selection = true
+	if is_node_ready():
+		_carousel.select(_index_of(form_id))
+		_refresh()
 
 
 ## Returns the currently previewed persistent identifier for tests and screen coordination.
@@ -129,99 +122,157 @@ func get_selected_form_id() -> StringName:
 
 ## Presents a short purchase/equip result without owning persistence decisions.
 func show_feedback(message: String, success: bool) -> void:
+	if not is_node_ready():
+		_pending_feedback = [message, success]
+		return
 	_feedback_label.text = message
 	_feedback_label.modulate = Palette.SOUL_CYAN if success else Palette.WARNING_AMBER
 
 
-func _select_form(form_id: StringName) -> void:
-	if catalog.get_form(form_id).form_id != form_id:
+func _on_carousel_selection_changed(index: int) -> void:
+	if _syncing or index < 0 or index >= _forms.size():
 		return
-	_selected_form_id = form_id
+	_selected_form_id = _forms[index].form_id
 	_has_user_selection = true
-	if is_node_ready():
-		_refresh()
-
-
-## Grows slots and the preview ring into the spare height of tall phones (1917-2340 design px).
-func _fit_layout() -> void:
-	_apply_flexible_sizes(0.0, 0.0)
-	var margins: int = (
-		_safe_margin.get_theme_constant(&"margin_top")
-		+ _safe_margin.get_theme_constant(&"margin_bottom")
-	)
-	var spare: float = maxf(0.0, size.y - margins - _content.get_combined_minimum_size().y)
-	_apply_flexible_sizes(
-		minf(spare * SLOT_GROW_SHARE, SLOT_MAX_GROW),
-		minf(spare * RING_GROW_SHARE, RING_MAX_GROW),
-	)
-
-
-func _apply_flexible_sizes(slot_grow: float, ring_grow: float) -> void:
-	for button: Button in _form_buttons:
-		button.custom_minimum_size.y = SLOT_BASE_HEIGHT + slot_grow
-	_preview_ring.custom_minimum_size = Vector2.ONE * (RING_BASE_SIZE + ring_grow)
+	_feedback_label.text = ""
+	_refresh()
 
 
 func _refresh() -> void:
 	if not is_node_ready():
 		return
 	var selected: FormData = catalog.get_form(_selected_form_id)
-	_preview.texture = selected.texture
-	_name_label.text = selected.display_name
-	_name_label.modulate = selected.tint
-	_description_label.text = selected.description
 	_balance_label.text = "%d" % _balance
-	_feedback_label.text = ""
+	_description_label.text = selected.description
+	var hollow := PackedInt32Array()
 	for index: int in _forms.size():
-		_refresh_slot(_form_buttons[index], _forms[index])
+		_refresh_card(_carousel.get_card(index), _forms[index])
+		if String(_forms[index].form_id) not in _owned:
+			hollow.append(index)
+	_dots.hollow = hollow
 	var is_owned: bool = String(selected.form_id) in _owned
-	_price_row.visible = not is_owned
-	_price_label.text = "%d" % selected.price
 	_action_button.icon = null
 	if is_owned:
 		var is_equipped: bool = selected.form_id == _equipped
-		_state_icon.texture = FORMS_ICON
-		_requirement_label.text = "EQUIPPED" if is_equipped else "OWNED  ·  READY TO EQUIP"
+		_requirement_label.text = "YOUR ACTIVE FORM" if is_equipped else "OWNED  ·  READY TO EQUIP"
 		_action_button.text = "EQUIPPED" if is_equipped else "EQUIP"
 		_action_button.disabled = is_equipped
 	elif _is_boss_locked(selected):
-		_state_icon.texture = LOCK_ICON
 		_requirement_label.text = "LOCKED  ·  DEFEAT THE REAPER"
 		_action_button.icon = LOCK_ICON
 		_action_button.text = "REAPER REQUIRED"
 		_action_button.disabled = true
 	elif _balance < selected.price:
-		_state_icon.texture = LOCK_ICON
 		_requirement_label.text = "LOCKED  ·  %d MORE SHARDS NEEDED" % (selected.price - _balance)
 		_action_button.icon = SHARD_ICON
 		_action_button.text = "CLAIM  %d" % selected.price
 		_action_button.disabled = true
 	else:
-		_state_icon.texture = SHARD_ICON
 		_requirement_label.text = "READY TO CLAIM"
 		_action_button.icon = SHARD_ICON
 		_action_button.text = "CLAIM  %d" % selected.price
 		_action_button.disabled = false
 
 
-## Portrait, name, state line and lock badge of one collection slot.
-func _refresh_slot(button: Button, form: FormData) -> void:
+## One portrait card: name on top, the form in the middle, its ownership state at the bottom.
+func _build_card(form: FormData) -> Control:
+	var card := Button.new()
+	card.theme_type_variation = &"CardButton"
+	card.name = "Card_%s" % form.form_id
+	var margin := MarginContainer.new()
+	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	for side: String in ["left", "right"]:
+		margin.add_theme_constant_override("margin_%s" % side, 34)
+	margin.add_theme_constant_override(&"margin_top", 44)
+	margin.add_theme_constant_override(&"margin_bottom", 40)
+	card.add_child(margin)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override(&"separation", 12)
+	margin.add_child(column)
+
+	var name_label := Label.new()
+	name_label.name = "Name"
+	name_label.theme_type_variation = &"TitleLabel"
+	name_label.add_theme_font_size_override(&"font_size", CARD_NAME_SIZE)
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_label.text = form.display_name
+	column.add_child(name_label)
+
+	var portrait_area := MarginContainer.new()
+	portrait_area.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_child(portrait_area)
+	if _glow_texture == null:
+		_glow_texture = _portrait_glow_texture()
+	var glow := TextureRect.new()
+	glow.name = "Glow"
+	glow.texture = _glow_texture
+	glow.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	glow.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	glow.self_modulate = Color(form.tint, 1.0)
+	portrait_area.add_child(glow)
+	var portrait := TextureRect.new()
+	portrait.name = "Portrait"
+	portrait.texture = form.texture
+	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	portrait_area.add_child(portrait)
+
+	var state_row := HBoxContainer.new()
+	state_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	state_row.add_theme_constant_override(&"separation", 10)
+	column.add_child(state_row)
+	var state_icon := TextureRect.new()
+	state_icon.name = "StateIcon"
+	state_icon.custom_minimum_size = STATE_ICON_SIZE
+	state_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	state_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	state_row.add_child(state_icon)
+	var state_label := Label.new()
+	state_label.name = "State"
+	state_label.theme_type_variation = &"CaptionLabel"
+	state_label.add_theme_font_size_override(&"font_size", CARD_STATE_SIZE)
+	state_row.add_child(state_label)
+	return card
+
+
+func _refresh_card(card: Control, form: FormData) -> void:
+	if card == null:
+		return
 	var owned: bool = String(form.form_id) in _owned
-	var state: String = "OWNED"
+	var portrait := card.find_child("Portrait", true, false) as TextureRect
+	var state_icon := card.find_child("StateIcon", true, false) as TextureRect
+	var state_label := card.find_child("State", true, false) as Label
+	var glow := card.find_child("Glow", true, false) as TextureRect
+	var brightness: float = 1.0 if owned else LOCKED_PORTRAIT_BRIGHTNESS
+	portrait.modulate = Color(brightness, brightness, brightness, 1.0)
+	glow.modulate.a = PORTRAIT_GLOW_ALPHA if owned else LOCKED_GLOW_ALPHA
 	if form.form_id == _equipped:
-		state = "EQUIPPED"
-	elif not owned:
-		state = "REAPER" if _is_boss_locked(form) else "%d" % form.price
-	button.icon = form.texture
-	button.text = "%s\n%s" % [form.display_name, state]
-	button.tooltip_text = "%s  ·  %s" % [form.display_name, "OWNED" if owned else "LOCKED"]
-	button.set_pressed_no_signal(form.form_id == _selected_form_id)
-	(button.get_node(^"LockBadge") as TextureRect).visible = not owned
+		state_icon.texture = FORMS_ICON
+		state_label.text = "EQUIPPED"
+	elif owned:
+		state_icon.texture = FORMS_ICON
+		state_label.text = "OWNED"
+	elif _is_boss_locked(form):
+		state_icon.texture = REAPER_ICON
+		state_label.text = "REAPER"
+	else:
+		state_icon.texture = SHARD_ICON
+		state_label.text = "%d" % form.price
 
 
-func _focus_selected_slot() -> void:
-	if is_inside_tree():
-		_form_buttons[_index_of(_selected_form_id)].grab_focus()
+## Radial white-to-clear halo, tinted per card through self_modulate.
+func _portrait_glow_texture() -> GradientTexture2D:
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.4, 1.0])
+	gradient.colors = PackedColorArray([Color(1, 1, 1, 1), Color(1, 1, 1, 0.4), Color(1, 1, 1, 0)])
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(1.0, 0.5)
+	texture.width = 128
+	texture.height = 128
+	return texture
 
 
 func _is_boss_locked(form: FormData) -> bool:
@@ -235,14 +286,9 @@ func _index_of(form_id: StringName) -> int:
 	return 0
 
 
-func _is_reduced_motion() -> bool:
-	var save_manager := get_node_or_null(^"/root/SaveManager") as SaveManagerService
-	if save_manager == null:
-		return false
-	return bool(save_manager.get_settings().get(&"reduced_motion", false))
-
-
 func _on_action_pressed() -> void:
+	if _action_button.disabled:
+		return
 	var selected: FormData = catalog.get_form(_selected_form_id)
 	if String(selected.form_id) in _owned:
 		equip_requested.emit(selected.form_id)

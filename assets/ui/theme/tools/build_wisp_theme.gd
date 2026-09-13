@@ -25,6 +25,10 @@ const FONT_SECONDARY := 34
 const FONT_SLOT := 26
 const FONT_CARD := 30
 const FONT_BAR := 22
+const FONT_NAV := 26
+## The system glyphs fill only ~60 % of their texture canvas, so the icon box is larger than the
+## glyph should appear.
+const NAV_ICON := 96
 const ICON_MAX := 64
 const HOVER := Color(1.12, 1.12, 1.12)
 const PRESS_BRIGHT := Color(1.35, 1.35, 1.35)
@@ -284,6 +288,32 @@ func _build_buttons() -> void:
 	}, FONT_CARD, Pal.SOUL_WHITE)
 	_theme.set_constant(&"icon_max_width", &"CardButton", 0)
 
+	# NavButton: one tab of the Home bottom navigation bar. Flat, icon above a short caption, so the
+	# bar reads as a single calm dock rather than five framed buttons. The pressed and focused
+	# states use a chamfered cyan lozenge behind the item - stone-cut corners, not a soft pill.
+	var nav_pad := [8.0, 10.0, 8.0, 10.0]
+	var nav_empty := StyleBoxEmpty.new()
+	for side: int in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
+		nav_empty.set_content_margin(side, nav_pad[side])
+	var nav_active := _flat(Color(Pal.SOUL_CYAN, 0.14), Color(Pal.SOUL_CYAN, 0.55), 2, 18, 10.0)
+	nav_active.content_margin_left = nav_pad[0]
+	nav_active.content_margin_right = nav_pad[2]
+	_variation(&"NavButton", &"Button")
+	_set_button(&"NavButton", {
+		"normal": nav_empty,
+		"hover": nav_empty,
+		"pressed": nav_active,
+		"hover_pressed": nav_active,
+		"disabled": nav_empty,
+		"focus": _focus_box(2.0),
+	}, FONT_NAV, Pal.TEXT_MUTED)
+	for c: StringName in [&"font_hover_color", &"font_pressed_color", &"font_hover_pressed_color",
+			&"font_focus_color"]:
+		_theme.set_color(c, &"NavButton", Pal.SOUL_WHITE)
+	_theme.set_color(&"icon_hover_color", &"NavButton", Color(1.15, 1.15, 1.15))
+	_theme.set_constant(&"icon_max_width", &"NavButton", NAV_ICON)
+	_theme.set_constant(&"h_separation", &"NavButton", 4)
+
 
 # ------------------------------------------------------------------------ panels
 
@@ -301,6 +331,9 @@ func _build_panels() -> void:
 	_panel(&"PanelCrest", _tex("panel_crest", _inner("panel_crest", [20, 56, 20, 36])))
 	_panel(&"PanelBanner", _tex("panel_banner", _inner("panel_banner", [28, 4, 28, 4])))
 	_panel(&"PanelPlate", _tex("plate_small", _inner("plate_small", [10, 0, 10, 0])))
+	# NavBar: the Home bottom navigation dock. The default stone panel, with tight vertical padding
+	# so five NavButtons fit a thumb-height strip.
+	_panel(&"NavBar", _tex("panel_default", _inner("panel_default", [6, 2, 6, 2])))
 	var ring := StyleBoxTexture.new()
 	ring.texture = load(RING_TEXTURE)
 	for side: int in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:

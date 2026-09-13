@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SanctumNode" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/sanctum_node.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/03_combo_chain.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+node_id = &"long_chain"
+display_name = "LONG CHAIN"
+description_template = "Your chain holds {value} longer."
+effect_key = &"combo_grace_bonus"
+max_level = 3
+value_per_level = 0.15
+unit = "s"
+cost_first_level = 180
+cost_step = 130
+prerequisite_id = &"rift_scholar"
+is_combat_power = false
+icon = ExtResource("2")

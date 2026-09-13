@@ -2,14 +2,14 @@
 
 [ext_resource type="Texture2D" path="res://assets/ui/theme/textures/ornament_banner_top.png" id="1_p7fr2"]
 
-[node name="BannerTopOrnament" type="Control" unique_id=1072297891]
+[node name="BannerTopOrnament" type="Control" unique_id=294799821]
 layout_mode = 3
 anchors_preset = 0
 size_flags_horizontal = 4
 size_flags_vertical = 0
 mouse_filter = 2
 
-[node name="Art" type="TextureRect" parent="." unique_id=1657855751]
+[node name="Art" type="TextureRect" parent="." unique_id=2064655612]
 layout_mode = 0
 offset_left = -42.0
 offset_top = -44.0

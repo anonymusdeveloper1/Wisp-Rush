@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="RiftData" load_steps=3 format=3]
+[ext_resource type="Script" path="res://scripts/resources/rift_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/rifts/shattered_background.png" id="2"]
+[resource]
+script = ExtResource("1")
+rift_id = &"shattered_rift"
+display_name = "SHATTERED RIFT"
+description = "Broken ground over a torn sky."
+rule_summary = "Void portals bend your dash to their pair."
+rule_key = &"portals"
+background = ExtResource("2")
+unlock_wave = 5
+accent = Color(0.694, 0.298, 0.851, 1)
+difficulty_tier = 2
+level_count = 8
+waves_per_level = 4
+level_one_threat = 1.00
+threat_per_level = 0.15
+enemy_speed_scale = 1.05
+boss_id = &"the_fracture"
+enemy_substitutions = {&"soul_wisp": &"rift_spawn", &"shard_wraith": &"echo"}
+floor_polygon = PackedVector2Array(0.81773, 0.46625, 0.89289, 0.52524, 0.91379, 0.60016, 0.84109, 0.65724, 0.79135, 0.74852, 0.63974, 0.75576, 0.50202, 0.75977, 0.38486, 0.71252, 0.31698, 0.64677, 0.21252, 0.62931, 0.10164, 0.59645, 0.15297, 0.51893, 0.08724, 0.46625, 0.11896, 0.40844, 0.17084, 0.35856, 0.22769, 0.31174, 0.25519, 0.25500, 0.35742, 0.25500, 0.50202, 0.25500, 0.60883, 0.25500, 0.74546, 0.25500, 0.81248, 0.29139, 0.87699, 0.34431, 0.82535, 0.41746)

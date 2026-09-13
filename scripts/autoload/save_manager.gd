@@ -7,7 +7,7 @@ signal progression_changed(snapshot: Dictionary)
 ## Emitted after settings change and save, with the full validated settings.
 signal settings_changed(settings: Dictionary)
 
-const SCHEMA_VERSION: int = 1
+const SCHEMA_VERSION: int = 5
 const DEFAULT_SAVE_PATH: String = "user://wisp_rush_save.json"
 const DEFAULT_TEMP_PATH: String = "user://wisp_rush_save.tmp.json"
 const DEFAULT_BACKUP_PATH: String = "user://wisp_rush_save.backup.json"
@@ -23,6 +23,20 @@ const VALID_FORM_IDS: Array[String] = [
 	"frost",
 	"eclipse",
 ]
+## Rift identifiers accepted from disk; must match data/rifts/default_catalog.tres.
+const VALID_RIFT_IDS: Array[String] = [
+	"obsidian_garden",
+	"shattered_rift",
+	"ember_hollow",
+	"frozen_choir",
+	"reapers_court",
+]
+const DEFAULT_RIFT_ID: String = "obsidian_garden"
+## Waves that pay a one-time depth reward, and the shards each pays.
+## Consent values accepted from disk; anything else falls back to "unknown".
+const VALID_CONSENT_STATES: Array[String] = ["unknown", "granted", "denied"]
+const DEPTH_MILESTONES: Array[int] = [5, 10, 15, 20, 25]
+const DEPTH_REWARDS: Array[int] = [25, 50, 100, 175, 300]
 const MAX_COUNTER: int = 2000000000
 
 var _data: Dictionary = {}
@@ -208,6 +222,19 @@ func record_run(summary: Dictionary) -> bool:
 		int(_data.get(&"soul_shards", 0)),
 		maxi(0, int(summary.get(&"soul_shards", 0))),
 	)
+	var rift_id: String = str(summary.get(&"rift", DEFAULT_RIFT_ID))
+	if rift_id in VALID_RIFT_IDS:
+		var bests: Dictionary = _data.get(&"rift_bests", {}) as Dictionary
+		bests[rift_id] = maxi(
+			int(bests.get(rift_id, 0)),
+			maxi(0, int(summary.get(&"score", 0))),
+		)
+		_data[&"rift_bests"] = bests
+		var cleared: int = maxi(0, int(summary.get(&"rift_levels_cleared", 0)))
+		if cleared > 0:
+			var levels: Dictionary = _data.get(&"rift_levels", {}) as Dictionary
+			levels[rift_id] = maxi(int(levels.get(rift_id, 0)), cleared)
+			_data[&"rift_levels"] = levels
 	return _save_and_emit()
 
 
@@ -258,6 +285,69 @@ func equip_form(form_id: StringName) -> bool:
 	return _save_and_emit()
 
 
+## Selects one known Rift as the arena the next run will use.
+func select_rift(rift_id: StringName) -> bool:
+	var id_text: String = String(rift_id)
+	if id_text not in VALID_RIFT_IDS:
+		return false
+	_data[&"selected_rift"] = id_text
+	return _save_and_emit()
+
+
+## Whether developer unlock helpers are permitted. Always false in an exported release build.
+##
+## GDD §13 forbids debug panels in the release, so every `debug_*` method below refuses to do
+## anything unless this is true, and the Settings card that calls them is hidden too.
+func debug_tools_allowed() -> bool:
+	return OS.is_debug_build()
+
+
+## Raises the lifetime best wave, which is what gates Rift unlocks.
+func debug_set_highest_wave(wave: int) -> bool:
+	if not debug_tools_allowed():
+		return false
+	_data[&"highest_wave"] = clampi(wave, 1, MAX_COUNTER)
+	return _save_and_emit()
+
+
+## Grants every cosmetic form without spending shards.
+func debug_unlock_all_forms() -> bool:
+	if not debug_tools_allowed():
+		return false
+	_data[&"owned_forms"] = VALID_FORM_IDS.duplicate()
+	return _save_and_emit()
+
+
+## Writes Soul Sanctum levels directly. The caller supplies catalog-derived maximums.
+func debug_set_sanctum_levels(levels: Dictionary) -> bool:
+	if not debug_tools_allowed():
+		return false
+	_data[&"sanctum_levels"] = _sanitize_id_counts(levels)
+	return _save_and_emit()
+
+
+## Writes the Trials ladder rank and progress directly.
+func debug_set_trials(rank: int, progress: Dictionary) -> bool:
+	if not debug_tools_allowed():
+		return false
+	_data[&"trial_rank"] = clampi(rank, 1, 999)
+	_data[&"trial_progress"] = _sanitize_id_counts(progress)
+	return _save_and_emit()
+
+
+## Sets the cleared Rift level for one Rift, so the map shows progress without playing.
+func debug_set_rift_level(rift_id: StringName, level: int) -> bool:
+	if not debug_tools_allowed():
+		return false
+	var id_text: String = String(rift_id)
+	if id_text not in VALID_RIFT_IDS:
+		return false
+	var levels: Dictionary = _data.get(&"rift_levels", {}) as Dictionary
+	levels[id_text] = clampi(level, 0, MAX_COUNTER)
+	_data[&"rift_levels"] = levels
+	return _save_and_emit()
+
+
 func _save_and_emit() -> bool:
 	var saved: bool = save_now()
 	if saved:
@@ -280,6 +370,15 @@ func _make_defaults() -> Dictionary:
 		&"owned_forms": ["void"],
 		&"equipped_form": "void",
 		&"tutorial_completed": false,
+		&"selected_rift": DEFAULT_RIFT_ID,
+		&"rift_bests": {},
+		&"rift_levels": {},
+		&"sanctum_levels": {},
+		&"trial_rank": 1,
+		&"trial_progress": {},
+		&"claimed_depth": 0,
+		&"ads_removed": false,
+		&"consent_state": "unknown",
 		&"challenge_state": {},
 		&"daily_state": {&"completed_dates": [], &"best_scores": {}},
 		&"settings": {
@@ -288,6 +387,7 @@ func _make_defaults() -> Dictionary:
 			&"haptics": true,
 			&"reduced_motion": false,
 			&"screen_shake": 1.0,
+			&"aim_arrow": true,
 		},
 	}
 
@@ -329,6 +429,27 @@ func _validate_and_migrate(source: Dictionary) -> Dictionary:
 	result[&"owned_forms"] = owned
 	var equipped: String = str(raw.get(&"equipped_form", "void"))
 	result[&"equipped_form"] = equipped if equipped in owned else "void"
+	var selected_rift: String = str(raw.get(&"selected_rift", DEFAULT_RIFT_ID))
+	result[&"selected_rift"] = (
+		selected_rift if selected_rift in VALID_RIFT_IDS else DEFAULT_RIFT_ID
+	)
+	if raw.get(&"rift_bests") is Dictionary:
+		result[&"rift_bests"] = _sanitize_rift_bests(raw[&"rift_bests"] as Dictionary)
+	if raw.get(&"rift_levels") is Dictionary:
+		result[&"rift_levels"] = _sanitize_rift_bests(raw[&"rift_levels"] as Dictionary)
+	if raw.get(&"sanctum_levels") is Dictionary:
+		result[&"sanctum_levels"] = _sanitize_id_counts(
+			raw[&"sanctum_levels"] as Dictionary
+		)
+	result[&"trial_rank"] = _safe_int(raw.get(&"trial_rank", 1), 1, 1, 999)
+	result[&"claimed_depth"] = _safe_int(raw.get(&"claimed_depth", 0), 0, 0, 9999)
+	result[&"ads_removed"] = raw[&"ads_removed"] if raw.get(&"ads_removed") is bool else false
+	var consent: String = str(raw.get(&"consent_state", "unknown"))
+	result[&"consent_state"] = consent if consent in VALID_CONSENT_STATES else "unknown"
+	if raw.get(&"trial_progress") is Dictionary:
+		result[&"trial_progress"] = _sanitize_id_counts(
+			raw[&"trial_progress"] as Dictionary
+		)
 	if raw.get(&"challenge_state") is Dictionary:
 		result[&"challenge_state"] = _sanitize_challenge_state(
 			raw[&"challenge_state"] as Dictionary
@@ -354,6 +475,151 @@ func _migrate_v0(old_data: Dictionary) -> Dictionary:
 	if old_data.has(&"selected_form"):
 		migrated[&"equipped_form"] = old_data[&"selected_form"]
 	return migrated
+
+
+## Whether the player owns the Remove Ads purchase.
+func has_removed_ads() -> bool:
+	return bool(_data.get(&"ads_removed", false))
+
+
+## Marks ads removed and optionally grants the bundled shards.
+##
+## Restores pass zero, so re-restoring a purchase can never mint shards repeatedly.
+func grant_remove_ads(bonus_shards: int) -> bool:
+	_data[&"ads_removed"] = true
+	if bonus_shards > 0:
+		_data[&"soul_shards"] = _clamped_add(
+			int(_data.get(&"soul_shards", 0)), bonus_shards
+		)
+	return _save_and_emit()
+
+
+## Stored advertising consent decision.
+func get_consent_state() -> String:
+	var state: String = str(_data.get(&"consent_state", "unknown"))
+	return state if state in VALID_CONSENT_STATES else "unknown"
+
+
+## Records an advertising consent decision.
+func set_consent_state(state: String) -> bool:
+	if state not in VALID_CONSENT_STATES:
+		return false
+	_data[&"consent_state"] = state
+	return _save_and_emit()
+
+
+## Pays every unclaimed depth milestone up to the deepest wave ever reached.
+##
+## Milestones are one-time and keyed on the lifetime `highest_wave`, so replaying a shallow run
+## never pays again and a single deep run can collect several at once.
+func claim_depth_milestones() -> Dictionary:
+	var reached: int = maxi(1, int(_data.get(&"highest_wave", 1)))
+	var claimed: int = maxi(0, int(_data.get(&"claimed_depth", 0)))
+	var reward: int = 0
+	var waves := PackedInt32Array()
+	for index: int in DEPTH_MILESTONES.size():
+		var wave: int = DEPTH_MILESTONES[index]
+		if wave <= claimed or wave > reached:
+			continue
+		reward += DEPTH_REWARDS[index]
+		waves.append(wave)
+		claimed = wave
+	if reward <= 0:
+		return {&"reward_shards": 0, &"waves": waves}
+	_data[&"claimed_depth"] = claimed
+	_data[&"soul_shards"] = _clamped_add(int(_data.get(&"soul_shards", 0)), reward)
+	_save_and_emit()
+	return {&"reward_shards": reward, &"waves": waves}
+
+
+## Deepest milestone wave already paid out.
+func get_claimed_depth() -> int:
+	return maxi(0, int(_data.get(&"claimed_depth", 0)))
+
+
+## Current Trials ladder tier, one-based.
+func get_trial_rank() -> int:
+	return maxi(1, int(_data.get(&"trial_rank", 1)))
+
+
+## Banked progress for every Trial the player has touched.
+func get_trial_progress() -> Dictionary:
+	return (_data.get(&"trial_progress", {}) as Dictionary).duplicate()
+
+
+## Stores a TrialTracker result and pays out its shard reward.
+func apply_trial_result(result: Dictionary) -> bool:
+	_data[&"trial_rank"] = _safe_int(result.get(&"rank", 1), 1, 1, 999)
+	if result.get(&"progress") is Dictionary:
+		_data[&"trial_progress"] = _sanitize_id_counts(
+			result[&"progress"] as Dictionary
+		)
+	var reward: int = clampi(int(result.get(&"reward_shards", 0)), 0, 10000)
+	if reward > 0:
+		_data[&"soul_shards"] = _clamped_add(int(_data.get(&"soul_shards", 0)), reward)
+	return _save_and_emit()
+
+
+## Purchased levels of every Soul Sanctum node, keyed by node id.
+func get_sanctum_levels() -> Dictionary:
+	return (_data.get(&"sanctum_levels", {}) as Dictionary).duplicate()
+
+
+## Purchased level of one Sanctum node.
+func get_sanctum_level(node_id: StringName) -> int:
+	var levels: Dictionary = _data.get(&"sanctum_levels", {}) as Dictionary
+	return maxi(0, int(levels.get(String(node_id), 0)))
+
+
+## Spends shards on one more level of a Sanctum node. The caller validates cost and prerequisites.
+func purchase_sanctum_level(node_id: StringName, price: int, max_level: int) -> bool:
+	var id_text: String = String(node_id)
+	if id_text.is_empty() or price < 0:
+		return false
+	var levels: Dictionary = _data.get(&"sanctum_levels", {}) as Dictionary
+	var current: int = maxi(0, int(levels.get(id_text, 0)))
+	if current >= max_level or int(_data.get(&"soul_shards", 0)) < price:
+		return false
+	levels[id_text] = current + 1
+	_data[&"sanctum_levels"] = levels
+	_data[&"soul_shards"] = int(_data.get(&"soul_shards", 0)) - price
+	return _save_and_emit()
+
+
+## Refunds every shard spent in the Sanctum and clears it. Used by the owner-facing reset only.
+func refund_sanctum(total_spent: int) -> bool:
+	_data[&"sanctum_levels"] = {}
+	_data[&"soul_shards"] = _clamped_add(int(_data.get(&"soul_shards", 0)), maxi(0, total_spent))
+	return _save_and_emit()
+
+
+## Keeps id-to-count maps sane: non-negative, bounded. Shared by Sanctum levels and Trial progress;
+## unknown ids are ignored by their catalog when applied.
+func _sanitize_id_counts(source: Dictionary) -> Dictionary:
+	var result: Dictionary = {}
+	for key: Variant in source.keys():
+		var id_text: String = str(key)
+		if id_text.is_empty():
+			continue
+		result[id_text] = _safe_int(source[key], 0, 0, MAX_COUNTER)
+	return result
+
+
+## Highest level cleared in one Rift; zero means the player has not finished level 1 yet.
+func get_rift_level(rift_id: StringName) -> int:
+	var levels: Dictionary = _data.get(&"rift_levels", {}) as Dictionary
+	return maxi(0, int(levels.get(String(rift_id), 0)))
+
+
+## Keeps only known rift ids mapped to sane best scores; drops anything else.
+func _sanitize_rift_bests(source: Dictionary) -> Dictionary:
+	var result: Dictionary = {}
+	for key: Variant in source.keys():
+		var id_text: String = str(key)
+		if id_text not in VALID_RIFT_IDS:
+			continue
+		result[id_text] = _safe_int(source[key], 0, 0, MAX_COUNTER)
+	return result
 
 
 func _sanitize_challenge_state(source: Dictionary) -> Dictionary:
@@ -409,6 +675,11 @@ func _sanitize_settings(source: Dictionary) -> Dictionary:
 	return {
 		&"music_volume": _safe_float(source.get(&"music_volume", 0.8), 0.8, 0.0, 1.0),
 		&"sfx_volume": _safe_float(source.get(&"sfx_volume", 0.9), 0.9, 0.0, 1.0),
+		# The full aim line became a direction arrow (owner decision). A new key, deliberately:
+		# every existing save held the old line's default of OFF, which would hide the arrow.
+		&"aim_arrow": (
+			source[&"aim_arrow"] if source.get(&"aim_arrow") is bool else defaults[&"aim_arrow"]
+		),
 		&"haptics": source[&"haptics"] if source.get(&"haptics") is bool else defaults[&"haptics"],
 		&"reduced_motion": (
 			source[&"reduced_motion"]

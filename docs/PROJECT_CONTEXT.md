@@ -5,7 +5,7 @@
 > the change. This file holds **meaning and intent**; the exhaustive, auto-generated inventory of
 > what exists is [generated/PROJECT_MAP.md](generated/PROJECT_MAP.md).
 
-_Last updated: 2026-09-11 · by: Codex_
+_Last updated: 2026-09-13 · by: Claude Code (Opus 5)_
 
 ## 1. Identity
 
@@ -23,12 +23,14 @@ _Last updated: 2026-09-11 · by: Codex_
 
 - **Phase:** Redesign v1 integrated (ADR-0005) and the playfield/sprite composition settled
   (ADR-0006). Runs on the owner's Android phone from a debug APK. Next: direction/monetisation.
-- **Works:** Loading → Home (Play, Forms, Daily Rift, Stats, Settings) → tutorial or endless waves
-  with the recurring Reaper → Results; persistent save; runtime-synthesized SFX and adaptive music;
-  shake, hit-stop and haptics with Reduced Motion; pause menu with confirmations; auto-pause on
-  interruption; Android back. 20 headless test scripts pass (`tools/run_tests.sh`).
-- **Next:** owner discussion (direction, monetisation, changes); device feel pass; owner-side art
-  re-export (dark icons, back chevron). Phones only. See [ROADMAP.md](ROADMAP.md).
+- **Works:** Loading → animated Home (Play + nav: Rifts, Forms, Sanctum, Trials, Daily; Stats,
+  Settings) → tutorial or endless waves with the recurring Reaper → Results; persistent save;
+  runtime-synthesized SFX and adaptive music; shake, hit-stop and haptics with Reduced Motion; pause
+  menu with confirmations; auto-pause on interruption; Android back. 33 headless test scripts pass (`tools/run_tests.sh`).
+- **Direction settled 2026-09-12:** one endless mode, engagement layered around it; M7 engagement
+  core → M8 Rifts → M9 monetisation (rewarded video + one remove-ads IAP). See [ROADMAP.md](ROADMAP.md).
+- **In flight:** Rifts ladder + map UI shipped ([ADR-0007](decisions/0007-rifts-as-rule-variant-arenas.md));
+  no rule twist implemented yet, so all five arenas still play identically.
 
 Keep this section ≤ 10 lines. Details belong in ROADMAP.md and DEVLOG.md.
 
@@ -134,6 +136,10 @@ Hand-maintained tables that give **meaning** to what the project map lists. Keep
 | Game feel & lifecycle | ✅ done | [game_feel.md](systems/game_feel.md) | `res://scenes/gameplay/game_world.gd` |
 | Settings & statistics | ✅ done | [settings.md](systems/settings.md) | `res://scenes/screens/settings_screen.tscn` |
 | UI design system | ✅ done | [ui_design_system.md](systems/ui_design_system.md) | `res://assets/ui/theme/wisp_theme.tres` |
+| Rifts | 🔄 in progress | [rifts.md](systems/rifts.md) | `res://scenes/screens/rift_map_screen.tscn` |
+| Soul Sanctum | ✅ done | [meta_progression.md](systems/meta_progression.md) | `res://scenes/screens/sanctum_screen.tscn` |
+| Trials ladder | ✅ done | [meta_progression.md](systems/meta_progression.md) | `res://scenes/screens/trials_screen.tscn` |
+| Monetisation | 🔄 plumbing only | [monetisation.md](systems/monetisation.md) | `res://scripts/autoload/monetisation_service.gd` |
 
 ### 5.2 Key scenes
 Only entry points, levels and major reusable prefabs — the map lists every scene.
@@ -141,7 +147,7 @@ Only entry points, levels and major reusable prefabs — the map lists every sce
 | Scene | Purpose | System |
 |---|---|---|
 | `res://scenes/main/main.tscn` | Composition root: Loading, Home, Forms, Daily, Statistics, Settings, GameWorld or Results; back routing | Game flow |
-| `res://scenes/screens/home_screen.tscn` | Full-bleed production-art Home screen | Game flow |
+| `res://scenes/screens/home_screen.tscn` | Home: top bar, animated hero Wisp over a living background (`HomeAmbience`, `OrbitMotes`), PLAY, bottom nav | Game flow |
 | `res://scenes/gameplay/game_world.tscn` | Responsive playable arena and run-local coordinator | Core run |
 | `res://scenes/player/wisp_player.tscn` | Aiming, dash, health and death player prefab | Player dash / health |
 | `res://scenes/enemies/soul_wisp.tscn` | One-hit steering enemy prefab | Enemies |
@@ -155,17 +161,18 @@ Only entry points, levels and major reusable prefabs — the map lists every sce
 | `res://scenes/tutorial/tutorial_overlay.tscn` | Non-blocking first-run guidance overlay | Tutorial |
 | `res://scenes/screens/results_screen.tscn` | Score, run statistics, shard summary and navigation | Game flow |
 | `res://scenes/bosses/reaper_boss.tscn` | Recurring three-phase Reaper encounter prefab | Reaper boss |
-| `res://scenes/screens/forms_screen.tscn` | Preview, purchase and equip the six cosmetic forms | Cosmetic forms |
+| `res://scenes/screens/forms_screen.tscn` | Card carousel to preview, claim and equip the six cosmetic forms | Cosmetic forms |
 | `res://scenes/screens/daily_screen.tscn` | Rift of the Day seed, best, reward and three challenges | Daily/challenges |
 | `res://scenes/screens/loading_screen.tscn` | Boot: streams screens and waits for audio synthesis (≤ 6 s) | Game flow |
 | `res://scenes/screens/settings_screen.tscn` | Settings, Privacy & About, armed reset; also the in-run overlay | Settings & statistics |
 | `res://scenes/screens/statistics_screen.tscn` | Lifetime statistics | Settings & statistics |
-
+| `res://scenes/screens/rift_map_screen.tscn` | Arena ladder card carousel: rule twist, unlock gate, level progress and per-Rift best | Rifts |
 ### 5.3 Autoloads
 | Name | Script | Responsibility |
 |---|---|---|
 | `SaveManager` | `res://scripts/autoload/save_manager.gd` (`SaveManagerService`) | Versioned local progression: validation, migration, atomic save + backup; automated runs use `user://test_runs/` ([ADR-0003](decisions/0003-save-manager-autoload.md)) |
 | `Audio` | `res://scripts/autoload/audio_service.gd` (`AudioService`) | Runtime-synthesized SFX and layered music on Master/Music/SFX/UI buses; call through `SoundFx` ([ADR-0004](decisions/0004-runtime-synthesized-audio.md)) |
+| `Monetisation` | `res://scripts/autoload/monetisation_service.gd` (`MonetisationService`) | Opt-in rewarded placements and the Remove Ads product behind an injected `AdProvider`; ships with `NullAdProvider`, so nothing is offered ([ADR-0009](decisions/0009-monetisation-model.md)) |
 
 ### 5.4 Input actions
 | Action | Default bindings | Meaning |
@@ -209,6 +216,8 @@ Only entry points, levels and major reusable prefabs — the map lists every sce
 | `ReaperTuning` | `res://scripts/resources/reaper_tuning.gd` | `res://data/bosses/default_reaper.tres` | Reaper health, phase timings, attack geometry and rewards |
 | `FormData` | `res://scripts/resources/form_data.gd` | `res://data/forms/*.tres` | Cosmetic form identity, price, requirement, texture and tint |
 | `FormCatalog` | `res://scripts/resources/form_catalog.gd` | `res://data/forms/default_catalog.tres` | Ordered six-form registry and validation |
+| `RiftData` | `res://scripts/resources/rift_data.gd` | `res://data/rifts/*.tres` | Arena identity, backdrop, unlock gate and rule twist |
+| `RiftCatalog` | `res://scripts/resources/rift_catalog.gd` | `res://data/rifts/default_catalog.tres` | Ordered five-Rift ladder and validation |
 
 ## 6. Tooling
 
@@ -224,7 +233,7 @@ Only entry points, levels and major reusable prefabs — the map lists every sce
 | Frame-time benchmark (crowded run) | `Godot --headless --path . --script res://tools/godot/bench_stress.gd` |
 | Regenerate runtime art from the redesign sheets | `python3 tools/art/extract_redesign.py`, then `tools/validate.sh` |
 | Rebuild the UI Theme | steps in [ui_design_system.md](systems/ui_design_system.md) |
-| Build + deploy the Android debug APK (device over USB) | `JAVA_HOME=$(/usr/libexec/java_home) "$GODOT" --headless --path . --export-debug "Android" build/android/wisp_rush_debug.apk` then `~/Library/Android/sdk/platform-tools/adb install -r -t build/android/wisp_rush_debug.apk` and `adb shell am start -n com.cognitix.wisprush/com.godot.game.GodotApp` |
+| Build + deploy the Android debug APK (device over USB) | `JAVA_HOME=$(/usr/libexec/java_home) "$GODOT" --headless --path . --export-debug "Android" build/android/wisp_rush_debug.apk` then `~/Library/Android/sdk/platform-tools/adb install -r -t build/android/wisp_rush_debug.apk` and `adb shell monkey -p com.cognitix.wisprush -c android.intent.category.LAUNCHER 1` (the activity is `GodotAppLauncher` and is **not exported**, so `am start -n` is denied) |
 | Render at an explicit window aspect | `tools/screenshot.sh [scene] [frames] [size]` (PNG remains at design resolution; runtime log reports the expanded arena) |
 | Run the game / open the editor / drive Godot from an agent | See [AGENTS.md](../AGENTS.md) §4 (commands + Godot MCP) |
 

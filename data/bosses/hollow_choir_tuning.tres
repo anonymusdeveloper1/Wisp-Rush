@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="ReaperTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/reaper_tuning.gd" id="1_tuning"]
+
+[resource]
+script = ExtResource("1_tuning")
+design_width = 1080.0
+base_health = 12
+health_per_encounter = 4
+intro_duration = 1.2
+recovery_duration = 0.65
+warning_duration = 0.8
+sweep_duration = 0.4
+teleport_attack_duration = 0.3
+corridor_duration = 0.6
+exposed_duration = 1.15
+speedup_per_encounter = 0.07
+minimum_timing_multiplier = 0.72
+sprite_diameter = 403.0
+core_radius = 68.0
+sweep_radius = 220.0
+sweep_blade_radius = 46.0
+lane_radius = 46.0
+score_reward = 1500
+shard_reward = 25
+experience_reward = 60
+victory_duration = 1.0

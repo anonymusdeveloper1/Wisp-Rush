@@ -25,6 +25,7 @@ config/icon="res://assets/art/branding/wisp_rush_app_icon_master.png"
 
 SaveManager="*res://scripts/autoload/save_manager.gd"
 Audio="*res://scripts/autoload/audio_service.gd"
+Monetisation="*res://scripts/autoload/monetisation_service.gd"
 
 [debug]
 

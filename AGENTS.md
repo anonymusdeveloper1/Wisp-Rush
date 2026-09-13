@@ -61,7 +61,7 @@
 | Frame-time benchmark | `"$GODOT" --headless --path . --script res://tools/godot/bench_stress.gd` |
 | Regenerate runtime art (never hand-edit `assets/art/`) | `python3 tools/art/extract_redesign.py` → `tools/validate.sh` |
 | Style UI | use theme type variations (`docs/systems/ui_design_system.md`) and `Palette`; no per-node StyleBoxFlat/colour overrides |
-| Build + deploy the Android debug APK (device over USB) | `JAVA_HOME=$(/usr/libexec/java_home) "$GODOT" --headless --path . --export-debug "Android" build/android/wisp_rush_debug.apk` then `~/Library/Android/sdk/platform-tools/adb install -r -t build/android/wisp_rush_debug.apk` and `adb shell am start -n com.cognitix.wisprush/com.godot.game.GodotApp` |
+| Build + deploy the Android debug APK (device over USB) | `JAVA_HOME=$(/usr/libexec/java_home) "$GODOT" --headless --path . --export-debug "Android" build/android/wisp_rush_debug.apk` then `~/Library/Android/sdk/platform-tools/adb install -r -t build/android/wisp_rush_debug.apk` and `adb shell monkey -p com.cognitix.wisprush -c android.intent.category.LAUNCHER 1` (the activity is `GodotAppLauncher` and is **not exported**, so `am start -n` is denied) |
 | Screenshot of what the game renders | `tools/screenshot.sh [res://scene.tscn] [frames] [size]` → `logs/screenshot.png` |
 | Run the game (window) | `"$GODOT" --path .` |
 | Run one scene | `"$GODOT" --path . res://scenes/<feature>/<thing>.tscn` |

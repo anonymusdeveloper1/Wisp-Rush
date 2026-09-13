@@ -20,6 +20,10 @@ const HIT_FLASH_MODULATE: Color = Color(1.9, 2.0, 2.05, 1.0)
 const HIT_FLASH_DURATION: float = 0.12
 ## Share of the dissolve spent collapsing toward the core before bursting outward.
 const DISSOLVE_INWARD_SHARE: float = 0.3
+## Scale an enemy pops in from as its telegraph resolves.
+const ARRIVAL_POP_SCALE: float = 0.72
+## Seconds the arrival pop takes to settle.
+const ARRIVAL_POP_DURATION: float = 0.22
 
 ## Movement, collision, durability and reward values for this archetype.
 @export var tuning: EnemyTuning
@@ -33,6 +37,8 @@ var _last_edge_position: Vector2 = Vector2.ZERO
 var _world_speed: float = 1.0
 var _viewport_scale: float = 1.0
 var _arena_rect: Rect2 = Rect2()
+## Painted floor as a screen-space polygon. Empty keeps the legacy rectangle containment.
+var _arena_polygon: PackedVector2Array = PackedVector2Array()
 var _base_sprite_scale: Vector2 = Vector2.ONE
 
 var _telegraph_remaining: float = 0.0
@@ -40,6 +46,7 @@ var _slow_remaining: float = 0.0
 var _slow_multiplier: float = 1.0
 var _last_damage_event_id: int = -1
 var _flash_tween: Tween
+var _arrival_tween: Tween
 
 @onready var _sprite: AnimatedSprite2D = %Sprite
 @onready var _arrival_ring: Sprite2D = %ArrivalRing
@@ -93,6 +100,11 @@ func set_viewport_width(viewport_width: float) -> void:
 
 
 ## Supplies live bounds used to keep mobile enemies readable inside the arena.
+## Applies the painted floor as a polygon, so enemies stay off the lava and the ice pillars.
+func set_arena_polygon(polygon: PackedVector2Array) -> void:
+	_arena_polygon = polygon
+
+
 func set_arena_rect(rect: Rect2) -> void:
 	_arena_rect = rect
 	set_viewport_width(rect.size.x)
@@ -203,6 +215,12 @@ func _clamp_to_arena() -> void:
 	if _arena_rect.size.x <= 0.0 or _arena_rect.size.y <= 0.0:
 		return
 	var margin: float = maxf(get_collision_radius(), _arena_rect.size.x * 0.05)
+	if _arena_polygon.size() >= 3:
+		# Containment runs at physics rate for up to MAX_LIVE_ENEMIES, so only pay for the polygon
+		# test when the enemy has actually left the floor.
+		if not DashGeometry.is_inside_polygon(position, _arena_polygon):
+			position = DashGeometry.clamp_to_polygon(position, _arena_polygon, margin)
+		return
 	position = Vector2(
 		clampf(position.x, _arena_rect.position.x + margin, _arena_rect.end.x - margin),
 		clampf(position.y, _arena_rect.position.y + margin, _arena_rect.end.y - margin),
@@ -224,7 +242,25 @@ func _update_telegraph(delta: float) -> void:
 		state = State.ACTIVE
 		_arrival_ring.visible = false
 		_sprite.modulate = Color.WHITE
+		_play_arrival_pop()
 		_on_became_active()
+
+
+## Snaps the enemy into existence with a short overshoot as the telegraph resolves.
+##
+## Purely presentational: collision uses `get_collision_radius()`, which is unaffected by the
+## sprite scale, so the pop can never change when a dash connects.
+func _play_arrival_pop() -> void:
+	if _arrival_tween != null and _arrival_tween.is_valid():
+		_arrival_tween.kill()
+	_sprite.scale = _base_sprite_scale * ARRIVAL_POP_SCALE
+	_arrival_tween = create_tween()
+	_arrival_tween.tween_property(
+		_sprite,
+		"scale",
+		_base_sprite_scale,
+		ARRIVAL_POP_DURATION,
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 func _update_slow(delta: float) -> void:

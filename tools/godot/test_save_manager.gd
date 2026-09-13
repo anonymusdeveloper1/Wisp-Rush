@@ -18,7 +18,14 @@ func _run_checks() -> void:
 	manager.configure_storage_paths(save_path, temp_path, backup_path)
 	root.add_child(manager)
 	var defaults: Dictionary = manager.get_snapshot()
-	if defaults[&"schema_version"] != 1 or defaults[&"owned_forms"] != ["void"]:
+	if (
+		defaults[&"schema_version"] != SaveManagerService.SCHEMA_VERSION
+		or defaults[&"owned_forms"] != ["void"]
+		or defaults[&"selected_rift"] != SaveManagerService.DEFAULT_RIFT_ID
+		or not (defaults[&"rift_bests"] as Dictionary).is_empty()
+		# The direction arrow replaced the aim line and is on by default.
+		or not bool((defaults[&"settings"] as Dictionary)[&"aim_arrow"])
+	):
 		failures += 1
 		push_error("save_manager: safe defaults failed")
 
@@ -86,7 +93,7 @@ func _run_checks() -> void:
 	root.add_child(migrated)
 	var migrated_data: Dictionary = migrated.get_snapshot()
 	if (
-		migrated_data[&"schema_version"] != 1
+		migrated_data[&"schema_version"] != SaveManagerService.SCHEMA_VERSION
 		or migrated_data[&"best_score"] != 777
 		or migrated_data[&"soul_shards"] != 320
 		or migrated_data[&"highest_wave"] != 1
@@ -101,6 +108,34 @@ func _run_checks() -> void:
 	migrated.queue_free()
 	await process_frame
 	_remove_test_tree(test_root)
+	var v1_root: String = "user://codex_save_v1_%d" % Time.get_ticks_usec()
+	DirAccess.make_dir_recursive_absolute(v1_root)
+	var v1_file := FileAccess.open(v1_root + "/save.json", FileAccess.WRITE)
+	v1_file.store_string(JSON.stringify({
+		"schema_version": 1,
+		"best_score": 4200,
+		"soul_shards": 55,
+		"selected_rift": "frozen_choir",
+	}))
+	v1_file.close()
+	var upgraded := SAVE_SCRIPT.new() as SaveManagerService
+	upgraded.configure_storage_paths(
+		v1_root + "/save.json",
+		v1_root + "/temp.json",
+		v1_root + "/backup.json",
+	)
+	root.add_child(upgraded)
+	var upgraded_data: Dictionary = upgraded.get_snapshot()
+	if (
+		upgraded_data[&"schema_version"] != SaveManagerService.SCHEMA_VERSION
+		or upgraded_data[&"best_score"] != 4200
+		or upgraded_data[&"soul_shards"] != 55
+		or upgraded_data[&"selected_rift"] != "frozen_choir"
+		or not (upgraded_data[&"rift_bests"] as Dictionary).is_empty()
+	):
+		failures += 1
+		push_error("save_manager: v1 to v2 rift migration failed")
+
 	if failures == 0:
 		print("save_manager: atomic round trip, recovery and migration passed")
 	quit(failures)

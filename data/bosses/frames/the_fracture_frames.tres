@@ -1,0 +1,73 @@
+[gd_resource type="SpriteFrames" load_steps=12 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/art/characters/the_fracture/01_dormant.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/the_fracture/02_awaken.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/the_fracture/03_idle.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/the_fracture/04_core_exposed.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/the_fracture/05_windup.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/the_fracture/06_slab_volley.png" id="6"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/the_fracture/07_portal_open.png" id="7"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/the_fracture/08_blink_out.png" id="8"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/the_fracture/09_reform.png" id="9"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/the_fracture/10_stagger.png" id="10"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/the_fracture/12_dissolve.png" id="11"]
+
+[resource]
+animations = [
+{
+"frames": [{"duration": 1.0, "texture": ExtResource("2")}],
+"loop": false,
+"name": &"appear",
+"speed": 6.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("1")}],
+"loop": false,
+"name": &"arrival",
+"speed": 6.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("7")}],
+"loop": false,
+"name": &"cast",
+"speed": 6.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("11")}],
+"loop": false,
+"name": &"defeated",
+"speed": 6.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("4")}],
+"loop": false,
+"name": &"exposed",
+"speed": 6.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("9")}],
+"loop": false,
+"name": &"hit",
+"speed": 6.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("3")}],
+"loop": true,
+"name": &"idle",
+"speed": 3.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("10")}],
+"loop": false,
+"name": &"stagger",
+"speed": 6.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("6")}],
+"loop": false,
+"name": &"strike",
+"speed": 6.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("8")}],
+"loop": false,
+"name": &"vanish",
+"speed": 6.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("5")}],
+"loop": false,
+"name": &"windup",
+"speed": 6.0
+}
+]

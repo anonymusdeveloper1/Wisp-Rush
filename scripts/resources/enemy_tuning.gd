@@ -34,3 +34,15 @@ extends Resource
 @export_range(0.1, 3.0, 0.05) var action_duration: float = 0.5
 ## Speed multiplier during an archetype-specific dart or charge.
 @export_range(1.0, 8.0, 0.1) var action_speed_multiplier: float = 3.0
+
+@export_group("Rift behaviours")
+## Enemy kind each death spawns, for splitters like the Cinder Shade. Empty means no split.
+@export var split_kind: StringName = &""
+## How many children a lethal hit spawns.
+@export_range(0, 4, 1) var split_count: int = 0
+## Sprite and collision multiplier applied to spawned children.
+@export_range(0.2, 1.0, 0.05) var split_scale: float = 0.6
+## Frontal arc, in degrees, that blocks dash damage entirely. Zero means no shield.
+@export_range(0.0, 300.0, 5.0) var shield_arc_degrees: float = 0.0
+## Distance between a tethered pair's two bodies at design width. Zero means no tether.
+@export_range(0.0, 600.0, 1.0) var tether_length: float = 0.0

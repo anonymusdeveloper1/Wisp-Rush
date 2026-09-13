@@ -2,14 +2,14 @@
 
 [ext_resource type="Texture2D" path="res://assets/ui/theme/textures/ornament_card_top.png" id="1_amyxv"]
 
-[node name="CardTopOrnament" type="Control" unique_id=791700987]
+[node name="CardTopOrnament" type="Control" unique_id=1983766298]
 layout_mode = 3
 anchors_preset = 0
 size_flags_horizontal = 4
 size_flags_vertical = 0
 mouse_filter = 2
 
-[node name="Art" type="TextureRect" parent="." unique_id=910371773]
+[node name="Art" type="TextureRect" parent="." unique_id=67243026]
 layout_mode = 0
 offset_left = -34.0
 offset_top = -70.0

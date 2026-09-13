@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="TrialData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/trial_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+trial_id = &"t06_wave"
+title = "GO DEEPER"
+description = "Reach wave 14 in a single run."
+metric = &"wave"
+target = 14
+reward_shards = 65
+tier = 6
+cumulative = false

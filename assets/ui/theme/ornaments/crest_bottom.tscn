@@ -2,14 +2,14 @@
 
 [ext_resource type="Texture2D" path="res://assets/ui/theme/textures/ornament_crest_bottom.png" id="1_a3cfr"]
 
-[node name="CrestBottomOrnament" type="Control" unique_id=1141354513]
+[node name="CrestBottomOrnament" type="Control" unique_id=490886942]
 layout_mode = 3
 anchors_preset = 0
 size_flags_horizontal = 4
 size_flags_vertical = 8
 mouse_filter = 2
 
-[node name="Art" type="TextureRect" parent="." unique_id=1096226610]
+[node name="Art" type="TextureRect" parent="." unique_id=313822364]
 layout_mode = 0
 offset_left = -50.0
 offset_top = 8.0

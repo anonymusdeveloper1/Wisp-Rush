@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="TrialData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/trial_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+trial_id = &"t09_multi_kill_dashes_m"
+title = "PERFECT ARC"
+description = "Land 6 multi-kill dashes in one run."
+metric = &"multi_kill_dashes"
+target = 6
+reward_shards = 95
+tier = 9
+cumulative = false

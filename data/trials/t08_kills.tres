@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="TrialData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/trial_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+trial_id = &"t08_kills"
+title = "REAP THE RIFT"
+description = "Defeat 2300 enemies in total."
+metric = &"kills"
+target = 2300
+reward_shards = 85
+tier = 8
+cumulative = true

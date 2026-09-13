@@ -1,0 +1,121 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scenes/screens/trials_screen.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/menu_background.png" id="2_bg"]
+[ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/banner_top.tscn" id="3_banner"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/02_soul_shards.png" id="4_shards"]
+
+[node name="TrialsScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.067, 0.082, 0.129, 0.45)
+
+[node name="Root" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_top = 64
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_bottom = 56
+
+[node name="Column" type="VBoxContainer" parent="Root"]
+layout_mode = 2
+theme_override_constants/separation = 28
+
+[node name="TitleBanner" type="PanelContainer" parent="Root/Column"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"PanelBanner"
+
+[node name="BannerTop" parent="Root/Column/TitleBanner" instance=ExtResource("3_banner")]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Root/Column/TitleBanner"]
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+text = "TRIALS"
+horizontal_alignment = 1
+
+[node name="Header" type="HBoxContainer" parent="Root/Column"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="RankPlate" type="PanelContainer" parent="Root/Column/Header"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"PanelPlate"
+
+[node name="RankRow" type="HBoxContainer" parent="Root/Column/Header/RankPlate"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Icon" type="TextureRect" parent="Root/Column/Header/RankPlate/RankRow"]
+custom_minimum_size = Vector2(52, 52)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("4_shards")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RankLabel" type="Label" parent="Root/Column/Header/RankPlate/RankRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"AmberValueLabel"
+theme_override_font_sizes/font_size = 40
+text = "RANK 1"
+
+[node name="Scroll" type="ScrollContainer" parent="Root/Column"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ListPad" type="MarginContainer" parent="Root/Column/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_right = 30
+
+[node name="TrialList" type="VBoxContainer" parent="Root/Column/Scroll/ListPad"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 26
+
+[node name="BackButton" type="Button" parent="Root/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"PrimaryButton"
+text = "BACK"

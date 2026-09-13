@@ -32,8 +32,9 @@ This is explicitly **not** orbit, tap-to-reverse, ring-gap or slingshot movement
 
 | Action | Touch / mouse | Keyboard debug | Notes |
 |---|---|---|---|
-| Aim | Hold and drag / click-drag | WASD or arrows | Thin path and first edge impact preview |
+| Aim | Hold and drag / click-drag | WASD or arrows | A small direction arrow beside the Wisp (AIM ARROW, on by default) |
 | Dash | Release after ≥ 28 dp | Space | Swipe direction is travel direction; length does not change power |
+| Redirect | Swipe again while dashing | Direction + Space | Turns the live dash from wherever the Wisp is |
 | Pause / back | HUD button | Escape | Closes the top overlay first |
 
 Input actions must match [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) §5.4. Only the first active
@@ -47,6 +48,18 @@ State machine: `SPAWNING → WAITING_AT_EDGE → AIMING → WINDUP → DASHING �
 `HURT`, `DEAD`, and `VICTORY`. Starting windup is 65 ms. A normalized direction produces constant
 speed, initially tuned to cross 1080 px in about 180–260 ms. The first ray/arena intersection is
 calculated before launch; movement stops exactly at it. Outward edge swipes reflect inward.
+
+**Flow** (owner decision 2026-09-12):
+- **Mid-dash redirect.** A swipe while dashing turns the dash from the Wisp's current position; a
+  dash no longer has to run wall to wall. Each redirect is a new dash for hit purposes, so enemies
+  passed on one leg can be hit on the next; the leg that ended is still scored.
+- **No lost input.** A touch is tracked in every live state. A swipe released during the windup, a
+  hurt reaction or a reform is buffered for 0.3 s and fires as soon as the Wisp can act; a swipe
+  during the 140 ms landing reaction launches immediately instead of waiting it out, and a swipe
+  during the 65 ms windup re-aims that dash.
+- **Launch burst.** Each dash starts at 1.4× speed and eases to cruise over about 0.1 s.
+- **Chain momentum.** A dash launched within 0.35 s of landing, or any redirect, adds +8 % speed up
+  to +25 %. A slow restart or taking damage resets it.
 
 Every dash has a unique `dash_id`. Collision uses the swept segment between physics positions,
 not a point sample. Each enemy can be damaged once per dash.
@@ -155,7 +168,20 @@ final files remain unavailable, use carefully tuned runtime synthesis rather tha
 ## 11. UI & screen flow
 
 `Loading → Home → Tutorial/Main Run → Upgrade/Pause overlays → Results → fast Restart/Home`.
-Home also reaches Forms, Discovery/Upgrades, Statistics, Settings and Daily Challenge. HUD places
+Home also reaches Forms, Discovery/Upgrades, Statistics, Settings and Daily Challenge.
+
+**Home** (owner decision 2026-09-13): minimal and Material-like in the stone-and-cyan style — a slim
+top bar (shards, best, Statistics, Settings), the logo, the equipped Wisp alive in the middle, one
+big PLAY with a caption naming the Rift it enters, and a bottom navigation bar (Rifts, Forms,
+Sanctum, Trials, Daily). The Wisp floats, breathes and sways with a pulsing glow while soul motes
+orbit it; the background comes alive (brazier flicker, rune pulse, drifting mist, rising motes)
+while the art stays unchanged. No entrance animation, no PLAY pulse; Reduced Motion stills it all.
+
+**Forms and Rift Map** are vertical card pickers: one big tall focused card in the centre, raised
+and framed, neighbours peeking in dimmed; swipe sideways to browse; a description and one main
+button below. Locked forms and Rifts stay previewable; a locked Rift can never be entered.
+
+HUD places
 score top-centre, health/currency top-left, pause top-right, contextual wave/combo information and a
 slim XP bar. Only UI respects safe-area insets; the world continues behind cutouts. All controls are
 large, focusable and have visible desktop/controller focus styling.
@@ -193,11 +219,19 @@ or legacy art. Monetisation integration stays hidden unless backed by a real pla
 | 6 | ASSUMPTION: taking damage resets the kill streak used by Reaper's Gift, matching combo risk/reward. | Implemented; owner may retune |
 | 7 | ASSUMPTION: the Reaper recurs every four waves (first at wave 4, about 66 seconds); each victory resumes a harder cycle. | Milestone 3 default; owner may retune |
 | 8 | ASSUMPTION: a completed daily run grants 10 Soul Shards once per local date; three date-seeded challenges grant 10–25 once each and accumulate across that date's runs. | Milestone 3 default; owner may retune |
+| 9 | ASSUMPTION: five Rifts gated on lifetime best wave at 0/5/10/15/20, each with one rule twist (portals, shrinking floor, drift, boss rush). The GDD never specified arenas. | Ladder and map shipped ([ADR-0007](decisions/0007-rifts-as-rule-variant-arenas.md)); twists unimplemented; owner may retune |
+| 11 | Monetisation model chosen: free with opt-in rewarded video (revive, double shards, upgrade reroll) plus one Remove Ads + shard pack IAP; never interstitials. Plumbing ships behind a null provider, so §12's offline/no-data-collection promise still holds today. §12 and §13 must be amended **before** a build with a real ad SDK ships. | Settled 2026-09-12 ([ADR-0009](decisions/0009-monetisation-model.md)); SDK, privacy policy and store config still owner-side |
+| 10 | ASSUMPTION: three new enemies (Cinder Shade splits on death, Warden is shielded on one face, Rift Spawn is a tethered pair) and a second boss (The Hollow Choir, a static three-core structure) extend the roster. Invented to fill the M8 art pack; not in the owner prompt. | Art generated only — no tuning, behaviour or scene; owner may reject or redesign |
 
 ## Change history
 
 | Date | Change | Source |
 |---|---|---|
+| 2026-09-13 | Home redesign (animated hero + living background, PLAY with Rift caption, bottom nav); Forms and Rift Map as portrait card carousels (§11) | Owner |
+| 2026-09-12 | Movement flow: mid-dash redirect, input buffering, landing-lock cancel, launch burst, chain momentum; aim line replaced by a direction arrow (§4, §5.1) | Owner |
+| 2026-09-12 | Monetisation model settled: opt-in rewarded video + one Remove Ads IAP, no interstitials (ADR-0009, §14 #11) | Owner |
+| 2026-09-12 | Permanent progression added: Soul Sanctum, Trials ladder, depth milestones | Owner request |
+| 2026-09-12 | Rifts: five rule-variant arenas, derived unlock ladder and map UI (ADR-0007); new enemy/boss art assumed (§14 #9–10) | Owner request |
 | 2026-09-12 | Playfield inset to the painted floor; sprites and hitboxes ×1.3–1.45 (ADR-0006) | Owner |
 | 2026-09-11 | Art direction replaced by redesign v1 (ADR-0005) | Owner |
 | 2026-09-11 | Phones-only QA; planned id `com.cognitix.wisprush`; release deferred for polish | Owner |

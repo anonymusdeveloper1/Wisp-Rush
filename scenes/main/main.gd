@@ -6,11 +6,16 @@ extends Node
 
 const LOADING_SCREEN: PackedScene = preload("res://scenes/screens/loading_screen.tscn")
 const FORM_CATALOG: FormCatalog = preload("res://data/forms/default_catalog.tres")
+const RIFT_CATALOG: RiftCatalog = preload("res://data/rifts/default_catalog.tres")
+const SANCTUM_CATALOG: SanctumCatalog = preload("res://data/sanctum/default_catalog.tres")
 ## Screen scenes streamed in at boot, keyed by screen id.
 const SCREEN_PATHS: Dictionary[StringName, String] = {
 	&"home": "res://scenes/screens/home_screen.tscn",
 	&"forms": "res://scenes/screens/forms_screen.tscn",
 	&"daily": "res://scenes/screens/daily_screen.tscn",
+	&"rift_map": "res://scenes/screens/rift_map_screen.tscn",
+	&"sanctum": "res://scenes/screens/sanctum_screen.tscn",
+	&"trials": "res://scenes/screens/trials_screen.tscn",
 	&"statistics": "res://scenes/screens/statistics_screen.tscn",
 	&"settings": "res://scenes/screens/settings_screen.tscn",
 	&"game": "res://scenes/gameplay/game_world.tscn",
@@ -109,6 +114,9 @@ func _show_home() -> void:
 	home.play_requested.connect(_show_game)
 	home.forms_requested.connect(_show_forms)
 	home.daily_requested.connect(_show_daily)
+	home.rift_map_requested.connect(_show_rift_map)
+	home.sanctum_requested.connect(_show_sanctum)
+	home.trials_requested.connect(_show_trials)
 	home.statistics_requested.connect(_show_statistics)
 	home.settings_requested.connect(_show_settings)
 	_replace_screen(home)
@@ -128,6 +136,73 @@ func _show_forms() -> void:
 		int(snapshot[&"bosses_defeated"]),
 	)
 	_replace_screen(forms)
+
+
+func _show_trials() -> void:
+	var trials := _instantiate(&"trials") as TrialsScreen
+	trials.back_requested.connect(_show_home)
+	trials.setup(_save_manager.get_trial_rank(), _save_manager.get_trial_progress())
+	_replace_screen(trials)
+
+
+func _show_sanctum() -> void:
+	var sanctum := _instantiate(&"sanctum") as SanctumScreen
+	sanctum.back_requested.connect(_show_home)
+	sanctum.purchase_requested.connect(_on_sanctum_purchase_requested)
+	_refresh_sanctum_screen(sanctum, "")
+	_replace_screen(sanctum)
+
+
+## Buys one Sanctum level, enforcing cost and prerequisites before touching the save.
+func _on_sanctum_purchase_requested(node_id: StringName) -> void:
+	var sanctum := _current_screen as SanctumScreen
+	if sanctum == null:
+		return
+	var node: SanctumNode = SANCTUM_CATALOG.get_node_by_id(node_id)
+	if node == null:
+		_refresh_sanctum_screen(sanctum, "UNKNOWN RITE")
+		return
+	var levels: Dictionary = _save_manager.get_sanctum_levels()
+	var level: int = int(levels.get(String(node_id), 0))
+	var cost: int = node.get_cost(level)
+	if cost < 0:
+		_refresh_sanctum_screen(sanctum, "ALREADY AWAKENED")
+		return
+	if not SANCTUM_CATALOG.is_unlocked(node, levels):
+		_refresh_sanctum_screen(sanctum, "SEALED — MASTER ITS ROOT FIRST")
+		return
+	if int(_save_manager.get_snapshot()[&"soul_shards"]) < cost:
+		_refresh_sanctum_screen(sanctum, "NOT ENOUGH SHARDS")
+		return
+	if _save_manager.purchase_sanctum_level(node_id, cost, node.max_level):
+		_refresh_sanctum_screen(sanctum, "%s AWAKENED" % node.display_name, true)
+	else:
+		_refresh_sanctum_screen(sanctum, "THE RITE FAILED")
+
+
+func _refresh_sanctum_screen(
+		sanctum: SanctumScreen,
+		message: String,
+		success: bool = false,
+	) -> void:
+	var snapshot: Dictionary = _save_manager.get_snapshot()
+	sanctum.setup(int(snapshot[&"soul_shards"]), _save_manager.get_sanctum_levels())
+	if not message.is_empty():
+		sanctum.show_feedback(message, success)
+
+
+func _show_rift_map() -> void:
+	var rift_map := _instantiate(&"rift_map") as RiftMapScreen
+	rift_map.back_requested.connect(_show_home)
+	rift_map.play_requested.connect(_on_rift_play_requested)
+	rift_map.setup(_save_manager.get_snapshot())
+	_replace_screen(rift_map)
+
+
+## Persists the chosen Rift first, so a run and any restart both read it from the save.
+func _on_rift_play_requested(rift_id: StringName) -> void:
+	_save_manager.select_rift(rift_id)
+	_show_game()
 
 
 func _show_daily() -> void:
@@ -165,6 +240,12 @@ func _show_game(daily_date: String = "", daily_seed: int = 0) -> void:
 	game.configure_run_profile(
 		FORM_CATALOG.get_form(StringName(snapshot[&"equipped_form"])),
 		daily_date,
+		RIFT_CATALOG.get_rift(StringName(str(snapshot.get(&"selected_rift", "")))),
+		# Resume at the level after the deepest one cleared in this Rift.
+		_save_manager.get_rift_level(
+			StringName(str(snapshot.get(&"selected_rift", "")))
+		) + 1,
+		_save_manager.get_sanctum_levels(),
 	)
 	game.home_requested.connect(_show_home)
 	game.restart_requested.connect(_restart_run)
@@ -198,11 +279,29 @@ func _show_results(summary: Dictionary) -> void:
 		bool(summary.get(&"is_daily", false)),
 	)
 	_save_manager.apply_challenge_result(challenge_result)
+	# Trials are the persistent ladder; challenges above are the date-seeded daily rotation.
+	var trial_result: Dictionary = TrialTracker.apply_run(
+		_save_manager.get_trial_rank(),
+		_save_manager.get_trial_progress(),
+		summary,
+	)
+	_save_manager.apply_trial_result(trial_result)
+	# Depth milestones are keyed on the lifetime best wave, so record_run must land first.
+	var depth_result: Dictionary = _save_manager.claim_depth_milestones()
 	snapshot = _save_manager.get_snapshot()
 	var display_summary: Dictionary = summary.duplicate(true)
 	display_summary[&"best_score"] = int(snapshot[&"best_score"])
 	display_summary[&"total_soul_shards"] = int(snapshot[&"soul_shards"])
-	display_summary[&"challenge_reward"] = int(challenge_result[&"reward_shards"])
+	display_summary[&"challenge_reward"] = (
+		int(challenge_result[&"reward_shards"])
+		+ int(trial_result[&"reward_shards"])
+		+ int(depth_result[&"reward_shards"])
+	)
+	display_summary[&"depth_reward"] = int(depth_result[&"reward_shards"])
+	display_summary[&"trial_rank"] = int(trial_result[&"rank"])
+	display_summary[&"trials_completed"] = (
+		trial_result[&"completed"] as PackedStringArray
+	).size()
 	var results := _instantiate(&"results") as ResultsScreen
 	results.restart_requested.connect(_restart_run)
 	results.home_requested.connect(_show_home)

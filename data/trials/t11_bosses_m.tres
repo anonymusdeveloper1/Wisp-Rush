@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="TrialData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/trial_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+trial_id = &"t11_bosses_m"
+title = "COURT BREAKER"
+description = "Defeat 15 bosses in total."
+metric = &"bosses"
+target = 15
+reward_shards = 115
+tier = 11
+cumulative = true

@@ -33,6 +33,7 @@ var _pending_changes: Dictionary = {}
 var _save_countdown: float = -1.0
 var _reset_arm_remaining: float = -1.0
 
+@onready var _groups: VBoxContainer = %Groups
 @onready var _shade: ColorRect = %Shade
 @onready var _margin: MarginContainer = %Margin
 @onready var _back_button: Button = %BackButton
@@ -44,6 +45,7 @@ var _reset_arm_remaining: float = -1.0
 @onready var _shake_value: Label = %ShakeValue
 @onready var _haptics_toggle: Button = %HapticsToggle
 @onready var _reduced_motion_toggle: Button = %ReducedMotionToggle
+@onready var _aim_arrow_toggle: Button = %AimArrowToggle
 @onready var _tutorial_button: Button = %TutorialButton
 @onready var _about_button: Button = %AboutButton
 @onready var _reset_button: Button = %ResetButton
@@ -68,6 +70,7 @@ func _ready() -> void:
 		_back_button.add_theme_font_size_override(&"font_size", RUN_BACK_GLYPH_SIZE)
 		_back_button.tooltip_text = "Back to the paused run"
 	_back_button.pressed.connect(_on_back_button_pressed)
+	_build_developer_card()
 	_music_slider.value_changed.connect(
 		func(value: float) -> void: _queue_change(&"music_volume", value)
 	)
@@ -83,6 +86,9 @@ func _ready() -> void:
 	)
 	_reduced_motion_toggle.toggled.connect(
 		func(enabled: bool) -> void: _queue_change(&"reduced_motion", enabled, true)
+	)
+	_aim_arrow_toggle.toggled.connect(
+		func(enabled: bool) -> void: _queue_change(&"aim_arrow", enabled, true)
 	)
 	_tutorial_button.pressed.connect(_on_tutorial_button_pressed)
 	_about_button.pressed.connect(_on_about_button_pressed)
@@ -126,6 +132,7 @@ func setup(settings: Dictionary) -> void:
 	_shake_slider.set_value_no_signal(float(settings.get(&"screen_shake", _shake_slider.value)))
 	_haptics_toggle.set_pressed_no_signal(bool(settings.get(&"haptics", true)))
 	_reduced_motion_toggle.set_pressed_no_signal(bool(settings.get(&"reduced_motion", false)))
+	_aim_arrow_toggle.set_pressed_no_signal(bool(settings.get(&"aim_arrow", true)))
 	_refresh_labels()
 
 
@@ -186,6 +193,7 @@ func _refresh_labels() -> void:
 	# The pressed (cyan-lit) frame is the ON state; the word repeats it so hue is never the only cue.
 	_haptics_toggle.text = "ON" if _haptics_toggle.button_pressed else "OFF"
 	_reduced_motion_toggle.text = "ON" if _reduced_motion_toggle.button_pressed else "OFF"
+	_aim_arrow_toggle.text = "ON" if _aim_arrow_toggle.button_pressed else "OFF"
 
 
 func _update_reset_arming() -> void:
@@ -276,3 +284,62 @@ func _on_reset_confirm_button_pressed() -> void:
 	_close_panels()
 	_feedback_label.text = "ALL PROGRESS ERASED"
 	progress_reset.emit()
+
+
+## Appends a developer card that unlocks progression, in debug builds only.
+##
+## GDD §13 forbids debug panels in a release, so this returns immediately unless SaveManager says
+## debug tools are allowed — and every action it calls refuses independently as well.
+func _build_developer_card() -> void:
+	var save := get_node_or_null(^"/root/SaveManager") as SaveManagerService
+	if save == null or not save.debug_tools_allowed():
+		return
+
+	var card := PanelContainer.new()
+	card.theme_type_variation = &"PanelCard"
+	var rows := VBoxContainer.new()
+	rows.add_theme_constant_override(&"separation", 10)
+	card.add_child(rows)
+
+	var caption := Label.new()
+	caption.theme_type_variation = &"CaptionLabel"
+	caption.text = "DEVELOPER  •  DEBUG BUILD ONLY"
+	rows.add_child(caption)
+
+	# label, tooltip, action
+	var actions: Array[Array] = [
+		["UNLOCK EVERYTHING", "Rifts, forms, Sanctum, Trials and shards",
+			func() -> bool: return DevUnlock.unlock_everything(save)],
+		["UNLOCK ALL RIFTS", "Raises the lifetime best wave past every gate",
+			func() -> bool: return DevUnlock.unlock_rifts(save)],
+		["UNLOCK ALL FORMS", "Owns all six cosmetic forms",
+			func() -> bool: return DevUnlock.unlock_forms(save)],
+		["MAX SOUL SANCTUM", "Every node at its maximum level",
+			func() -> bool: return DevUnlock.max_sanctum(save)],
+		["COMPLETE ALL TRIALS", "Finishes the whole ladder",
+			func() -> bool: return DevUnlock.complete_trials(save)],
+		["+%d SHARDS" % DevUnlock.SHARD_GRANT, "Adds Soul Shards",
+			func() -> bool: return DevUnlock.grant_shards(save)],
+	]
+	for action: Array in actions:
+		var button := Button.new()
+		button.theme_type_variation = &"SecondaryButton"
+		button.text = action[0] as String
+		button.tooltip_text = action[1] as String
+		button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		var run: Callable = action[2] as Callable
+		var label: String = action[0] as String
+		button.pressed.connect(func() -> void: _on_developer_action(label, run))
+		rows.add_child(button)
+
+	_groups.add_child(card)
+	UiJuice.bind_press_feedback(card)
+	SoundFx.bind_buttons(card)
+
+
+func _on_developer_action(label: String, run: Callable) -> void:
+	var applied: bool = bool(run.call())
+	_feedback_label.add_theme_color_override(
+		&"font_color", Palette.SOUL_CYAN if applied else Palette.WARNING_AMBER
+	)
+	_feedback_label.text = "%s %s" % [label, "APPLIED" if applied else "REFUSED"]

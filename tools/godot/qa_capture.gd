@@ -5,7 +5,7 @@ extends SceneTree
 ## Usage (normally driven by tools/qa_matrix.sh):
 ##   WISP_ISOLATED_SAVE=1 Godot --path . --resolution 390x844 \
 ##     --script res://tools/godot/qa_capture.gd -- <screen> <out.png>
-## Screens: home, forms, daily, stats, settings, results, game, pause, upgrade, tutorial.
+## Screens: home, forms, rifts, rifts_locked, daily, stats, settings, results, game, pause, upgrade, tutorial.
 
 const MAIN_SCENE_PATH: String = "res://scenes/main/main.tscn"
 const GAME_WORLD_PATH: String = "res://scenes/gameplay/game_world.tscn"
@@ -53,6 +53,17 @@ func _build(screen: String) -> int:
 			var forms := _add_screen("res://scenes/screens/forms_screen.tscn") as FormsScreen
 			forms.setup(1320, ["void", "ash", "venom"], &"venom", 2)
 			return 20
+		"rifts", "rifts_locked":
+			var rifts := _add_screen("res://scenes/screens/rift_map_screen.tscn") as RiftMapScreen
+			var rift_snapshot: Dictionary = snapshot.duplicate(true)
+			rift_snapshot[&"selected_rift"] = "shattered_rift"
+			rift_snapshot[&"rift_bests"] = {"obsidian_garden": 48210, "shattered_rift": 6120}
+			rift_snapshot[&"rift_levels"] = {"obsidian_garden": 8, "shattered_rift": 3}
+			rifts.setup(rift_snapshot)
+			if screen == "rifts_locked":
+				# Focus Ember Hollow (wave 10 gate) to check the lock card and disabled ENTER.
+				(rifts.get_node("%Carousel") as FocusCarousel).select(2, false)
+			return 30
 		"daily":
 			var daily := _add_screen("res://scenes/screens/daily_screen.tscn") as DailyScreen
 			var date_key: String = ChallengeTracker.get_date_key()

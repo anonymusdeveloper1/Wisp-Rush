@@ -7,7 +7,7 @@
 
 **Main scene:** `res://scenes/main/main.tscn` · **Features:** `4.7, Forward Plus`
 
-**Counts:** 26 scenes · 49 scripts · 48 resources · 0 shaders · 154 asset files
+**Counts:** 36 scenes · 71 scripts · 120 resources · 0 shaders · 230 asset files
 
 ## Autoloads
 
@@ -15,6 +15,7 @@
 |---|---|---|
 | `SaveManager` | `res://scripts/autoload/save_manager.gd` | yes |
 | `Audio` | `res://scripts/autoload/audio_service.gd` | yes |
+| `Monetisation` | `res://scripts/autoload/monetisation_service.gd` | yes |
 
 ## Input actions
 
@@ -50,22 +51,32 @@ _None._
 | `res://scenes/bosses/reaper_boss.tscn` | `ReaperBoss` (Node2D) | `res://scenes/bosses/reaper_boss.gd` | 10 | — | `bosses` |
 | `res://scenes/debug/theme_gallery.tscn` | `ThemeGallery` (Control) | `res://scenes/debug/theme_gallery.gd` | 4 | — | — |
 | `res://scenes/enemies/bone_mote.tscn` | `BoneMote` (Node2D) | `res://scenes/enemies/bone_mote.gd` | 4 | — | `enemies` |
+| `res://scenes/enemies/cinder_shade.tscn` | `CinderShade` (Node2D) | `res://scenes/enemies/cinder_shade.gd` | 4 | — | `enemies` |
+| `res://scenes/enemies/court_shade.tscn` | `CourtShade` (Node2D) | `res://scenes/enemies/shard_wraith.gd` | 4 | — | `enemies` |
+| `res://scenes/enemies/echo.tscn` | `Echo` (Node2D) | `res://scenes/enemies/cinder_shade.gd` | 4 | — | `enemies` |
+| `res://scenes/enemies/frost_wisp.tscn` | `FrostWisp` (Node2D) | `res://scenes/enemies/shard_wraith.gd` | 4 | — | `enemies` |
+| `res://scenes/enemies/rift_spawn.tscn` | `RiftSpawn` (Node2D) | `res://scenes/enemies/rift_spawn.gd` | 6 | — | `enemies` |
 | `res://scenes/enemies/shard_wraith.tscn` | `ShardWraith` (Node2D) | `res://scenes/enemies/shard_wraith.gd` | 4 | — | `enemies` |
+| `res://scenes/enemies/slag_hulk.tscn` | `SlagHulk` (Node2D) | `res://scenes/enemies/bone_mote.gd` | 4 | — | `enemies` |
 | `res://scenes/enemies/soul_wisp.tscn` | `SoulWisp` (Node2D) | `res://scenes/enemies/soul_wisp.gd` | 4 | — | `enemies` |
-| `res://scenes/gameplay/game_world.tscn` | `GameWorld` (Control) | `res://scenes/gameplay/game_world.gd` | 69 | `res://assets/ui/theme/ornaments/crest_bottom.tscn`, `res://assets/ui/theme/ornaments/crest_top.tscn`, `res://scenes/player/wisp_player.tscn`, `res://scenes/screens/upgrade_select.tscn`, `res://scenes/tutorial/tutorial_overlay.tscn` | — |
+| `res://scenes/enemies/warden.tscn` | `Warden` (Node2D) | `res://scenes/enemies/warden.gd` | 4 | — | `enemies` |
+| `res://scenes/gameplay/game_world.tscn` | `GameWorld` (Control) | `res://scenes/gameplay/game_world.gd` | 68 | `res://assets/ui/theme/ornaments/crest_bottom.tscn`, `res://assets/ui/theme/ornaments/crest_top.tscn`, `res://scenes/player/wisp_player.tscn`, `res://scenes/screens/upgrade_select.tscn`, `res://scenes/tutorial/tutorial_overlay.tscn` | — |
 | `res://scenes/hazards/blade_ring.tscn` | `BladeRing` (Node2D) | `res://scenes/hazards/blade_ring.gd` | 4 | — | `hazards` |
 | `res://scenes/hazards/spike_bloom.tscn` | `SpikeBloom` (Node2D) | `res://scenes/hazards/spike_bloom.gd` | 4 | — | `hazards` |
 | `res://scenes/hazards/split_void_crystal.tscn` | `SplitVoidCrystal` (Node2D) | `res://scenes/hazards/split_void_crystal.gd` | 4 | — | `hazards` |
 | `res://scenes/main/main.tscn` | `Main` (Node) | `res://scenes/main/main.gd` | 1 | — | — |
 | `res://scenes/pickups/soul_shard_pickup.tscn` | `SoulShardPickup` (Node2D) | `res://scenes/pickups/soul_shard_pickup.gd` | 2 | — | `pickups` |
-| `res://scenes/player/wisp_player.tscn` | `WispPlayer` (CharacterBody2D) | `res://scenes/player/wisp_player.gd` | 8 | — | — |
+| `res://scenes/player/wisp_player.tscn` | `WispPlayer` (CharacterBody2D) | `res://scenes/player/wisp_player.gd` | 10 | — | — |
 | `res://scenes/screens/daily_screen.tscn` | `DailyScreen` (Control) | `res://scenes/screens/daily_screen.gd` | 36 | `res://assets/ui/theme/ornaments/banner_top.tscn`, `res://assets/ui/theme/ornaments/crest_bottom.tscn`, `res://assets/ui/theme/ornaments/crest_top.tscn` | — |
-| `res://scenes/screens/forms_screen.tscn` | `FormsScreen` (Control) | `res://scenes/screens/forms_screen.gd` | 47 | `res://assets/ui/theme/ornaments/banner_top.tscn`, `res://assets/ui/theme/ornaments/card_top.tscn` | — |
-| `res://scenes/screens/home_screen.tscn` | `HomeScreen` (Control) | `res://scenes/screens/home_screen.gd` | 25 | — | — |
+| `res://scenes/screens/forms_screen.tscn` | `FormsScreen` (Control) | `res://scenes/screens/forms_screen.gd` | 21 | `res://assets/ui/theme/ornaments/banner_top.tscn` | — |
+| `res://scenes/screens/home_screen.tscn` | `HomeScreen` (Control) | `res://scenes/screens/home_screen.gd` | 34 | — | — |
 | `res://scenes/screens/loading_screen.tscn` | `LoadingScreen` (Control) | `res://scenes/screens/loading_screen.gd` | 5 | — | — |
 | `res://scenes/screens/results_screen.tscn` | `ResultsScreen` (Control) | `res://scenes/screens/results_screen.gd` | 73 | `res://assets/ui/theme/ornaments/amber_top.tscn`, `res://assets/ui/theme/ornaments/banner_top.tscn`, `res://assets/ui/theme/ornaments/card_top.tscn` | — |
-| `res://scenes/screens/settings_screen.tscn` | `SettingsScreen` (Control) | `res://scenes/screens/settings_screen.gd` | 69 | `res://assets/ui/theme/ornaments/banner_top.tscn`, `res://assets/ui/theme/ornaments/card_top.tscn` | — |
+| `res://scenes/screens/rift_map_screen.tscn` | `RiftMapScreen` (Control) | `res://scenes/screens/rift_map_screen.gd` | 18 | `res://assets/ui/theme/ornaments/banner_top.tscn` | — |
+| `res://scenes/screens/sanctum_screen.tscn` | `SanctumScreen` (Control) | `res://scenes/screens/sanctum_screen.gd` | 20 | `res://assets/ui/theme/ornaments/banner_top.tscn` | — |
+| `res://scenes/screens/settings_screen.tscn` | `SettingsScreen` (Control) | `res://scenes/screens/settings_screen.gd` | 74 | `res://assets/ui/theme/ornaments/banner_top.tscn`, `res://assets/ui/theme/ornaments/card_top.tscn` | — |
 | `res://scenes/screens/statistics_screen.tscn` | `StatisticsScreen` (Control) | `res://scenes/screens/statistics_screen.gd` | 19 | `res://assets/ui/theme/ornaments/banner_top.tscn` | — |
+| `res://scenes/screens/trials_screen.tscn` | `TrialsScreen` (Control) | `res://scenes/screens/trials_screen.gd` | 17 | `res://assets/ui/theme/ornaments/banner_top.tscn` | — |
 | `res://scenes/screens/upgrade_select.tscn` | `UpgradeSelect` (Control) | `res://scenes/screens/upgrade_select.gd` | 31 | `res://assets/ui/theme/ornaments/banner_top.tscn` | — |
 | `res://scenes/tutorial/tutorial_overlay.tscn` | `TutorialOverlay` (Control) | `res://scenes/tutorial/tutorial_overlay.gd` | 10 | — | — |
 
@@ -78,53 +89,75 @@ _None._
 | Script | class_name | extends | Summary (`##` brief) | Signals | Exports | Public methods |
 |---|---|---|---|---|---|---|
 | `res://assets/ui/theme/tools/build_wisp_theme.gd` | — | `SceneTree` | Generates res://assets/ui/theme/wisp_theme.tres and the ornament scenes from textures/slices.json. | — | — | — |
-| `res://scenes/bosses/reaper_boss.gd` | `ReaperBoss` | `Node2D` | Runs the Reaper's deterministic three-phase attacks, exposed core and victory dissolve. | `phase_changed`, `summon_requested`, `health_changed`, `defeated` | `tuning` | `configure`, `set_target_position`, `set_arena_rect`, `set_last_edge_position`, `skip_intro`, `get_current_health`, `get_maximum_health`, `is_core_exposed`, `get_phase`, `get_dangerous_circles`, `get_dangerous_lanes`, `get_lane_radius`, `try_dash_hit` |
+| `res://scenes/bosses/reaper_boss.gd` | `ReaperBoss` | `Node2D` | Runs the Reaper's deterministic three-phase attacks, exposed core and victory dissolve. | `phase_changed`, `summon_requested`, `health_changed`, `defeated` | `tuning` | `configure_variant`, `configure`, `set_target_position`, `set_arena_polygon`, `set_arena_rect`, `set_last_edge_position`, `skip_intro`, `get_current_health`, `get_maximum_health`, `is_core_exposed`, `get_phase`, `get_dangerous_circles`, `get_dangerous_lanes`, `get_lane_radius`, `try_dash_hit` |
 | `res://scenes/debug/debug_overlay.gd` | `DebugOverlay` | `CanvasLayer` | Debug-build-only performance overlay (toggle with F3): FPS, frame/physics time, draw calls, | — | — | `build_report` |
 | `res://scenes/debug/theme_gallery.gd` | — | `Control` | Debug screen showing every Wisp theme type variation (redesign v1) on the menu background. | — | — | — |
 | `res://scenes/enemies/bone_mote.gd` | `BoneMoteEnemy` | `EnemyActor` | Three-hit heavy enemy that telegraphs and charges the Wisp's most recent edge position. | — | — | — |
+| `res://scenes/enemies/cinder_shade.gd` | `CinderShadeEnemy` | `EnemyActor` | Ember shade that drifts at the Wisp and splits into two smaller shades when cut. | — | — | — |
+| `res://scenes/enemies/rift_spawn.gd` | `RiftSpawnEnemy` | `EnemyActor` | Tethered pair whose only weak point is the energy tether strung between its two bodies. | — | — | `get_tether_endpoints`, `try_dash_hit` |
 | `res://scenes/enemies/shard_wraith.gd` | `ShardWraithEnemy` | `EnemyActor` | Two-hit crystal enemy that telegraphs short angular darts between fast steering passes. | — | — | — |
 | `res://scenes/enemies/soul_wisp.gd` | `SoulWispEnemy` | `EnemyActor` | One-hit enemy that gently steers toward the Wisp to create readable early chain lines. | — | — | — |
-| `res://scenes/gameplay/game_world.gd` | `GameWorld` | `Control` | Coordinates the endless arena, tutorial, waves, combat, mutations, rewards and run summary. | `home_requested`, `run_ended`, `tutorial_completed`, `restart_requested` | `tutorial_enabled`, `run_seed`, `auto_pause_on_focus_loss` | `get_score`, `get_combo`, `get_highest_combo`, `get_total_kills`, `get_current_wave`, `get_soul_shards`, `get_multi_kill_dashes`, `get_bosses_defeated`, `is_boss_active`, `is_tutorial_complete`, `add_experience`, `get_mutation_level`, `configure_run_profile`, `handle_back`, `add_trauma`, `get_trauma`, `get_shake_strength`, `is_run_meaningful` |
-| `res://scenes/gameplay/wave_director.gd` | `WaveDirector` | `Node` | Deterministic endless-wave state machine that spends budget on authored formations. | `formation_requested`, `wave_started` | `tuning`, `catalog` | `start`, `advance`, `set_run_context`, `suspend_for_boss`, `resume_after_boss`, `get_current_wave`, `get_wave_progress`, `get_remaining_budget`, `get_difficulty_tier`, `is_suspended` |
+| `res://scenes/enemies/warden.gd` | `WardenEnemy` | `EnemyActor` | Armoured guardian whose frontal shield arc blocks dash damage, so it must be cut from behind. | — | — | `try_dash_hit`, `is_blocking` |
+| `res://scenes/gameplay/game_world.gd` | `GameWorld` | `Control` | Coordinates the endless arena, tutorial, waves, combat, mutations, rewards and run summary. | `home_requested`, `run_ended`, `tutorial_completed`, `restart_requested` | `tutorial_enabled`, `run_seed`, `auto_pause_on_focus_loss` | `get_score`, `get_combo`, `get_highest_combo`, `get_total_kills`, `get_current_wave`, `get_soul_shards`, `get_multi_kill_dashes`, `get_bosses_defeated`, `is_boss_active`, `is_tutorial_complete`, `add_experience`, `get_mutation_level`, `configure_run_profile`, `get_boss_wave_interval`, `get_arena_shrink`, `get_reward_multiplier`, `get_portal_positions`, `get_arena_polygon`, `get_landing_polygon`, `get_wall_splash_fx`, `get_arena_rect`, `debug_quiet_arena`, `debug_spawn_enemy`, `debug_live_enemy_count`, `debug_enemy_layer_count`, `debug_apply_rift_rules`, `handle_back`, `add_trauma`, `get_trauma`, `get_shake_strength`, `is_run_meaningful` |
+| `res://scenes/gameplay/wall_splash_fx.gd` | `WallSplashFx` | `Node2D` | A splash where the Wisp hits a wall: droplets burst off the wall and a splat flattens against it. | — | — | `setup`, `play`, `get_last_origin`, `get_emitters` |
+| `res://scenes/gameplay/wave_director.gd` | `WaveDirector` | `Node` | Deterministic endless-wave state machine that spends budget on authored formations. | `formation_requested`, `wave_started` | `tuning`, `catalog` | `start`, `advance`, `set_rift_threat_multiplier`, `set_run_context`, `suspend_for_boss`, `resume_after_boss`, `get_current_wave`, `get_wave_progress`, `get_remaining_budget`, `get_difficulty_tier`, `is_suspended` |
 | `res://scenes/hazards/blade_ring.gd` | `BladeRing` | `HazardActor` | Fixed rotating ring whose four visible blade tips are dangerous while its centre remains safe. | — | — | `get_dangerous_circles` |
 | `res://scenes/hazards/spike_bloom.gd` | `SpikeBloom` | `HazardActor` | Fixed bloom that alternates a harmless closed bud, an amber-rimmed warning and a dangerous | — | — | `get_dangerous_circles` |
 | `res://scenes/hazards/split_void_crystal.gd` | `SplitVoidCrystal` | `HazardActor` | Indestructible warned obstacle that truncates dash corridors through its narrow body. | — | — | `blocks_dash` |
 | `res://scenes/main/main.gd` | — | `Node` | Composition root: boot loading, navigation between screens, back handling and app lifecycle. | — | — | — |
 | `res://scenes/pickups/soul_shard_pickup.gd` | `SoulShardPickup` | `Node2D` | Run-currency pickup collected by dash sweeps or short-range attraction to the Wisp. | `collected` | — | `configure`, `set_attraction_radius`, `try_dash_collect` |
-| `res://scenes/player/wisp_player.gd` | `WispPlayer` | `CharacterBody2D` | Converts swipe, mouse and keyboard aim into an exact edge-to-edge Wisp dash. | `dash_started`, `dash_segment_swept`, `wall_impacted`, `focus_started`, `obstacle_impacted`, `health_changed`, `damaged`, `died` | `tuning`, `dash_damage` | `request_dash`, `set_arena_rect`, `cancel_active_aim`, `get_collision_radius`, `get_current_health`, `get_maximum_health`, `set_run_combat_modifiers`, `set_cosmetic_form`, `get_blade_width_multiplier`, `get_dash_speed_multiplier`, `increase_maximum_health`, `heal`, `play_victory`, `is_vulnerable`, `take_contact_damage`, `take_hazard_damage`, `interrupt_dash_at` |
+| `res://scenes/player/wisp_player.gd` | `WispPlayer` | `CharacterBody2D` | Converts swipe, mouse and keyboard aim into an exact edge-to-edge Wisp dash. | `dash_started`, `dash_segment_swept`, `dash_redirected`, `wall_impacted`, `focus_started`, `obstacle_impacted`, `health_changed`, `damaged`, `died` | `tuning`, `dash_damage` | `request_dash`, `teleport_dash_to`, `set_arena_polygon`, `get_dash_target`, `set_bonus_invulnerability`, `set_aim_arrow_enabled`, `is_aim_arrow_visible`, `get_aim_arrow_direction`, `get_momentum`, `get_current_dash_speed`, `has_buffered_swipe`, `redirect_dash`, `set_edge_drift`, `set_arena_rect`, `cancel_active_aim`, `get_collision_radius`, `get_current_health`, `get_maximum_health`, `set_run_combat_modifiers`, `set_cosmetic_form`, `get_blade_width_multiplier`, `get_dash_speed_multiplier`, `increase_maximum_health`, `heal`, `play_victory`, `is_vulnerable`, `take_contact_damage`, `take_hazard_damage`, `interrupt_dash_at` |
 | `res://scenes/screens/daily_screen.gd` | `DailyScreen` | `Control` | Offline daily-run screen: today's portal, seed and best, three local goal rows and Play. | `play_daily_requested`, `back_requested` | — | `setup` |
-| `res://scenes/screens/forms_screen.gd` | `FormsScreen` | `Control` | Collection screen for previewing, purchasing and equipping gameplay-neutral Wisp forms. | `purchase_requested`, `equip_requested`, `back_requested` | `catalog` | `setup`, `select_form`, `get_selected_form_id`, `show_feedback` |
-| `res://scenes/screens/home_screen.gd` | `HomeScreen` | `Control` | Redesign v1 Home: profile strip, wordmark, equipped-form hero, Play, Forms and Daily Rift. | `play_requested`, `forms_requested`, `daily_requested`, `statistics_requested`, `settings_requested` | — | `setup` |
+| `res://scenes/screens/forms_screen.gd` | `FormsScreen` | `Control` | Wisp picker: a portrait card carousel of the six gameplay-neutral forms, buy or equip below. | `purchase_requested`, `equip_requested`, `back_requested` | `catalog` | `setup`, `select_form`, `get_selected_form_id`, `show_feedback` |
+| `res://scenes/screens/home_ambience.gd` | `HomeAmbience` | `Control` | Living background for the Home screen: flickering braziers, pulsing runes, drifting mist and | — | — | `set_active`, `is_active`, `uv_to_local`, `get_cover_scale` |
+| `res://scenes/screens/home_screen.gd` | `HomeScreen` | `Control` | Home: a calm top bar, the wordmark, a living hero Wisp, one PLAY and a bottom navigation dock. | `play_requested`, `forms_requested`, `daily_requested`, `rift_map_requested`, `sanctum_requested`, `trials_requested`, `statistics_requested`, `settings_requested` | `rift_catalog` | `setup`, `get_orbits`, `is_animating`, `get_rift_caption` |
 | `res://scenes/screens/loading_screen.gd` | `LoadingScreen` | `Control` | Boot screen: the Wisp Rush mark over a soft soul-cyan glow while scenes load on worker threads | `finished` | — | `begin` |
+| `res://scenes/screens/orbit_motes.gd` | `OrbitMotes` | `Node2D` | Soul sparks circling the Home hero Wisp on tilted ellipses, in the equipped form's colour. | — | `side` | `get_spark_count`, `sync_time`, `get_time` |
 | `res://scenes/screens/results_screen.gd` | `ResultsScreen` | `Control` | End-of-run summary with fast restart as the primary action and Home/Forms as secondary. | `restart_requested`, `home_requested`, `forms_requested` | — | `setup` |
+| `res://scenes/screens/rift_map_screen.gd` | `RiftMapScreen` | `Control` | Rift map: a portrait card carousel of the arena ladder, each card showing the Rift's own arena. | `back_requested`, `play_requested` | `catalog` | `setup`, `get_selected_rift_id`, `is_rift_unlocked` |
+| `res://scenes/screens/sanctum_screen.gd` | `SanctumScreen` | `Control` | Soul Sanctum: the permanent upgrade tree bought with Soul Shards. | `back_requested`, `purchase_requested` | `catalog` | `setup`, `get_selected_node_id`, `show_feedback` |
 | `res://scenes/screens/settings_screen.gd` | `SettingsScreen` | `Control` | Player settings: volumes, haptics, reduced motion, shake, tutorial replay, about and reset. | `back_requested`, `progress_reset` | `allow_progress_reset` | `setup`, `handle_back`, `build_about_text` |
 | `res://scenes/screens/statistics_screen.gd` | `StatisticsScreen` | `Control` | Lifetime statistics read from the persistent SaveManager snapshot. | `back_requested` | — | `setup`, `build_rows`, `format_play_time` |
+| `res://scenes/screens/trials_screen.gd` | `TrialsScreen` | `Control` | Trials: the three persistent goals the player is working on, and the ladder rank they feed. | `back_requested` | — | `setup` |
 | `res://scenes/screens/upgrade_select.gd` | `UpgradeSelect` | `Control` | Always-processing three-card mutation overlay that accepts exactly one choice per presentation. | `choice_selected` | — | `present`, `dismiss`, `choose_index`, `get_presented_choice_ids` |
 | `res://scenes/tutorial/tutorial_overlay.gd` | `TutorialOverlay` | `Control` | Non-blocking first-run instruction card owned by GameWorld. | — | — | `set_bottom_inset`, `show_step`, `show_completion` |
 | `res://scripts/autoload/audio_service.gd` | `AudioService` | `Node` | Plays synthesized SFX through a voice pool and mixes three synced adaptive music layers. | `sounds_ready` | — | `is_ready`, `play_sfx`, `play_multi_kill`, `start_music`, `stop_music`, `set_music_intensity`, `set_boss_music`, `set_interrupted`, `apply_settings`, `generate_now`, `get_sfx_stream`, `get_music_stream` |
-| `res://scripts/autoload/save_manager.gd` | `SaveManagerService` | `Node` | Owns versioned local progression with validation, migration and atomic backup rotation. | `progression_changed`, `settings_changed` | — | `uses_isolated_storage`, `configure_storage_paths`, `reload`, `get_snapshot`, `save_now`, `reset_save`, `get_settings`, `update_settings`, `reset_tutorial`, `mark_tutorial_completed`, `record_run`, `add_soul_shards`, `apply_challenge_result`, `purchase_form`, `equip_form` |
-| `res://scripts/components/enemy_actor.gd` | `EnemyActor` | `Node2D` | Shared telegraph, health, swept-hit, focus, slow and dissolve behavior for regular enemies. | `killed` | `tuning`, `movement_enabled` | `set_target_position`, `set_last_edge_position`, `set_world_speed`, `set_viewport_width`, `set_arena_rect`, `apply_slow`, `is_contact_active`, `get_collision_radius`, `get_current_health`, `get_threat_cost`, `get_shard_drop_chance`, `is_slowed`, `try_dash_hit`, `try_direct_hit` |
+| `res://scripts/autoload/monetisation_service.gd` | `MonetisationService` | `Node` | Provider-agnostic monetisation: opt-in rewarded video and a single Remove Ads purchase. | `rewarded_granted`, `rewarded_failed`, `ads_removed_changed`, `consent_changed` | — | `set_provider`, `set_save_manager`, `is_available`, `has_removed_ads`, `get_consent_state`, `set_consent`, `needs_consent_prompt`, `can_offer`, `show_rewarded`, `begin_run`, `can_purchase_remove_ads`, `purchase_remove_ads`, `restore_purchases` |
+| `res://scripts/autoload/save_manager.gd` | `SaveManagerService` | `Node` | Owns versioned local progression with validation, migration and atomic backup rotation. | `progression_changed`, `settings_changed` | — | `uses_isolated_storage`, `configure_storage_paths`, `reload`, `get_snapshot`, `save_now`, `reset_save`, `get_settings`, `update_settings`, `reset_tutorial`, `mark_tutorial_completed`, `record_run`, `add_soul_shards`, `apply_challenge_result`, `purchase_form`, `equip_form`, `select_rift`, `debug_tools_allowed`, `debug_set_highest_wave`, `debug_unlock_all_forms`, `debug_set_sanctum_levels`, `debug_set_trials`, `debug_set_rift_level`, `has_removed_ads`, `grant_remove_ads`, `get_consent_state`, `set_consent_state`, `claim_depth_milestones`, `get_claimed_depth`, `get_trial_rank`, `get_trial_progress`, `apply_trial_result`, `get_sanctum_levels`, `get_sanctum_level`, `purchase_sanctum_level`, `refund_sanctum`, `get_rift_level` |
+| `res://scripts/components/enemy_actor.gd` | `EnemyActor` | `Node2D` | Shared telegraph, health, swept-hit, focus, slow and dissolve behavior for regular enemies. | `killed` | `tuning`, `movement_enabled` | `set_target_position`, `set_last_edge_position`, `set_world_speed`, `set_viewport_width`, `set_arena_polygon`, `set_arena_rect`, `apply_slow`, `is_contact_active`, `get_collision_radius`, `get_current_health`, `get_threat_cost`, `get_shard_drop_chance`, `is_slowed`, `try_dash_hit`, `try_direct_hit` |
+| `res://scripts/components/focus_carousel.gd` | `FocusCarousel` | `Control` | Portrait card picker: one large focused card in the centre, its neighbours peeking in dimmed. | `selection_changed`, `activated` | `focus_width_share`, `max_width_share`, `card_aspect`, `max_card_aspect`, `pitch_share`, `side_scale`, `side_brightness`, `lift_share`, `snap_speed`, `tap_slop`, `flick_speed` | `set_cards`, `select`, `get_selected_index`, `get_card_count`, `get_card`, `get_scroll`, `is_settled`, `get_focus_card_size` |
 | `res://scripts/components/hazard_actor.gd` | `HazardActor` | `Node2D` | Shared arrival, scaling, focus and collision-query contract for sparse arena hazards. | — | `tuning`, `telegraph_texture`, `active_texture` | `set_world_speed`, `set_viewport_width`, `blocks_dash`, `get_blocking_radius`, `get_dangerous_circles`, `get_threat_cost` |
 | `res://scripts/components/health_component.gd` | `HealthComponent` | `Node` | Reusable clamped integer health state with change and one-shot depletion signals. | `health_changed`, `depleted` | `maximum_health` | `configure`, `reset`, `apply_damage`, `heal`, `get_current_health`, `is_depleted` |
-| `res://scripts/components/run_progression.gd` | `RunProgression` | `Node` | Run-local XP, deterministic non-capped choices and mutation-level state. | `experience_changed`, `level_ready`, `mutation_applied` | `tuning` | `start`, `add_experience`, `offer_choices`, `apply_choice`, `get_mutation_level`, `get_mutation`, `has_pending_level`, `get_current_xp`, `get_xp_threshold`, `get_run_level`, `get_levels`, `get_total_mutation_levels` |
+| `res://scripts/components/page_dots.gd` | `PageDots` | `Control` | Row of small diamonds showing position in a FocusCarousel; the current one is larger and lit. | — | `count`, `position_value`, `dot_radius`, `dot_spacing` | — |
+| `res://scripts/components/run_progression.gd` | `RunProgression` | `Node` | Run-local XP, deterministic non-capped choices and mutation-level state. | `experience_changed`, `level_ready`, `mutation_applied` | `tuning` | `start`, `add_experience`, `grant_random_mutation`, `offer_choices`, `apply_choice`, `get_mutation_level`, `get_mutation`, `has_pending_level`, `get_current_xp`, `get_xp_threshold`, `get_run_level`, `get_levels`, `get_total_mutation_levels` |
 | `res://scripts/components/vfx_pool.gd` | `VfxPool` | `Node2D` | Pooled one-shot sprite effects (slices, trails, bursts) with no per-effect node allocation. | — | `additive_blend` | `play`, `get_active_count`, `clear`, `get_additive_material`, `countdown_blink` |
-| `res://scripts/resources/enemy_tuning.gd` | `EnemyTuning` | `Resource` | Shared data schema for an enemy's movement, collision, durability and rewards. | — | `design_width`, `movement_speed`, `turn_speed`, `collision_radius`, `sprite_diameter`, `maximum_health`, `score_reward`, `experience_reward`, `threat_cost`, `shard_drop_chance`, `telegraph_duration`, `dissolve_duration`, `action_interval`, `action_telegraph`, `action_duration`, `action_speed_multiplier` | — |
+| `res://scripts/resources/boss_data.gd` | `BossData` | `Resource` | One boss variant: which atlas it wears, how tough it is, and its accent colour. | — | `boss_id`, `display_name`, `frames`, `tuning`, `tint`, `accent` | `validate` |
+| `res://scripts/resources/enemy_tuning.gd` | `EnemyTuning` | `Resource` | Shared data schema for an enemy's movement, collision, durability and rewards. | — | `design_width`, `movement_speed`, `turn_speed`, `collision_radius`, `sprite_diameter`, `maximum_health`, `score_reward`, `experience_reward`, `threat_cost`, `shard_drop_chance`, `telegraph_duration`, `dissolve_duration`, `action_interval`, `action_telegraph`, `action_duration`, `action_speed_multiplier`, `split_kind`, `split_count`, `split_scale`, `shield_arc_degrees`, `tether_length` | — |
 | `res://scripts/resources/form_catalog.gd` | `FormCatalog` | `Resource` | Ordered registry for the six persistent, gameplay-neutral Wisp forms. | — | `form_paths` | `load_forms`, `validate`, `get_form` |
 | `res://scripts/resources/form_data.gd` | `FormData` | `Resource` | Data-driven cosmetic identity, unlock requirement, supplied art and feedback tint. | — | `form_id`, `display_name`, `description`, `price`, `requires_boss_victory`, `texture`, `tint` | `validate` |
 | `res://scripts/resources/formation_catalog.gd` | `FormationCatalog` | `Resource` | Ordered Resource paths for the complete validated encounter-template catalog. | — | `formation_paths` | `load_formations`, `validate` |
 | `res://scripts/resources/formation_data.gd` | `FormationData` | `Resource` | Data-driven normalized enemy and optional hazard placement for one readable encounter. | — | `formation_id`, `minimum_wave`, `threat_cost`, `enemy_kinds`, `normalized_positions`, `hazard_kind`, `hazard_position`, `allow_mirror`, `allow_rotation` | `validate`, `get_transformed_positions`, `get_transformed_hazard_position` |
 | `res://scripts/resources/hazard_tuning.gd` | `HazardTuning` | `Resource` | Shared viewport scaling, collision and cycle values for one arena hazard type. | — | `design_width`, `sprite_diameter`, `blocking_radius`, `danger_radius`, `arrival_telegraph`, `safe_duration`, `pulse_duration`, `active_duration`, `rotation_speed`, `orbit_radius`, `blade_radius`, `threat_cost` | — |
 | `res://scripts/resources/mutation_data.gd` | `MutationData` | `Resource` | Data-driven identity, cap, icon and next-level presentation for one run mutation. | — | `mutation_id`, `display_name`, `description_template`, `max_level`, `base_value`, `value_per_level`, `icon` | `get_value_for_level`, `get_next_description` |
-| `res://scripts/resources/player_tuning.gd` | `PlayerTuning` | `Resource` | Data-driven starting values for Wisp gesture, dash, health, impact and focus behaviour. | — | `design_width`, `dash_speed`, `windup_duration`, `wall_impact_duration`, `focus_duration`, `focus_world_speed`, `minimum_swipe_distance`, `radius_viewport_ratio`, `minimum_radius`, `maximum_radius`, `blade_bonus`, `spawn_duration`, `maximum_health`, `hurt_duration`, `invulnerability_duration`, `death_duration` | — |
+| `res://scripts/resources/player_tuning.gd` | `PlayerTuning` | `Resource` | Data-driven starting values for Wisp gesture, dash, health, impact and focus behaviour. | — | `design_width`, `dash_speed`, `windup_duration`, `wall_impact_duration`, `focus_duration`, `focus_world_speed`, `minimum_swipe_distance`, `radius_viewport_ratio`, `minimum_radius`, `maximum_radius`, `blade_bonus`, `spawn_duration`, `maximum_health`, `hurt_duration`, `invulnerability_duration`, `death_duration`, `input_buffer_window`, `launch_burst_multiplier`, `launch_burst_decay`, `momentum_window`, `momentum_step`, `momentum_max` | — |
 | `res://scripts/resources/reaper_tuning.gd` | `ReaperTuning` | `Resource` | Data-driven health, timing, geometry and rewards for the recurring Reaper encounter. | — | `design_width`, `base_health`, `health_per_encounter`, `intro_duration`, `recovery_duration`, `warning_duration`, `sweep_duration`, `teleport_attack_duration`, `corridor_duration`, `exposed_duration`, `speedup_per_encounter`, `minimum_timing_multiplier`, `sprite_diameter`, `core_radius`, `sweep_radius`, `sweep_blade_radius`, `lane_radius`, `score_reward`, `shard_reward`, `experience_reward`, `victory_duration` | — |
+| `res://scripts/resources/rift_catalog.gd` | `RiftCatalog` | `Resource` | Ordered registry of the five playable Rifts, in Rift-map progression order. | — | `rift_paths` | `load_rifts`, `validate`, `get_rift` |
+| `res://scripts/resources/rift_data.gd` | `RiftData` | `Resource` | Data-driven identity, unlock gate, backdrop and rule twist for one playable arena. | — | `rift_id`, `display_name`, `description`, `rule_summary`, `rule_key`, `background`, `floor_polygon`, `unlock_wave`, `accent`, `difficulty_tier`, `level_count`, `waves_per_level`, `level_one_threat`, `threat_per_level`, `enemy_speed_scale`, `enemy_substitutions`, `boss_id` | `is_unlocked`, `get_threat_multiplier`, `substitute_enemy`, `has_floor_polygon`, `get_total_waves`, `validate` |
 | `res://scripts/resources/run_progression_tuning.gd` | `RunProgressionTuning` | `Resource` | XP curve, mutation catalog and shared reward-effect values for one endless run. | — | `mutation_paths`, `base_xp_threshold`, `xp_growth`, `wide_reap_per_level`, `velocity_per_level`, `velocity_score_bonus`, `pulse_base_radius`, `pulse_radius_per_level`, `cold_wake_base_duration`, `cold_wake_duration_per_level`, `cold_wake_speed`, `gift_base_streak`, `gift_reduction_per_level`, `gift_minimum_streak`, `shard_attraction_radius`, `hunger_attraction_per_level` | — |
+| `res://scripts/resources/sanctum_catalog.gd` | `SanctumCatalog` | `Resource` | The Soul Sanctum tree: every permanent upgrade, plus the power budget that keeps it honest. | — | `node_paths` | `load_nodes`, `get_node_by_id`, `get_total_cost`, `get_maxed_combat_power`, `is_unlocked`, `validate` |
+| `res://scripts/resources/sanctum_node.gd` | `SanctumNode` | `Resource` | One permanent upgrade in the Soul Sanctum: identity, cost curve and its mechanical hook. | — | `node_id`, `display_name`, `description_template`, `effect_key`, `max_level`, `value_per_level`, `unit`, `cost_first_level`, `cost_step`, `prerequisite_id`, `is_combat_power`, `icon` | `get_value`, `get_cost`, `get_total_cost`, `get_next_description`, `validate` |
+| `res://scripts/resources/trial_catalog.gd` | `TrialCatalog` | `Resource` | The Trials ladder: tiers of three goals, cleared together to rank up. | — | `trial_paths` | `load_trials`, `get_tier_count`, `get_tier`, `validate` |
+| `res://scripts/resources/trial_data.gd` | `TrialData` | `Resource` | One persistent goal in the Trials ladder: what it measures, the target, and its shard reward. | — | `trial_id`, `title`, `description`, `metric`, `target`, `reward_shards`, `tier`, `cumulative` | `advance`, `is_complete`, `validate` |
 | `res://scripts/resources/wave_tuning.gd` | `WaveTuning` | `Resource` | Data-driven duration, budget growth and spawn spacing for the endless wave director. | — | `wave_duration`, `base_threat_budget`, `threat_growth_per_wave`, `formation_gap`, `safe_spawn_distance`, `post_boss_budget_bonus`, `post_boss_gap_multiplier` | — |
 | `res://scripts/utils/audio_synth.gd` | `AudioSynth` | `RefCounted` | Renders every Wisp Rush sound effect and music loop as 16-bit mono PCM at runtime. | — | — | `render_sfx`, `render_music_layer`, `render_all_pcm`, `encode_pcm16`, `build_stream`, `create_stream` |
 | `res://scripts/utils/challenge_tracker.gd` | `ChallengeTracker` | `RefCounted` | Produces deterministic offline goals and safely applies one completed run to their progress. | — | — | `get_date_key`, `get_daily_seed`, `get_challenges`, `apply_run` |
-| `res://scripts/utils/dash_geometry.gd` | `DashGeometry` | `RefCounted` | Pure geometry helpers for exact edge landings and swept dash collision. | — | — | `ray_to_rect_edge`, `reflect_inward`, `inward_edge_normal`, `distance_to_segment` |
+| `res://scripts/utils/dash_geometry.gd` | `DashGeometry` | `RefCounted` | Pure geometry helpers for exact edge landings and swept dash collision. | — | — | `ray_to_rect_edge`, `reflect_inward`, `inward_edge_normal`, `distance_to_segment`, `polygon_signed_area`, `polygon_edge_normal`, `cast_polygon`, `ray_to_polygon_edge`, `is_inside_polygon`, `is_inside_polygon_slack`, `inset_polygon`, `nearest_polygon_point`, `polygon_inward_normal`, `nearest_polygon_edge`, `reflect_inward_polygon`, `clamp_to_polygon`, `polygon_centroid`, `polygon_from_uv`, `polygon_bounds` |
+| `res://scripts/utils/dev_unlock.gd` | `DevUnlock` | `RefCounted` | Developer-only helpers that unlock progression so features can be reached without playing. | — | — | `get_unlock_wave`, `unlock_rifts`, `unlock_forms`, `max_sanctum`, `complete_trials`, `grant_shards`, `unlock_everything` |
 | `res://scripts/utils/haptics.gd` | `Haptics` | `RefCounted` | Settings-gated vibration pulses for touch devices; silently does nothing on desktop. | — | — | `pulse`, `is_enabled` |
 | `res://scripts/utils/palette.gd` | `Palette` | `RefCounted` | Redesign v1 colour palette as typed constants (source: concept_art/wisp_rush_redesign_v1/STYLE_GUIDE.md). | — | — | — |
+| `res://scripts/utils/sanctum_effects.gd` | `SanctumEffects` | `RefCounted` | Resolves purchased Soul Sanctum levels into the flat effect values GameWorld applies at run start. | — | — | `get_value`, `get_multiplier`, `get_count`, `get_keys` |
 | `res://scripts/utils/sound_fx.gd` | `SoundFx` | `RefCounted` | Null-safe shortcuts to the `Audio` autoload so gameplay and UI code never crash without audio. | — | — | `audio`, `play`, `multi_kill`, `music_state`, `set_interrupted`, `bind_buttons` |
+| `res://scripts/utils/trial_tracker.gd` | `TrialTracker` | `RefCounted` | Applies a finished run to the persistent Trials ladder and reports rank-ups and rewards. | — | — | `apply_run`, `get_active_trials`, `is_ladder_complete` |
 | `res://scripts/utils/ui_juice.gd` | `UiJuice` | `RefCounted` | Light UI feedback: buttons dip to 95 % while pressed and spring back on release. | — | — | `bind_press_feedback` |
 
 ## Resources (.tres)
@@ -132,10 +165,29 @@ _None._
 | Resource | Type | Script class |
 |---|---|---|
 | `res://assets/ui/theme/wisp_theme.tres` | `Theme` | — |
+| `res://data/bosses/cinder_maw.tres` | `Resource` | `BossData` |
+| `res://data/bosses/cinder_maw_tuning.tres` | `Resource` | `ReaperTuning` |
 | `res://data/bosses/default_reaper.tres` | `Resource` | `ReaperTuning` |
+| `res://data/bosses/frames/cinder_maw_frames.tres` | `SpriteFrames` | — |
+| `res://data/bosses/frames/hollow_choir_frames.tres` | `SpriteFrames` | — |
+| `res://data/bosses/frames/the_fracture_frames.tres` | `SpriteFrames` | — |
+| `res://data/bosses/hollow_choir.tres` | `Resource` | `BossData` |
+| `res://data/bosses/hollow_choir_tuning.tres` | `Resource` | `ReaperTuning` |
+| `res://data/bosses/reaper.tres` | `Resource` | `BossData` |
+| `res://data/bosses/reaper_ascended.tres` | `Resource` | `BossData` |
+| `res://data/bosses/reaper_ascended_tuning.tres` | `Resource` | `ReaperTuning` |
+| `res://data/bosses/the_fracture.tres` | `Resource` | `BossData` |
+| `res://data/bosses/the_fracture_tuning.tres` | `Resource` | `ReaperTuning` |
 | `res://data/enemies/bone_mote.tres` | `Resource` | `EnemyTuning` |
+| `res://data/enemies/cinder_shade.tres` | `Resource` | `EnemyTuning` |
+| `res://data/enemies/court_shade.tres` | `Resource` | `EnemyTuning` |
+| `res://data/enemies/echo.tres` | `Resource` | `EnemyTuning` |
+| `res://data/enemies/frost_wisp.tres` | `Resource` | `EnemyTuning` |
+| `res://data/enemies/rift_spawn.tres` | `Resource` | `EnemyTuning` |
 | `res://data/enemies/shard_wraith.tres` | `Resource` | `EnemyTuning` |
+| `res://data/enemies/slag_hulk.tres` | `Resource` | `EnemyTuning` |
 | `res://data/enemies/soul_wisp.tres` | `Resource` | `EnemyTuning` |
+| `res://data/enemies/warden.tres` | `Resource` | `EnemyTuning` |
 | `res://data/formations/01_horizontal_three.tres` | `Resource` | `FormationData` |
 | `res://data/formations/02_vertical_three.tres` | `Resource` | `FormationData` |
 | `res://data/formations/03_diagonal_chain.tres` | `Resource` | `FormationData` |
@@ -176,6 +228,59 @@ _None._
 | `res://data/mutations/wide_reap.tres` | `Resource` | `MutationData` |
 | `res://data/player/default_player_tuning.tres` | `Resource` | `PlayerTuning` |
 | `res://data/progression/default_run_progression.tres` | `Resource` | `RunProgressionTuning` |
+| `res://data/rifts/default_catalog.tres` | `Resource` | `RiftCatalog` |
+| `res://data/rifts/ember_hollow.tres` | `Resource` | `RiftData` |
+| `res://data/rifts/frozen_choir.tres` | `Resource` | `RiftData` |
+| `res://data/rifts/obsidian_garden.tres` | `Resource` | `RiftData` |
+| `res://data/rifts/reapers_court.tres` | `Resource` | `RiftData` |
+| `res://data/rifts/shattered_rift.tres` | `Resource` | `RiftData` |
+| `res://data/sanctum/default_catalog.tres` | `Resource` | `SanctumCatalog` |
+| `res://data/sanctum/first_gift.tres` | `Resource` | `SanctumNode` |
+| `res://data/sanctum/keen_edge.tres` | `Resource` | `SanctumNode` |
+| `res://data/sanctum/long_chain.tres` | `Resource` | `SanctumNode` |
+| `res://data/sanctum/rift_scholar.tres` | `Resource` | `SanctumNode` |
+| `res://data/sanctum/shard_finder.tres` | `Resource` | `SanctumNode` |
+| `res://data/sanctum/soul_magnet.tres` | `Resource` | `SanctumNode` |
+| `res://data/sanctum/soul_reserve.tres` | `Resource` | `SanctumNode` |
+| `res://data/sanctum/swift_soul.tres` | `Resource` | `SanctumNode` |
+| `res://data/sanctum/warded_soul.tres` | `Resource` | `SanctumNode` |
+| `res://data/trials/default_catalog.tres` | `Resource` | `TrialCatalog` |
+| `res://data/trials/t01_highest_combo_m.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t01_kills.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t01_wave.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t02_kills.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t02_multi_kill_dashes_m.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t02_wave.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t03_bosses_m.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t03_kills.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t03_wave.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t04_kills.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t04_score_m.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t04_wave.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t05_kills.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t05_rapid_ricochets_m.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t05_wave.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t06_kills.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t06_rift_levels_cleared_m.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t06_wave.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t07_kills.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t07_run_level_m.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t07_wave.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t08_kills.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t08_soul_shards_m.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t08_wave.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t09_kills.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t09_multi_kill_dashes_m.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t09_wave.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t10_highest_combo_m.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t10_kills.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t10_wave.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t11_bosses_m.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t11_kills.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t11_wave.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t12_kills.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t12_score_m.tres` | `Resource` | `TrialData` |
+| `res://data/trials/t12_wave.tres` | `Resource` | `TrialData` |
 | `res://data/waves/default_catalog.tres` | `Resource` | `FormationCatalog` |
 | `res://data/waves/default_wave_tuning.tres` | `Resource` | `WaveTuning` |
 | `res://default_bus_layout.tres` | `AudioBusLayout` | — |
@@ -190,12 +295,24 @@ _None._
 
 ## Assets
 
-`.gd` × 1 · `.json` × 1 · `.png` × 144 · `.py` × 1 · `.pyc` × 1 · `.tres` × 1 · `.tscn` × 5
+`.gd` × 1 · `.json` × 1 · `.png` × 220 · `.py` × 1 · `.pyc` × 1 · `.tres` × 1 · `.tscn` × 5
 
 - `res://assets/art/branding/wisp_rush_app_icon_master.png`
 - `res://assets/art/branding/wisp_rush_app_icon_store.png`
 - `res://assets/art/branding/wisp_rush_logo.png`
 - `res://assets/art/branding/wisp_rush_splash_master.png`
+- `res://assets/art/characters/cinder_maw/01_dormant.png`
+- `res://assets/art/characters/cinder_maw/02_awaken.png`
+- `res://assets/art/characters/cinder_maw/03_idle.png`
+- `res://assets/art/characters/cinder_maw/04_vent_one.png`
+- `res://assets/art/characters/cinder_maw/05_vent_two.png`
+- `res://assets/art/characters/cinder_maw/06_vent_three.png`
+- `res://assets/art/characters/cinder_maw/07_inhale.png`
+- `res://assets/art/characters/cinder_maw/08_erupt.png`
+- `res://assets/art/characters/cinder_maw/09_magma_spray.png`
+- `res://assets/art/characters/cinder_maw/10_stagger.png`
+- `res://assets/art/characters/cinder_maw/11_collapse.png`
+- `res://assets/art/characters/cinder_maw/12_dissolve.png`
 - `res://assets/art/characters/enemies/01_soul_wisp_idle_a.png`
 - `res://assets/art/characters/enemies/02_soul_wisp_idle_b.png`
 - `res://assets/art/characters/enemies/03_soul_wisp_hit.png`
@@ -208,12 +325,48 @@ _None._
 - `res://assets/art/characters/enemies/10_bone_mote_idle_b.png`
 - `res://assets/art/characters/enemies/11_bone_mote_hit.png`
 - `res://assets/art/characters/enemies/12_bone_mote_dissolve.png`
+- `res://assets/art/characters/enemies/13_cinder_shade_idle_a.png`
+- `res://assets/art/characters/enemies/14_cinder_shade_idle_b.png`
+- `res://assets/art/characters/enemies/15_cinder_shade_split.png`
+- `res://assets/art/characters/enemies/16_cinder_shade_dissolve.png`
+- `res://assets/art/characters/enemies/17_warden_idle.png`
+- `res://assets/art/characters/enemies/18_warden_turn.png`
+- `res://assets/art/characters/enemies/19_warden_shield_hit.png`
+- `res://assets/art/characters/enemies/20_warden_dissolve.png`
+- `res://assets/art/characters/enemies/21_rift_spawn_rest.png`
+- `res://assets/art/characters/enemies/22_rift_spawn_taut.png`
+- `res://assets/art/characters/enemies/23_rift_spawn_snap.png`
+- `res://assets/art/characters/enemies/24_rift_spawn_dissolve.png`
+- `res://assets/art/characters/enemies/25_echo_idle_a.png`
+- `res://assets/art/characters/enemies/26_echo_idle_b.png`
+- `res://assets/art/characters/enemies/27_echo_dissolve.png`
+- `res://assets/art/characters/enemies/28_slag_hulk_idle_a.png`
+- `res://assets/art/characters/enemies/29_slag_hulk_idle_b.png`
+- `res://assets/art/characters/enemies/30_slag_hulk_dissolve.png`
+- `res://assets/art/characters/enemies/31_frost_wisp_idle_a.png`
+- `res://assets/art/characters/enemies/32_frost_wisp_idle_b.png`
+- `res://assets/art/characters/enemies/33_frost_wisp_dissolve.png`
+- `res://assets/art/characters/enemies/34_court_shade_idle_a.png`
+- `res://assets/art/characters/enemies/35_court_shade_idle_b.png`
+- `res://assets/art/characters/enemies/36_court_shade_dissolve.png`
 - `res://assets/art/characters/forms/01_void.png`
 - `res://assets/art/characters/forms/02_ash.png`
 - `res://assets/art/characters/forms/03_venom.png`
 - `res://assets/art/characters/forms/04_bloodmoon.png`
 - `res://assets/art/characters/forms/05_frost.png`
 - `res://assets/art/characters/forms/06_eclipse.png`
+- `res://assets/art/characters/hollow_choir/01_dormant.png`
+- `res://assets/art/characters/hollow_choir/02_awaken.png`
+- `res://assets/art/characters/hollow_choir/03_idle.png`
+- `res://assets/art/characters/hollow_choir/04_core_broken_one.png`
+- `res://assets/art/characters/hollow_choir/05_core_broken_two.png`
+- `res://assets/art/characters/hollow_choir/06_cores_shattered.png`
+- `res://assets/art/characters/hollow_choir/07_sound_windup.png`
+- `res://assets/art/characters/hollow_choir/08_sound_release.png`
+- `res://assets/art/characters/hollow_choir/09_frost_cast.png`
+- `res://assets/art/characters/hollow_choir/10_stagger.png`
+- `res://assets/art/characters/hollow_choir/11_shatter.png`
+- `res://assets/art/characters/hollow_choir/12_dissolve.png`
 - `res://assets/art/characters/reaper/01_idle_a.png`
 - `res://assets/art/characters/reaper/02_idle_b.png`
 - `res://assets/art/characters/reaper/03_attack_windup.png`
@@ -226,6 +379,18 @@ _None._
 - `res://assets/art/characters/reaper/10_exposed_core.png`
 - `res://assets/art/characters/reaper/11_corridor_cast.png`
 - `res://assets/art/characters/reaper/12_stagger.png`
+- `res://assets/art/characters/the_fracture/01_dormant.png`
+- `res://assets/art/characters/the_fracture/02_awaken.png`
+- `res://assets/art/characters/the_fracture/03_idle.png`
+- `res://assets/art/characters/the_fracture/04_core_exposed.png`
+- `res://assets/art/characters/the_fracture/05_windup.png`
+- `res://assets/art/characters/the_fracture/06_slab_volley.png`
+- `res://assets/art/characters/the_fracture/07_portal_open.png`
+- `res://assets/art/characters/the_fracture/08_blink_out.png`
+- `res://assets/art/characters/the_fracture/09_reform.png`
+- `res://assets/art/characters/the_fracture/10_stagger.png`
+- `res://assets/art/characters/the_fracture/11_break.png`
+- `res://assets/art/characters/the_fracture/12_dissolve.png`
 - `res://assets/art/characters/wisp/01_idle_a.png`
 - `res://assets/art/characters/wisp/02_idle_b.png`
 - `res://assets/art/characters/wisp/03_charge_a.png`
@@ -253,6 +418,22 @@ _None._
 - `res://assets/art/environment/props/08_blade_ring_hazard_active.png`
 - `res://assets/art/environment/props/08_blade_ring_hazard_warning.png`
 - `res://assets/art/environment/props/09_void_portal.png`
+- `res://assets/art/environment/props/10_void_portal_entrance.png`
+- `res://assets/art/environment/props/10_void_portal_entrance_active.png`
+- `res://assets/art/environment/props/11_void_portal_exit.png`
+- `res://assets/art/environment/props/11_void_portal_exit_active.png`
+- `res://assets/art/environment/props/12_obsidian_pillar.png`
+- `res://assets/art/environment/props/12_obsidian_pillar_cracked.png`
+- `res://assets/art/environment/props/13_floor_warning.png`
+- `res://assets/art/environment/props/13_floor_warning_active.png`
+- `res://assets/art/environment/props/14_floor_crumble.png`
+- `res://assets/art/environment/props/15_obsidian_rubble.png`
+- `res://assets/art/environment/props/16_rune_tile.png`
+- `res://assets/art/environment/props/16_rune_tile_lit.png`
+- `res://assets/art/environment/rifts/ember_hollow_background.png`
+- `res://assets/art/environment/rifts/frozen_choir_background.png`
+- `res://assets/art/environment/rifts/reapers_court_background.png`
+- `res://assets/art/environment/rifts/shattered_background.png`
 - `res://assets/art/environment/wisp_rush_arena_background.png`
 - `res://assets/art/ui/frames/banner.png`
 - `res://assets/art/ui/frames/bar_fill.png`
@@ -359,10 +540,13 @@ _None._
 | systems | [System: Game feel & lifecycle](../systems/game_feel.md) |
 | systems | [System: Game flow](../systems/game_flow.md) |
 | systems | [System: Arena hazards](../systems/hazards.md) |
+| systems | [System: Meta progression (Soul Sanctum, Trials, depth milestones)](../systems/meta_progression.md) |
+| systems | [System: Monetisation](../systems/monetisation.md) |
 | systems | [System: Run progression and mutations](../systems/mutations.md) |
 | systems | [System: Player dash](../systems/player_dash.md) |
 | systems | [System: Player health](../systems/player_health.md) |
 | systems | [System: Reaper boss](../systems/reaper_boss.md) |
+| systems | [System: Rifts](../systems/rifts.md) |
 | systems | [System: Save manager](../systems/save_manager.md) |
 | systems | [System: Settings, statistics and boot screens](../systems/settings.md) |
 | systems | [System: Tutorial](../systems/tutorial.md) |
@@ -374,6 +558,11 @@ _None._
 | decisions | [ADR-0004: Runtime-synthesized audio](../decisions/0004-runtime-synthesized-audio.md) |
 | decisions | [ADR-0005: Adopt visual redesign v1](../decisions/0005-visual-redesign-v1.md) |
 | decisions | [ADR-0006: Inset playfield to the painted floor, and larger sprites](../decisions/0006-inset-playfield-and-larger-sprites.md) |
+| decisions | [ADR-0007: Rifts are rule-variant arenas, not reskins](../decisions/0007-rifts-as-rule-variant-arenas.md) |
+| decisions | [ADR-0008: Rift levels and the difficulty ladder](../decisions/0008-rift-levels-and-difficulty-ladder.md) |
+| decisions | [ADR-0009: Monetisation is opt-in rewarded video plus one Remove Ads purchase](../decisions/0009-monetisation-model.md) |
+| decisions | [ADR-0010: Rift bosses are data-driven variants of one phase machine](../decisions/0010-data-driven-boss-variants.md) |
+| decisions | [ADR-0011: The playfield is each Rift's painted floor, derived from its art](../decisions/0011-polygon-playfield-from-art.md) |
 
 ## Documentation gaps
 

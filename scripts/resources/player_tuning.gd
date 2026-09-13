@@ -34,3 +34,19 @@ extends Resource
 @export_range(0.1, 3.0, 0.05) var invulnerability_duration: float = 0.9
 ## Death-dissolve duration in seconds before Results may appear.
 @export_range(0.1, 2.0, 0.05) var death_duration: float = 0.55
+
+@export_group("Flow")
+## Seconds a swipe released while the Wisp cannot act is remembered and fired as soon as it can.
+## Without this, a swipe started during windup, a hurt reaction or a reform is silently discarded.
+@export_range(0.0, 0.6, 0.01) var input_buffer_window: float = 0.30
+## Speed multiplier at the instant a dash launches, easing back to 1.0 so each dash feels explosive.
+@export_range(1.0, 2.5, 0.05) var launch_burst_multiplier: float = 1.4
+## Seconds for the launch burst to decay; smaller is a sharper kick.
+@export_range(0.02, 0.5, 0.01) var launch_burst_decay: float = 0.11
+## Dashes chained within this many seconds of landing, or redirected mid-flight, build momentum.
+@export_range(0.05, 1.5, 0.01) var momentum_window: float = 0.35
+## Momentum added per chained dash, as a fraction of dash speed.
+@export_range(0.0, 0.5, 0.01) var momentum_step: float = 0.08
+## Maximum momentum, as a fraction of dash speed. Resets on a slow restart or on taking damage.
+@export_range(0.0, 1.0, 0.01) var momentum_max: float = 0.25
+

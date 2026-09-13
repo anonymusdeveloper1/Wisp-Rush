@@ -1,0 +1,46 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scenes/enemies/cinder_shade.gd" id="1_enemy"]
+[ext_resource type="Resource" path="res://data/enemies/cinder_shade.tres" id="2_tuning"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/enemies/13_cinder_shade_idle_a.png" id="3_idle_a"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/enemies/14_cinder_shade_idle_b.png" id="4_idle_b"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/enemies/15_cinder_shade_split.png" id="5_hit"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/enemies/16_cinder_shade_dissolve.png" id="6_dissolve"]
+[ext_resource type="Texture2D" path="res://assets/art/vfx/11_boss_warning_ring.png" id="7_arrival"]
+[ext_resource type="Texture2D" path="res://assets/art/vfx/03_wall_impact_small.png" id="8_hit_flash"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_enemy"]
+animations = [{
+"frames": [{"duration": 1.0, "texture": ExtResource("6_dissolve")}],
+"loop": false,
+"name": &"dissolve",
+"speed": 4.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("5_hit")}],
+"loop": false,
+"name": &"hit",
+"speed": 8.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("3_idle_a")}, {"duration": 1.0, "texture": ExtResource("4_idle_b")}],
+"loop": true,
+"name": &"idle",
+"speed": 3.2
+}]
+
+[node name="CinderShade" type="Node2D" groups=["enemies"]]
+script = ExtResource("1_enemy")
+tuning = ExtResource("2_tuning")
+
+[node name="ArrivalRing" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+texture = ExtResource("7_arrival")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+unique_name_in_owner = true
+sprite_frames = SubResource("SpriteFrames_enemy")
+animation = &"idle"
+
+[node name="HitFlash" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+z_index = 2
+texture = ExtResource("8_hit_flash")
