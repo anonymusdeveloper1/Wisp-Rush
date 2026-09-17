@@ -1,0 +1,197 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/tutorial/tutorial_screen.gd" id="1_screen"]
+[ext_resource type="Resource" path="res://data/tutorial/default_tutorial.tres" id="2_catalog"]
+[ext_resource type="Script" path="res://scenes/tutorial/tutorial_director.gd" id="3_director"]
+[ext_resource type="Script" path="res://scenes/tutorial/tutorial_ghost_hand.gd" id="4_hand"]
+[ext_resource type="Script" path="res://scripts/components/page_dots.gd" id="5_dots"]
+[ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/crest_top.tscn" id="6_crest_top"]
+
+[node name="TutorialScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_screen")
+catalog = ExtResource("2_catalog")
+
+[node name="Director" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("3_director")
+
+[node name="GuideLayer" type="CanvasLayer" parent="."]
+layer = 9
+
+[node name="Guide" type="Control" parent="GuideLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="SkipButton" type="Button" parent="GuideLayer/Guide"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -220.0
+offset_bottom = 94.0
+grow_horizontal = 0
+theme_type_variation = &"SecondaryButton"
+text = "SKIP"
+
+[node name="GuideMargin" type="MarginContainer" parent="GuideLayer/Guide"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -258.0
+offset_bottom = -48.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/margin_left = 34
+theme_override_constants/margin_right = 34
+
+[node name="Center" type="CenterContainer" parent="GuideLayer/Guide/GuideMargin"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="GuidePanel" type="PanelContainer" parent="GuideLayer/Guide/GuideMargin/Center"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(900, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Copy" type="VBoxContainer" parent="GuideLayer/Guide/GuideMargin/Center/GuidePanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="StepRow" type="HBoxContainer" parent="GuideLayer/Guide/GuideMargin/Center/GuidePanel/Copy"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="StepLabel" type="Label" parent="GuideLayer/Guide/GuideMargin/Center/GuidePanel/Copy/StepRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+theme_override_font_sizes/font_size = 26
+text = "LESSON 1 / 9"
+vertical_alignment = 1
+
+[node name="Dots" type="Control" parent="GuideLayer/Guide/GuideMargin/Center/GuidePanel/Copy/StepRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+script = ExtResource("5_dots")
+count = 9
+dot_radius = 6.0
+dot_spacing = 28.0
+
+[node name="CaptionLabel" type="Label" parent="GuideLayer/Guide/GuideMargin/Center/GuidePanel/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Drag to aim, release to dash across the arena."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="HandLayer" type="CanvasLayer" parent="."]
+layer = 11
+
+[node name="GhostHand" type="Node2D" parent="HandLayer"]
+unique_name_in_owner = true
+script = ExtResource("4_hand")
+
+[node name="ConfirmLayer" type="CanvasLayer" parent="."]
+process_mode = 3
+layer = 12
+
+[node name="SkipConfirm" type="Control" parent="ConfirmLayer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ConfirmDim" type="ColorRect" parent="ConfirmLayer/SkipConfirm"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Center" type="CenterContainer" parent="ConfirmLayer/SkipConfirm"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="ConfirmLayer/SkipConfirm/Center"]
+custom_minimum_size = Vector2(700, 0)
+layout_mode = 2
+theme_type_variation = &"PanelCrest"
+
+[node name="Margin" type="MarginContainer" parent="ConfirmLayer/SkipConfirm/Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 26
+
+[node name="Choices" type="VBoxContainer" parent="ConfirmLayer/SkipConfirm/Center/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="Title" type="Label" parent="ConfirmLayer/SkipConfirm/Center/Panel/Margin/Choices"]
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+text = "SKIP THE TUTORIAL?"
+horizontal_alignment = 1
+
+[node name="Text" type="Label" parent="ConfirmLayer/SkipConfirm/Center/Panel/Margin/Choices"]
+custom_minimum_size = Vector2(560, 0)
+layout_mode = 2
+text = "You can replay it any time from the Rift Map."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="SkipConfirmButton" type="Button" parent="ConfirmLayer/SkipConfirm/Center/Panel/Margin/Choices"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+theme_type_variation = &"DangerButton"
+text = "SKIP TUTORIAL"
+
+[node name="SkipCancelButton" type="Button" parent="ConfirmLayer/SkipConfirm/Center/Panel/Margin/Choices"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+text = "KEEP LEARNING"
+
+[node name="CrestTop" parent="ConfirmLayer/SkipConfirm/Center/Panel" instance=ExtResource("6_crest_top")]
+layout_mode = 2

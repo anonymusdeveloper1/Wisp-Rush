@@ -4,7 +4,7 @@ extends SceneTree
 const TUNING: RunProgressionTuning = preload(
 	"res://data/progression/default_run_progression.tres"
 )
-const OVERLAY: PackedScene = preload("res://scenes/screens/upgrade_select.tscn")
+const OVERLAY: PackedScene = preload("res://scenes/gameplay/upgrade_tray.tscn")
 
 
 func _init() -> void:
@@ -29,10 +29,10 @@ func _run_checks() -> void:
 		push_error("run_progression: level readiness or distinct offer failed")
 
 	var selected_ids: Array[StringName] = []
-	var overlay := OVERLAY.instantiate() as UpgradeSelect
+	var overlay := OVERLAY.instantiate() as UpgradeTray
 	root.add_child(overlay)
 	overlay.choice_selected.connect(func(id: StringName) -> void: selected_ids.append(id))
-	overlay.present(choices, progression.get_levels())
+	overlay.present(choices, progression.get_levels(), 0.0)
 	if not overlay.choose_index(0) or overlay.choose_index(0):
 		failures += 1
 		push_error("run_progression: overlay accepted zero or multiple selections")

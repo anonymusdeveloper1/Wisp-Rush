@@ -20,6 +20,20 @@ const ORBIT_SQUASH: float = 0.34
 ## Angular speed range, radians per second.
 const SPEED_MIN: float = 0.55
 const SPEED_MAX: float = 1.15
+## Per-spark reach range, as a fraction of `radius`.
+const REACH_MIN: float = 0.82
+const REACH_MAX: float = 1.12
+## Largest per-spark vertical bob, as a fraction of its reach, and how strongly the bob is applied.
+const RISE_MAX: float = 0.12
+const RISE_BOB: float = 0.35
+## Spark core size range in pixels on an orbit of UNIT_RADIUS; sparks scale with the orbit.
+const SIZE_MIN: float = 6.0
+const SIZE_MAX: float = 11.0
+const UNIT_RADIUS: float = 180.0
+## Size multiplier on the far and near side of the orbit, and the soft halo relative to the core.
+const FAR_SIZE: float = 0.55
+const NEAR_SIZE: float = 1.15
+const HALO_SCALE: float = 2.4
 
 ## Horizontal orbit radius in pixels; the Home screen sets it from the hero size.
 var radius: float = 180.0:
@@ -45,9 +59,9 @@ func _ready() -> void:
 		_sparks.append({
 			&"phase": TAU * float(index) / float(COUNT) + random.randf_range(-0.3, 0.3),
 			&"speed": random.randf_range(SPEED_MIN, SPEED_MAX),
-			&"reach": random.randf_range(0.82, 1.12),
-			&"rise": random.randf_range(-0.12, 0.12),
-			&"size": random.randf_range(6.0, 11.0),
+			&"reach": random.randf_range(REACH_MIN, REACH_MAX),
+			&"rise": random.randf_range(-RISE_MAX, RISE_MAX),
+			&"size": random.randf_range(SIZE_MIN, SIZE_MAX),
 		})
 
 
@@ -72,22 +86,35 @@ func get_time() -> float:
 	return _time
 
 
+## How far any spark, halo included, can reach from the orbit centre, in multiples of `radius`.
+##
+## `x` is the reach to either side; `y` is the reach below the centre, on the near side where sparks
+## are largest. The Home screen uses it to keep the orbit clear of the buttons around the Wisp.
+static func get_extent_ratio() -> Vector2:
+	var halo: float = HALO_SCALE * SIZE_MAX * NEAR_SIZE / UNIT_RADIUS
+	return Vector2(
+		REACH_MAX + halo,
+		REACH_MAX * (ORBIT_SQUASH + RISE_MAX * RISE_BOB) + halo,
+	)
+
+
 func _draw() -> void:
-	var unit: float = radius / 180.0
+	var unit: float = radius / UNIT_RADIUS
 	for spark: Dictionary in _sparks:
 		var angle: float = float(spark[&"phase"]) + _time * float(spark[&"speed"])
 		var reach: float = radius * float(spark[&"reach"])
 		# The orbit tilts slightly and each spark bobs, so the ring never looks mechanical.
 		var point := Vector2(
 			cos(angle) * reach,
-			sin(angle) * reach * ORBIT_SQUASH + float(spark[&"rise"]) * reach * 0.35 * sin(_time * 0.7 + angle)
+			sin(angle) * reach * ORBIT_SQUASH
+					+ float(spark[&"rise"]) * reach * RISE_BOB * sin(_time * 0.7 + angle)
 		)
 		# sin(angle) > 0 is the near side of the orbit (in front of the Wisp, lower on screen).
 		var near: bool = sin(angle) > 0.0
 		if (side == SIDE_BACK and near) or (side == SIDE_FRONT and not near):
 			continue
 		var depth: float = (sin(angle) + 1.0) * 0.5
-		var size: float = float(spark[&"size"]) * unit * lerpf(0.55, 1.15, depth)
+		var size: float = float(spark[&"size"]) * unit * lerpf(FAR_SIZE, NEAR_SIZE, depth)
 		var alpha: float = lerpf(0.25, 1.0, depth)
-		draw_circle(point, size * 2.4, Color(tint, 0.24 * alpha))
+		draw_circle(point, size * HALO_SCALE, Color(tint, 0.24 * alpha))
 		draw_circle(point, size, Color(Palette.SOUL_WHITE.lerp(tint, 0.35), 0.9 * alpha))

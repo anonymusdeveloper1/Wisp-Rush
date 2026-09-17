@@ -141,11 +141,19 @@ theme_override_constants/separation = 20
 
 [node name="BackButton" type="Button" parent="SafeMargin/Content/Footer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(280, 0)
+custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
 size_flags_vertical = 4
 theme_type_variation = &"SecondaryButton"
 text = "BACK"
+
+[node name="TutorialButton" type="Button" parent="SafeMargin/Content/Footer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"SecondaryButton"
+text = "TUTORIAL"
 
 [node name="EnterButton" type="Button" parent="SafeMargin/Content/Footer"]
 unique_name_in_owner = true

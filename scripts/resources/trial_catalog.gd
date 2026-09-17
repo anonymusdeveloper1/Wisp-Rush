@@ -7,7 +7,7 @@ const TRIALS_PER_TIER: int = 3
 ## Run-summary keys a trial may read. Anything else would silently never progress.
 const VALID_METRICS: Array[StringName] = [
 	&"score", &"kills", &"highest_combo", &"wave", &"multi_kill_dashes",
-	&"rapid_ricochets", &"bosses", &"soul_shards", &"run_level", &"rift_levels_cleared",
+	&"rapid_ricochets", &"bosses", &"rp_collected", &"run_level", &"level_clears",
 ]
 
 ## Trial `.tres` paths in ladder order; every consecutive group of three forms one tier.
@@ -71,7 +71,7 @@ func validate() -> PackedStringArray:
 	for tier: int in get_tier_count():
 		var total: int = 0
 		for trial: TrialData in get_tier(tier + 1):
-			total += trial.reward_shards
+			total += trial.reward_points
 		if total < previous_reward:
 			failures.append("tier %d rewards less than the tier before it" % (tier + 1))
 		previous_reward = total

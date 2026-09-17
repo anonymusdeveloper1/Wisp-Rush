@@ -79,11 +79,29 @@ theme_type_variation = &"PanelBanner"
 layout_mode = 2
 
 [node name="Title" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/BannerCenter/Banner"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"TitleLabel"
 text = "RUN COMPLETE"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="RiftName" type="Label" parent="SafeMargin/Center/Panel/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+theme_override_font_sizes/font_size = 30
+text = "OBSIDIAN GARDEN"
+horizontal_alignment = 1
+
+[node name="UnlockBanner" type="Label" parent="SafeMargin/Center/Panel/Margin/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"AmberValueLabel"
+theme_override_font_sizes/font_size = 40
+text = "SHATTERED RIFT OPEN"
+horizontal_alignment = 1
 
 [node name="ScoreCaption" type="Label" parent="SafeMargin/Center/Panel/Margin/Content"]
 layout_mode = 2
@@ -286,34 +304,34 @@ theme_override_constants/separation = 10
 [node name="Title" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box"]
 layout_mode = 2
 theme_type_variation = &"CaptionLabel"
-text = "REWARDS"
+text = "RIFT POINTS"
 horizontal_alignment = 1
 
 [node name="Row" type="HBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="RunReward" type="VBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row"]
+[node name="CollectedReward" type="VBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 6
 
-[node name="Plate" type="PanelContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/RunReward"]
+[node name="Plate" type="PanelContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/CollectedReward"]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"PanelPlate"
 
-[node name="Pad" type="MarginContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/RunReward/Plate"]
+[node name="Pad" type="MarginContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/CollectedReward/Plate"]
 layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_right = 20
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 18
 
-[node name="Line" type="HBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/RunReward/Plate/Pad"]
+[node name="Line" type="HBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/CollectedReward/Plate/Pad"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
-[node name="Icon" type="TextureRect" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/RunReward/Plate/Pad/Line"]
-custom_minimum_size = Vector2(48, 48)
+[node name="Icon" type="TextureRect" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/CollectedReward/Plate/Pad/Line"]
+custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
@@ -321,41 +339,41 @@ texture = ExtResource("10_shards")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="RunShardsValue" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/RunReward/Plate/Pad/Line"]
+[node name="CollectedValue" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/CollectedReward/Plate/Pad/Line"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"AmberValueLabel"
-theme_override_font_sizes/font_size = 42
-text = "+0"
+theme_override_font_sizes/font_size = 36
+text = "+0 RP"
 vertical_alignment = 1
 
-[node name="Caption" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/RunReward"]
+[node name="Caption" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/CollectedReward"]
 layout_mode = 2
 theme_type_variation = &"CaptionLabel"
-text = "THIS RUN"
+text = "RP COLLECTED"
 horizontal_alignment = 1
 
-[node name="GoalReward" type="VBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row"]
+[node name="PerformanceReward" type="VBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 6
 
-[node name="Plate" type="PanelContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalReward"]
+[node name="Plate" type="PanelContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/PerformanceReward"]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"PanelPlate"
 
-[node name="Pad" type="MarginContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalReward/Plate"]
+[node name="Pad" type="MarginContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/PerformanceReward/Plate"]
 layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_right = 20
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 18
 
-[node name="Line" type="HBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalReward/Plate/Pad"]
+[node name="Line" type="HBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/PerformanceReward/Plate/Pad"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
-[node name="Icon" type="TextureRect" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalReward/Plate/Pad/Line"]
-custom_minimum_size = Vector2(48, 48)
+[node name="Icon" type="TextureRect" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/PerformanceReward/Plate/Pad/Line"]
+custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
@@ -363,41 +381,41 @@ texture = ExtResource("10_shards")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="GoalShardsValue" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalReward/Plate/Pad/Line"]
+[node name="PerformanceValue" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/PerformanceReward/Plate/Pad/Line"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"AmberValueLabel"
-theme_override_font_sizes/font_size = 42
-text = "+0"
+theme_override_font_sizes/font_size = 36
+text = "+0 RP"
 vertical_alignment = 1
 
-[node name="Caption" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalReward"]
+[node name="Caption" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/PerformanceReward"]
 layout_mode = 2
 theme_type_variation = &"CaptionLabel"
-text = "GOALS"
+text = "PERFORMANCE"
 horizontal_alignment = 1
 
-[node name="TotalReward" type="VBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row"]
+[node name="GoalsReward" type="VBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 6
 
-[node name="Plate" type="PanelContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/TotalReward"]
+[node name="Plate" type="PanelContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalsReward"]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"PanelPlate"
 
-[node name="Pad" type="MarginContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/TotalReward/Plate"]
+[node name="Pad" type="MarginContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalsReward/Plate"]
 layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_right = 20
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 18
 
-[node name="Line" type="HBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/TotalReward/Plate/Pad"]
+[node name="Line" type="HBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalsReward/Plate/Pad"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
-[node name="Icon" type="TextureRect" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/TotalReward/Plate/Pad/Line"]
-custom_minimum_size = Vector2(48, 48)
+[node name="Icon" type="TextureRect" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalsReward/Plate/Pad/Line"]
+custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
@@ -405,19 +423,102 @@ texture = ExtResource("10_shards")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="TotalShardsValue" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/TotalReward/Plate/Pad/Line"]
+[node name="RewardsValue" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalsReward/Plate/Pad/Line"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_type_variation = &"ValueLabel"
-theme_override_font_sizes/font_size = 42
-text = "0"
+theme_type_variation = &"AmberValueLabel"
+theme_override_font_sizes/font_size = 36
+text = "+0 RP"
 vertical_alignment = 1
 
-[node name="Caption" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/TotalReward"]
+[node name="Caption" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalsReward"]
 layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+text = "REWARDS"
+horizontal_alignment = 1
+
+[node name="ClearReward" type="VBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Plate" type="PanelContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/ClearReward"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"PanelPlate"
+
+[node name="Pad" type="MarginContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/ClearReward/Plate"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 18
+
+[node name="Line" type="HBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/ClearReward/Plate/Pad"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Icon" type="TextureRect" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/ClearReward/Plate/Pad/Line"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("10_shards")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ClearValue" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/ClearReward/Plate/Pad/Line"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"AmberValueLabel"
+theme_override_font_sizes/font_size = 36
+text = "+0 RP"
+vertical_alignment = 1
+
+[node name="Caption" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/ClearReward"]
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+text = "CLEAR BONUS"
+horizontal_alignment = 1
+
+[node name="TotalLine" type="HBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box"]
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="TotalCaption" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/TotalLine"]
+layout_mode = 2
+size_flags_vertical = 4
 theme_type_variation = &"CaptionLabel"
 text = "TOTAL"
-horizontal_alignment = 1
+
+[node name="TotalValue" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/TotalLine"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"AmberValueLabel"
+theme_override_font_sizes/font_size = 42
+text = "+0 RP"
+
+[node name="Divider" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/TotalLine"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"CaptionLabel"
+text = "•"
+
+[node name="BalanceCaption" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/TotalLine"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"CaptionLabel"
+text = "BALANCE"
+
+[node name="BalanceValue" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/TotalLine"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"ValueLabel"
+theme_override_font_sizes/font_size = 42
+text = "0 RP"
 
 [node name="SpacerBottom" type="Control" parent="SafeMargin/Center/Panel/Margin/Content"]
 layout_mode = 2

@@ -1,6 +1,6 @@
 class_name SettingsScreen
 extends Control
-## Player settings: volumes, haptics, reduced motion, shake, tutorial replay, about and reset.
+## Player settings: volumes, haptics, reduced motion, shake, about and reset.
 ##
 ## Works as a Home-level screen and as an overlay inside the paused run (process mode Always).
 ## Changes go through the SaveManager autoload, which validates, persists and emits
@@ -46,7 +46,7 @@ var _reset_arm_remaining: float = -1.0
 @onready var _haptics_toggle: Button = %HapticsToggle
 @onready var _reduced_motion_toggle: Button = %ReducedMotionToggle
 @onready var _aim_arrow_toggle: Button = %AimArrowToggle
-@onready var _tutorial_button: Button = %TutorialButton
+@onready var _aim_assist_toggle: Button = %AimAssistToggle
 @onready var _about_button: Button = %AboutButton
 @onready var _reset_button: Button = %ResetButton
 @onready var _feedback_label: Label = %FeedbackLabel
@@ -90,7 +90,9 @@ func _ready() -> void:
 	_aim_arrow_toggle.toggled.connect(
 		func(enabled: bool) -> void: _queue_change(&"aim_arrow", enabled, true)
 	)
-	_tutorial_button.pressed.connect(_on_tutorial_button_pressed)
+	_aim_assist_toggle.toggled.connect(
+		func(enabled: bool) -> void: _queue_change(&"aim_assist", enabled, true)
+	)
 	_about_button.pressed.connect(_on_about_button_pressed)
 	_about_close_button.pressed.connect(_close_panels)
 	_reset_button.pressed.connect(_on_reset_button_pressed)
@@ -133,6 +135,7 @@ func setup(settings: Dictionary) -> void:
 	_haptics_toggle.set_pressed_no_signal(bool(settings.get(&"haptics", true)))
 	_reduced_motion_toggle.set_pressed_no_signal(bool(settings.get(&"reduced_motion", false)))
 	_aim_arrow_toggle.set_pressed_no_signal(bool(settings.get(&"aim_arrow", true)))
+	_aim_assist_toggle.set_pressed_no_signal(bool(settings.get(&"aim_assist", true)))
 	_refresh_labels()
 
 
@@ -194,6 +197,7 @@ func _refresh_labels() -> void:
 	_haptics_toggle.text = "ON" if _haptics_toggle.button_pressed else "OFF"
 	_reduced_motion_toggle.text = "ON" if _reduced_motion_toggle.button_pressed else "OFF"
 	_aim_arrow_toggle.text = "ON" if _aim_arrow_toggle.button_pressed else "OFF"
+	_aim_assist_toggle.text = "ON" if _aim_assist_toggle.button_pressed else "OFF"
 
 
 func _update_reset_arming() -> void:
@@ -254,13 +258,6 @@ func _on_back_button_pressed() -> void:
 	back_requested.emit()
 
 
-func _on_tutorial_button_pressed() -> void:
-	var save_manager: SaveManagerService = _get_save_manager()
-	if save_manager != null:
-		save_manager.reset_tutorial()
-	_feedback_label.text = "THE LESSON WILL PLAY ON YOUR NEXT RUN"
-
-
 func _on_about_button_pressed() -> void:
 	_about_panel.visible = true
 	_about_close_button.grab_focus()
@@ -308,18 +305,16 @@ func _build_developer_card() -> void:
 
 	# label, tooltip, action
 	var actions: Array[Array] = [
-		["UNLOCK EVERYTHING", "Rifts, forms, Sanctum, Trials and shards",
+		["UNLOCK EVERYTHING", "Rifts, forms, Trials and Rift Points",
 			func() -> bool: return DevUnlock.unlock_everything(save)],
 		["UNLOCK ALL RIFTS", "Raises the lifetime best wave past every gate",
 			func() -> bool: return DevUnlock.unlock_rifts(save)],
 		["UNLOCK ALL FORMS", "Owns all six cosmetic forms",
 			func() -> bool: return DevUnlock.unlock_forms(save)],
-		["MAX SOUL SANCTUM", "Every node at its maximum level",
-			func() -> bool: return DevUnlock.max_sanctum(save)],
 		["COMPLETE ALL TRIALS", "Finishes the whole ladder",
 			func() -> bool: return DevUnlock.complete_trials(save)],
-		["+%d SHARDS" % DevUnlock.SHARD_GRANT, "Adds Soul Shards",
-			func() -> bool: return DevUnlock.grant_shards(save)],
+		["+%s" % RiftPoints.format(DevUnlock.RP_GRANT), "Adds Rift Points",
+			func() -> bool: return DevUnlock.grant_rift_points(save)],
 	]
 	for action: Array in actions:
 		var button := Button.new()

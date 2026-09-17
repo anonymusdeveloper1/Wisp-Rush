@@ -6,9 +6,9 @@
 script = ExtResource("1")
 trial_id = &"t09_wave"
 title = "GO DEEPER"
-description = "Reach wave 21 in a single run."
+description = "Reach wave 21 in Endless."
 metric = &"wave"
 target = 21
-reward_shards = 95
+reward_points = 95
 tier = 9
 cumulative = false

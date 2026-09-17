@@ -1,0 +1,147 @@
+[gd_resource type="Resource" script_class="ArenaSkinData" load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/arena_skin_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/endless/thumbnails/world_tree_crown.png" id="2_thumbnail"]
+[ext_resource type="Script" path="res://scripts/resources/arena_scenery_data.gd" id="3_scenery"]
+[ext_resource type="Script" path="res://scripts/resources/arena_scenery_zone.gd" id="4_zone"]
+[ext_resource type="Script" path="res://scripts/resources/arena_particle_emitter.gd" id="5_emitter"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/endless/masks/world_tree_crown.png" id="6_mask"]
+
+[sub_resource type="Resource" id="Zone_1"]
+script = ExtResource("4_zone")
+zone_name = "canopy"
+light_color = Color(0.5569, 0.8784, 0.4784, 1)
+light_alt_color = Color(1, 0.7725, 0.4196, 1)
+light_strength = 0.55
+breathe = 0
+breathe_hz = 0.15
+flicker = 0
+flicker_hz = 6
+flare_interval = 0
+flare_boost = 0
+flare_rise = 0.3
+flare_fade = 1.2
+flare_is_flash = false
+hue_cycle = 0
+hue_cycle_hz = 0.05
+color_shift = 0.4
+color_shift_cycles = 3
+color_shift_hz = 0.08
+twinkle = 0.6
+twinkle_hz = 0.5
+travel = 0
+travel_cycles = 8
+travel_hz = 0.5
+sweep_weight = 0
+warp_mode = 0
+warp_px = 0
+warp_hz = 0.1
+warp_cycles = 4
+
+[sub_resource type="Resource" id="Zone_2"]
+script = ExtResource("4_zone")
+zone_name = "moon glow"
+light_color = Color(0.8471, 0.902, 1, 1)
+light_alt_color = Color(0.8471, 0.902, 1, 1)
+light_strength = 0.45
+breathe = 0.3
+breathe_hz = 0.06
+flicker = 0
+flicker_hz = 6
+flare_interval = 0
+flare_boost = 0
+flare_rise = 0.3
+flare_fade = 1.2
+flare_is_flash = false
+hue_cycle = 0
+hue_cycle_hz = 0.05
+color_shift = 0
+color_shift_cycles = 2
+color_shift_hz = 0.08
+twinkle = 0
+twinkle_hz = 1
+travel = 0
+travel_cycles = 8
+travel_hz = 0.5
+sweep_weight = 0
+warp_mode = 0
+warp_px = 0
+warp_hz = 0.1
+warp_cycles = 4
+
+[sub_resource type="Resource" id="Zone_3"]
+script = ExtResource("4_zone")
+zone_name = "waterfalls"
+light_color = Color(0.6118, 0.8392, 1, 1)
+light_alt_color = Color(0.6118, 0.8392, 1, 1)
+light_strength = 0.45
+breathe = 0
+breathe_hz = 0.15
+flicker = 0
+flicker_hz = 6
+flare_interval = 0
+flare_boost = 0
+flare_rise = 0.3
+flare_fade = 1.2
+flare_is_flash = false
+hue_cycle = 0
+hue_cycle_hz = 0.05
+color_shift = 0
+color_shift_cycles = 2
+color_shift_hz = 0.08
+twinkle = 0
+twinkle_hz = 1
+travel = 0.7
+travel_cycles = 26
+travel_hz = 0.8
+sweep_weight = 0
+warp_mode = 2
+warp_px = 1.2
+warp_hz = 0.5
+warp_cycles = 20
+
+[sub_resource type="Resource" id="Emitter_1"]
+script = ExtResource("5_emitter")
+emitter_name = "fireflies"
+points_uv = PackedVector2Array(0.9022, 0.8744, 0.8470, 0.8977, 0.1668, 0.9827, 0.3953, 0.0574, 0.8119, 0.1256, 0.0776, 0.0293, 0.2721, 0.9850, 0.6291, 0.1555, 0.6132, 0.9737, 0.2487, 0.1166, 0.1424, 0.2081, 0.7226, 0.9868, 0.8480, 0.8218, 0.3613, 0.9151, 0.9139, 0.0724, 0.2997, 0.9055, 0.5112, 0.8738, 0.5186, 0.0789, 0.8459, 0.0676, 0.6886, 0.8487, 0.7205, 0.9414, 0.8789, 0.9707, 0.3475, 0.1166, 0.8799, 0.9336, 0.4219, 0.8756, 0.5080, 0.9228, 0.9086, 0.1005, 0.1350, 0.9635, 0.0096, 0.9803, 0.0574, 0.0245, 0.1498, 0.9217, 0.0521, 0.8421, 0.8852, 0.9258, 0.3156, 0.1447, 0.6440, 0.1226, 0.9947, 0.1124, 0.9766, 0.1890, 0.1403, 0.8457, 0.5441, 0.0622, 0.7375, 0.9001, 0.9075, 0.0197, 0.3592, 0.9815, 0.6270, 0.1854, 0.0340, 0.8379, 0.7035, 0.9922, 0.6291, 0.9731, 0.0755, 0.9414, 0.1424, 0.1663)
+amount = 16
+lifetime = 6
+direction = Vector2(0, -1)
+spread_degrees = 180
+speed_px = Vector2(3, 9)
+gravity_px = Vector2(0, 0)
+size_px = Vector2(9, 15)
+color = Color(0.5569, 0.8784, 0.4784, 1)
+end_color = Color(1, 0.7725, 0.4196, 1)
+alpha = 1
+pulses = 2
+additive = true
+sprite = 0
+spin_degrees = 0
+random_seed = 1001
+
+[sub_resource type="Resource" id="Scenery"]
+script = ExtResource("3_scenery")
+mask = ExtResource("6_mask")
+scenery_saturation = 1.25
+scenery_contrast = 1.06
+scenery_exposure = 1.04
+shadow_lift = Color(0.2392, 0.5451, 1, 1)
+shadow_lift_amount = 0.14
+highlight_lift = Color(0.5569, 0.8784, 0.4784, 1)
+highlight_lift_amount = 0.18
+floor_saturation = 1.04
+zones = Array[ExtResource("4_zone")]([SubResource("Zone_1"), SubResource("Zone_2"), SubResource("Zone_3")])
+emitters = Array[ExtResource("5_emitter")]([SubResource("Emitter_1")])
+
+[resource]
+script = ExtResource("1_script")
+skin_id = &"world_tree_crown"
+display_name = "WORLD TREE CROWN"
+description = "A polished living-wood platform high among floating islands."
+tier = 2
+background_path = "res://assets/art/environment/endless/world_tree_crown.png"
+thumbnail = ExtResource("2_thumbnail")
+price = 2000
+accent = Color(0.3686, 0.4902, 0.298, 1)
+scenery = SubResource("Scenery")

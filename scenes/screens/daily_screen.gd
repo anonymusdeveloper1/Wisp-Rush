@@ -1,12 +1,14 @@
 class_name DailyScreen
 extends Control
-## Offline daily-run screen: today's portal, seed and best, three local goal rows and Play.
+## Offline daily-run screen: today's portal, arena and seed, best, three local goal rows and Play.
+##
+## The daily run plays on Endless rules in the arena of the day, which the seed line names.
 ##
 ## Layout follows the redesign v1 handoff board (Daily Rift panel) and styles everything through
 ## theme type variations (docs/systems/ui_design_system.md). Each goal row is the scene's
 ## `ChallengeLabel<n>` Label, whose text is the goal title (tests read it at
 ## Margin/Content/Challenges/ChallengeLabel<n>). The row frame (icon, description, slim bar,
-## "x / y" and a shard reward plate) is built in code as the label's child and drawn behind it
+## "x / y" and a Rift Points reward plate) is built in code as the label's child and drawn behind it
 ## with `show_behind_parent`: a tab stop indents the title into the frame's text column and the
 ## frame reaches above the label by its top content margin, so the title sits inside the frame.
 ## Goal states differ in wording and shading, not in hue alone: in progress ("12 / 25"),
@@ -23,7 +25,7 @@ const ROW_GAP: int = 16
 const ROW_SEPARATION: int = 20
 ## Square size of a goal row's icon (design px).
 const GOAL_ICON_SIZE: float = 84.0
-## Square size of the shard icon inside a reward plate (design px).
+## Square size of the Rift Points icon inside a reward plate (design px).
 const REWARD_ICON_SIZE: float = 40.0
 ## Font size of a goal row's description line.
 const DESCRIPTION_FONT_SIZE: int = 28
@@ -38,14 +40,14 @@ const SHADE_ALPHA: float = 0.35
 ## Opacity of icons and reward plates whose reward was already claimed.
 const CLAIMED_ALPHA: float = 0.45
 
-const _SHARD_ICON: Texture2D = preload("res://assets/art/ui/system/02_soul_shards.png")
+const _RP_ICON: Texture2D = preload("res://assets/art/ui/system/02_soul_shards.png")
 const _FALLBACK_GOAL_ICON: Texture2D = preload("res://assets/art/ui/system/13_daily.png")
 const _GOAL_ICONS: Dictionary[StringName, Texture2D] = {
 	&"kills": preload("res://assets/art/ui/system/18_reaper.png"),
 	&"multi_kill_dashes": preload("res://assets/art/ui/system/05_play.png"),
 	&"wave": preload("res://assets/art/ui/system/13_daily.png"),
 	&"highest_combo": preload("res://assets/art/ui/system/03_combo_chain.png"),
-	&"soul_shards": preload("res://assets/art/ui/system/02_soul_shards.png"),
+	&"rp_collected": preload("res://assets/art/ui/system/02_soul_shards.png"),
 	&"bosses": preload("res://assets/art/ui/system/18_reaper.png"),
 	&"rapid_ricochets": preload("res://assets/art/ui/system/07_restart.png"),
 }
@@ -56,6 +58,8 @@ const _MONTHS: Array[String] = [
 
 var _date_key: String = ""
 var _seed: int = 1
+## Display name of today's arena skin; empty hides it from the seed line.
+var _arena_name: String = ""
 var _snapshot: Dictionary = {}
 var _row_top_margin: float = 0.0
 var _row_frames: Array[PanelContainer] = []
@@ -100,10 +104,11 @@ func _ready() -> void:
 	print("[Daily] ready | date=%s seed=%d" % [_date_key, _seed])
 
 
-## Supplies today's identity and all persistent progress used by the screen.
-func setup(date_key: String, seed: int, snapshot: Dictionary) -> void:
+## Supplies today's identity, the arena of the day and all persistent progress used by the screen.
+func setup(date_key: String, seed: int, snapshot: Dictionary, arena_name: String = "") -> void:
 	_date_key = date_key
 	_seed = maxi(1, seed)
+	_arena_name = arena_name
 	_snapshot = snapshot.duplicate(true)
 	if is_node_ready():
 		_apply_snapshot()
@@ -114,6 +119,8 @@ func _apply_snapshot() -> void:
 		return
 	_date_label.text = _format_date(_date_key)
 	_seed_label.text = "RIFT SEED  ·  %010d" % _seed
+	if not _arena_name.is_empty():
+		_seed_label.text = "%s  ·  SEED %010d" % [_arena_name.to_upper(), _seed]
 	var daily_state: Dictionary = _snapshot.get(&"daily_state", {}) as Dictionary
 	var best_scores: Dictionary = daily_state.get(&"best_scores", {}) as Dictionary
 	var completed_dates: Array = daily_state.get(&"completed_dates", []) as Array
@@ -122,7 +129,9 @@ func _apply_snapshot() -> void:
 	_reward_label.text = (
 		"DAILY BONUS CLAIMED"
 		if bonus_claimed
-		else "+%d FOR FINISHING TODAY'S RIFT" % ChallengeTracker.DAILY_COMPLETION_REWARD
+		else "%s FOR FINISHING TODAY'S RIFT" % RiftPoints.format_gain(
+			ChallengeTracker.DAILY_COMPLETION_REWARD
+		)
 	)
 	_reward_label.theme_type_variation = &"CaptionLabel" if bonus_claimed else &"AmberValueLabel"
 	_reward_icon.modulate = Color(1.0, 1.0, 1.0, CLAIMED_ALPHA if bonus_claimed else 1.0)
@@ -167,7 +176,7 @@ func _apply_goal(index: int, definition: Dictionary, current: int, is_claimed: b
 	else:
 		count.text = "%d / %d" % [shown, target]
 		count.theme_type_variation = &"ValueLabel"
-	_row_rewards[index].text = "+%d" % int(definition[&"reward"])
+	_row_rewards[index].text = RiftPoints.format_gain(int(definition[&"reward"]))
 	_row_plates[index].modulate = Color(1.0, 1.0, 1.0, CLAIMED_ALPHA if is_claimed else 1.0)
 
 
@@ -233,7 +242,7 @@ func _build_goal_row(label: Label) -> void:
 	var plate_row := HBoxContainer.new()
 	plate_row.add_theme_constant_override(&"separation", 8)
 	plate.add_child(plate_row)
-	plate_row.add_child(_make_icon(_SHARD_ICON, REWARD_ICON_SIZE))
+	plate_row.add_child(_make_icon(_RP_ICON, REWARD_ICON_SIZE))
 	var reward := Label.new()
 	reward.theme_type_variation = &"AmberValueLabel"
 	reward.add_theme_font_size_override(&"font_size", REWARD_FONT_SIZE)

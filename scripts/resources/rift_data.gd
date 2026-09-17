@@ -1,6 +1,6 @@
 class_name RiftData
 extends Resource
-## Data-driven identity, unlock gate, backdrop and rule twist for one playable arena.
+## Data-driven identity, unlock requirement, backdrop and rule twist for one playable arena.
 ##
 ## A Rift is not a reskin: `rule_key` names the one mechanical twist that makes it play differently
 ## from the Obsidian Garden baseline. GameWorld reads the key at run start; everything else here is
@@ -25,17 +25,19 @@ extends Resource
 ## ones, where its corners sat in the lava and on the ice pillars. Empty falls back to the legacy
 ## rectangle so a Rift without a baked polygon still plays.
 @export var floor_polygon: PackedVector2Array = PackedVector2Array()
-## Lifetime highest wave required to unlock; zero is always available.
-@export_range(0, 999, 1) var unlock_wave: int = 0
+## Rift whose level must be cleared to open this one; empty means open from the start (ADR-0013).
+@export var unlock_after_rift_id: StringName = &""
+## Level of `unlock_after_rift_id` that must be cleared (banked in the save's `rift_levels`).
+@export_range(1, 20, 1) var unlock_after_level: int = 1
 ## Map-node accent colour; use a Palette constant, never a raw literal.
 @export var accent: Color = Color.WHITE
 
 @export_group("Difficulty")
 ## Where this Rift sits on the ladder, 1 (Obsidian Garden) to 5 (Reaper's Court).
 @export_range(1, 5, 1) var difficulty_tier: int = 1
-## Levels the player clears inside this Rift before it becomes endless.
+## Story levels in this Rift; a run plays exactly one, and clearing them all masters the Rift.
 @export_range(1, 20, 1) var level_count: int = 8
-## Waves survived per level before this Rift's boss appears.
+## Waves per level; the boss on the last of them is the level's final boss and ends a story run.
 @export_range(1, 20, 1) var waves_per_level: int = 4
 ## Threat-budget multiplier at level 1. Kept near 1.0 in every Rift so level 1 is always approachable.
 @export_range(0.4, 2.0, 0.01) var level_one_threat: float = 1.0
@@ -48,13 +50,15 @@ extends Resource
 ## Replaces authored formation enemy kinds with this Rift's own roster, so the twenty formations
 ## stay reusable while each arena fields different threats. Empty means the base roster.
 @export var enemy_substitutions: Dictionary[StringName, StringName] = {}
-## Boss encountered at the end of every level in this Rift.
+## Boss that ends every level in this Rift (and the mid-level boss under `boss_rush`).
 @export var boss_id: StringName = &"reaper"
 
 
-## Whether a lifetime best wave clears this Rift's unlock gate.
-func is_unlocked(highest_wave: int) -> bool:
-	return highest_wave >= unlock_wave
+## Whether banked level clears (`rift_levels`: Rift id -> highest cleared level) open this Rift.
+func is_unlocked(rift_levels: Dictionary) -> bool:
+	if unlock_after_rift_id.is_empty():
+		return true
+	return int(rift_levels.get(String(unlock_after_rift_id), 0)) >= unlock_after_level
 
 
 ## Threat-budget multiplier for a one-based level inside this Rift.
@@ -98,6 +102,6 @@ func validate() -> PackedStringArray:
 		if point.x < 0.0 or point.x > 1.0 or point.y < 0.0 or point.y > 1.0:
 			failures.append("floor polygon point %s is outside UV space" % point)
 			break
-	if unlock_wave < 0:
-		failures.append("unlock wave is negative")
+	if unlock_after_rift_id == rift_id and not rift_id.is_empty():
+		failures.append("unlock requirement names the Rift itself")
 	return failures

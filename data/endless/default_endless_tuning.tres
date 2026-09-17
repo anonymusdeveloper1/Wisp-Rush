@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EndlessTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/endless_tuning.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+boss_wave_interval = 4
+refill_live_enemies = 2
+threat_start = 1.0
+threat_per_cycle = 0.18
+threat_cap = 3.0
+speed_scale_start = 1.0
+speed_scale_per_cycle = 0.04
+speed_scale_cap = 1.3
+daily_roster_rift_ids = Array[StringName]([&"obsidian_garden"])
+daily_boss_ids = Array[StringName]([&"reaper"])

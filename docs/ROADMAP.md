@@ -1,6 +1,6 @@
 # Roadmap
 
-> Milestones and the task backlog. Status legend: ⬜ todo · 🔄 in progress · ✅ done · ⛔ blocked.
+> Milestones and the task backlog. Status legend: ⬜ todo · 🔄 in progress · ✅ done · ⛔ blocked · ✖ superseded.
 > Keep items small and verifiable ("player can dash through enemies with 0.15 s i-frames", not
 > "improve movement"). Move finished items to ✅, don't delete them within the active milestone.
 
@@ -20,7 +20,7 @@
 - ✅ Wisp states, touch/mouse/keyboard aim, exact ray-to-edge dash and wall focus
 - ✅ Soul Wisp formation, swept dash collision, score and combo feedback
 - ✅ Player health, contact damage, invulnerability, death/results and fast restart
-- ✅ Integrated first-run tutorial: wall dash → single slice → triple reap
+- ✅ Integrated first-run tutorial: wall dash → single slice → triple reap (✖ superseded 2026-09-15 by the Tutorial screen, Milestone 12)
 
 ## Milestone 2 — Endless run (complete)
 
@@ -77,7 +77,11 @@
   Godot 4.7.2 Android export templates + a local debug keystore installed, JDK path set in Godot's
   editor settings. Still open: iOS preset, launcher icons/adaptive icons, release signing and store config
 - ⬜ Release README, privacy disclosures and asset-licence confirmation
-- ⬜ No debug/legacy/placeholder content in the release export
+- ⬜ No debug/legacy/placeholder content in the release export (the Endless placeholder skins are gone, 2026-09-15)
+- ✅ Endless skins: all 30 real skins pass spec 05's checker and eye review and are extracted and wired with `placeholder = false`; `placeholder_void_slate` saves map to `astral_observatory` (2026-09-15). Device pass pending
+- ⬜ Rift Points pacing calibrated on a device: `EconomyTuning.placeholder` (`res://data/economy/default_economy_tuning.tres`) is a headless bot estimate and must be `false` before release; the level-clear bonus (20 + 10/level, repeats 25 %) is a starting value in the same file (specs 01–02, [shop.md](systems/shop.md))
+- ⬜ Home's SHOP and NO ADS wired to real billing, or hidden, before any store release (ADR-0012)
+- ⬜ Tutorial screen placeholder replaced before release: the code-drawn ghost hand (`scenes/tutorial/tutorial_ghost_hand.gd`, glowing fingertip + stem, no hand art exists); its arena is the default Endless skin, now real art ([tutorial.md](systems/tutorial.md))
 
 ## Milestone 7 — Engagement core (complete)
 
@@ -88,6 +92,10 @@
 > Why this first: nothing carries over between runs today. The only Soul Shard sink is the six
 > cosmetic forms — exactly 4,750 shards — after which the currency is inert and every run looks
 > identical. Permanent progression is the missing return reason.
+>
+> **Superseded 2026-09-14 ([ADR-0013](decisions/0013-rift-story-levels-endless-mode-and-rift-points.md)):**
+> two modes (Rift story levels + a cosmetic Endless mode); the Soul Sanctum is removed in M10, and the
+> return reasons become Rift levels, Endless, Rift Points cosmetics and the Trials.
 
 - ✅ Soul Sanctum: permanent node tree bought with Soul Shards, applied at run start, power-capped
       so a maxed account gains no more than ~20 % (GDD §6: permanent progress must not trivialise starts)
@@ -112,7 +120,7 @@
 - ✅ Rift framework: per-Rift rule modifier, unlock condition, own best score and mission chain
 - ✅ Shattered Rift (portals) · Ember Hollow (shrinking floor) · Frozen Choir (drift after impact) ·
       Reaper's Court (boss every two waves, double rewards)
-- ⬜ Three to five missions per Rift gating the next unlock
+- ✖ Three to five missions per Rift gating the next unlock — superseded by level-1 clears (ADR-0013)
 - ✅ Second boss, or a Reaper variant with a swapped phase — one boss forever is the fastest source of staleness
 - ✅ Owner: generate the four Rift backgrounds, props, enemies and Hollow Choir boss sheets; hand
       back `wisp_rush_rifts_v1.zip`
@@ -121,18 +129,71 @@
 - ✅ Wire the new art through a v2 slice spec and re-run the art pipeline
 - ✅ New arena backgrounds must keep their usable floor inside `ARENA_FLOOR_UV` (ADR-0006) or re-measure it
 
+## Milestone 10 — Rift story levels, Endless mode and Rift Points
+
+> Owner direction 2026-09-14 ([ADR-0013](decisions/0013-rift-story-levels-endless-mode-and-rift-points.md),
+> [ADR-0014](decisions/0014-endless-arenas-share-one-floor-template.md)). Build order and acceptance
+> checks: [docs/specs/story_and_endless/](specs/story_and_endless/README.md). Sequencing: M10 → the rest
+> of M9 → M6.
+
+- ✅ Direction recorded: GDD rewrite, ADR-0013/0014, specs 01–05, planned system docs
+- ✅ Endless floor template (`concept_art/wisp_rush_endless_v1/floor_template.json`), its image tool and the three skin prompts
+- ✅ Owner approved the whole plan on 2026-09-15 ("follow this to change the fundamentals"), GDD §14 #12–#19 included
+- ✅ Spec 01 — Soul Shards → Rift Points; Sanctum removed with refund; save v6; performance bonus; Remove Ads without currency (2026-09-15; bot-estimated `score_per_rift_point`, GDD §14 #22)
+- ✅ Spec 02 — One level per Rift run; level-1 clears open the next Rift; victory/defeat Results; Trials audit (2026-09-15; implementation only, headless tests not updated or run by owner request — device pass pending)
+- ✅ Spec 03 — Endless mode on the floor template with cleared-Rift rosters and bosses; Endless bests; daily run on Endless rules (2026-09-15; implementation only on the placeholder skin, headless tests not written/updated/run by owner request — device pass pending)
+- ✅ Spec 04 — Rift Points Shop tabs (Wisps, Dashes, Arenas, No Ads); dash styles; Forms screen retired (2026-09-15; implementation only, headless tests not written/updated/run by owner request — device pass pending)
+- ⬜ Owner: generate the three Endless skins with `floor_template_layout.png` attached
+- ✅ Spec 05 — Validate, extract and wire the Endless skins; placeholder removed (2026-09-15: all 30 skins from the manifest, tier prices, lossy import, Shop thumbnails, animated Legendary/Mythic scenery (`ArenaAmbience`; rebuilt 2026-09-16 on masks + scenery shader + particles), `test_endless_catalog`. Pending: device pass)
+- ⬜ Device pass: Rift Points pacing (35–45 RP per median early run) and Endless difficulty per cycle
+
+## Milestone 11 — RUSH mode and fast feel
+
+> Owner decision 2026-09-15: four base mechanics make runs feel faster; the "Essences" power-up idea
+> is not planned. Rules: GDD §5.6 and §14 #27. Build steps: [docs/specs/rush_and_feel/](specs/rush_and_feel/README.md).
+
+- ✅ Spec written, GDD §5.6 added
+- ✅ One owner for `Engine.time_scale` (hit-stop + finisher); chain momentum counted in game time
+- ✅ Momentum you can see: trail length and brightness, dash pitch, speed lines at max
+- ✅ Auto-collect: floor shards fly to the Wisp at wave and boss changes and before the run ends
+- ✅ Slow-motion finisher: 5-kill dash, field clear (6 s cooldown), boss killing blow
+- ✅ RUSH meter and RUSH mode: 6 s of ×1.3 speed, ×2 score, frozen combo, no damage, peak music
+      ([rush_mode.md](systems/rush_mode.md); built 2026-09-15, validate.sh only — no tests by owner preference)
+- ⬜ Tests when wanted: `test_rush_mode.gd`, `test_run_feel.gd` (spec Verify section)
+- ⬜ Device pass: how often RUSH fires per Rift level and Endless run, and how the finisher feels
+
+## Milestone 12 — Tutorial screen
+
+> Owner decision 2026-09-15: a separate Tutorial screen teaches every base mechanic, easiest first, as
+> "show, then you try" lessons; real runs never teach. Rules: GDD §11, §14 #29. System: [tutorial.md](systems/tutorial.md).
+
+- ✅ Nine lessons (aim & dash, slice, chain, redirect, blockers, danger, Rift Points & XP, RUSH, boss)
+      in `data/tutorial/default_tutorial.tres`; ghost-hand demo drives the real Wisp (boss lesson: hand only)
+- ✅ `RunProfile.tutorial` scripted arena + GameWorld run event signals and scripted-run hooks; in-run lesson,
+      `TutorialOverlay`, `tutorial_enabled`/`tutorial_completed` and `test_tutorial_flow.gd` removed
+- ✅ First launch opens the Tutorial after Loading; SKIP confirm; replay only from the Rift Map TUTORIAL button;
+      Settings' REPLAY TUTORIAL removed (built 2026-09-15; validate.sh + one deleted smoke walk, no permanent tests by owner preference)
+- ⬜ Device pass: lesson difficulty (the mid-dash redirect window is short), caption length on small phones,
+      ghost-hand readability, Android back into the skip confirm
+- ⬜ Tests when wanted: a tutorial flow test (director walk, first-launch and Rift Map routing); stale tests that
+      boot Main now mark the tutorial completed first
+
 ## Milestone 9 — Monetisation
 
 > Owner decision 2026-09-12: **free with opt-in rewarded video plus one "Remove Ads + Shard Pack" IAP.**
 > Never interstitials — a forced ad between three-minute runs breaks the "immediate momentum" pillar
 > (GDD §2). Blocked on M7 shipping and showing healthy day-1/day-7 retention.
+> **2026-09-14:** the pack carries no currency — Remove Ads only, and Rift Points can't be bought (ADR-0013).
 
 - ✅ ADR-0009: monetisation model, SDK choice and the privacy consequences
 - ⬜ GDD §12/§13 amendment — the "offline, no data collection, no fake purchases" promise no longer
       holds unqualified once an ad SDK ships
 - ✅ Ad SDK integration behind a service wrapper, so gameplay code never calls the SDK directly
-- ⬜ Rewarded placements: revive once per run · double Soul Shards at Results · one upgrade reroll
-- ⬜ IAP: Remove Ads + Shard Pack, including restore purchases
+- ⬜ Rewarded placements: revive once per run · double Rift Points at Results · one upgrade reroll
+- ⬜ IAP: Remove Ads (no currency inside — ADR-0013), including restore purchases
+- ✅ Shop screen UI (Remove Ads bundle, Restore) reachable from Home's SHOP and NO ADS, purchases
+      disabled until a store is connected ([ADR-0012](decisions/0012-store-surface-before-billing.md))
+- ⬜ `AdProvider` price query, so BUY can show the localized price
 - ⬜ Consent flow (GDPR / ATT) and a published privacy policy
 - ✅ Verify no ad or IAP code path can block, delay or interrupt a run start
 

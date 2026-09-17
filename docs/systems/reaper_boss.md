@@ -1,11 +1,11 @@
 # System: Reaper boss
 
-> **Status:** ✅ done · **Last updated:** 2026-09-11 · **GDD section:** §5.5, §7–8
+> **Status:** ✅ done · **Last updated:** 2026-09-15 · **GDD section:** §5.5, §7–8
 
 ## Purpose
 
-Interrupt endless waves near one minute with a readable three-phase skill check, then award a
-victory beat and continue the same run at a harder threat tier.
+Interrupt the waves near one minute with a readable three-phase skill check, then award a victory
+beat: a story level's final boss ends the run in victory; otherwise the run continues harder.
 
 ## Files
 
@@ -33,14 +33,14 @@ GameWorld
 | `phase_changed(phase)` | signal | Boss phase changed for HUD/callout feedback. |
 | `summon_requested(points)` | signal | Teleport Hunt requests a small Soul Wisp line. |
 | `health_changed(current, maximum)` | signal | Refresh boss-only health UI. |
-| `defeated(position, score, shards)` | signal | Final dissolve completed and rewards are ready. |
+| `defeated(position, score, rp_reward)` | signal | Final dissolve completed and rewards are ready. |
 | `configure(rect, target, encounter, seed)` | method | Start a scaled deterministic encounter. |
 | `try_dash_hit(from, to, radius, damage, dash_id)` | method | Damage exposed core at most once per dash. |
 | `get_dangerous_circles()` / `get_dangerous_lanes()` | method | Current telegraphed attack geometry. |
 
 ## Data & tuning
 
-Base health and all intro/action/exposure timings, attack sizes, 1,500 score and Soul Shard reward
+Base health and all intro/action/exposure timings, attack sizes, 1,500 score and Rift Points reward (`rp_reward`)
 live in `default_reaper.tres`. Later encounters add health and accelerate only within authored caps.
 
 ## Dependencies
@@ -54,7 +54,11 @@ GameWorld suspends WaveDirector, routes player sweeps/damage and realizes reques
 - Phase 2 marks two teleport points, brightens the true one, summons Soul Wisps, then exposes.
 - Phase 3 warns two death lanes with a preserved diagonal route before they become dangerous.
 - The core is immune outside exposed windows and one dash ID can damage it only once.
-- Defeat clears unsafe minors, awards the victory, then resumes a harder endless-wave tier.
+- Defeat clears unsafe minors and awards the victory. **Victory per mode** (spec 02): in a `story`
+  run the boss on wave `waves_per_level` ends the run in victory after `victory_duration`; Reaper's
+  Court's mid-level boss (wave `waves_per_level / 2`) resumes waves. On Endless rules (`endless`,
+  `daily`) every boss resumes a harder cycle, and the variant is `ArenaRules.get_boss_id(bosses beaten,
+  seed)`: a seeded pick from the pool (cleared Rifts' bosses, or the daily `reaper`), no immediate repeat.
 
 ## How to test
 

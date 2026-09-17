@@ -70,7 +70,7 @@ func _build_row(trial: TrialData) -> Control:
 
 	var footer := Label.new()
 	footer.theme_type_variation = &"CaptionLabel"
-	footer.text = "%d / %d   •   %d SHARDS" % [banked, trial.target, trial.reward_shards]
+	footer.text = "%d / %d   •   %s" % [banked, trial.target, RiftPoints.format(trial.reward_points)]
 	box.add_child(footer)
 
 	box.modulate = Color(1.0, 1.0, 1.0, 0.6) if done else Color.WHITE

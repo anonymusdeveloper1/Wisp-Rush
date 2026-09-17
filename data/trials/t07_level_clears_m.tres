@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="TrialData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/trial_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+trial_id = &"t07_level_clears_m"
+title = "ASCENDANT"
+description = "Clear 12 Rift levels in total."
+metric = &"level_clears"
+target = 12
+reward_points = 75
+tier = 7
+cumulative = true

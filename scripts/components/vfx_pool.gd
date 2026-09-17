@@ -19,6 +19,10 @@ var _duration := PackedFloat32Array()
 var _start_alpha := PackedFloat32Array()
 var _start_scale := PackedVector2Array()
 var _end_scale := PackedVector2Array()
+## Flight effects move from `_flight_from` to `_flight_to`; `_flying` marks those slots.
+var _flight_from := PackedVector2Array()
+var _flight_to := PackedVector2Array()
+var _flying := PackedByteArray()
 
 static var _additive_material: CanvasItemMaterial
 
@@ -36,6 +40,9 @@ func _ready() -> void:
 	_start_alpha.resize(POOL_SIZE)
 	_start_scale.resize(POOL_SIZE)
 	_end_scale.resize(POOL_SIZE)
+	_flight_from.resize(POOL_SIZE)
+	_flight_to.resize(POOL_SIZE)
+	_flying.resize(POOL_SIZE)
 
 
 func _process(delta: float) -> void:
@@ -47,7 +54,12 @@ func _process(delta: float) -> void:
 		var eased: float = 1.0 - (1.0 - progress) * (1.0 - progress)
 		var sprite: Sprite2D = _sprites[slot]
 		sprite.scale = _start_scale[slot].lerp(_end_scale[slot], eased)
-		sprite.modulate.a = _start_alpha[slot] * (1.0 - progress)
+		if _flying[slot] != 0:
+			# A flight stays visible until it lands, then fades in its last fifth.
+			sprite.global_position = _flight_from[slot].lerp(_flight_to[slot], progress * progress)
+			sprite.modulate.a = _start_alpha[slot] * minf(1.0, (1.0 - progress) * 5.0)
+		else:
+			sprite.modulate.a = _start_alpha[slot] * (1.0 - progress)
 		if progress >= 1.0:
 			_duration[slot] = 0.0
 			sprite.visible = false
@@ -77,6 +89,25 @@ func play(
 	_start_alpha[slot] = tint.a
 	_start_scale[slot] = start_scale
 	_end_scale[slot] = end_scale
+	_flying[slot] = 0
+	return slot
+
+
+## Plays `texture` flying from `from_position` to `to_position` (canvas coordinates) over `duration`
+## seconds, easing in and scaling from `start_scale` to `end_scale`. Used by RUSH soul orbs.
+func play_flight(
+		texture: Texture2D,
+		from_position: Vector2,
+		to_position: Vector2,
+		start_scale: Vector2 = Vector2.ONE,
+		end_scale: Vector2 = Vector2.ONE,
+		duration: float = 0.3,
+		tint: Color = Color.WHITE,
+	) -> int:
+	var slot: int = play(texture, from_position, 0.0, start_scale, end_scale, duration, tint)
+	_flight_from[slot] = from_position
+	_flight_to[slot] = to_position
+	_flying[slot] = 1
 	return slot
 
 

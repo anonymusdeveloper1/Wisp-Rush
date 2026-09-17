@@ -24,23 +24,35 @@ func load_rifts() -> Array[RiftData]:
 	return rifts
 
 
-## Returns count, duplicate, ordering, default-Rift and per-resource authoring failures.
+## Returns count, duplicate, ordering, unlock-chain, default-Rift and per-resource authoring failures.
 func validate() -> PackedStringArray:
 	var failures := PackedStringArray()
 	var rifts: Array[RiftData] = load_rifts()
 	var seen_ids: Dictionary[StringName, bool] = {}
+	# Level count of every Rift already walked, so a requirement can only name an earlier Rift.
+	var earlier_levels: Dictionary[StringName, int] = {}
 	if rifts.size() != REQUIRED_RIFT_COUNT:
 		failures.append("catalog requires exactly %d rifts" % REQUIRED_RIFT_COUNT)
-	var previous_wave: int = -1
 	var previous_tier: int = 0
-	for rift: RiftData in rifts:
+	for index: int in rifts.size():
+		var rift: RiftData = rifts[index]
 		if seen_ids.has(rift.rift_id):
 			failures.append("duplicate rift id %s" % rift.rift_id)
 		seen_ids[rift.rift_id] = true
-		# The map draws the ladder in catalog order, so gates must not go backwards.
-		if rift.unlock_wave < previous_wave:
-			failures.append("%s unlock wave decreases" % rift.rift_id)
-		previous_wave = rift.unlock_wave
+		# The map draws the ladder in catalog order: the first Rift is open, every other one is
+		# opened by clearing a level of a Rift before it.
+		if index == 0:
+			if not rift.unlock_after_rift_id.is_empty():
+				failures.append("%s is first and must have no unlock requirement" % rift.rift_id)
+		elif not earlier_levels.has(rift.unlock_after_rift_id):
+			failures.append("%s unlock requirement %s is not an earlier rift" % [
+				rift.rift_id, rift.unlock_after_rift_id,
+			])
+		elif rift.unlock_after_level > earlier_levels[rift.unlock_after_rift_id]:
+			failures.append("%s unlock level %d is beyond %s's levels" % [
+				rift.rift_id, rift.unlock_after_level, rift.unlock_after_rift_id,
+			])
+		earlier_levels[rift.rift_id] = rift.level_count
 		if rift.difficulty_tier <= previous_tier:
 			failures.append("%s difficulty tier does not increase" % rift.rift_id)
 		previous_tier = rift.difficulty_tier
@@ -51,10 +63,8 @@ func validate() -> PackedStringArray:
 			failures.append("%s: %s" % [rift.rift_id, failure])
 	if not seen_ids.has(DEFAULT_RIFT_ID):
 		failures.append("catalog requires the %s rift" % DEFAULT_RIFT_ID)
-	else:
-		for rift: RiftData in rifts:
-			if rift.rift_id == DEFAULT_RIFT_ID and rift.unlock_wave != 0:
-				failures.append("%s must be unlocked from the start" % DEFAULT_RIFT_ID)
+	elif not rifts.is_empty() and rifts[0].rift_id != DEFAULT_RIFT_ID:
+		failures.append("%s must be first and unlocked from the start" % DEFAULT_RIFT_ID)
 	return failures
 
 

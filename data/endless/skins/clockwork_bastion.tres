@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ArenaSkinData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/arena_skin_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/endless/thumbnails/clockwork_bastion.png" id="2_thumbnail"]
+
+[resource]
+script = ExtResource("1_script")
+skin_id = &"clockwork_bastion"
+display_name = "CLOCKWORK BASTION"
+description = "Dark steel plates encircled by still bronze-grey machinery."
+tier = 1
+background_path = "res://assets/art/environment/endless/clockwork_bastion.png"
+thumbnail = ExtResource("2_thumbnail")
+price = 800
+accent = Color(0.9529, 0.6588, 0.2784, 1)

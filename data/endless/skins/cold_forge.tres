@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ArenaSkinData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/arena_skin_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/endless/thumbnails/cold_forge.png" id="2_thumbnail"]
+
+[resource]
+script = ExtResource("1_script")
+skin_id = &"cold_forge"
+display_name = "COLD FORGE"
+description = "Silent iron plates among unlit anvils, chains, and chimneys."
+tier = 0
+background_path = "res://assets/art/environment/endless/cold_forge.png"
+thumbnail = ExtResource("2_thumbnail")
+price = 300
+accent = Color(0.9529, 0.6588, 0.2784, 1)

@@ -42,10 +42,9 @@ func _run_checks() -> void:
 		failures += 1
 		push_error("m4_systems: settings were not clamped, persisted and announced")
 	save_manager.mark_tutorial_completed()
-	save_manager.reset_tutorial()
-	if bool(save_manager.get_snapshot()[&"tutorial_completed"]):
+	if not bool(save_manager.get_snapshot()[&"tutorial_completed"]):
 		failures += 1
-		push_error("m4_systems: tutorial replay did not clear completion")
+		push_error("m4_systems: tutorial completion was not persisted")
 
 	# Settings screen: reset starts disarmed, back closes the panel, slider saves are debounced.
 	var settings_screen := SETTINGS_SCENE.instantiate() as SettingsScreen
@@ -91,7 +90,6 @@ func _run_checks() -> void:
 	# GameWorld: shake settings, lifecycle pause, back handling and restart confirmation.
 	save_manager.update_settings({&"reduced_motion": false, &"screen_shake": 0.0})
 	var game := GAME_WORLD_SCENE.instantiate() as GameWorld
-	game.tutorial_enabled = false
 	game.run_seed = 4242
 	root.add_child(game)
 	await process_frame

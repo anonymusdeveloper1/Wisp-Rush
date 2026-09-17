@@ -19,7 +19,6 @@ func _fail(message: String) -> void:
 
 func _run() -> void:
 	var game := GAME_WORLD_SCENE.instantiate() as GameWorld
-	game.tutorial_enabled = false
 	game.run_seed = 3
 	game.auto_pause_on_focus_loss = false
 	game.configure_run_profile(FORMS.get_form(&"void"), "", RIFTS.get_rift(&"ember_hollow"), 1)

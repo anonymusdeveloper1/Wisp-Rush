@@ -18,7 +18,7 @@ func _build() -> void:
 	var home := HOME_SCENE.instantiate() as HomeScreen
 	home.setup({
 		&"best_score": 48210,
-		&"soul_shards": 5670,
+		&"rift_points": 5670,
 		&"selected_rift": "ember_hollow",
 		&"rift_levels": {"ember_hollow": 2},
 		&"settings": {&"reduced_motion": false},

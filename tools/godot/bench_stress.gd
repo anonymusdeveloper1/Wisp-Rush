@@ -25,7 +25,6 @@ func _run() -> void:
 	var user_args: PackedStringArray = OS.get_cmdline_user_args()
 	var enemy_target: int = int(user_args[0]) if not user_args.is_empty() else DEFAULT_ENEMY_TARGET
 	var game := GAME_WORLD_SCENE.instantiate() as GameWorld
-	game.tutorial_enabled = false
 	game.run_seed = 99
 	game.auto_pause_on_focus_loss = false
 	root.add_child(game)

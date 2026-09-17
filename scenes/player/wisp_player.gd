@@ -17,6 +17,10 @@ signal dash_segment_swept(
 ## Emitted when a swipe mid-flight turns the live dash. [param previous_dash_id] is the leg that just
 ## ended without touching a wall, so GameWorld can resolve its kills; `dash_started` follows.
 signal dash_redirected(world_position: Vector2, previous_dash_id: int)
+## Emitted while the aim arrow is shown (every aim update) and once when it hides. [param direction]
+## and [param landing] are the RESOLVED, aim-assisted dash from [param origin], so GameWorld can draw
+## the path and light the enemies that dash would slice; `active` false clears them.
+signal aim_preview_changed(origin: Vector2, direction: Vector2, landing: Vector2, active: bool)
 ## Emitted when a dash stops at its precomputed arena edge.
 signal wall_impacted(world_position: Vector2, inward_normal: Vector2, dash_id: int)
 ## Requests run-local enemy and hazard slowdown without slowing input or UI.
@@ -51,6 +55,13 @@ const ACTION_DASH: StringName = &"dash"
 const INVALID_POINTER: int = -99
 const MOUSE_POINTER: int = -1
 const SOURCE_FRAME_SIZE: float = 362.0
+## Momentum streak glow art (head on +x, like the dash trails); the RUSH aura is a generated radial.
+const STREAK_GLOW_TEXTURE: Texture2D = preload("res://assets/art/vfx/01_dash_trail_short.png")
+## Gradient texture size in px for the generated RUSH aura.
+const RUSH_AURA_TEXTURE_SIZE: int = 128
+## Speed-line stroke width in design px, and scroll speed in line lengths per second.
+const SPEED_LINE_WIDTH: float = 3.0
+const SPEED_LINE_SCROLL: float = 2.5
 const FORM_SOURCE_SIZE: float = 512.0
 ## Idle breathing while waiting at an edge: a 2.5 % scale swing over a slow cycle (STYLE_GUIDE).
 const IDLE_BREATH_AMOUNT: float = 0.025
@@ -65,6 +76,10 @@ const ARROW_PULSE_AMOUNT: float = 0.08
 const ARROW_PULSE_RATE: float = 11.0
 ## A drag shorter than this fraction of the swipe threshold is too noisy to point an arrow.
 const ARROW_MIN_DRAG_SHARE: float = 0.5
+## Distance from the Wisp's centre to the arrow tip, in collision radii: where the path line starts.
+const AIM_LINE_START_RADII: float = 3.3
+## Slack, in degrees, when checking that an assisted dash stays within the assist cone.
+const AIM_ASSIST_ANGLE_SLACK: float = 0.01
 
 ## Gesture, movement and presentation values for this Wisp instance.
 @export var tuning: PlayerTuning
@@ -91,8 +106,6 @@ var _state_time_remaining: float = 0.0
 var _invulnerability_remaining: float = 0.0
 var _invulnerability_elapsed: float = 0.0
 var _death_reported: bool = false
-## Extra invulnerability seconds granted by the Soul Sanctum's Warded Soul node.
-var _bonus_invulnerability: float = 0.0
 ## Whether the aim arrow is drawn while aiming.
 var _aim_arrow_enabled: bool = true
 ## A swipe released while the Wisp could not act, and the physics time it has left to fire.
@@ -104,8 +117,26 @@ var _buffer_remaining: float = 0.0
 var _dash_elapsed: float = 0.0
 ## Chain momentum as a fraction of dash speed, built by fast redirects.
 var _momentum: float = 0.0
-## Tick of the most recent landing, for measuring how quickly the next dash followed.
-var _last_landing_msec: int = -1
+## Accumulated physics (game) time in seconds; the momentum window counts this, not the wall clock,
+## so slow motion or a pause between a landing and the next launch never breaks a chain.
+var _game_time: float = 0.0
+## Game time ([member _game_time]) of the most recent landing; negative when there is none to chain.
+var _last_landing_time: float = -1.0
+## Run modifier from RUSH mode; composes with momentum, mutations and the launch burst.
+var _rush_speed_multiplier: float = 1.0
+## RUSH damage immunity: blocks every damage source, separate from hurt invulnerability (no blink).
+var _damage_immune: bool = false
+## Momentum presentation (GDD §5.6); null disables the streak glow and speed lines.
+var _feel_tuning: RunFeelTuning
+## RUSH shows momentum visuals at full and a steady Wisp glow; `_rush_warning` makes it flicker.
+var _rush_visuals: bool = false
+var _rush_warning: bool = false
+var _glow_time: float = 0.0
+var _glow_tint: Color = Palette.SOUL_CYAN
+## Built in code at `_ready`, drawn at absolute z 0 so telegraphs and the aim arrow stay above them.
+var _streak_glow: Sprite2D
+var _rush_aura: Sprite2D
+var _speed_lines: Node2D
 ## Clock for the aim arrow pulse.
 var _arrow_time: float = 0.0
 ## Frozen Choir: design-space px/s the Wisp slides along its resting edge. Zero disables drift.
@@ -126,6 +157,15 @@ var _cosmetic_texture: Texture2D
 var _cosmetic_tint: Color = Palette.SOUL_CYAN
 var _breath_time: float = 0.0
 var _reduced_motion: bool = false
+## Whether pointer and keyboard input steer the Wisp; the tutorial turns it off while it demonstrates.
+var _input_enabled: bool = true
+## AIM ASSIST setting: released swipes may bend up to `tuning.aim_assist_degrees` into more enemies.
+var _aim_assist_enabled: bool = true
+## Query handed down by the owner (GameWorld): `func(origin, landing, corridor_radius) -> int`, how
+## many enemies a dash segment would slice. The Wisp never looks enemies up itself.
+var _aim_target_counter: Callable = Callable()
+## Whether the last `aim_preview_changed` said active, so a hide is announced exactly once.
+var _aim_preview_active: bool = false
 
 @onready var _health: HealthComponent = %HealthComponent
 @onready var _sprite: AnimatedSprite2D = %Sprite
@@ -148,9 +188,12 @@ func _ready() -> void:
 	_impact_burst.visible = false
 	_apply_cosmetic_form()
 	_reduced_motion = _read_reduced_motion()
+	_build_momentum_nodes()
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if not _input_enabled:
+		return
 	if event is InputEventScreenTouch:
 		var touch := event as InputEventScreenTouch
 		if touch.canceled:
@@ -180,6 +223,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
+	_update_momentum_visuals(delta)
 	if _aim_arrow.visible:
 		_arrow_time += delta
 		var pulse: float = 1.0 + sin(_arrow_time * ARROW_PULSE_RATE) * (
@@ -195,6 +239,8 @@ func _process(delta: float) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	# Physics delta is already scaled by Engine.time_scale, so this is game time.
+	_game_time += delta
 	_update_invulnerability(delta)
 	match state:
 		State.SPAWNING:
@@ -302,14 +348,6 @@ func get_dash_target() -> Vector2:
 	return _dash_target
 
 
-## Adds permanent invulnerability seconds from the Soul Sanctum.
-##
-## Held as a runtime field rather than written into `tuning`, because PlayerTuning is a shared
-## Resource: mutating it would leak the bonus into every later run and into the .tres on disk.
-func set_bonus_invulnerability(seconds: float) -> void:
-	_bonus_invulnerability = maxf(0.0, seconds)
-
-
 ## Shows or hides the direction arrow drawn beside the Wisp while aiming.
 ##
 ## The arrow replaced the full aim line (owner decision): it shows where the dash will go without
@@ -330,17 +368,147 @@ func get_aim_arrow_direction() -> Vector2:
 	return Vector2.RIGHT.rotated(_aim_arrow.rotation)
 
 
+## Turns the release-time aim assist on or off (AIM ASSIST in Settings, on by default).
+func set_aim_assist_enabled(enabled: bool) -> void:
+	_aim_assist_enabled = enabled
+
+
+## Whether the release-time aim assist is on.
+func is_aim_assist_enabled() -> bool:
+	return _aim_assist_enabled
+
+
+## Supplies the enemy query the aim assist scores directions with:
+## `func(origin: Vector2, landing: Vector2, corridor_radius: float) -> int`. An invalid Callable
+## turns the assist off (a Wisp run alone has nothing to aim at).
+func set_aim_target_counter(counter: Callable) -> void:
+	_aim_target_counter = counter
+
+
+## Whether the aim preview (arrow, and GameWorld's path line and highlights) is currently shown.
+func is_aim_preview_active() -> bool:
+	return _aim_preview_active
+
+
+## Radius of the damaging dash corridor in viewport px: collision radius plus the blade bonus, times
+## the run's blade-width mutation. The single source for swept hits and the aim preview.
+func get_dash_corridor_radius() -> float:
+	return (_player_radius + tuning.blade_bonus * _viewport_scale) * _blade_width_multiplier
+
+
+## Distance from the Wisp's centre to the aim arrow tip, where the path line starts.
+func get_aim_line_start_distance() -> float:
+	return _player_radius * AIM_LINE_START_RADII
+
+
+## Returns the direction a released swipe toward [param direction] will actually dash.
+##
+## Gentle aim assist (owner decision 2026-09-15): samples directions every
+## `tuning.aim_assist_step_degrees` out to ±`tuning.aim_assist_degrees` and bends to the one that
+## slices the MOST enemies, only if that is more than the raw direction slices. Ties keep the
+## direction closest to the raw swipe; it never bends toward zero hits or past the cone, and every
+## candidate is a legal cast from [method _resolve_dash]. Off, or with no counter, returns the raw
+## direction normalized.
+func get_assisted_direction(direction: Vector2) -> Vector2:
+	if direction.is_zero_approx():
+		return direction
+	var raw: Vector2 = direction.normalized()
+	var step_degrees: float = tuning.aim_assist_step_degrees
+	if (
+		not _aim_assist_enabled
+		or not _aim_target_counter.is_valid()
+		or tuning.aim_assist_degrees <= 0.0
+		or step_degrees <= 0.0
+		or not _arena_initialized
+	):
+		return raw
+	var raw_resolved: Dictionary = _resolve_dash(raw)
+	var raw_direction: Vector2 = raw_resolved[&"direction"] as Vector2
+	var best_count: int = _count_aim_targets(raw_resolved)
+	var best: Vector2 = raw
+	var steps: int = floori(tuning.aim_assist_degrees / step_degrees + 0.0001)
+	var cone: float = deg_to_rad(tuning.aim_assist_degrees + AIM_ASSIST_ANGLE_SLACK)
+	for index: int in range(1, steps + 1):
+		var offset: float = deg_to_rad(step_degrees * float(index))
+		# Walking outward with a strict "more" keeps ties on the candidate closest to the raw swipe.
+		for side: int in 2:
+			var candidate: Vector2 = raw.rotated(offset if side == 0 else -offset)
+			var resolved: Dictionary = _resolve_dash(candidate)
+			var target: Vector2 = resolved[&"target"] as Vector2
+			if position.distance_squared_to(target) <= 1.0:
+				continue
+			# An outward swipe reflects inward; never let a reflection carry the bend past the cone.
+			if absf(raw_direction.angle_to(resolved[&"direction"] as Vector2)) > cone:
+				continue
+			var count: int = _count_aim_targets(resolved)
+			if count > best_count:
+				best_count = count
+				best = candidate
+	return best
+
+
 ## Current chain momentum, as a fraction of dash speed.
 func get_momentum() -> float:
 	return _momentum
 
 
-## Dash speed right now in px/s, including launch burst, momentum and run modifiers.
+## Dash speed right now in px/s, including launch burst, momentum and run modifiers (mutations, RUSH).
 func get_current_dash_speed() -> float:
 	return (
-		tuning.dash_speed * _dash_speed_multiplier * _viewport_scale
+		tuning.dash_speed * _dash_speed_multiplier * _rush_speed_multiplier * _viewport_scale
 		* (1.0 + _momentum) * _launch_burst()
 	)
+
+
+## Whole chain momentum steps built so far (momentum / `momentum_step`), e.g. for the dash pitch.
+func get_momentum_steps() -> int:
+	if tuning.momentum_step <= 0.0:
+		return 0
+	return roundi(_momentum / tuning.momentum_step)
+
+
+## Momentum presentation level 0..1 (momentum / `momentum_max`); 1.0 while RUSH visuals are on.
+func get_momentum_visual_level() -> float:
+	if _rush_visuals:
+		return 1.0
+	return RunFeelTuning.momentum_level(_momentum, tuning.momentum_max)
+
+
+## Enables the momentum streak glow, speed lines and RUSH glow with [param feel] values, tinted
+## [param glow_tint] (the dash style's trail tint). Null disables them.
+func set_momentum_presentation(feel: RunFeelTuning, glow_tint: Color) -> void:
+	_feel_tuning = feel
+	_glow_tint = glow_tint
+	if is_node_ready():
+		_hide_momentum_visuals()
+
+
+## RUSH run modifier for dash speed (1.0 = off). Composes with momentum and mutations; the tuning
+## Resource is never written.
+func set_rush_speed_multiplier(multiplier: float) -> void:
+	_rush_speed_multiplier = maxf(0.1, multiplier)
+
+
+## Returns the RUSH dash-speed multiplier (1.0 when RUSH is off).
+func get_rush_speed_multiplier() -> float:
+	return _rush_speed_multiplier
+
+
+## RUSH damage immunity: while on, enemy contact, hazards and boss attacks deal no damage. Separate
+## from post-hit invulnerability, so there is no blink.
+func set_damage_immune(immune: bool) -> void:
+	_damage_immune = immune
+
+
+## Whether RUSH damage immunity is on.
+func is_damage_immune() -> bool:
+	return _damage_immune
+
+
+## RUSH presentation: momentum visuals at full and a steady Wisp glow; [param warning] flickers it.
+func set_rush_visuals(active: bool, warning: bool = false) -> void:
+	_rush_visuals = active
+	_rush_warning = active and warning
 
 
 ## Whether a released swipe is waiting for the Wisp to be able to act.
@@ -435,6 +603,55 @@ func cancel_active_aim() -> void:
 		_enter_waiting()
 
 
+## Turns player steering (touch, mouse and keyboard) on or off; off also drops a gesture in progress.
+## The tutorial turns it off while its ghost hand demonstrates a lesson.
+func set_input_enabled(enabled: bool) -> void:
+	_input_enabled = enabled
+	if not enabled:
+		cancel_active_aim()
+
+
+## Whether player steering is on.
+func is_input_enabled() -> bool:
+	return _input_enabled
+
+
+## Shows the aim arrow a held drag of [param drag_vector] would show, without a pointer (tutorial
+## demos drive it). Ignored while dead or in the victory pose.
+func preview_aim(drag_vector: Vector2) -> void:
+	if drag_vector.is_zero_approx() or state == State.DEAD or state == State.VICTORY:
+		return
+	if state == State.WAITING_AT_EDGE:
+		state = State.AIMING
+	_aim_direction = drag_vector.normalized()
+	_update_aim_preview(_aim_direction)
+
+
+## Acts on a released swipe of [param drag_vector] exactly as a real drag would: dash, mid-dash
+## redirect, windup retarget or buffer. The tutorial demo drives the real Wisp through it.
+func perform_swipe(drag_vector: Vector2) -> void:
+	if drag_vector.is_zero_approx():
+		return
+	_act_on_swipe(drag_vector)
+
+
+## Moves a resting Wisp onto the wall point nearest [param world_position] and clears momentum.
+## Refused mid-dash, in windup, hurt, dead or in victory; returns whether it moved (tutorial resets).
+func place_at_edge(world_position: Vector2) -> bool:
+	if state not in [State.WAITING_AT_EDGE, State.AIMING, State.WALL_IMPACT, State.SPAWNING]:
+		return false
+	_active_pointer = INVALID_POINTER
+	_buffer_remaining = 0.0
+	_momentum = 0.0
+	_last_landing_time = -1.0
+	velocity = Vector2.ZERO
+	global_position = world_position
+	_snap_to_nearest_edge()
+	if state != State.SPAWNING:
+		_enter_waiting()
+	return true
+
+
 ## Returns the live collision radius in viewport pixels for debug and encounter spacing.
 func get_collision_radius() -> float:
 	return _player_radius
@@ -503,7 +720,7 @@ func play_victory(duration: float) -> void:
 
 ## Returns whether ordinary enemy contact may currently damage the Wisp.
 func is_vulnerable() -> bool:
-	if _health.is_depleted() or _invulnerability_remaining > 0.0:
+	if _damage_immune or _health.is_depleted() or _invulnerability_remaining > 0.0:
 		return false
 	return state in [State.WAITING_AT_EDGE, State.AIMING, State.WINDUP]
 
@@ -518,7 +735,8 @@ func take_contact_damage(safe_edge_position: Vector2) -> bool:
 ## Applies one telegraphed hazard hit, including while dashing, then reforms safely.
 func take_hazard_damage(safe_edge_position: Vector2) -> bool:
 	if (
-		_health.is_depleted()
+		_damage_immune
+		or _health.is_depleted()
 		or _invulnerability_remaining > 0.0
 		or state in [State.SPAWNING, State.HURT, State.DEAD, State.VICTORY]
 	):
@@ -532,7 +750,7 @@ func interrupt_dash_at(world_position: Vector2, impact_normal: Vector2) -> bool:
 		return false
 	global_position = world_position
 	velocity = Vector2.ZERO
-	_last_landing_msec = Time.get_ticks_msec()
+	_last_landing_time = _game_time
 	# Stopped against a crystal in open floor: not resting on any wall edge.
 	_resting_edge = -1
 	state = State.WALL_IMPACT
@@ -671,13 +889,13 @@ func _take_damage(safe_edge_position: Vector2) -> bool:
 	_active_pointer = INVALID_POINTER
 	# A hit breaks the chain, just as it breaks the combo - including the landing it would chain from.
 	_momentum = 0.0
-	_last_landing_msec = -1
+	_last_landing_time = -1.0
 	_buffer_remaining = 0.0
 	velocity = Vector2.ZERO
 	_hide_aim_preview()
 	global_position = safe_edge_position
 	_snap_to_nearest_edge()
-	_invulnerability_remaining = tuning.invulnerability_duration + _bonus_invulnerability
+	_invulnerability_remaining = tuning.invulnerability_duration
 	_invulnerability_elapsed = 0.0
 	if not _health.apply_damage(1):
 		return false
@@ -692,7 +910,7 @@ func _take_damage(safe_edge_position: Vector2) -> bool:
 
 
 func _process_keyboard_aim() -> void:
-	if _active_pointer != INVALID_POINTER:
+	if _active_pointer != INVALID_POINTER or not _input_enabled:
 		return
 	var keyboard_direction := Input.get_vector(
 		ACTION_MOVE_LEFT,
@@ -708,7 +926,7 @@ func _process_keyboard_aim() -> void:
 		state = State.WAITING_AT_EDGE
 		_hide_aim_preview()
 	if Input.is_action_just_pressed(ACTION_DASH):
-		request_dash(_aim_direction)
+		request_dash(get_assisted_direction(_aim_direction))
 
 
 func _begin_pointer(screen_position: Vector2, pointer_id: int) -> void:
@@ -751,13 +969,14 @@ func _end_pointer(screen_position: Vector2, pointer_id: int) -> void:
 
 ## Routes a completed swipe to whatever the Wisp can do right now, buffering it when it can't.
 func _act_on_swipe(drag_vector: Vector2) -> void:
+	# Aim assist bends the swipe at the moment it acts (a buffered swipe is scored when it fires).
 	match state:
 		State.WAITING_AT_EDGE, State.AIMING, State.WALL_IMPACT:
-			request_dash(drag_vector)
+			request_dash(get_assisted_direction(drag_vector))
 		State.DASHING:
-			redirect_dash(drag_vector)
+			redirect_dash(get_assisted_direction(drag_vector))
 		State.WINDUP:
-			_retarget_windup(drag_vector)
+			_retarget_windup(get_assisted_direction(drag_vector))
 		State.SPAWNING, State.HURT:
 			_buffered_swipe = drag_vector
 			_buffer_remaining = tuning.input_buffer_window
@@ -827,7 +1046,11 @@ func _cancel_pointer(pointer_id: int) -> void:
 
 ## Keyboard parity for desktop QA: Space redirects mid-dash or cancels the landing lock.
 func _process_keyboard_flow() -> void:
-	if _active_pointer != INVALID_POINTER or not Input.is_action_just_pressed(ACTION_DASH):
+	if (
+		_active_pointer != INVALID_POINTER
+		or not _input_enabled
+		or not Input.is_action_just_pressed(ACTION_DASH)
+	):
 		return
 	var keyboard_direction := Input.get_vector(
 		ACTION_MOVE_LEFT,
@@ -838,16 +1061,18 @@ func _process_keyboard_flow() -> void:
 	if state == State.DASHING:
 		# Only redirect along a direction the player is actually holding, never a stale aim.
 		if not keyboard_direction.is_zero_approx():
-			redirect_dash(keyboard_direction)
+			redirect_dash(get_assisted_direction(keyboard_direction))
 	elif state == State.WALL_IMPACT:
-		request_dash(_aim_direction if keyboard_direction.is_zero_approx() else keyboard_direction)
+		request_dash(get_assisted_direction(
+			_aim_direction if keyboard_direction.is_zero_approx() else keyboard_direction
+		))
 
 
 ## Chained launches build momentum; a slow restart lets it drain back to zero.
 func _update_momentum_for_launch() -> void:
 	var quick: bool = (
-		_last_landing_msec >= 0
-		and Time.get_ticks_msec() - _last_landing_msec <= int(tuning.momentum_window * 1000.0)
+		_last_landing_time >= 0.0
+		and _game_time - _last_landing_time <= tuning.momentum_window
 	)
 	if quick:
 		_add_momentum()
@@ -870,7 +1095,11 @@ func _minimum_swipe_distance() -> float:
 
 
 func _update_aim_preview(direction: Vector2) -> void:
-	var resolved: Dictionary = _resolve_dash(direction)
+	# What you see is what you get: the preview shows the aim-assisted dash a release would take.
+	# With the arrow off nothing is shown, so the lean skips the assist's sampling.
+	var resolved: Dictionary = _resolve_dash(
+		get_assisted_direction(direction) if _aim_arrow_enabled else direction
+	)
 	var resolved_direction: Vector2 = resolved[&"direction"] as Vector2
 	var target: Vector2 = resolved[&"target"] as Vector2
 	# The Wisp still leans into the aim even with the arrow off: that is feel, not a readout. Never
@@ -893,10 +1122,28 @@ func _update_aim_preview(direction: Vector2) -> void:
 	if not _aim_arrow.visible:
 		_arrow_time = 0.0
 	_aim_arrow.visible = true
+	_aim_preview_active = true
+	aim_preview_changed.emit(
+		global_position,
+		resolved_direction,
+		global_position + (target - position),
+		true,
+	)
 
 
 func _hide_aim_preview() -> void:
 	_aim_arrow.visible = false
+	if _aim_preview_active:
+		_aim_preview_active = false
+		aim_preview_changed.emit(global_position, Vector2.ZERO, global_position, false)
+
+
+## Enemies the owner's counter says a resolved dash would slice; 0 without a counter.
+func _count_aim_targets(resolved: Dictionary) -> int:
+	if not _aim_target_counter.is_valid():
+		return 0
+	var landing: Vector2 = global_position + ((resolved[&"target"] as Vector2) - position)
+	return int(_aim_target_counter.call(global_position, landing, get_dash_corridor_radius()))
 
 
 func _begin_dash_motion() -> void:
@@ -918,9 +1165,7 @@ func _advance_dash(delta: float) -> void:
 		position = _dash_target
 	else:
 		position += _dash_direction * step_distance
-	var corridor_radius: float = (
-		(_player_radius + tuning.blade_bonus * _viewport_scale) * _blade_width_multiplier
-	)
+	var corridor_radius: float = get_dash_corridor_radius()
 	dash_segment_swept.emit(
 		previous_global_position,
 		global_position,
@@ -935,7 +1180,7 @@ func _advance_dash(delta: float) -> void:
 
 func _finish_dash() -> void:
 	velocity = Vector2.ZERO
-	_last_landing_msec = Time.get_ticks_msec()
+	_last_landing_time = _game_time
 	state = State.WALL_IMPACT
 	_state_time_remaining = tuning.wall_impact_duration
 	# The normal comes from the cast that chose this landing, not from re-deriving it here: on a
@@ -1086,3 +1331,101 @@ func _read_reduced_motion() -> bool:
 	if save_manager == null:
 		return false
 	return bool(save_manager.get_settings().get(&"reduced_motion", false))
+
+
+func _build_momentum_nodes() -> void:
+	_streak_glow = Sprite2D.new()
+	_streak_glow.name = "StreakGlow"
+	_streak_glow.texture = STREAK_GLOW_TEXTURE
+	_rush_aura = Sprite2D.new()
+	_rush_aura.name = "RushAura"
+	var gradient := Gradient.new()
+	gradient.set_color(0, Color.WHITE)
+	gradient.set_color(1, Color(1.0, 1.0, 1.0, 0.0))
+	var aura_texture := GradientTexture2D.new()
+	aura_texture.gradient = gradient
+	aura_texture.fill = GradientTexture2D.FILL_RADIAL
+	aura_texture.fill_from = Vector2(0.5, 0.5)
+	aura_texture.fill_to = Vector2(0.5, 0.0)
+	aura_texture.width = RUSH_AURA_TEXTURE_SIZE
+	aura_texture.height = RUSH_AURA_TEXTURE_SIZE
+	_rush_aura.texture = aura_texture
+	_speed_lines = Node2D.new()
+	_speed_lines.name = "SpeedLines"
+	_speed_lines.draw.connect(_draw_speed_lines)
+	for node: Node2D in [_speed_lines, _streak_glow, _rush_aura]:
+		# Absolute z 0 = the VFX pool's depth: under hazard/boss telegraphs and the aim arrow (GDD §8).
+		node.z_as_relative = false
+		node.z_index = 0
+		node.visible = false
+		node.material = VfxPool.get_additive_material()
+		add_child(node)
+
+
+func _hide_momentum_visuals() -> void:
+	for node: Node2D in [_speed_lines, _streak_glow, _rush_aura]:
+		if node != null:
+			node.visible = false
+
+
+## Streak glow and speed lines follow chain momentum while dashing; RUSH adds a glow around the Wisp.
+## Damage zeroes momentum and ends the dash, so everything clears at once.
+func _update_momentum_visuals(delta: float) -> void:
+	if _feel_tuning == null or _streak_glow == null:
+		return
+	var alive: bool = state != State.DEAD and not _health.is_depleted()
+	var dashing: bool = alive and state == State.DASHING
+	var level: float = get_momentum_visual_level()
+	_glow_time += delta
+	_streak_glow.visible = dashing
+	if dashing:
+		var size_radii: float = lerpf(
+			_feel_tuning.streak_glow_size, _feel_tuning.streak_glow_size_at_max, level
+		)
+		var glow_scale: float = _player_radius * size_radii / SOURCE_FRAME_SIZE
+		_streak_glow.rotation = _dash_direction.angle()
+		# The trail art's head sits on +x; shift it back so the glow trails behind the Wisp.
+		_streak_glow.position = -_dash_direction * _player_radius * size_radii * 0.3
+		_streak_glow.scale = Vector2(glow_scale, glow_scale * 0.6)
+		_streak_glow.modulate = Color(_glow_tint, lerpf(
+			_feel_tuning.streak_glow_alpha, _feel_tuning.streak_glow_alpha_at_max, level
+		))
+	var lines: bool = (
+		dashing
+		and not _reduced_motion
+		and _feel_tuning.speed_line_count > 0
+		and level >= _feel_tuning.speed_lines_at - 0.0001
+	)
+	_speed_lines.visible = lines
+	if lines:
+		_speed_lines.queue_redraw()
+	_rush_aura.visible = alive and _rush_visuals
+	if _rush_aura.visible:
+		var alpha: float = _feel_tuning.streak_glow_alpha_at_max
+		if _rush_warning and fmod(_glow_time * _feel_tuning.warning_flicker_rate, 1.0) < 0.5:
+			alpha *= 0.25
+		_rush_aura.scale = Vector2.ONE * (
+			_player_radius * _feel_tuning.streak_glow_size_at_max / float(RUSH_AURA_TEXTURE_SIZE)
+		)
+		_rush_aura.modulate = Color(_glow_tint, alpha)
+
+
+func _draw_speed_lines() -> void:
+	if _feel_tuning == null:
+		return
+	var count: int = _feel_tuning.speed_line_count
+	var direction: Vector2 = _dash_direction if not _dash_direction.is_zero_approx() else Vector2.RIGHT
+	var side: Vector2 = direction.orthogonal()
+	var length: float = _player_radius * _feel_tuning.speed_line_length
+	var color := Color(Palette.SOUL_WHITE, _feel_tuning.speed_line_alpha)
+	var width: float = maxf(1.0, SPEED_LINE_WIDTH * _viewport_scale)
+	for index: int in count:
+		var spread: float = (float(index) + 0.5) / float(count) * 2.0 - 1.0
+		# Each line scrolls backward at its own phase so the streaks read as motion, not stripes.
+		var phase: float = fmod(_glow_time * SPEED_LINE_SCROLL + float(index) * 0.37, 1.0)
+		var start: Vector2 = (
+			side * spread * _player_radius * 1.4
+			- direction * (_player_radius * 0.8 + phase * length * 0.5)
+		)
+		var line_length: float = length * (1.0 - absf(spread) * 0.4)
+		_speed_lines.draw_line(start, start - direction * line_length, color, width, true)

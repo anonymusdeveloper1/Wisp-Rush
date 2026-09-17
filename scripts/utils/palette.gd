@@ -18,7 +18,7 @@ const SLATE_TEAL: Color = Color("#263D42")
 const SOUL_CYAN: Color = Color("#62E8F2")
 ## Hot cores and primary readable text/highlights. #EAFDFF
 const SOUL_WHITE: Color = Color("#EAFDFF")
-## Telegraphs, rewards (score, shards earned) and important landmarks. #F3A847
+## Telegraphs, rewards (score, Rift Points earned) and important landmarks. #F3A847
 const WARNING_AMBER: Color = Color("#F3A847")
 ## Enemy cores, boss actions and selected states only. #B14CD9
 const RIFT_MAGENTA: Color = Color("#B14CD9")

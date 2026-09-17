@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="DashStyleData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/dash_style_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+style_id = &"verdant"
+display_name = "VERDANT"
+description = "Moss and new growth, left glowing where you pass."
+price = 600
+trail_tint = Color(0.612, 0.796, 0.494, 1)
+burst_tint = Color(0.812, 0.91, 0.741, 1)
+uses_form_tint = false

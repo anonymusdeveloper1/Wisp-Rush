@@ -19,7 +19,7 @@ Milestone 2 is complete. The repository now contains a playable endless-run foun
 - Three Soul Fragments, enemy contact, safe-edge reform, visible i-frames and death dissolve.
 - Integrated first-run wall dash → single slice → triple reap lesson.
 - Enemy XP, safe three-card choices and all eight functional run mutations.
-- Separate Soul Shard drops/rewards plus score, best, wave, kill, chain and run Results statistics.
+- Separate Rift Points drops/rewards plus score, best, wave, kill, chain and run Results statistics.
 
 The three-phase Reaper, persistent save/forms and local daily/challenge systems are next; see
 [docs/ROADMAP.md](docs/ROADMAP.md). This build is not yet the release-complete MVP.
@@ -71,10 +71,6 @@ it never changes speed, damage or distance.
   --headless --path . --script res://tools/godot/test_health_component.gd
 /Users/dimitarslezenkovski/Desktop/Godot.app/Contents/MacOS/Godot \
   --headless --path . --script res://tools/godot/test_player_health_flow.gd
-
-# Integrated wall dash → single slice → triple reap lesson
-/Users/dimitarslezenkovski/Desktop/Godot.app/Contents/MacOS/Godot \
-  --headless --path . --script res://tools/godot/test_tutorial_flow.gd
 
 # Formation catalog/director and all three enemy families
 /Users/dimitarslezenkovski/Desktop/Godot.app/Contents/MacOS/Godot \

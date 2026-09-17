@@ -36,6 +36,7 @@ GameWorld
 | `start(seed)` | method | Reset and begin wave one deterministically. |
 | `advance(delta, live_threat)` | method | Advance the timer and spend budget only when no live enemy remains. |
 | `set_run_context(health, maximum, upgrades)` | method | Supply health and power context for bounded difficulty adaptation. |
+| `set_rift_threat_multiplier(multiplier)` | method | Scales every wave budget (0.25–4). GameWorld passes `ArenaRules.get_threat_multiplier(cycle)`: the Rift level's value in a story run, `EndlessTuning` per boss cycle on Endless rules (spec 03). |
 | `get_current_wave()` | method | Current one-based wave. |
 | `get_wave_progress()` | method | Normalized elapsed progress through the current wave. |
 | `get_remaining_budget()` | method | Threat budget not yet assigned this wave. |

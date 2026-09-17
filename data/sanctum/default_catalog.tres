@@ -1,7 +1,0 @@
-[gd_resource type="Resource" script_class="SanctumCatalog" load_steps=2 format=3]
-
-[ext_resource type="Script" path="res://scripts/resources/sanctum_catalog.gd" id="1"]
-
-[resource]
-script = ExtResource("1")
-node_paths = PackedStringArray("res://data/sanctum/keen_edge.tres", "res://data/sanctum/swift_soul.tres", "res://data/sanctum/shard_finder.tres", "res://data/sanctum/rift_scholar.tres", "res://data/sanctum/soul_magnet.tres", "res://data/sanctum/long_chain.tres", "res://data/sanctum/warded_soul.tres", "res://data/sanctum/first_gift.tres", "res://data/sanctum/soul_reserve.tres")

@@ -4,8 +4,8 @@ extends Node
 ##
 ## The game never talks to an ad or store SDK directly. It talks to an injected `AdProvider`, and
 ## the shipped default is `NullAdProvider`, which reports nothing available. That is deliberate:
-## GDD §13 forbids dead buttons and fake purchases, so with no real provider configured every
-## monetisation surface stays hidden and the game is exactly the offline build it was before.
+## GDD §13 forbids fake purchases, so with no real provider no ad is ever offered and nothing can be
+## bought. The Shop screen is still reachable, with its buttons disabled (ADR-0012).
 ##
 ## Wiring a real SDK means implementing `AdProvider` and calling `set_provider()` at boot — no
 ## gameplay code changes. See [ADR-0009](../../docs/decisions/0009-monetisation-model.md).
@@ -21,11 +21,12 @@ signal consent_changed(state: StringName)
 
 ## Rewarded placements the game offers. Never interstitials: GDD §2's momentum pillar forbids them.
 const PLACEMENT_REVIVE: StringName = &"revive"
-const PLACEMENT_DOUBLE_SHARDS: StringName = &"double_shards"
+## Doubles the Rift Points a finished run earned (ADR-0013 renamed it from "double Soul Shards").
+const PLACEMENT_DOUBLE_RIFT_POINTS: StringName = &"double_rift_points"
 const PLACEMENT_UPGRADE_REROLL: StringName = &"upgrade_reroll"
 const PLACEMENTS: Array[StringName] = [
 	PLACEMENT_REVIVE,
-	PLACEMENT_DOUBLE_SHARDS,
+	PLACEMENT_DOUBLE_RIFT_POINTS,
 	PLACEMENT_UPGRADE_REROLL,
 ]
 
@@ -34,10 +35,9 @@ const CONSENT_UNKNOWN: StringName = &"unknown"
 const CONSENT_GRANTED: StringName = &"granted"
 const CONSENT_DENIED: StringName = &"denied"
 
-## Product identifier for the single in-app purchase.
-const PRODUCT_REMOVE_ADS: StringName = &"remove_ads_shard_pack"
-## Shards granted alongside ad removal.
-const REMOVE_ADS_SHARD_GRANT: int = 1500
+## Product identifier for the single in-app purchase. Remove Ads carries no currency (ADR-0013):
+## no real-money path ever grants Rift Points.
+const PRODUCT_REMOVE_ADS: StringName = &"remove_ads"
 
 
 ## Minimal contract a real SDK adapter must implement.
@@ -95,9 +95,9 @@ func set_save_manager(save: SaveManagerService) -> void:
 	_save = save
 
 
-## Whether any monetisation surface should be shown at all.
+## Whether the provider is up at all, so ads and purchases can even be attempted.
 ##
-## False on the shipped build, so no ad or purchase button is ever rendered.
+## False on the shipped build: no ad is offered and the Shop's buttons stay disabled.
 func is_available() -> bool:
 	return _provider.is_available()
 
@@ -164,30 +164,35 @@ func begin_run() -> void:
 	_consumed_this_run.clear()
 
 
+## Whether the store is reachable at all, owned purchases aside. Gates Restore Purchases.
+func is_store_available() -> bool:
+	return is_available() and _provider.is_store_available()
+
+
 ## Whether the Remove Ads product can be offered.
 func can_purchase_remove_ads() -> bool:
 	return is_available() and _provider.is_store_available() and not has_removed_ads()
 
 
-## Runs the Remove Ads purchase and grants its shards on success.
+## Runs the Remove Ads purchase; success removes ads and grants nothing else.
 func purchase_remove_ads() -> bool:
 	if not can_purchase_remove_ads():
 		return false
 	if not _provider.purchase(PRODUCT_REMOVE_ADS):
 		return false
 	if _save != null:
-		_save.grant_remove_ads(REMOVE_ADS_SHARD_GRANT)
+		_save.grant_remove_ads()
 	ads_removed_changed.emit(true)
 	return true
 
 
-## Restores a previously owned Remove Ads purchase without re-granting its shards.
+## Restores a previously owned Remove Ads purchase; like the purchase, it grants no currency.
 func restore_purchases() -> bool:
-	if not is_available() or not _provider.is_store_available():
+	if not is_store_available():
 		return false
 	if not _provider.restore_purchases():
 		return false
 	if _save != null:
-		_save.grant_remove_ads(0)
+		_save.grant_remove_ads()
 	ads_removed_changed.emit(true)
 	return true

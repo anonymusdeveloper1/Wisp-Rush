@@ -1,0 +1,147 @@
+[gd_resource type="Resource" script_class="ArenaSkinData" load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/arena_skin_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/endless/thumbnails/galleon_wreck.png" id="2_thumbnail"]
+[ext_resource type="Script" path="res://scripts/resources/arena_scenery_data.gd" id="3_scenery"]
+[ext_resource type="Script" path="res://scripts/resources/arena_scenery_zone.gd" id="4_zone"]
+[ext_resource type="Script" path="res://scripts/resources/arena_particle_emitter.gd" id="5_emitter"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/endless/masks/galleon_wreck.png" id="6_mask"]
+
+[sub_resource type="Resource" id="Zone_1"]
+script = ExtResource("4_zone")
+zone_name = "sea"
+light_color = Color(0.6118, 0.8392, 1, 1)
+light_alt_color = Color(0.6118, 0.8392, 1, 1)
+light_strength = 0.4
+breathe = 0
+breathe_hz = 0.15
+flicker = 0
+flicker_hz = 6
+flare_interval = 0
+flare_boost = 0
+flare_rise = 0.3
+flare_fade = 1.2
+flare_is_flash = false
+hue_cycle = 0
+hue_cycle_hz = 0.05
+color_shift = 0
+color_shift_cycles = 2
+color_shift_hz = 0.08
+twinkle = 0.7
+twinkle_hz = 0.9
+travel = 0
+travel_cycles = 8
+travel_hz = 0.5
+sweep_weight = 0
+warp_mode = 1
+warp_px = 2.4
+warp_hz = 0.14
+warp_cycles = 9
+
+[sub_resource type="Resource" id="Zone_2"]
+script = ExtResource("4_zone")
+zone_name = "sunset"
+light_color = Color(1, 0.7725, 0.4196, 1)
+light_alt_color = Color(1, 0.5412, 0.4784, 1)
+light_strength = 0.6
+breathe = 0.25
+breathe_hz = 0.06
+flicker = 0
+flicker_hz = 6
+flare_interval = 0
+flare_boost = 0
+flare_rise = 0.3
+flare_fade = 1.2
+flare_is_flash = false
+hue_cycle = 0
+hue_cycle_hz = 0.05
+color_shift = 0.4
+color_shift_cycles = 1.5
+color_shift_hz = 0.08
+twinkle = 0
+twinkle_hz = 1
+travel = 0
+travel_cycles = 8
+travel_hz = 0.5
+sweep_weight = 0
+warp_mode = 0
+warp_px = 0
+warp_hz = 0.1
+warp_cycles = 4
+
+[sub_resource type="Resource" id="Zone_3"]
+script = ExtResource("4_zone")
+zone_name = "lantern"
+light_color = Color(1, 0.7725, 0.4196, 1)
+light_alt_color = Color(1, 0.4784, 0.1804, 1)
+light_strength = 1.1
+breathe = 0
+breathe_hz = 0.15
+flicker = 0.45
+flicker_hz = 4
+flare_interval = 0
+flare_boost = 0
+flare_rise = 0.3
+flare_fade = 1.2
+flare_is_flash = false
+hue_cycle = 0
+hue_cycle_hz = 0.05
+color_shift = 0
+color_shift_cycles = 2
+color_shift_hz = 0.08
+twinkle = 0
+twinkle_hz = 1
+travel = 0
+travel_cycles = 8
+travel_hz = 0.5
+sweep_weight = 0
+warp_mode = 0
+warp_px = 0
+warp_hz = 0.1
+warp_cycles = 4
+
+[sub_resource type="Resource" id="Emitter_1"]
+script = ExtResource("5_emitter")
+emitter_name = "spray"
+points_uv = PackedVector2Array(0.0128, 0.1962, 0.2338, 0.1872, 0.3879, 0.1962, 0.8183, 0.1860, 0.4410, 0.1543, 0.5972, 0.1944, 0.9777, 0.1770, 0.2125, 0.2033, 0.9639, 0.1591, 0.4570, 0.1549, 0.7683, 0.1435, 0.9501, 0.2010, 0.7035, 0.1417, 0.7917, 0.1519, 0.1690, 0.1693, 0.3698, 0.1830, 0.4272, 0.1633, 0.7917, 0.1836, 0.0106, 0.2081, 0.7492, 0.1722, 0.2125, 0.1890, 0.1562, 0.2195, 0.8618, 0.2123, 0.8193, 0.1447, 0.0436, 0.2069, 0.4697, 0.1621, 0.1573, 0.2135, 0.2391, 0.1800, 0.8300, 0.1782, 0.5388, 0.1794, 0.6164, 0.1848, 0.8799, 0.1932, 0.3411, 0.1483, 0.1010, 0.1836, 0.1870, 0.1938, 0.9575, 0.1621, 0.2593, 0.1579, 0.0882, 0.1944, 0.1668, 0.2039, 0.5558, 0.1639, 0.8172, 0.1986, 0.4463, 0.1938, 0.3241, 0.1531, 0.7843, 0.1603, 0.4251, 0.1717, 0.5664, 0.1974, 0.9447, 0.1447, 0.5335, 0.1447)
+amount = 12
+lifetime = 1.4
+direction = Vector2(0, -1)
+spread_degrees = 35
+speed_px = Vector2(24, 60)
+gravity_px = Vector2(0, 50)
+size_px = Vector2(7, 12)
+color = Color(0.6118, 0.8392, 1, 1)
+end_color = Color(0.9176, 0.9922, 1, 1)
+alpha = 0.9
+pulses = 0
+additive = true
+sprite = 0
+spin_degrees = 0
+random_seed = 601
+
+[sub_resource type="Resource" id="Scenery"]
+script = ExtResource("3_scenery")
+mask = ExtResource("6_mask")
+scenery_saturation = 1.3
+scenery_contrast = 1.1
+scenery_exposure = 1.03
+shadow_lift = Color(0.2392, 0.5451, 1, 1)
+shadow_lift_amount = 0.22
+highlight_lift = Color(1, 0.5412, 0.4784, 1)
+highlight_lift_amount = 0.2
+floor_saturation = 1.04
+zones = Array[ExtResource("4_zone")]([SubResource("Zone_1"), SubResource("Zone_2"), SubResource("Zone_3")])
+emitters = Array[ExtResource("5_emitter")]([SubResource("Emitter_1")])
+
+[resource]
+script = ExtResource("1_script")
+skin_id = &"galleon_wreck"
+display_name = "GALLEON WRECK"
+description = "A weathered galleon deck over a stormy cliffside sea."
+tier = 2
+background_path = "res://assets/art/environment/endless/galleon_wreck.png"
+thumbnail = ExtResource("2_thumbnail")
+price = 2000
+accent = Color(0.9529, 0.6588, 0.2784, 1)
+scenery = SubResource("Scenery")

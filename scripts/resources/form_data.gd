@@ -8,7 +8,7 @@ extends Resource
 @export var display_name: String
 ## Short flavour text displayed beneath the preview.
 @export_multiline var description: String
-## Soul Shards required to purchase this form.
+## Rift Points required to purchase this form.
 @export_range(0, 100000, 1) var price: int = 0
 ## Requires at least one lifetime Reaper victory before purchase.
 @export var requires_boss_victory: bool = false

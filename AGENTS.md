@@ -16,6 +16,10 @@
    authority) and its six-screen board, plus [ADR-0005](docs/decisions/0005-visual-redesign-v1.md)
    (redesign, generated art pipeline) and [ADR-0006](docs/decisions/0006-inset-playfield-and-larger-sprites.md)
    (inset playfield, sprite/hitbox scale).
+5c. **Making a devlog video (TikTok / YouTube Shorts)?** [docs/marketing/devlog_video_recipe.md](docs/marketing/devlog_video_recipe.md)
+   (owner-approved recipe: rules, structures, Palmier Pro blueprint, QA), [docs/marketing/devlog_hooks.md](docs/marketing/devlog_hooks.md)
+   (the hook library every episode picks from), [tools/video/README.md](tools/video/README.md)
+   (commands) and [docs/marketing/devlog_video_brief.md](docs/marketing/devlog_video_brief.md) (what may be shown).
 6. The newest 2–3 entries of [docs/DEVLOG.md](docs/DEVLOG.md) and the active milestone in [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## 2. Ground rules
@@ -64,6 +68,7 @@
 | Build + deploy the Android debug APK (device over USB) | `JAVA_HOME=$(/usr/libexec/java_home) "$GODOT" --headless --path . --export-debug "Android" build/android/wisp_rush_debug.apk` then `~/Library/Android/sdk/platform-tools/adb install -r -t build/android/wisp_rush_debug.apk` and `adb shell monkey -p com.cognitix.wisprush -c android.intent.category.LAUNCHER 1` (the activity is `GodotAppLauncher` and is **not exported**, so `am start -n` is denied) |
 | Screenshot of what the game renders | `tools/screenshot.sh [res://scene.tscn] [frames] [size]` → `logs/screenshot.png` |
 | Run the game (window) | `"$GODOT" --path .` |
+| Devlog video (capture, voice, graphics, sounds; edit in Palmier Pro) | [tools/video/README.md](tools/video/README.md), recipe [docs/marketing/devlog_video_recipe.md](docs/marketing/devlog_video_recipe.md) |
 | Run one scene | `"$GODOT" --path . res://scenes/<feature>/<thing>.tscn` |
 | Run headless with collision debug etc. | `"$GODOT" --headless --path . --quit-after 300` |
 | Open the editor | `open -a ~/Desktop/Godot.app --args --path "$PWD" --editor` |

@@ -4,7 +4,6 @@ extends SceneTree
 const SAVE_SCRIPT: Script = preload("res://scripts/autoload/save_manager.gd")
 const SETTINGS_SCENE: PackedScene = preload("res://scenes/screens/settings_screen.tscn")
 const RIFTS: RiftCatalog = preload("res://data/rifts/default_catalog.tres")
-const SANCTUM: SanctumCatalog = preload("res://data/sanctum/default_catalog.tres")
 const TRIALS: TrialCatalog = preload("res://data/trials/default_catalog.tres")
 
 var _failures: int = 0
@@ -62,15 +61,6 @@ func _run() -> void:
 		if form_id not in owned:
 			_fail("form %s was not unlocked" % form_id)
 
-	# --- Sanctum.
-	if not DevUnlock.max_sanctum(save):
-		_fail("max_sanctum failed")
-	for node: SanctumNode in SANCTUM.load_nodes():
-		if save.get_sanctum_level(node.node_id) != node.max_level:
-			_fail("%s is at %d, expected %d" % [
-				node.node_id, save.get_sanctum_level(node.node_id), node.max_level,
-			])
-
 	# --- Trials.
 	if not DevUnlock.complete_trials(save):
 		_fail("complete_trials failed")
@@ -81,12 +71,12 @@ func _run() -> void:
 	if not TrialTracker.is_ladder_complete(save.get_trial_rank(), save.get_trial_progress()):
 		_fail("the ladder did not read as complete")
 
-	# --- Shards.
-	var before: int = int(save.get_snapshot()[&"soul_shards"])
-	if not DevUnlock.grant_shards(save):
-		_fail("grant_shards failed")
-	if int(save.get_snapshot()[&"soul_shards"]) != before + DevUnlock.SHARD_GRANT:
-		_fail("the shard grant did not land exactly")
+	# --- Rift Points.
+	var before: int = int(save.get_snapshot()[&"rift_points"])
+	if not DevUnlock.grant_rift_points(save):
+		_fail("grant_rift_points failed")
+	if int(save.get_snapshot()[&"rift_points"]) != before + DevUnlock.RP_GRANT:
+		_fail("the Rift Points grant did not land exactly")
 
 	# --- The combined action on a clean save.
 	var everything: SaveManagerService = _fresh_save()
@@ -97,13 +87,13 @@ func _run() -> void:
 		_fail("unlock_everything did not grant every form")
 	if int(final[&"highest_wave"]) < DevUnlock.get_unlock_wave():
 		_fail("unlock_everything did not raise the best wave")
-	if int(final[&"soul_shards"]) < DevUnlock.SHARD_GRANT:
-		_fail("unlock_everything granted no shards")
+	if int(final[&"rift_points"]) < DevUnlock.RP_GRANT:
+		_fail("unlock_everything granted no Rift Points")
 
 	# --- Guards: a null save must be refused rather than crash.
 	if DevUnlock.unlock_everything(null):
 		_fail("unlock_everything accepted a null save")
-	if DevUnlock.max_sanctum(null) or DevUnlock.unlock_forms(null):
+	if DevUnlock.grant_rift_points(null) or DevUnlock.unlock_forms(null):
 		_fail("a helper accepted a null save")
 	if everything.debug_set_rift_level(&"not_a_rift", 5):
 		_fail("an unknown rift id was accepted")
@@ -122,11 +112,15 @@ func _run() -> void:
 				for child: Node in row.get_children():
 					if child is Label and (child as Label).text.begins_with("DEVELOPER"):
 						found += 1
+					if child is Button and (child as Button).text.to_upper().contains("SANCTUM"):
+						_fail("the developer card still offers a Sanctum action")
+					if child is Button and (child as Button).text.to_upper().contains("SHARD"):
+						_fail("the developer card still names shards: %s" % (child as Button).text)
 		if found != 1:
 			_fail("expected exactly one developer card, found %d" % found)
 	settings.queue_free()
 	await process_frame
 
 	if _failures == 0:
-		print("dev_unlock: rifts, forms, sanctum, trials, shards, guards and the card validated")
+		print("dev_unlock: rifts, forms, trials, Rift Points, guards and the card validated")
 	quit(_failures)

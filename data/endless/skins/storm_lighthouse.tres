@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ArenaSkinData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/arena_skin_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/endless/thumbnails/storm_lighthouse.png" id="2_thumbnail"]
+
+[resource]
+script = ExtResource("1_script")
+skin_id = &"storm_lighthouse"
+display_name = "STORM LIGHTHOUSE"
+description = "A rock platform above crashing waves and a cold-lit lighthouse."
+tier = 1
+background_path = "res://assets/art/environment/endless/storm_lighthouse.png"
+thumbnail = ExtResource("2_thumbnail")
+price = 800
+accent = Color(0.3843, 0.9098, 0.949, 1)

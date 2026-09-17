@@ -38,8 +38,8 @@ extends Resource
 @export_range(20.0, 120.0, 1.0) var lane_radius: float = 46.0
 ## Score awarded after the final dissolve.
 @export_range(100, 10000, 50) var score_reward: int = 1500
-## Soul Shards awarded after victory.
-@export_range(1, 100, 1) var shard_reward: int = 25
+## Rift Points awarded after victory.
+@export_range(1, 100, 1) var rp_reward: int = 25
 ## XP awarded after victory.
 @export_range(1, 1000, 1) var experience_reward: int = 60
 ## Seconds reserved for the victory pulse before endless waves resume.

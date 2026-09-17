@@ -35,7 +35,6 @@ func _start(rift_id: StringName) -> GameWorld:
 	# does). Every later check would then run frozen and time out waiting for the Wisp to rest.
 	paused = false
 	var game := GAME_WORLD_SCENE.instantiate() as GameWorld
-	game.tutorial_enabled = false
 	game.run_seed = 7
 	game.auto_pause_on_focus_loss = false
 	game.configure_run_profile(FORMS.get_form(&"void"), "", CATALOG.get_rift(rift_id), 1)

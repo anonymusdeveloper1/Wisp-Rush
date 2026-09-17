@@ -376,6 +376,16 @@ func _build_bars() -> void:
 	fill.content_margin_right = 6.0
 	_theme.set_stylebox(&"fill", &"SlimProgressBar", fill)
 
+	# RUSH meter under the HUD XP strip: the same slim track, a Soul White fill with a cyan rim so it
+	# never reads as a second XP bar (GDD §5.6).
+	_variation(&"RushProgressBar", t)
+	_theme.set_stylebox(&"background", &"RushProgressBar",
+			_flat(Color(Pal.VOID_CHARCOAL, 0.92), Pal.STEEL_BORDER, 2, 6, 9.0))
+	var rush_fill := _flat(Pal.SOUL_WHITE, Pal.SOUL_CYAN, 3, 6, 0.0)
+	rush_fill.content_margin_left = 6.0
+	rush_fill.content_margin_right = 6.0
+	_theme.set_stylebox(&"fill", &"RushProgressBar", rush_fill)
+
 
 func _build_slider() -> void:
 	var t := &"HSlider"

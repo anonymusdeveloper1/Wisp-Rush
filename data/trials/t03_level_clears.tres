@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="TrialData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/trial_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+trial_id = &"t03_level_clears"
+title = "PATHFINDER"
+description = "Clear 4 Rift levels in total."
+metric = &"level_clears"
+target = 4
+reward_points = 35
+tier = 3
+cumulative = true

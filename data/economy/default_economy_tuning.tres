@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EconomyTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/economy_tuning.gd" id="1_economy"]
+
+[resource]
+script = ExtResource("1_economy")
+score_per_rift_point = 200
+level_clear_base = 20
+level_clear_per_level = 10
+repeat_clear_fraction = 0.25
+placeholder = true

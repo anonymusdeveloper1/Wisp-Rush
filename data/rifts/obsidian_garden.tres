@@ -9,7 +9,6 @@ description = "Where every wisp first wakes."
 rule_summary = "The rift as it was made. No twist."
 rule_key = &"none"
 background = ExtResource("2")
-unlock_wave = 0
 accent = Color(0.384, 0.91, 0.949, 1)
 difficulty_tier = 1
 level_count = 8

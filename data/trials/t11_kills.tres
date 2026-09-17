@@ -9,6 +9,6 @@ title = "REAP THE RIFT"
 description = "Defeat 5000 enemies in total."
 metric = &"kills"
 target = 5000
-reward_shards = 115
+reward_points = 115
 tier = 11
 cumulative = true

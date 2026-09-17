@@ -42,22 +42,16 @@ func try_dash_hit(
 		damage: int,
 		damage_event_id: int,
 	) -> bool:
-	if state == State.ACTIVE and tuning.shield_arc_degrees > 0.0:
-		var approach: Vector2 = (segment_end - segment_start).normalized()
-		if not approach.is_zero_approx():
-			# The dash strikes the shield when it travels *into* the plate, i.e. against the facing.
-			var incoming: Vector2 = -approach
-			var half_arc: float = deg_to_rad(tuning.shield_arc_degrees) * 0.5
-			if absf(incoming.angle_to(_facing)) <= half_arc:
-				var hit_radius: float = get_collision_radius() + corridor_radius
-				var distance: float = DashGeometry.distance_to_segment(
-					global_position,
-					segment_start,
-					segment_end,
-				)
-				if distance <= hit_radius:
-					_on_shield_blocked()
-				return false
+	if state == State.ACTIVE and _shield_faces(segment_start, segment_end):
+		var hit_radius: float = get_collision_radius() + corridor_radius
+		var distance: float = DashGeometry.distance_to_segment(
+			global_position,
+			segment_start,
+			segment_end,
+		)
+		if distance <= hit_radius:
+			_on_shield_blocked()
+		return false
 	return super.try_dash_hit(
 		segment_start,
 		segment_end,
@@ -67,9 +61,29 @@ func try_dash_hit(
 	)
 
 
+## Shield rule as a pure query (aim preview): a dash arriving into the plate never counts.
+func would_dash_hit(segment_start: Vector2, segment_end: Vector2, corridor_radius: float) -> bool:
+	if state == State.ACTIVE and _shield_faces(segment_start, segment_end):
+		return false
+	return super.would_dash_hit(segment_start, segment_end, corridor_radius)
+
+
 ## Whether the shield is currently deflecting, for feedback and tests.
 func is_blocking() -> bool:
 	return _blocked_flash > 0.0
+
+
+## Whether a dash [param segment_start]→[param segment_end] arrives inside the shield arc.
+func _shield_faces(segment_start: Vector2, segment_end: Vector2) -> bool:
+	if tuning.shield_arc_degrees <= 0.0:
+		return false
+	var approach: Vector2 = (segment_end - segment_start).normalized()
+	if approach.is_zero_approx():
+		return false
+	# The dash strikes the shield when it travels *into* the plate, i.e. against the facing.
+	var incoming: Vector2 = -approach
+	var half_arc: float = deg_to_rad(tuning.shield_arc_degrees) * 0.5
+	return absf(incoming.angle_to(_facing)) <= half_arc
 
 
 func _on_shield_blocked() -> void:

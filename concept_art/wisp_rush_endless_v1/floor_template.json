@@ -1,0 +1,26 @@
+{
+  "id": "endless_floor_template_v1",
+  "frozen_on": "2026-09-14",
+  "decision": "docs/decisions/0014-endless-arenas-share-one-floor-template.md",
+  "about": "The one playable floor shared by every Endless arena skin. Frozen: changing it means regenerating and re-validating every skin. Rifts keep their own art-derived floors (ADR-0011). Render the PNGs with tools/art/make_endless_floor_template.py.",
+  "canvas_px": [941, 1672],
+  "space": "Texture UV of the 941x1672 background: (0, 0) top-left, (1, 1) bottom-right.",
+  "source_rect_uv": [0.145, 0.255, 0.845, 0.770],
+  "source_rect_note": "[u_min, v_min, u_max, v_max] = GameWorld.ARENA_FLOOR_UV, the formation distribution rect and design scale (ADR-0006).",
+  "chamfer_px": 80,
+  "polygon_uv": [
+    [0.23002, 0.25500],
+    [0.75998, 0.25500],
+    [0.84500, 0.30285],
+    [0.84500, 0.72215],
+    [0.75998, 0.77000],
+    [0.23002, 0.77000],
+    [0.14500, 0.72215],
+    [0.14500, 0.30285]
+  ],
+  "floor_bleed_px": 12,
+  "rim_band_px": [12, 40],
+  "rim_tolerance_px": 48,
+  "hud_band_max_v": 0.255,
+  "crop_20x9_u": [0.100, 0.900]
+}

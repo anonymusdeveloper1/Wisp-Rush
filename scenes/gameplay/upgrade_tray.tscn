@@ -1,0 +1,275 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/gameplay/upgrade_tray.gd" id="1_tray"]
+[ext_resource type="Texture2D" path="res://assets/ui/theme/textures/panel_card_selected.png" id="2_selected"]
+
+[node name="UpgradeTray" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_tray")
+
+[node name="TrayPanel" type="MarginContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 1056.0
+offset_bottom = 500.0
+mouse_filter = 0
+
+[node name="Content" type="VBoxContainer" parent="TrayPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="TimeoutBar" type="ProgressBar" parent="TrayPanel/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"SlimProgressBar"
+max_value = 1.0
+step = 0.0
+value = 1.0
+show_percentage = false
+
+[node name="Cards" type="HBoxContainer" parent="TrayPanel/Content"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="Choice0" type="Button" parent="TrayPanel/Content/Cards"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 350)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_type_variation = &"CardButton"
+
+[node name="Highlight0" type="NinePatchRect" parent="TrayPanel/Content/Cards/Choice0"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -6.0
+offset_top = -3.0
+offset_right = 4.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_selected")
+patch_margin_left = 91
+patch_margin_top = 129
+patch_margin_right = 91
+patch_margin_bottom = 118
+
+[node name="Copy" type="VBoxContainer" parent="TrayPanel/Content/Cards/Choice0"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 36.0
+offset_top = 52.0
+offset_right = -37.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="Icon0" type="TextureRect" parent="TrayPanel/Content/Cards/Choice0/Copy"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name0" type="Label" parent="TrayPanel/Content/Cards/Choice0/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "WIDE REAP"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Description0" type="Label" parent="TrayPanel/Content/Cards/Choice0/Copy"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 92)
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+theme_override_font_sizes/font_size = 22
+text = "Dash corridor width +27%."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Level0" type="Label" parent="TrayPanel/Content/Cards/Choice0/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+theme_override_font_sizes/font_size = 22
+text = "LEVEL 0  →  1"
+horizontal_alignment = 1
+
+[node name="Choice1" type="Button" parent="TrayPanel/Content/Cards"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 350)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_type_variation = &"CardButton"
+
+[node name="Highlight1" type="NinePatchRect" parent="TrayPanel/Content/Cards/Choice1"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -6.0
+offset_top = -3.0
+offset_right = 4.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_selected")
+patch_margin_left = 91
+patch_margin_top = 129
+patch_margin_right = 91
+patch_margin_bottom = 118
+
+[node name="Copy" type="VBoxContainer" parent="TrayPanel/Content/Cards/Choice1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 36.0
+offset_top = 52.0
+offset_right = -37.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="Icon1" type="TextureRect" parent="TrayPanel/Content/Cards/Choice1/Copy"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name1" type="Label" parent="TrayPanel/Content/Cards/Choice1/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "SOUL HUNGER"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Description1" type="Label" parent="TrayPanel/Content/Cards/Choice1/Copy"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 92)
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+theme_override_font_sizes/font_size = 22
+text = "Dash damage +1; stronger pickup pull."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Level1" type="Label" parent="TrayPanel/Content/Cards/Choice1/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+theme_override_font_sizes/font_size = 22
+text = "LEVEL 0  →  1"
+horizontal_alignment = 1
+
+[node name="Choice2" type="Button" parent="TrayPanel/Content/Cards"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 350)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_type_variation = &"CardButton"
+
+[node name="Highlight2" type="NinePatchRect" parent="TrayPanel/Content/Cards/Choice2"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -6.0
+offset_top = -3.0
+offset_right = 4.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_selected")
+patch_margin_left = 91
+patch_margin_top = 129
+patch_margin_right = 91
+patch_margin_bottom = 118
+
+[node name="Copy" type="VBoxContainer" parent="TrayPanel/Content/Cards/Choice2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 36.0
+offset_top = 52.0
+offset_right = -37.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="Icon2" type="TextureRect" parent="TrayPanel/Content/Cards/Choice2/Copy"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name2" type="Label" parent="TrayPanel/Content/Cards/Choice2/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "DEATH PULSE"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Description2" type="Label" parent="TrayPanel/Content/Cards/Choice2/Copy"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 92)
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+theme_override_font_sizes/font_size = 22
+text = "Wall impacts release a damaging soul pulse."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Level2" type="Label" parent="TrayPanel/Content/Cards/Choice2/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+theme_override_font_sizes/font_size = 22
+text = "LEVEL 0  →  1"
+horizontal_alignment = 1

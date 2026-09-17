@@ -1,10 +1,14 @@
 # System: Cosmetic forms
 
-> **Status:** ✅ done · **Last updated:** 2026-09-13 · **GDD section:** §6, §9, §11
+> **Status:** ✅ done · **Last updated:** 2026-09-15 · **GDD section:** §6, §9, §11
+>
+> **Changed 2026-09-15 ([spec 04](../specs/story_and_endless/04_shop.md)):** the Forms screen is retired;
+> forms are bought and equipped in the Shop's WISPS tab ([shop.md](shop.md)). `FormData` and
+> `FormCatalog` stay.
 
 ## Purpose
 
-Let players preview, purchase and equip all six supplied Wisp forms using earned Soul Shards while
+Let players preview, purchase and equip all six supplied Wisp forms using earned Rift Points while
 keeping every gameplay value identical.
 
 ## Files
@@ -14,38 +18,24 @@ keeping every gameplay value identical.
 | `res://scripts/resources/form_data.gd` | Form identity, price, requirement, art and tint |
 | `res://scripts/resources/form_catalog.gd` | Ordered six-form registry and validation |
 | `res://data/forms/*.tres` | Void, Ash, Venom, Bloodmoon, Frost and Eclipse data |
-| `res://scenes/screens/forms_screen.tscn` | Carousel picker, ownership, claim/equip and Back UI |
-| `res://scenes/screens/forms_screen.gd` | Builds the form cards, presentation and user intents |
+| `res://scenes/screens/shop_screen.tscn` / `.gd` | WISPS tab: the form carousel, buy/equip ([shop.md](shop.md)) |
 | `res://scripts/components/focus_carousel.gd` / `page_dots.gd` | Shared card picker + page indicator ([ui_design_system.md](ui_design_system.md)) |
 
 ## Scene / node structure
 
-```text
-FormsScreen (Control)
-├── Background (menu_background) · Shade
-└── SafeMargin → Content (VBox)
-    ├── Header: TitleBanner "FORMS" · BalancePlate (%BalanceLabel)
-    ├── %Carousel (FocusCarousel) ← six CardButton cards built in code
-    ├── %Dots (PageDots, hollow = not owned)
-    ├── %DescriptionLabel · %RequirementLabel · %FeedbackLabel
-    └── Footer: %BackButton (SecondaryButton) · %ActionButton (PrimaryButton)
-```
+No screen of its own since 2026-09-15: forms are cards in the Shop's WISPS tab ([shop.md](shop.md)).
 
 ## Public API
 
 | Member | Kind | Description |
 |---|---|---|
-| `purchase_requested(id)` | signal | Buy the selected locked form. |
-| `equip_requested(id)` | signal | Equip the selected owned form. |
-| `back_requested` | signal | Return Home. |
-| `setup(balance, owned, equipped, bosses)` | method | Refresh all visible form states (safe before `_ready`). |
-| `select_form(id)` / `get_selected_form_id()` | method | Focus any form, locked included / the focused form. |
-| `show_feedback(message, success)` | method | Short purchase/equip result line. |
+| `FormCatalog.load_forms()` / `get_form(id)` / `validate()` | method | Ordered forms / lookup with Void fallback / authoring checks. |
+| `SaveManagerService.purchase_cosmetic(&"form", id, price, requirement_met)` / `equip_cosmetic(&"form", id)` | method | Buy (and equip) / equip, through Main. |
 
 ## Data & tuning
 
-Prices follow the GDD: Void free; Ash 250; Venom 500; Bloodmoon 800; Frost 1,200; Eclipse 2,000
-plus the first boss victory. Each Resource uses one supplied form texture and presentation tint.
+Prices are in Rift Points and follow the GDD: Void free; Ash 250 RP; Venom 500 RP; Bloodmoon 800 RP;
+Frost 1,200 RP; Eclipse 2,000 RP plus the first boss victory. Each Resource uses one supplied form texture and presentation tint.
 
 ## Dependencies
 
@@ -53,13 +43,13 @@ Main mediates SaveManager purchases/equips. Home and WispPlayer display the equi
 
 ## Rules & behaviour
 
-- **Picker (owner decision 2026-09-13):** a portrait carousel — one big lifted, magenta-framed card
+- **Picker (owner decision 2026-09-13, now the Shop's WISPS tab):** a portrait carousel — one big lifted, magenta-framed card
   in the centre, neighbours dimmed at the sides, page dots, a description, then Back and one main
   button. Swipe or tap a side card to browse; tapping the focused card does what the main button does.
 - Each card: name, the portrait over a halo in the form's tint (dimmed when not owned), and a state
-  row — EQUIPPED / OWNED / REAPER / shard price, always with an icon.
-- `%ActionButton`: EQUIPPED (disabled) / EQUIP / REAPER REQUIRED (disabled, lock) / CLAIM price
-  (shard icon; disabled until affordable). `%RequirementLabel` says why in text.
+  row — EQUIPPED / OWNED / BOSS / price (`250 RP`), always with an icon.
+- `%ActionButton`: the Shop's five states (`BUY  •  250 RP`, `NEED 50 RP`, `BEAT A BOSS FIRST`, EQUIP,
+  EQUIPPED); buying equips.
 - The carousel opens on the equipped form and follows it until the player picks one.
 - Portraits come from the redesign form sheet, and each form's `tint` drives gameplay VFX colour.
 - Every form can be previewed while locked.
@@ -69,9 +59,10 @@ Main mediates SaveManager purchases/equips. Home and WispPlayer display the equi
 
 ## How to test
 
-- Verify all six Resources, preview locked forms, rejected/accepted purchase and persisted equip.
-- `test_menu_screens.gd` (carousel selection, tap-to-act), `test_progression_screens.gd` (`%ActionButton`).
-- Phone layouts: `tools/qa_matrix.sh forms`.
+- Tap the hero Wisp on Home (or WISP FORMS on Results) to open the Shop's WISPS tab. Verify all six
+  Resources, preview locked forms, rejected/accepted purchase and persisted equip.
+- Headless screen tests still target the retired Forms screen and are stale (owner cleans them up).
+- Phone layouts: `tools/qa_matrix.sh shop_wisps`.
 
 ## Known issues / TODO
 
@@ -81,6 +72,8 @@ Main mediates SaveManager purchases/equips. Home and WispPlayer display the equi
 
 | Date | Change |
 |---|---|
+| 2026-09-15 | Forms screen retired; forms live in the Shop's WISPS tab (spec 04) |
+| 2026-09-15 | Prices and balance in Rift Points (`RiftPoints.format`, spec 01) |
 | 2026-09-13 | Forms screen rebuilt as a `FocusCarousel` card picker; `%ActionButton` replaces the grid + action |
 | 2026-09-12 | Restyled to redesign v1; tints retuned to the new portraits (ADR-0005) |
 | 2026-09-11 | Planned for Milestone 3 |

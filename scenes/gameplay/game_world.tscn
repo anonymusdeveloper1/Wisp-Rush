@@ -5,14 +5,15 @@
 [ext_resource type="PackedScene" path="res://scenes/player/wisp_player.tscn" id="3_player"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/system/01_soul_life.png" id="4_life"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/system/02_soul_shards.png" id="5_shards"]
+[ext_resource type="Resource" path="res://data/economy/default_economy_tuning.tres" id="30_economy"]
+[ext_resource type="Resource" path="res://data/feel/default_run_feel_tuning.tres" id="31_feel"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/system/06_pause.png" id="6_pause"]
-[ext_resource type="PackedScene" path="res://scenes/tutorial/tutorial_overlay.tscn" id="7_tutorial"]
 [ext_resource type="Script" path="res://scenes/gameplay/wave_director.gd" id="8_wave_director"]
 [ext_resource type="Resource" path="res://data/waves/default_wave_tuning.tres" id="9_wave_tuning"]
 [ext_resource type="Resource" path="res://data/waves/default_catalog.tres" id="10_catalog"]
 [ext_resource type="Script" path="res://scripts/components/run_progression.gd" id="11_progression"]
 [ext_resource type="Resource" path="res://data/progression/default_run_progression.tres" id="12_progression_tuning"]
-[ext_resource type="PackedScene" path="res://scenes/screens/upgrade_select.tscn" id="13_upgrade_select"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/upgrade_tray.tscn" id="13_upgrade_tray"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/system/18_reaper.png" id="14_reaper"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/forms/01_void.png" id="15_form"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/system/05_play.png" id="16_play"]
@@ -21,6 +22,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/ui/system/16_home.png" id="19_home"]
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/crest_top.tscn" id="20_crest_top"]
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/crest_bottom.tscn" id="21_crest_bottom"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/system/11_upgrades.png" id="40_upgrade"]
 
 [node name="GameWorld" type="Control"]
 process_mode = 3
@@ -32,6 +34,8 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_game")
+economy_tuning = ExtResource("30_economy")
+feel_tuning = ExtResource("31_feel")
 
 [node name="FullBleedBackground" type="TextureRect" parent="."]
 unique_name_in_owner = true
@@ -166,12 +170,12 @@ theme_override_font_sizes/font_size = 40
 text = "3"
 vertical_alignment = 1
 
-[node name="ShardLine" type="HBoxContainer" parent="HUD/SafeHud/HealthRow/StatsColumn"]
+[node name="RiftPointsLine" type="HBoxContainer" parent="HUD/SafeHud/HealthRow/StatsColumn"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 8
 
-[node name="ShardIcon" type="TextureRect" parent="HUD/SafeHud/HealthRow/StatsColumn/ShardLine"]
+[node name="RiftPointsIcon" type="TextureRect" parent="HUD/SafeHud/HealthRow/StatsColumn/RiftPointsLine"]
 custom_minimum_size = Vector2(50, 50)
 layout_mode = 2
 size_flags_vertical = 4
@@ -180,12 +184,18 @@ texture = ExtResource("5_shards")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="ShardCount" type="Label" parent="HUD/SafeHud/HealthRow/StatsColumn/ShardLine"]
+[node name="RiftPointsCount" type="Label" parent="HUD/SafeHud/HealthRow/StatsColumn/RiftPointsLine"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"ValueLabel"
 theme_override_font_sizes/font_size = 40
 text = "0"
+vertical_alignment = 1
+
+[node name="RiftPointsUnit" type="Label" parent="HUD/SafeHud/HealthRow/StatsColumn/RiftPointsLine"]
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+text = "RP"
 vertical_alignment = 1
 
 [node name="ScorePlate" type="PanelContainer" parent="HUD/SafeHud"]
@@ -255,6 +265,104 @@ grow_horizontal = 2
 theme_type_variation = &"ValueLabel"
 theme_override_font_sizes/font_size = 22
 text = "SOUL LEVEL 1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RushRow" type="HBoxContainer" parent="HUD/SafeHud"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -300.0
+offset_right = 220.0
+offset_bottom = 32.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_constants/separation = 14
+
+[node name="RushLabel" type="Label" parent="HUD/SafeHud/RushRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(66, 0)
+layout_mode = 2
+theme_type_variation = &"ValueLabel"
+theme_override_font_sizes/font_size = 22
+text = "RUSH"
+vertical_alignment = 1
+
+[node name="RushBar" type="ProgressBar" parent="HUD/SafeHud/RushRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"RushProgressBar"
+show_percentage = false
+
+[node name="UpgradeButton" type="Button" parent="HUD/SafeHud"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(132, 132)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -132.0
+offset_bottom = 132.0
+grow_horizontal = 0
+focus_mode = 0
+tooltip_text = "Upgrade"
+theme_type_variation = &"IconButton"
+
+[node name="UpgradeIcon" type="TextureRect" parent="HUD/SafeHud/UpgradeButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 30.0
+offset_top = 14.0
+offset_right = -30.0
+offset_bottom = -44.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("40_upgrade")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="UpgradeCaption" type="Label" parent="HUD/SafeHud/UpgradeButton"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -44.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_type_variation = &"CaptionLabel"
+theme_override_font_sizes/font_size = 20
+text = "UPGRADE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="UpgradeCount" type="Label" parent="HUD/SafeHud/UpgradeButton"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -54.0
+offset_top = -8.0
+offset_right = 6.0
+offset_bottom = 32.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_type_variation = &"AmberValueLabel"
+theme_override_font_sizes/font_size = 26
+text = "×2"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -383,10 +491,7 @@ theme_type_variation = &"BossProgressBar"
 value = 100.0
 show_percentage = false
 
-[node name="TutorialOverlay" parent="HUD" instance=ExtResource("7_tutorial")]
-unique_name_in_owner = true
-
-[node name="UpgradeSelect" parent="HUD" instance=ExtResource("13_upgrade_select")]
+[node name="UpgradeTray" parent="HUD" instance=ExtResource("13_upgrade_tray")]
 unique_name_in_owner = true
 
 [node name="PauseOverlay" type="Control" parent="HUD"]

@@ -13,6 +13,11 @@
 # Node tooling
 node_modules/
 
+# Devlog videos: footage/voice workspace and the local Kokoro TTS environment (large, machine-local)
+/video/
+/tools/video/.venv/
+/tools/video/models/
+
 # Claude Code: personal, machine-local overrides only
 .claude/settings.local.json
 

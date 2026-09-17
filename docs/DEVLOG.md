@@ -4,6 +4,466 @@
 > [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) §7.6. Keep entries short — details belong in the docs
 > they changed.
 
+## 2026-09-17 — Devlog #4 "Four tricks for one swipe"
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Owner: "create the next devlog". Built EP04 (49.0 s, structure C, game feel) in the new Palmier project "Wisp Rush Devlog 04 - One Swipe Feel".
+  - Hook: H9 numbered promise ("Four little tricks make one swipe feel this good.") plus an open loop ("Number four almost broke my game."), with the payoff-first treatment: an 8-kill line lit at half speed under a giant "4", then the slice. Neither the idea nor the treatment repeats EP03 (hooks §6 log).
+  - The four tricks, each on a stone step card that parks top-left:
+    1. aim rings with the ×3 count (arrow sweep);
+    2. AIM ASSIST off (×2) then on (×3), "≤ 6°", "only if it hits more";
+    3. the slow-motion finisher on a five-kill diagonal, "TIME ×0.3";
+    4. RUSH in a free-play run with 6 s / ×1.3 / ×2 / no-damage pills.
+  - The RUSH bug (DEVLOG 2026-09-15) explained on the grid: the timer drains to 0.0 s, `rush_time = 0` runs before `end_rush()`, which "thinks RUSH is over… skips!", the meter stays full, "RUSH ×2 ×3 ×4 ×∞". The fix swaps the two code cards, then the meter empties first and the timer after. Then the AI credit, the four step cards with "bug included", the question and the follow card.
+  - New fixture `tools/godot/render_feel_showcase.gd` (scripted, repeatable feel shots in a quiet tutorial arena; the event log marks shots, releases and kills). New `devlog_graphics.py` commands `code` and `meter`, bar colours, step icons `target` / `bend` / `slowmo`, and step labels that shrink to fit. Documented in the README, recipe §3.1 / §5 and PROJECT_CONTEXT §6.
+- **Files/systems:**
+  - Tools: `tools/godot/render_feel_showcase.gd`, `tools/video/{devlog_graphics.py,README.md}`.
+  - Docs: `docs/marketing/{devlog_hooks.md,devlog_video_recipe.md}`, `docs/PROJECT_CONTEXT.md`.
+  - Workspace (git-ignored): `video/{footage/ep04_*,voice/ep04,graphics/ep04}`.
+- **Verified:**
+  - Script claims match the code: `aim_assist_degrees` 6, `finisher_kills` 5, `finisher_time_scale` 0.3, RUSH 6 s / ×1.3 / ×2 / immunity, and the fix order in `GameWorld._update_rush` / `_end_rush`.
+  - Captures: the first assist take showed no difference (a 5° offset still hit all three), so the fixture now searches 3°–14° for a drag the assist improves; the retake lights 2 without the assist and 3 with it.
+  - Voice lines checked with Palmier transcription: "Four tricks" was heard as "For treks", "Hold to aim" as "One hole", "hit zero first" as "01st", "Full meter? RUSH again." as "We'll meet a rush"; all four lines were reworded and the take re-voiced clean.
+  - Composited frames checked across the cut. Fixes: a Wisp cut off in the hook push-in, big "×3 / ×2" echoes of the tiny in-game count, "TIME ×0.3" and "FIXED" moved off the captions and header, duplicate captions under kinetic text removed, and a wrapped last caption split in two.
+  - First export peaked at −1.4 dBTP where a step SFX and RUSH footage audio stacked (f2172); after lowering both: −14.5 LUFS, −2.3 dBTP. Export `video/exports/wisp_rush_devlog_04_four_tricks_one_swipe.mp4`: H.264 1080×1920 60 fps, AAC 48 kHz, 49.0 s; watched back in Palmier, and the transcript matches the script.
+- **Follow-ups:** owner review of EP04. EP05 only when asked, with a hook idea and treatment EP04 didn't use. Disk space is low (~4 GB free): delete captures after transcoding.
+
+## 2026-09-16 — Devlog #3 "30 new arenas" and the hook library
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Owner asked for the next devlog, about the 30 new arenas. Built EP03 (51.0 s, structure B) in the new Palmier project "Wisp Rush Devlog 03 - 30 New Arenas":
+    - the hook (below), then a montage under "30 NEW ARENAS";
+    - "4 TIERS" cards (10 Simple, 10 Rare, 5 Legendary, 5 Mythic), and the first effects as a sticker strip ("shapes on top?");
+    - "DIDN'T MATCH THE ART", and MYTHIC struck through;
+    - the version-2 light-map explainer from a real scenery mask, then Legendary punch-ins with tier pills;
+    - shop carousel, the three Mythic set pieces (a ring on the dragon's glowing throat), and the fair-floor outline over three arenas ("SAME FLOOR ×30", "LOOKS ONLY.");
+    - the build-size board (45 MB → 3.7 MB, 12× smaller), a Starforged run with the AI pill, "WHICH ARENA WOULD YOU PICK?" over a Dragon Skull run, and the follow card.
+  - Owner: "not every video shall have that comment hook". Recipe §1 now rotates hooks; EP03 opens on a before/after glow-up wipe.
+  - Owner then sent three hook-teaching TikToks. They were downloaded to `video/references/hook1–3.mp4` and watched to the end in Palmier. The result is the new hook library [docs/marketing/devlog_hooks.md](marketing/devlog_hooks.md):
+    - the context → lean → snapback test;
+    - ten spoken hook ideas (templates paraphrased) with true Wisp Rush lines and topic picks;
+    - what not to copy (their look, their CTA);
+    - a hook log.
+  - Recipe §0/§1/§2/§3.1/§4/§5/§10, the `devlog-video` skill, AGENTS.md 5c and PROJECT_CONTEXT point to it.
+  - EP03's opening went through three versions:
+    1. A glow-up wipe.
+    2. A library re-hook: "My arenas just got a huge glow-up. But one thing never changed."
+    3. The owner asked again: "the hook, the opening… use one idea from the hook ideas I have given you". It now uses H2, the never-again warning from HOOK-A: "Never, ever draw effects on top of your game art. I learned that the hard way."
+  - How the final opening plays: "NEVER," / "EVER." slam in on black. Then the old sticker effects appear with rings and a red strike, and a hurt-Wisp joke beat follows. The warning pays off at "my first effects were just shapes, drawn on top of the painting", now marked "never do this!".
+  - The library now requires one recognizable idea per episode (H1–H9). The triple hook stays as the §2 check only.
+  - New fixture `tools/godot/render_arena_showcase.gd` (Endless skins back to back with a held start, so no enemies spawn; `segment_start` / `segment_end` events). New `devlog_graphics.py` commands: `tier`, `outline`, `lightmap`, `crop`. Documented in the README, recipe §5 and PROJECT_CONTEXT §6.
+- **Files/systems:**
+  - Docs: `docs/marketing/{devlog_hooks.md (new),devlog_video_recipe.md}`, `.claude/skills/devlog-video/SKILL.md`, `AGENTS.md`, `docs/PROJECT_CONTEXT.md`.
+  - Tools: `tools/godot/render_arena_showcase.gd`, `tools/video/{devlog_graphics.py,README.md}`.
+  - Workspace (git-ignored): `video/{references/hook1–3,footage/ep03_*,voice/ep03,graphics/ep03}`.
+- **Verified:**
+  - Every beat of the composited timeline was checked with `inspect_timeline` and full-res `capture_frame`. Fixes:
+    - the empty top of the tier grid (headline added);
+    - the strike line hidden behind MYTHIC;
+    - captions over the shop card and over the floor-outline edges.
+  - Voice lines were checked with Palmier transcription:
+    - "But one thing didn't change at all." was heard as "The one thing…", so it was reworded to "But one thing never changed.";
+    - line 2 was voiced several ways: every take that opened with or led into "Wisp Rush" was heard as "Wisp Brush" or "Wisp rushes", and even the older good take lost "Wisp" once it followed a sentence break. The line is now "Thirty new arenas are now in Wisp Rush.", timed so the "30" pops on "Thirty".
+  - In the first export, the montage whoosh and an accent sat about 8 dB over the soft start of the next word. The whoosh now leads into the cut, and the accent is at −20 dB.
+  - Export `video/exports/wisp_rush_devlog_03_30_new_arenas.mp4`: H.264 1080×1920 60 fps, AAC 48 kHz, 51.0 s, −14.6 LUFS, −2.7 dBTP. Watched back in Palmier: the storyboard and transcript match `video/voice/ep03/ep03_final_script.txt`.
+- **Follow-ups:** owner review of EP03. EP04/EP05 only when asked; they must pick a hook idea and a visual treatment EP03 didn't use (hooks §6). `tour=story` capture is still untested.
+
+## 2026-09-16 — Devlog video recipe for every agent (EP02 approved)
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - The owner approved Devlog #2 and asked for it to be written up so other agents can make videos the same way. Reverse-engineered the final EP02 timeline into [docs/marketing/devlog_video_recipe.md](marketing/devlog_video_recipe.md): owner rules, the four references and what to take from each, three story structures with beat timings, script rules and the EP02 script, piece-making, the Palmier track stack, an element cookbook with EP02's exact values, motion/text/caption/sound rules with an SFX map, QA/export/watch-back steps, gotchas and a frame map.
+  - `tools/video/palmier_motion.py` (pop, tap ring, custom keyframe rows, image sizes, `fit-text` font sizes; it reproduces EP02's keyframes exactly). New Claude Code skill `devlog-video`. `tools/video/README.md` is now commands only (style moved to the recipe; one export serves TikTok and Shorts). Pointers in AGENTS.md (§1 5c, §4), CLAUDE.md, PROJECT_CONTEXT §6/§7.1 and the brief.
+  - Export renamed to `video/exports/wisp_rush_devlog_02_why_buttons_froze.mp4` (approved).
+- **Files/systems:** `docs/marketing/{devlog_video_recipe.md,devlog_video_brief.md}`, `tools/video/{palmier_motion.py,README.md}`, `.claude/skills/devlog-video/SKILL.md`, `AGENTS.md`, `CLAUDE.md`, `docs/PROJECT_CONTEXT.md`.
+- **Verified:** `palmier_motion.py` output matches the EP02 timeline keyframes (step card, tap ring, comment card, logo, sticker) and `fit-text` gives the sizes EP02 uses; `tools/validate.sh` → OK. Docs only otherwise.
+- **Follow-ups:** EP03–EP05 when the owner asks (one per request); `tour=story` capture still untested; EP01 predates the recipe (owner to decide whether to remake it).
+
+## 2026-09-16 — Devlog #2 "Why every button froze" and the devlog style guide
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Owner set a new style for all devlogs from four reference TikToks (downloaded to `video/references/`, watched to the end in Palmier): open on a viewer comment, explain problems with motion graphics, show before / why / after briefly, charisma, under 60 s, stock footage allowed. Recorded as the style guide in [tools/video/README.md](../tools/video/README.md); the owner asked for one test video first, one Palmier project per episode.
+  - Owner picked the topic "why buttons froze". Built EP02 (43.7 s) in the new project "Wisp Rush Devlog 02 - Why Buttons Froze": comment card (second Kokoro voice `af_heart`) → frozen Home with frost → "WHY?" beat → frame-strip explainer with a growing red freeze bar → "576 MS" → logo frost gag → "cover first, build later" with stone step cards over the real Home/Shop and the run loading screen → numbers board (576 → 0 ms, 271 → 0 ms, "measured on a Mac") → Aurora Throne RUSH footage → AI credit → question → follow card.
+  - New tools: `tools/godot/export_game_audio.gd` (the game's synthesized SFX and music as WAVs for sound design) and `tools/video/devlog_graphics.py` (comment card, grid, frame strip, freeze bar, taps, marker arrows, frost, step cards).
+- **Files/systems:** `tools/godot/export_game_audio.gd`, `tools/video/{devlog_graphics.py,README.md}`; workspace `video/{references,audio,graphics,voice/ep02,exports}/` (git-ignored).
+- **Verified:** export `video/exports/wisp_rush_devlog_02_why_buttons_froze_draft1.mp4`: H.264 1080×1920 60 fps, AAC 48 kHz, 43.7 s; the first render peaked at +1.0 dBTP (Kokoro voices peak near 0 dBFS), fixed by mastering both voices (README step 3) → −14.6 LUFS, −2.6 dBTP. Watched back in Palmier: storyboard and transcript match the script. Composited frames checked across the cut; oversized headlines (Palmier sizes text ~1.78× PIL) resized, captions moved off the tapped PLAY button.
+- **Follow-ups:** owner review of EP02 (and EP01 draft 1); if approved, EP03–EP05 follow the guide; `tour=story` capture still untested.
+
+## 2026-09-16 — Devlog capture tours and the EP02–EP05 plan
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Owner asked for 3–4 TikTok/YouTube devlogs from `docs/marketing/devlog_video_brief.md`, then paused production for a plan review. Four episodes planned in [tools/video/README.md](../tools/video/README.md): EP02 arenas, EP03 dash feel, EP04 two modes, EP05 menu freezes. Nothing edited yet.
+  - The capture bot moved out of `render_gameplay_clip.gd` into `tools/godot/devlog_bot.gd`, shared with the new `tools/godot/render_devlog_tour.gd`, which drives the real `Main` through a scripted tour (`menus`, `story`) on its own isolated save (`user://test_runs/devlog_tour*.json`). New bot option `dash_speed` (on a duplicated `PlayerTuning`) for before/after shots; `quality` sets the MJPEG quality.
+- **Files/systems:** `tools/godot/{devlog_bot,render_gameplay_clip,render_devlog_tour}.gd`, `tools/video/README.md` (also replaced its stale "Endless skin is placeholder art" capture note).
+- **Verified:** all three scripts pass `--check-only`. `tour=menus skin=aurora_throne` recorded 50.9 s (`video/footage/tour_menus.mp4`, contact sheet reviewed): boot, Rift Map, Shop WISPS/DASHES/ARENAS to the Mythic cards, run loading screen, an Aurora Throne run with an 8-kill dash, a ×30 chain, RUSH and the Hollow Choir arriving. The run loading screen never reports "not navigating", so the tour's wait timed out (footage unaffected); it now waits for that screen unsettled. That fix and `tour=story` have not run yet.
+- **Follow-ups:** owner approval of the plan and feedback on Devlog #1 draft 1; then captures (Mythic runs on starforged_citadel and dragon_skull_throne, a same-seed 4,400 vs 3,960 px/s pair, the story tour), voiceovers and edits.
+
+## 2026-09-16 — Devlog video brief for the marketing agent
+- **Who:** Claude Code (Opus 5)
+- **Did:** Owner asked for one file another agent can track this session from and cut TikTok/YouTube devlogs against. Wrote `docs/marketing/devlog_video_brief.md`: the session story, the nine filmable features in priority order, safe on-screen numbers (navigation 271/576 ms → 0 ms at the tap, arena art 45 MB → 3.7 MB, 24/30 skins pass the checker), capture commands (adb screenrecord, screenshot.sh, render_*_showcase, qa_matrix, the before/after scenery sheets), branding asset paths, hard publishing rules (never call the art hand-made, never use the fake-controls key art, no release date or store claims, monetisation is disabled), known rough edges to avoid filming, and three suggested videos.
+- **Files/systems:** `docs/marketing/devlog_video_brief.md` (new), PROJECT_CONTEXT §7.1 row.
+- **Verified:** links checked against existing docs; no code touched.
+
+## 2026-09-16 — No navigation freezes: cover-then-build, run prewarm, image loading screen
+- **Who:** Claude Code (Opus 5)
+- **Did:** Owner (Galaxy S24): PLAY and other buttons froze. Main now covers first and builds later: every navigation starts a 0.12 s void-charcoal veil at the tap, builds the next screen under it (latest request wins, presses swallowed), lets it draw 2 frames covered, then lifts with the glide. PLAY / Rift Map ENTER prewarm the run beneath the run loading screen (`GameWorld.hold_start/warm_up_render/release_start`, `PROCESS_MODE_DISABLED` while hidden; loading screen on the internal `LoadingCover` CanvasLayer 99 so it draws over the run) and reveal that run when the bar completes — no instantiate after the bar. Fixed the switch timing stamp (the boot LoadingScreen measured from the previous switch); the log now reports build · tap to revealed · worst frame. Rift and form data stay loaded after boot. Shop ARENAS builds thumbnails + scenery materials lazily (focused ± 2, shared per scenery), active tab only. Loading screen redesigned: random painted background (5 Rifts, Home, menu) with Ken Burns drift, gradient scrim, logo + arena heading, `LOADING...` with animated dots over a full-width ProgressBar (Reduced Motion: still).
+- **Timings (desktop, 540x1170 window, blocking at tap → after):** Rift Map 271.5 → 0 ms (build under veil 7.5 ms); Shop ARENAS 27.0 → 0 (build 16.1); Trials 36.2 → 0 (38.4); Home 11–44 → 0 (1–6); PLAY 575.8 ms blocking, GameWorld 71 ms + 73.5 ms worst frame after the bar → 0 ms at tap, run build 1.7 ms + add/ready/warm 48–58 ms behind the loading screen, reveal worst frame 9.6 ms. Every change now settles tap → revealed in ~425–460 ms. Device before: GameWorld ready 270.9 ms + 196.5 ms worst frame (first run) after the bar — remeasure on device.
+- **Files/systems:** `scenes/main/main.gd`, `scenes/gameplay/game_world.gd`, `scenes/screens/loading_screen.{gd,tscn}`, `scenes/screens/shop_screen.gd`, `tools/godot/test_screen_transitions.gd`; docs `game_flow.md`, `core_run.md`, `shop.md`.
+- **Verified:** `tools/validate.sh` → OK; `test_screen_transitions` and `test_game_flow` pass; run loading screenshot at 540x1170 checked (the first capture showed the prewarming arena drawing over the loading screen — fixed with the cover layer).
+- **Follow-ups:** device check of first-run GameWorld pipeline compilation behind the loading screen; Results after a run end still banks synchronously (~30 ms) before its veil.
+
+---
+
+## 2026-09-16 — Run loading screen for PLAY and Rift Map ENTER
+- **Who:** Claude Code (Opus 5)
+- **Did:** Owner asked for a loading screen when pressing PLAY or entering a Rift. `LoadingScreen.begin_run(paths, heading, subheading)` reuses the boot screen (logo, glow, progress bar) with the arena's name — `ENDLESS` + the equipped skin, or `<RIFT>` + `LEVEL n` — loads the Endless background on a worker thread and stays up at least `RUN_MIN_SECONDS` (0.9 s). Only Home PLAY and Rift Map ENTER use it; restart, PLAY AGAIN / NEXT LEVEL / RETRY on Results and the daily run keep the instant path (GDD §2 immediate momentum).
+- **Files/systems:** `scenes/screens/loading_screen.{gd,tscn}`, `scenes/main/main.gd`.
+- **Verified:** `tools/validate.sh` → OK.
+
+## 2026-09-16 — Stale export cache after the scenery rebuild
+- **Who:** Claude Code (Opus 5)
+- **Did:** The first APK after the arena scenery rebuild logged 40 load errors on the phone: 20 Simple/Rare skin resources still referenced the deleted `arena_ambience_effect.gd`. The repo files were correct; Godot's export cache (`.godot/exported/`) had reused binary conversions from the previous build. Cleared that cache, rebuilt, confirmed no exported resource references the old script, reinstalled: Home boots with 0 errors. **After deleting or renaming a Resource script, clear `.godot/exported/` before exporting.**
+- **Verified:** device boot log clean (Galaxy S24).
+
+## 2026-09-16 — Endless scenery rebuilt on the painting (Legendary/Mythic)
+- **Who:** Claude Code (Opus 5)
+- **Did:** Owner device feedback 2026-09-15 ("effects do not look good — more vibrant; Mythic shall be felt"). Replaced the code-drawn circles/bands with layers that use the painting: `tools/art/endless_scenery.py` (per-skin `SCENERY` table) writes 471×836 RGBA masks (R light sources by brightness/top-hat/hue rules in tunable rects, G distortion regions, B floor weight across the rim tolerance, A zone ids) and floor-clear particle emission points; `arena_scenery.gdshader` grades scenery (saturation, contrast, split-tone lift; floor only a luminance-kept saturation lift), animates emissive zones (breathing, flicker, flares, colour cycling, twinkle, travelling pulses), distorts G (ripple/shimmer/wave/roil) and draws CORONA/SWIRL set pieces, light sweeps and shooting stars in one pass; `ArenaAmbience` drives time values (pausable) and mask-gated CPUParticles2D.
+- Mythic set pieces: eclipse corona rays + flares + god-ray sweep + ash; starforged turning galaxy + shooting stars + light falls; abyssal portal swirl + seam/rune pulses + chain glints + motes; aurora waving colour-shifting aurora + torch flicker/haze + snow; dragon flaring eye sockets + throat fire + heat shimmer + embers/smoke. Legendary: 2–3 calm touches each (storm_anvil soft bolt flashes ≥ 6 s apart).
+- Removed `ArenaAmbienceEffect` and every drawn-shape kind; `ArenaSkinData.ambience` → `scenery`, `ArenaRules.get_ambience()` → `get_scenery()`; Shop ARENAS thumbnails use the static grade + glow material; `EndlessCatalog.validate_scenery()` (centres, streak regions, emission points + drift paths, mask floor ≈ 0).
+- **Files/systems:** `assets/shaders/arena_scenery{,_particles}.gdshader`, `scripts/resources/{arena_scenery_data,arena_scenery_zone,arena_particle_emitter,arena_skin_data,endless_catalog}.gd`, `scenes/gameplay/{arena_ambience,arena_rules,endless_arena_rules,game_world}.gd`, `scenes/screens/shop_screen.gd`, `assets/art/environment/endless/masks/`, `data/endless/skins/*.tres`, `tools/art/{endless_scenery,make_endless_skin_data,set_endless_import_lossy}.py`, `tools/godot/{render_endless_scenery_sheet,test_endless_catalog,qa_capture}.gd`; docs endless_mode, ASSETS, PROJECT_CONTEXT §5.8, GDD history.
+- **Verified:** `tools/validate.sh` → OK; `run_tests.sh endless_catalog` → PASS. Real-run sheets (3 frames ~0.7 s apart × 10 skins, 540×1170): `logs/endless/scenery_round0_before.png`, `scenery_round1.png`, `scenery_round2.png`, `scenery_round3.png`; close-ups `scenery_detail_mythic_top.png`, `scenery_detail_mythic_bottom.png`; mask preview `scenery_masks_preview.png`; `logs/qa/endless_aurora_throne_sheet.png` (5 phones). Floor luminance identical before/after on all 10 skins (sheet stats), floor saturation +2–5 %, scenery saturation ≈ ×1.5–2; nothing over the floor; Wisp brightest small object. Round 1 caught a double texture multiply (canvas `COLOR` already holds the texture) that darkened everything.
+- **Follow-ups:** device pass for look and cost (full-screen shader + ≤ ~100 CPU particles on Mythic); top set pieces sit partly behind the HUD score box; the rim band takes part of the grade (warmer dragon rim) — owner to judge.
+
+## 2026-09-15 — Thirty Endless arena skins wired, animated Legendary/Mythic scenery
+- **Who:** Claude Code (Opus 5)
+- **Did:** Spec 05 finished for all 30 skins (owner decisions 2026-09-15). `make_endless_skin_data.py` generates the 30 `ArenaSkinData` (manifest names/descriptions, tier, prices 0/800/1,200 then 300/800/2,000/3,500 by tier, Palette accents, no placeholders) and the catalog. Backgrounds now load lazily (`background_path`) and the Shop uses 282×502 thumbnails, so boot and the ARENAS carousel never hold 30 full textures. New `ArenaAmbienceEffect` + `ArenaAmbience`: code-drawn glows, corona ring, flicker, mist, motes, twinkling stars, aurora and soft lightning (≥6 s apart) anchored to painted features on the 5 Legendary (light) and 5 Mythic (rich) skins, validated to stay outside the floor + 48 px; Reduced Motion keeps still glows; also shown on Shop cards. Save ids for 30 skins; tier shown on cards.
+- **Checker:** 24/30 pass all metrics (coverage 0.884–1.000, luminance ×0.28–×0.91, props 0); 6 flagged only by the rim heuristic (fungal_hollow 0.718, library_of_echoes 0.927, galleon_wreck 0.400, eclipse_sanctum 0.922, abyssal_gate 0.517, aurora_throne 0.737), all eye-approved.
+- **Import size:** 30 backgrounds lossless 47,051,268 B (44.9 MiB) → lossy q0.8 3,911,522 B (3.7 MiB); thumbnails 577,684 B lossy (≈4.8 MB lossless); uids unchanged (`set_endless_import_lossy.py`, owner-approved exception).
+- **Files/systems:** `scripts/resources/{arena_skin_data,arena_ambience_effect,endless_catalog}.gd`, `scenes/gameplay/{arena_ambience,arena_rules,endless_arena_rules,game_world}.gd`, `scenes/screens/shop_screen.gd`, `scripts/autoload/save_manager.gd`, `data/endless/**`, `assets/art/environment/endless/**`, `tools/art/{extract_endless,make_endless_skin_data,set_endless_import_lossy}.py`, `tools/godot/{test_endless_catalog,render_endless_skins_sheet,qa_capture}.gd`; docs endless_mode, shop, tutorial, ASSETS, GDD §6/§14 #19 #26, ADR-0014 addendum, PROJECT_CONTEXT §5.8, ROADMAP M6/M10, spec 05.
+- **Verified:** `tools/validate.sh` → OK; `run_tests.sh endless_catalog` → 1 passed; also passed challenge_tracker, screen_transitions, monetisation, game_flow. Already stale, unrelated (removed FormsScreen / `purchase_form`): save_manager, main_progression_flow, menu_screens, progression_screens, rift_points_text, screen_setup_order. Real renders: `logs/endless/run_sheet_{1,2}.png` (all 30 at 540×1170) and `logs/qa/endless_{astral_observatory,storm_anvil,aurora_throne}_sheet.png`: rim at the wall, Wisp on the edge and brightest small object, nothing over the floor.
+- **Follow-ups:** device pass (rim, lossy quality, ambience cost); HUD text over bright top scenery on quartz_grotto/slate_cliffs/dusk_sandstone; confirm generated-art licence; update the stale tests.
+
+## 2026-09-15 — Thirty Endless arena source skins
+- **Who:** Codex (built-in ImageGen)
+- **Did:** Generated all 30 cosmetic Endless arena backgrounds from the owner's skin prompt and exact playable-floor layout. Rebuilt late Mythic floors and cleaned the fungal, market and anvil drafts against the 50% playfield guide; exported one distinct 941×1672 opaque RGB PNG per skin and `skins_manifest.json` (Simple/Rare/Legendary/Mythic: 10/10/5/5). Source art only; no generated runtime PNGs, skin data or gameplay were changed.
+- **Files/systems:** `concept_art/wisp_rush_endless_v1/{SKIN_SET_PROMPT.md,assets/}`, `docs/ASSETS.md`; Endless visual source pack.
+- **Verified:** 30 unique PNGs, exact filenames/dimensions/RGB and tier counts; all art compared to `floor_template_guide.png`; `tools/validate.sh` → `VALIDATE: OK` (85 scripts checked, main booted). `tools/run_tests.sh` → 22 passed, 11 failed in existing stale tests that reference removed Forms/progression APIs or old screen expectations; none consume these source files. Godot MCP unavailable; no runtime art integration or in-game visual pass yet.
+- **Follow-ups:** Run spec 05's art checker/extraction and wire all 30 skins (01–03 still have placeholders; 04–30 need data/prices) before shipping; confirm generated-art release licence; update the 11 stale tests separately.
+
+## 2026-09-15 — Tappable UPGRADE button
+- **Who:** Claude Code (Opus 5)
+- **Did:** Owner missed an indicator after the tray simplification (the UPGRADE READY pill had been removed) and chose a tappable button. `%UpgradeButton` (IconButton, 11_upgrades icon, "UPGRADE" caption, amber ×N when several are banked, pulse from `RunProgressionTuning.button_pulse_*`) sits under the pause button while a level-up is banked and the cards are not up; tapping opens the cards immediately. Calm-moment auto-open is unchanged.
+- **Verified:** `tools/validate.sh` → OK; temporary smoke (hidden when nothing banked, visible when banked, tap opens the tray, hidden while it is up) 4/4, deleted.
+
+## 2026-09-15 — Upgrade cards raised
+- **Who:** Claude Code (Opus 5)
+- **Did:** Owner: the cards sat too low. New `RunProgressionTuning.tray_raise_share` (0.1 — first tried 0.2, owner: "not that high"): the tray's bottom edge rests 10 % of the screen height above the bottom safe margin (plus the tutorial lift), still sliding up from below.
+- **Verified:** `tools/validate.sh` → OK.
+
+## 2026-09-15 — Upgrade tray simplified to cards and a timer
+- **Who:** Claude Code (Opus 5)
+- **Did:** Owner: "don't make the UI that complex, just cards and timer". Removed the tray's frame (TrayPanel is a plain MarginContainer) and its "CHOOSE AN UPGRADE" / "SWIPE TO KEEP PLAYING" header, and the HUD UPGRADE READY pill (scene nodes, layout, pulse, `indicator_pulse_*` tuning). The three cards, the draining timeout bar, banking, calm moments, slow motion and swipe/timeout dismiss are unchanged.
+- **Files/systems:** `scenes/gameplay/{upgrade_tray.tscn,upgrade_tray.gd,game_world.gd,game_world.tscn}`, `scripts/resources/run_progression_tuning.gd`, `data/progression/default_run_progression.tres`; docs GDD §5.5, mutations, core_run, tutorial, ui_design_system.
+- **Verified:** `tools/validate.sh` → OK.
+
+## 2026-09-15 — TikTok devlog pipeline and Devlog #1 draft
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Owner wants TikTok devlogs edited in **Palmier Pro** through its MCP server (registered locally as `palmier-pro`, `http://127.0.0.1:19789/mcp`), footage recorded by the game itself, a young male **Kokoro** voice, and "game first, open about AI". Workflow and house style: [tools/video/README.md](../tools/video/README.md).
+  - `tools/godot/render_gameplay_clip.gd`: a bot plays a real Endless or Rift run (aim arrow held before multi-kills, redirects, Soul Fragment refills) while MovieWriter records 1080×1920 @ 60 fps with game audio, plus a JSON-lines event log (multi-kills, RUSH, boss, hits, upgrades) to cut to. (The parallel upgrade-tray session repointed it at `UpgradeTray`.)
+  - `tools/video/kokoro_tts.py`: offline Kokoro voiceover (kokoro-onnx 0.6.1 in a git-ignored venv, models ~380 MB, owner-approved download) with per-line timings and an exact-timing SRT; Palmier's own transcription put captions 0.4–0.8 s early on Kokoro audio.
+  - Devlog #1 "One swipe" (25.6 s) edited in Palmier project "Wisp Rush Devlogs": 12 shots from Ember Hollow, Obsidian Garden (Reaper), Frozen Choir and the Home screen, punch-ins, synced captions, series tag and follow card. Footage predates the upgrade tray (it shows the old paused card picker only outside the chosen shots).
+- **Files/systems:** `tools/godot/render_gameplay_clip.gd`, `tools/video/{kokoro_tts.py,README.md}`, `.gitignore` (`/video/`, `/tools/video/.venv/`, `/tools/video/models/`), `docs/PROJECT_CONTEXT.md` §3/§6.
+- **Verified:** `tools/validate.sh` → `VALIDATE: OK`; captures ran without script errors (Obsidian Garden L1 cleared by the bot in 87 s); voiceover pronunciation checked through Palmier transcripts; composited timeline checked with `inspect_timeline`; export `video/exports/wisp_rush_devlog_01_one_swipe_draft1.mp4` probed: H.264 High 1080×1920 60 fps, AAC 48 kHz, −16.7 LUFS, −0.9 dBTP. No tests run (tooling only).
+- **Follow-ups:**
+  - Game bug found in capture logs: the slow-motion finisher and one more RUSH path call `SoundFx.play(&"pulse")`, which is a music layer, not one of the 18 SFX ids (`[Audio] unknown SFX id: pulse`; `game_world.gd:3009` finisher and `:3125`), so they play no sound.
+  - Story Rift level 1 leaves the arena empty for ~20 s between waves when enemies die fast (Obsidian Garden 3–24 s, Ember Hollow 12–27 s) — Endless got continuous spawns, story levels did not.
+  - The default Endless skin shows a baked "PLACEHOLDER - NOT FOR RELEASE" label; devlog footage uses story Rifts until real skins land.
+  - Owner review of Devlog #1 (voice, pacing, captions) before posting.
+
+## 2026-09-15 — Banked upgrades and the slow-motion card tray
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Owner: upgrades came too fast and cut the player off (the paused picker opened mid-combo). Owner decisions, not assumptions: GDD §5.5 upgrade offer rules; build choices are ASSUMPTION #30.
+  - **Banking.** Level-ups never interrupt; `RunProgression.get_banked_levels()` counts thresholds covered (capped by mutation levels left). HUD `%UpgradeReady` `PanelPlate` pill ("UPGRADE READY", amber ×N) right of the XP strip; pulse off under Reduced Motion.
+  - **Calm moments.** Wave start (not boss waves), boss beaten after the victory beat, field clear; each opens a 4 s window; the tray opens when banked, free play, no boss pending/alive/beat, no RUSH, not paused, run live, Wisp waiting, combo 0. A shown moment is spent, so dismissed cards return only at the next one.
+  - **No pause.** New `UpgradeTray` (`scenes/gameplay/upgrade_tray.*`, replaces and deletes `scenes/screens/upgrade_select.*`): bottom default panel, header, `SlimProgressBar` timeout, three `CardButton`s; slides in real time. GameWorld holds the new keyed `_hold_time_scale(&"upgrade_tray", 0.3)` (released by `_release_time_scale`; pause, run end, scene exit and `_reset_view_effects` clear holds). Tap → one `apply_choice`, next banked set slides in or tray leaves; any dash dismisses (level banked); 6 real s timeout; pause suspends and Resume restores; boss start and run end close it. No `get_tree().paused` for upgrades anymore; finishers and RUSH wait for the tray. Tuning in `RunProgressionTuning` (Upgrade offer).
+  - **Tutorial lesson 7.** Captions "Kills fill XP. Level-ups wait for a calm moment, then cards slide up." / "Reap the souls. When the cards slide up, tap one."; new `demo_upgrade_tap` fills the bar, requests the lesson calm moment and the ghost hand really taps a card (`TutorialGhostHand.play_tap`, real time; hand moved to a new HandLayer 11 above the HUD); the try requests calm moments again after a swipe/timeout and shows one dimmed hint tap; tray lifted above the caption band (`set_upgrade_tray_lift`). Catalog: `demo_card_look_seconds`, `demo_card_index`, `demo_tray_wait_limit`.
+  - Stale tools pointed at `UpgradeTray` only (`test_run_progression`, `test_gameplay_slice`, `calibrate_rp`, `render_gameplay_clip`, `render_upgrade_showcase` — now banks ×2, spawns enemies, has a usage header).
+- **Files/systems:** `scenes/gameplay/{game_world.gd,game_world.tscn,upgrade_tray.gd,upgrade_tray.tscn}`, `scripts/components/run_progression.gd`, `scripts/resources/{run_progression_tuning,tutorial_catalog,tutorial_lesson_data}.gd`, `data/progression/default_run_progression.tres`, `data/tutorial/default_tutorial.tres`, `scenes/tutorial/{tutorial_director,tutorial_ghost_hand,tutorial_screen}.gd`, `tutorial_screen.tscn`; docs mutations, core_run, rush_mode, game_feel, player_dash, tutorial, ui_design_system, GDD §5.5/§5.6/§14, PROJECT_CONTEXT.
+- **Verified:** `tools/validate.sh` → `VALIDATE: OK`. One temporary headless smoke (deleted): 52 checks, 0 failures — three quick level-ups bank mid-combo with no tray and time 1.0; no tray without a calm moment; opens at a calm wave start at ×0.30, tree unpaused; a pick applies exactly one mutation, a tap during slide-in is refused, the next set appears (×2), last pick closes and time 1.0; arena dash dismisses (banked, time 1.0), no reopen in the same moment, reopens at a field clear; timeout keeps the level; pause → 1.0 and hidden, resume → shown and ×0.3; boss start closes; never calm with a boss pending/alive or during RUSH; Reduced Motion instant at 1.0; scene exit → 1.0; tutorial lesson 7 demo opens the tray and the hand picks once, reaches the try, the try's calm moment opens the tray and a pick passes the lesson. One capture (540×960, render_upgrade_showcase): tray and ×2 pill read clearly; frame PNGs deleted. **No permanent tests and `tools/run_tests.sh` not run, by owner preference.** No MCP or device run.
+- **Follow-ups:** device pass — 0.3 slow motion vs "not a safe pause", 6 s timeout, 4 s calm window, whether constant dashers in Endless (continuous refill) see cards often enough, tray covering a Wisp resting on the bottom wall, pill fit next to the XP bar on narrow safe areas; stale tests still stale.
+
+## 2026-09-15 — App icon reverted to the previous brand mark
+- **Who:** Claude Code (Opus 5)
+- **Did:** Owner asked to put the previous logo back. `brand_icon` / `brand_icon_store` in `tools/art/redesign_v1_slices.json` point at `14_brand_mark.png` again and the two icon PNGs were regenerated. The emblem stays available, unused, at `concept_art/wisp_rush_redesign_v1/assets/17_game_emblem_icon.png`. The Home/loading wordmark was never changed.
+
+## 2026-09-15 — Aim line removed, arrow kept
+- **Who:** Claude Code (Opus 5)
+- **Did:** Owner liked the aim help but asked to remove the dash-path line and keep the arrow. `AimGuide` no longer draws the line or end diamond; the lit-enemy rings, the ×N count (now just past the arrow tip) and the aim assist are unchanged.
+- **Verified:** `tools/validate.sh` → OK.
+
+## 2026-09-15 — Aim help: target highlight and gentle aim assist
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Owner: players miss enemies and lose combos through aim precision (hits are already swept). Owner decisions, not assumptions: GDD §4 / §5.1.
+  - **Target highlight.** `WispPlayer.aim_preview_changed(origin, direction, landing, active)` fires on every aim-arrow update (resolved, assisted) and once on hide. GameWorld draws the new `AimGuide` (faint line from the arrow tip to where the dash stops, end diamond, `×N` `ValueLabel` at 2+) under the enemy layer and lights enemies with `EnemyActor.set_targeted` (code-drawn `SOUL_CYAN` ring, pulse off under Reduced Motion). Counting uses the new side-effect-free `EnemyActor.would_dash_hit` (Warden shield arc and Rift Spawn tether overrides), which `try_dash_hit` now calls too, with `WispPlayer.get_dash_corridor_radius()` (also used by `_advance_dash`); it stops at dash-blocking hazards and portal mouths, not at cycling damage hazards. Clears on release/cancel/damage/pause/upgrade/death/level victory/tutorial skip confirm (`GameWorld.cancel_player_aim`); AIM ARROW off hides it.
+  - **Aim assist.** `WispPlayer.get_assisted_direction` samples ±1°…±6° and bends only to strictly more hits (ties → closest, never to 0, cone checked on the resolved direction, legal casts only), applied in `_act_on_swipe` (launch, redirect, windup retarget, buffered) and both keyboard paths; the preview shows the assisted result. GameWorld hands the enemy query down once via `set_aim_target_counter`. `PlayerTuning.aim_assist_degrees` 6.0 / `aim_assist_step_degrees` 1.0. Settings **AIM ASSIST** toggle (`aim_assist`, default ON, sanitized like `aim_arrow`, no schema bump); AIM ARROW caption now "Show the dash path and lit targets".
+  - **Tutorial.** Slice and chain captions teach lit enemies and the ×count; demos already drive `preview_aim`, so they show the line, rings and ×3; catalog `hold_seconds` 0.2 → 0.4 so the demo holds long enough to read it. Lesson count and flow unchanged.
+- **Files/systems:** `scenes/player/wisp_player.gd`, `scenes/gameplay/{game_world.gd,aim_guide.gd}` (new), `scripts/components/enemy_actor.gd`, `scenes/enemies/{warden,rift_spawn}.gd`, `scripts/resources/player_tuning.gd`, `data/player/default_player_tuning.tres`, `scripts/autoload/save_manager.gd`, `scenes/screens/settings_screen.{gd,tscn}`, `scenes/tutorial/tutorial_screen.gd`, `data/tutorial/default_tutorial.tres`; docs player_dash, enemies, core_run, settings, tutorial, GDD §4/§5.1.
+- **Verified:** `tools/validate.sh` → `VALIDATE: OK`. One temporary headless smoke (deleted): 36 checks, 0 failures — straight dash through 3 lined-up Soul Wisps: guide count 3, label `×3`, all three lit, no bend, release clears, kills 3; assist algorithm with a scripted counter (picks +4° best, tie keeps −2° closest, never past 6°, no bend at max or at zero hits, reaches the 6° edge); real enemies: raw 2 → assisted 3 hits at a 1° bend, preview and arrow show the assisted line, assist off returns raw, 90-direction sweep worst bend 6.00°, never worse, released dash killed 3; crystal truncates line and count; cancel/pause/damage/AIM ARROW off clear; Warden front blocked/back hits; save sanitizer defaults `aim_assist` ON. One capture (540×960, 3 souls + 1 off-line, finger held): line, two cyan rings and `×2` read clearly on Obsidian Garden (third soul lay beyond the landing); frame PNGs deleted. **No permanent tests and `tools/run_tests.sh` not run, by owner preference.** No MCP or device run.
+- **Follow-ups:** device pass (ring/line readability on pale Frozen Choir ice and Ember Hollow, whether 6° feels gentle, whether lighting 2–3 health enemies that survive one hit misleads); tutorial slice/chain captions assume AIM ARROW is ON; in a debug build Settings (with the DEVELOPER card) has no scroll and now needs 2,473 px (was ~2,366; the AIM ASSIST row adds 107 px incl. spacing), so its bottom is clipped on 2,338–2,400 px-tall phones in the debug APK — release builds need ~1,780 px; a ScrollContainer (or a tighter FEEL card) is the fix, not done here; stale tests (`test_movement` arrow checks, `test_save_manager` settings keys) untouched.
+
+## 2026-09-15 — Endless spawns continuously
+- **Who:** Claude Code (Opus 5)
+- **Did:** Owner: Endless had stretches with no enemies — "there shall be constantly enemies and things happening". Cause: each wave is a 22 s timer plus a threat budget, formations only spawn on an empty field, so clearing a wave's budget early left the arena empty until the timer ran out. New `WaveDirector.set_continuous(refill_live_enemies)`: under Endless rules (Endless and the daily run) the next formation arrives while at most `EndlessTuning.refill_live_enemies` (2) enemies are alive, and a spent (or timed-out) wave starts the next one at once. Story Rift levels keep timed waves. Waves, and so bosses every 4 waves, now come sooner in real time.
+- **Files/systems:** `scenes/gameplay/{wave_director,game_world,endless_arena_rules}.gd`, `scripts/resources/endless_tuning.gd`, `data/endless/default_endless_tuning.tres`.
+- **Verified:** `tools/validate.sh` → OK; device feel pending.
+
+## 2026-09-15 — Dash slowed 10 %
+- **Who:** Claude Code (Opus 5)
+- **Did:** Owner: "slow the character dash a little bit, not a lot". `PlayerTuning.dash_speed` 4,400 → 3,960 px/s (−10 %) in `data/player/default_player_tuning.tres` and the schema default. Launch burst, momentum, mutations and RUSH still multiply on top; a cruise crossing of 1080 px now takes ~273 ms (burst start makes the real crossing shorter).
+- **Verified:** `tools/validate.sh` → OK.
+
+## 2026-09-15 — Tutorial screen replaces the in-run lesson
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Owner decision: a separate Tutorial screen teaches every base mechanic easiest-first as "show, then you try" lessons (aim & dash, slice, chain, redirect, blockers, danger, Rift Points & XP + upgrade, RUSH, boss with 3 health). `TutorialScreen` hosts a GameWorld built with the new `RunProfile.tutorial` (`MODE_TUTORIAL`: Endless floor template under the placeholder `astral_observatory` skin, no waves, boss cadence, run end, Results, banking or recording); `TutorialDirector` runs the lessons from `data/tutorial/default_tutorial.tres` (`TutorialCatalog` / `TutorialLessonData`).
+  - Ghost hand (`TutorialGhostHand`) is code-drawn placeholder art; **the demo drives the real Wisp** (aim arrow while the hand drags, `WispPlayer.perform_swipe` on release, mid-dash redirects re-aimed at release), except the boss lesson, whose demo is hand-only. The danger demo forces its hit near the spikes; hits refill Soul Fragments so the tutorial never ends in death.
+  - GameWorld: removed `TutorialStep`, `TutorialOverlay`, `tutorial_enabled`, `tutorial_completed`, `is_tutorial_complete`; added run event signals (`dash_launched`, `dash_resolved`, `enemy_defeated`, `player_damaged`, `upgrade_chosen`, `rush_started`, `boss_defeated`) and scripted-run hooks; RUSH/XP gating now `set_rush_enabled` / `set_experience_enabled`. WispPlayer: `set_input_enabled`, `preview_aim`, `perform_swipe`, `place_at_edge`. ReaperBoss `configure(..., health_override)`.
+  - Main: first launch (save `tutorial_completed` false) opens the Tutorial after Loading; finish/skip marks it completed → Home; Rift Map footer TUTORIAL (SecondaryButton; BACK 240 px) replays it and returns to the Rift Map; back/Escape open the SKIP confirm; the Tutorial never glides. Settings' REPLAY TUTORIAL and `SaveManager.reset_tutorial()` removed. Deleted `scenes/tutorial/tutorial_overlay.*` (the deletion is staged in the index by a `git rm --cached`) and `tools/godot/test_tutorial_flow.gd`; tool scripts that set `tutorial_enabled` were trimmed (the ones that relied on it to hold waves now call `debug_quiet_arena()`), and `test_game_flow` / `test_main_progression_flow` mark the tutorial completed before booting Main; `qa_capture.gd`'s `tutorial` shot renders the new screen.
+- **Files/systems:** `scenes/tutorial/*`, `scripts/resources/tutorial_{lesson_data,catalog}.gd`, `data/tutorial/`, `scenes/gameplay/{game_world.gd,game_world.tscn,run_profile.gd}`, `scenes/player/wisp_player.gd`, `scenes/bosses/reaper_boss.gd`, `scenes/main/main.gd`, `scenes/screens/{rift_map_screen,settings_screen}.*`, `scripts/autoload/save_manager.gd`, tool scripts; docs tutorial (rewritten), core_run, game_flow, rush_mode, rifts, settings, endless_mode, save_manager, enemies, GDD §5.6/§11/§14 #23/#29, PROJECT_CONTEXT §2/§4/§5.1/§5.2/§5.8, ROADMAP M12 + M6, README.
+- **Verified:** `tools/validate.sh` → `VALIDATE: OK`. One temporary headless smoke (deleted) walked all nine lessons with their real demos (demo dashes landed: slice 1 kill, chain 3, redirect leg 1, crystal route 1, danger 1 after the forced hit, XP 3, RUSH 3 and RUSH fired), emitted each goal (chain retry, danger hit → retry + refill, real upgrade pick, real RUSH, real boss core hits), then skip/back toggling, first-launch → Tutorial → skip → Home, Rift Map TUTORIAL → finish/skip → Rift Map: 0 failures; Rift Map footer min width 825 px of 1000. One `tools/screenshot.sh` capture mid-demo: hand, aim arrow, SKIP and caption panel read clearly. **No permanent tests written and `tools/run_tests.sh` not run, by owner preference.** No MCP/device run.
+- **Follow-ups:** device pass (redirect lesson timing, caption length on small phones, back into the confirm); the placeholder skin's baked name plate shows faintly behind the step row; stale tests remain stale (untouched beyond API removals).
+
+## 2026-09-15 — Light test pass after RUSH; fixed RUSH restarting forever
+- **Who:** Claude Code (Opus 5)
+- **Did:** Owner asked for a quick test-and-fix pass. Full headless suite: 22 passed, 12 failed — every failure is a stale test calling pre-rework APIs (`configure_run_profile`, `purchase_form`, the retired Forms screen); no error came from game code. Updated `test_movement` to `configure_run(RunProfile.story(...))`: it passes, so the game-time momentum window kept dash flow intact. A throwaway headless smoke of RUSH and the time-scale owner found a **real bug**: `_update_rush` zeroed `_rush_remaining` before calling `_end_rush`, which then saw RUSH inactive and skipped emptying the meter — RUSH restarted every time it ended (permanent ×1.3 speed and damage immunity). Fixed by ending while the remaining time is still positive. After the fix: lowest time-scale request wins, overlapping requests expire back to 1.0, RUSH starts on a full meter, grants immunity and speed, ends after its duration, restores both, empties the meter, and scene exit restores time scale.
+- **Files/systems:** `scenes/gameplay/game_world.gd`, `tools/godot/test_movement.gd`.
+- **Verified:** smoke 13/13 (script deleted after the run); `test_movement` PASS; `tools/validate.sh` → OK.
+- **Follow-ups:** the other 11 stale tests still need updating to the story/Endless/Shop APIs; finisher triggers, shard sweep and RUSH fill from real kills only checked on device.
+
+## 2026-09-15 — App icon from the owner's game emblem
+- **Who:** Claude Code (Opus 5)
+- **Did:** Owner supplied the cyan soul-flame emblem (Codex `wisp_rush_game_emblem_alpha.png`, genuine alpha) as the app icon. Added it as `concept_art/wisp_rush_redesign_v1/assets/17_game_emblem_icon.png` and pointed the `brand_icon` / `brand_icon_store` groups of `tools/art/redesign_v1_slices.json` at it; rebuilt with `extract_redesign.py --only brand_logo brand_icon brand_icon_store`. The Home/loading wordmark logo is unchanged (briefly swapped, reverted at the owner's request; the regenerated PNG is byte-identical to the committed one). Splash still uses `14_brand_mark`.
+- **Files/systems:** `assets/art/branding/wisp_rush_app_icon_{master,store}.png`, `tools/art/redesign_v1_slices.json`, `docs/ASSETS.md`.
+- **Verified:** `tools/validate.sh` → OK; icon previewed on `#111521`.
+
+## 2026-09-15 — RUSH mode and fast feel built (spec rush_and_feel, implementation only)
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - `RunFeelTuning` (`scripts/resources/run_feel_tuning.gd`, `data/feel/default_run_feel_tuning.tres`, GDD §14 #27 values) on `GameWorld.feel_tuning`.
+  - One owner for `Engine.time_scale`: `_request_time_scale(scale, real_seconds)` (lowest wins, real-time expiry); hit-stop and the finisher use it; pause, upgrade choice, run end and `_reset_view_effects` clear it. Chain momentum's window now counts game time (`WispPlayer._game_time`) instead of `Time.get_ticks_msec()`.
+  - Visible momentum: trails lengthen/brighten with momentum, streak glow, speed lines at max (not under Reduced Motion), dash pitch per step. Auto-collect: `SoulShardPickup.sweep_to` / `collect_now` at wave start, boss start, boss defeat, fatal hit and before the summary, one capped chime run. Slow-motion finisher on a 5-kill dash, field clear (6 s cooldown) and boss killing blow.
+  - RUSH meter (orbs via `VfxPool.play_flight`, `%RushRow` with new `RushProgressBar` theme variation, theme regenerated) and RUSH mode (×1.3 speed modifier, ×2 score at the choke point, frozen combo, `WispPlayer` damage immunity, music 1.0, aura + flicker, edge glow); summary `rush_count`. Simplest choices recorded as GDD §14 #28.
+- **Files/systems:** `scenes/gameplay/{game_world.gd,game_world.tscn}`, `scenes/player/wisp_player.gd`, `scenes/pickups/soul_shard_pickup.gd`, `scripts/components/vfx_pool.gd`, `scripts/resources/run_feel_tuning.gd`, `data/feel/`, `assets/ui/theme/{tools/build_wisp_theme.gd,wisp_theme.tres}`; docs new `systems/rush_mode.md`, player_dash, game_feel, core_run, audio, mutations, ui_design_system, PROJECT_CONTEXT §2/§5.1/§5.8, GDD §14 #27–#28, ROADMAP M11, spec status.
+- **Verified:** `tools/validate.sh` → `VALIDATE: OK`. `tools/qa_matrix.sh game` once: no overlap at the five phone sizes; the RUSH caption read faint, so it now uses `ValueLabel` and the row was widened left to line the bar up with the XP strip (not re-captured). **No tests were written, updated or run, by owner preference (device testing over headless tests)**; no MCP run. RUSH, finishers and sweeps have not been exercised at runtime — only parsed and booted.
+- **Follow-ups:** device pass for every spec Acceptance item (RUSH frequency per Rift level / Endless run, finisher feel, time scale always back to 1.0, boss panel 34 px lower with the RUSH row); `test_rush_mode.gd` / `test_run_feel.gd` when wanted; `test_movement` should still pass (momentum window unchanged at normal speed).
+
+## 2026-09-15 — RUSH mode and fast-feel spec (docs only)
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Owner chose four base mechanics to make runs feel faster — RUSH mode, visible chain momentum, auto-collected Rift Points, a slow-motion finisher — and dropped the "Essences" power-up idea.
+  - Recorded the rules in GDD §5.6 (+ starting values as §14 #27), wrote the one-phase work order [specs/rush_and_feel/](specs/rush_and_feel/README.md) and ROADMAP Milestone 11. Also added an Endless skin-set prompt earlier today (`concept_art/wisp_rush_endless_v1/SKIN_SET_PROMPT.md`, 30 skins in four rarities).
+  - Code facts the spec guards against: `_hit_stop()` writes `Engine.time_scale` directly (a finisher would race it → one time-scale owner), and chain momentum's window uses wall-clock `Time.get_ticks_msec()` (slow motion would break chains → count game time).
+- **Files/systems:** `docs/GDD.md`, `docs/ROADMAP.md`, `docs/specs/rush_and_feel/README.md`. No code changed.
+- **Verified:** docs only; not run.
+- **Follow-ups:** a coding agent implements the spec; RUSH frequency and finisher feel need a device pass.
+
+## 2026-09-15 — PLAY starts Endless; story Rifts only through RIFTS
+- **Who:** Claude Code (Opus 5)
+- **Did:** Owner, after the first device look at the rework: "PLAY puts the user only in Endless mode; they enter a Rift with the RIFTS button; remove the ENDLESS button". PLAY now builds the `endless` profile and Endless is open from the first launch; the pool always holds Obsidian Garden (roster + Reaper) and grows with each Rift's level-1 clear (`ContentUnlocks.is_in_endless_pool`). Removed the ENDLESS button, NEW badge, `endless_intro_seen` (save key, `mark_endless_intro_seen`), `is_endless_unlocked`, the `ENDLESS UNLOCKED` Results banner and the arena-skin Endless gate (Shop + SaveManager). Home's caption reads `ENDLESS` / `ENDLESS  •  BEST WAVE n`; BEST is always the Endless best. The first-run lesson now plays inside the first Endless run (the tutorial was already mode-agnostic).
+- **Files/systems:** `scenes/main/main.gd`, `scenes/screens/{home_screen.gd,home_screen.tscn,results_screen.gd,shop_screen.gd}`, `scripts/utils/content_unlocks.gd`, `scripts/autoload/save_manager.gd`; docs `GDD.md` §6/§11/§14 #13, `systems/{endless_mode,game_flow}.md`.
+- **Verified:** `tools/validate.sh` only (owner: no tests). Stale tests now also include ENDLESS visibility/badge and `get_rift_caption` (renamed `get_play_caption`) checks.
+- **Follow-ups:** device check of the first-launch tutorial inside Endless.
+- **Then (owner):** Endless is not limited by Rifts — every Rift's roster and boss can appear even with nothing cleared. `ContentUnlocks.get_endless_roster_rift_ids(catalog)` / `get_endless_boss_ids(catalog)` now return every Rift; `is_in_endless_pool` removed.
+
+## 2026-09-15 — Spec 05 (partial): final Endless skins wired with placeholder art (implementation only)
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - [Spec 05](specs/story_and_endless/05_endless_arena_art.md) without the owner's art: `data/endless/skins/{astral_observatory,drowned_sanctum,moonpetal_shrine}.tres` (final ids/names, descriptions, accents, 0 / 800 / 1,200 RP, all `placeholder = true`); catalog default `astral_observatory`; `placeholder_void_slate` data and art deleted.
+  - `make_endless_floor_template.py`: `--style <skin_id>` and `--placeholder-skins` render a distinct stand-in per skin on the identical template (`assets/art/environment/endless/<skin_id>.png`, 941×1672); template PNGs regenerated byte-identical.
+  - Save: `VALID_ARENA_SKIN_IDS` = the three skins; `RETIRED_ARENA_SKIN_IDS` maps owned/equipped `placeholder_void_slate` → `astral_observatory` while sanitizing (no schema bump). GDD §14 #26.
+- **Files/systems:** `data/endless/`, `assets/art/environment/endless/`, `tools/art/make_endless_floor_template.py`, `scripts/autoload/save_manager.gd`, `scripts/resources/arena_skin_data.gd`; docs endless_mode, save_manager, ASSETS, GENERATION_PROMPTS status, GDD §14 #26, ROADMAP M6/M10, spec README.
+- **Verified:** `tools/validate.sh` → OK only. **No tests were written, updated or run, and no MCP/QA/screenshot runs, by owner request**; existing headless tests may now be stale (`test_save_manager`, `test_menu_screens`, anything expecting `placeholder_void_slate`). No checker numbers: `check_endless_skin.py` was not built.
+- **Follow-ups:** owner generates the three images; build the checker and extraction, flip `placeholder` to `false`; QA sheets and device pass (rim at the wall, Wisp brightest, 20:9 crop); write `test_endless_catalog`.
+
+## 2026-09-15 — Spec 04: One Shop for everything Rift Points buy (implementation only)
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - [Spec 04](specs/story_and_endless/04_shop.md): `ShopScreen` rebuilt with tabs WISPS / DASHES / ARENAS (FocusCarousel cards, one main button: BUY • price, NEED n RP, BEAT A BOSS FIRST / UNLOCK ENDLESS FIRST, EQUIP, EQUIPPED) and NO ADS (ADR-0012 panel, unchanged behaviour, no RP). Tab bar = `NavBar` + toggle `NavButton`s (no theme change).
+  - `DashStyleData` / `DashStyleCatalog`, `data/dash_styles/` (SOUL 0, MOONSILVER 300, VERDANT 600, ABYSSAL 900; reserved-hue validation). GameWorld tints the launch burst and long trail from `RunProfile.dash_style`; SOUL keeps the form tint.
+  - Save v8: `owned_dash_styles` / `equipped_dash_style`; `purchase_cosmetic` / `equip_cosmetic` / `owns_cosmetic` replace `purchase_form` / `equip_form` (buying equips; arena skins refused until Endless opens).
+  - Routing: Forms screen deleted; Wisp tap and Results' WISP FORMS → Shop WISPS, SHOP → last tab this session, NO ADS → NO ADS tab, Back returns to Home or the same Results (`Main._present_results`). Home/Results signal `forms_requested` → `wisps_requested`. `qa_capture.gd` / `qa_matrix.sh` screens `forms`/`shop` → `shop_wisps`/`shop_dashes`/`shop_arenas`/`shop_no_ads`.
+- **Files/systems:** `scenes/screens/shop_screen.*` (forms_screen.* deleted), `scripts/resources/dash_style_{data,catalog}.gd`, `data/dash_styles/`, `scripts/autoload/save_manager.gd`, `scenes/main/main.gd`, `scenes/gameplay/{run_profile,game_world}.gd`, `scenes/screens/{home_screen,results_screen}.gd`, `tools/godot/qa_capture.gd`, `tools/qa_matrix.sh`; docs shop, forms, monetisation, ui_design_system, game_flow, save_manager, core_run, PROJECT_CONTEXT §5.1/§5.2/§5.8, GDD §14 #18/#25, ROADMAP M10.
+- **Verified:** `tools/validate.sh` → OK only. **No tests were written, updated or run, and no MCP/QA/screenshot/render runs, by owner request.** `test_shop` / `test_dash_styles` do not exist; existing headless tests are likely stale (`test_save_manager` schema 8 and `purchase_form`, `test_form_catalog`, `test_menu_screens`, `test_screen_setup_order`, `test_screen_transitions`, `test_main_progression_flow`, `test_progression_screens`, `test_focus_carousel`, `test_monetisation`/Shop `setup` callers, anything using `FormsScreen` or `forms_requested`).
+- **Follow-ups:** device pass (tab bar and long button text on small phones, dash preview, dash tint contrast on all Rifts and the Endless skin, Back from Shop to Results); write the Shop and dash style tests; tune prices after the device pass.
+
+## 2026-09-15 — Spec 03: Endless mode and the daily run on Endless rules (implementation only)
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - [Spec 03](specs/story_and_endless/03_endless_mode.md): `ArenaSkinData`, `EndlessTuning`, `EndlessCatalog` (`data/endless/`, template polygon from `floor_template.json`); `ArenaRules` seam with `RiftArenaRules` / `EndlessArenaRules` built by `RunProfile.create_arena_rules()` — GameWorld no longer holds a `RiftData`. Endless: template floor under the skin, no twist, seeded roster per wave and boss per cycle without immediate repeats, threat/speed per cycle, never ends on a boss; roster wave callout.
+  - Daily run = Endless rules with the daily pool and arena of the day; Daily screen names the arena. `EnemyActor.set_speed_scale` (Rift `enemy_speed_scale` was never applied before; now it is — GDD §14 #24).
+  - `ContentUnlocks.is_endless_unlocked` / `get_endless_roster_rift_ids` / `get_endless_boss_ids`; save v7 (Endless bests, runs, intro flag, owned/equipped arena skin); Home ENDLESS in the PLAY row's left slot (NEW badge, slow counter-turning portal, stilled by Reduced Motion), BEST = Rift best until Endless opens; Results `WAVE w` / PLAY AGAIN / HOME for Endless and daily, `ENDLESS UNLOCKED` banner; Statistics Endless rows.
+  - Development placeholder skin `placeholder_void_slate` generated with `make_endless_floor_template.py --placeholder` (ASSETS.md, ROADMAP M6).
+- **Files/systems:** `scenes/gameplay/{arena_rules,rift_arena_rules,endless_arena_rules,run_profile,game_world}.gd`, `scripts/resources/{arena_skin_data,endless_tuning,endless_catalog}.gd`, `data/endless/`, `assets/art/environment/endless/`, `scripts/utils/content_unlocks.gd`, `scripts/components/enemy_actor.gd`, `scripts/autoload/save_manager.gd`, `scenes/main/main.gd`, `scenes/screens/{home_screen.*,results_screen.gd,daily_screen.gd,statistics_screen.gd}`; docs endless_mode, core_run, wave_director, reaper_boss, challenges, save_manager, game_flow, settings, meta_progression, PROJECT_CONTEXT §5.1/§5.2/§5.8, ASSETS, GDD §14 #13–#15/#24, ROADMAP M6/M10.
+- **Verified:** `tools/validate.sh` → OK only. **No tests were written, updated or run, and no MCP/QA/screenshot runs, by owner request.** `test_endless_catalog` / `test_endless_mode` do not exist; existing headless tests may now be stale (`test_save_manager` schema 7, `test_menu_screens`, `test_main_progression_flow`, `test_challenge_tracker`, `test_rift_rules`/`test_rift_enemies` — `_rift` is gone and Rift enemy speed now applies — plus everything already stale after spec 02).
+- **Follow-ups:** device pass (ENDLESS visibility/badge, Endless run on the placeholder, Results `WAVE w`, Statistics fitting three more rows on small phones); tune per-cycle difficulty; write the Endless tests; spec 05 replaces the placeholder.
+
+## 2026-09-15 — Spec 02: Rifts become story levels (implementation only)
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Finished the interrupted phase ([spec 02](specs/story_and_endless/02_story_mode.md)): `RunProfile` + `GameWorld.configure_run` (Main builds every profile; `configure_run_profile` gone), `ContentUnlocks`, `RiftData.unlock_after_rift_id/level` chain with `RiftCatalog.validate()`, one level per story run ending in victory through `run_ended`, clear bonus via `EconomyTuning`, daily run unchanged in Obsidian Garden.
+  - Main routes: PLAY → selected Rift's next level (lesson = Obsidian Garden L1), Rift Map ENTER → that Rift's next level, restart replays the profile, Results NEXT LEVEL / ENTER <RIFT>; a clear that opens a Rift selects it.
+  - Results: `LEVEL n CLEARED` / `LEVEL n FAILED` banner, Rift name, `<RIFT> OPEN` banner, CLEAR BONUS plate, primary ENTER <RIFT> / NEXT LEVEL / PLAY AGAIN / RETRY. Home caption `<RIFT>  •  LEVEL n` or `MASTERED`; Rift Map cards `LEVEL n / 8` or `MASTERED`, lock text `CLEAR <RIFT> LEVEL 1`.
+  - Trials audit: `level_clears` metric; tiers 2/3/6/7 re-authored as level-clear goals, GO DEEPER wave 10+ says "in Endless" (GDD §14 #23). GDD §14 #12/#13 owner approved.
+  - Render fixtures and `calibrate_rp.gd` switched to `configure_run`.
+- **Files/systems:** `scenes/main/main.gd`, `scenes/gameplay/{game_world.gd,run_profile.gd}`, `scenes/screens/{results_screen.*,home_screen.gd,rift_map_screen.gd}`, `scripts/utils/{content_unlocks,dev_unlock}.gd`, `scripts/resources/{rift_data,rift_catalog,trial_catalog,economy_tuning}.gd`, `data/rifts/`, `data/trials/`, `data/economy/`, `tools/godot/{render_aim_arrow_showcase,render_wall_splash_showcase,calibrate_rp}.gd`; docs rifts, core_run, reaper_boss, game_flow, meta_progression, challenges, tutorial, save_manager, GDD §14, ROADMAP M6/M10, spec README.
+- **Verified:** `tools/validate.sh` → OK only. **No tests were written, updated or run, and no MCP/QA/screenshot runs, by owner request** (he tests on his phone). Existing headless tests that use `configure_run_profile`, `unlock_wave`, wave gates, `REACH WAVE`/`ENDLESS` card text, the old trial ids or multi-level runs (`test_rift_rules`, `test_rift_catalog`, `test_menu_screens`, `test_main_progression_flow`, `test_dev_unlock`, `test_movement`, `test_wall_splash`, likely `test_trials`/`test_tutorial_flow`) are now stale.
+- **Follow-ups:** device pass of the acceptance list (tutorial → L1 CLEARED → SHATTERED RIFT OPEN → ENTER; Results layout with the fourth RP plate and unlock banner on small phones); clean up/replace the stale tests; tune the clear bonus (`EconomyTuning.placeholder`).
+
+## 2026-09-15 — Spec 01: Rift Points replace Soul Shards; Soul Sanctum removed with a refund
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Currency renamed everywhere ([spec 01](specs/story_and_endless/01_rift_points.md)): save `rift_points`, run summary `rp_collected`, `add_rift_points()`, `reward_points`, `_award_rift_points()`, `grant_remove_ads()`, `DevUnlock.RP_GRANT` / `grant_rift_points`, boss `rp_reward`, placement `double_rift_points`. Player text reads `1,250 RP` / "Rift Points" through the new `RiftPoints` helper; HUD, Home, Results, Shop, Forms, Daily, Trials, Statistics, the Settings developer card and the theme gallery. Pickup files keep the `soul_shard` names (glossary).
+  - Save schema v6: `soul_shards` carries over, plus a refund of every Sanctum level bought from a frozen `SANCTUM_REFUND_COSTS` table (resolved with `SanctumNode.get_cost` from `data/sanctum/*.tres` before deletion: 8,970 RP for a maxed tree); `sanctum_levels` dropped; renamed Trials/challenge ids keep progress; a migrated save is written back at once so it never refunds twice.
+  - Soul Sanctum deleted: screen, `SanctumNode`/`SanctumCatalog`/`SanctumEffects`, data, test, Home button, Main route, SaveManager methods, dev action, `WispPlayer` bonus invulnerability, `RunProgression.grant_random_mutation`. Runs start at the no-bonus baseline; `configure_run_profile` lost `sanctum_levels`. Home's left column is Trials + Daily.
+  - Performance bonus: new `EconomyTuning` (`res://data/economy/default_economy_tuning.tres`); `rp_performance = score / score_per_rift_point`; `record_run` adds collected + performance once. Results shows RP COLLECTED, PERFORMANCE, REWARDS, TOTAL (the measured balance change) and BALANCE. Remove Ads is product `remove_ads` with no currency; the Shop's shard line is gone.
+  - Calibration: new `tools/godot/calibrate_rp.gd` bot runs. At the spec's 400 the tutorial and two early runs paid 28/20/24 RP (target 35–45), so `score_per_rift_point` is now **200** (45/33/38). Numbers in [shop.md](systems/shop.md); flagged `EconomyTuning.placeholder = true`, pending device calibration (ROADMAP M6).
+- **Files/systems:** `scripts/autoload/{save_manager,monetisation_service}.gd`, `scenes/gameplay/game_world.{gd,tscn}`, `scenes/main/main.gd`, `scenes/screens/{home,results,shop,forms,daily,trials,statistics,settings}_screen.*`, `scenes/player/wisp_player.gd`, `scenes/bosses/reaper_boss.gd`, `scripts/resources/{economy_tuning,trial_data,trial_catalog,reaper_tuning}.gd`, `scripts/utils/{rift_points,dev_unlock,challenge_tracker,trial_tracker}.gd`, `data/{economy,trials,bosses}/`, `data/sanctum/` (deleted), tests, `tools/godot/qa_capture.gd` + `tools/qa_matrix.sh` (new `trials` screen); docs: shop, save_manager, meta_progression (now "Trials and depth milestones"), monetisation, challenges, forms, game_flow, core_run, mutations, rifts, settings, reaper_boss, ui_design_system, PROJECT_CONTEXT §2/§4/§5.1/§5.2/§5.8/§8, GDD §14 #12/#16/#17/#22, ROADMAP M6/M10, spec 01 status.
+- **Verified:**
+  - `tools/validate.sh` → OK; `tools/run_tests.sh` → **34 passed, 0 failed** (`test_sanctum` deleted; new `test_rift_points_text`).
+  - New checks: v5 fixture (300 shards, keen_edge 2, soul_reserve 1, unknown id, over-cap level) → v6 `rift_points` 3,220 exactly once, persisted and stable on reload, v6 round trip, future schema untouched; Remove Ads purchase/restore leave the balance unchanged; Results total = balance change through a live Main; no-bonus run baseline.
+  - "No SHARD text" check is a test, not a grep: `test_rift_points_text.gd` scans every `text =`/title/description in `scenes/` and `data/`, prose string literals in all scripts, the challenge pool and the live text of nine screens (only the Shard Wraith is allowed).
+  - `tools/qa_matrix.sh home results shop daily trials forms stats game settings` — sheets reviewed at all five sizes, no clipping; Statistics then switched to grouped `1,320 RP`.
+  - Godot MCP run: boot → Loading → Home, no SCRIPT ERROR (only the existing typed-conversion warnings).
+- **Follow-ups:**
+  - Device pass: confirm or retune `score_per_rift_point`, then set `EconomyTuning.placeholder = false`. Bots never dodge, so runs that beat the first boss (84–191 RP) are unmeasured with people.
+  - ASSUMPTION GDD §14 #22: HOARDER and POINT SEEKER count `rp_collected`, not `rift_points` as the spec table said, to keep their difficulty.
+  - The trial rename `t08_soul_shards_m` → `t08_rp_collected_m` was made with `git mv`, so that rename is staged in the index; nothing was committed.
+  - The MCP run used the real desktop save, so an existing v5 save there is now v6 (what any first launch of this build does).
+  - ~~The Shop's Remove Ads card still uses the shard-cluster art as its emblem~~ — fixed in the review below.
+- **Review:** exactly-once RP was only checked against Main's own balance change (true by construction), and no test read the summary GameWorld really emits. `test_main_progression_flow` now computes the rewards independently from the pre-run save (`ChallengeTracker`/`TrialTracker.apply_run`, depth rule) and requires balance change = displayed total = 3 + 1 + rewards, plus `%RewardsValue`; a deliberate double challenge payment in Main now fails it (24 vs 14). `Main._show_results` warns when the total ≠ collected + performance + rewards. `test_player_health_flow` plants score/pickups before the killing hit and checks the live summary's `rp_collected`/`rp_performance` against the wired `EconomyTuning` (fails if the `.tscn` export or a key is lost — both tried), that every Trial/challenge metric is a summary key, and `get_performance_points` edge cases (0, negative, 199/200/399/400/401, divisor 0). `test_rift_points_text` now requires grouped-number + `RP` unit on Home/Shop/HUD and an RP value on Results, Daily rewards, Trials footers, Forms balance and the Statistics row (a bare Trials footer fails it); Daily and Trials format through `RiftPoints`, the HUD count groups digits. Shop offer emblem is Home's NO ADS glyph instead of currency art (`qa_matrix.sh shop` reviewed, 5 sizes). Dead `sanctum_levels` assertion removed from `test_dev_unlock`; migration tables are typed dictionaries; spec 01 acceptance boxes ticked.
+
+## 2026-09-15 — Direction recorded: Rift story levels, Endless mode, Rift Points (docs, specs, art template)
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Recorded the owner's 2026-09-14 direction: Rifts as story mode, a cosmetic Endless mode, earned-only Rift Points, Soul Sanctum removed, Remove Ads the only real-money item ([ADR-0013](decisions/0013-rift-story-levels-endless-mode-and-rift-points.md)).
+  - Measured why arena looks can't reuse Rift walls: the five floors span 85–100 % of the largest, and their shared shape keeps 63–82 % of each. Chose one chamfered-rectangle floor for every Endless skin ([ADR-0014](decisions/0014-endless-arenas-share-one-floor-template.md)).
+  - Filled design gaps as ASSUMPTIONs in GDD §14 #12–#21: one level per Rift run, level-1 clears unlock, Endless pools, the daily run on Endless rules, RP pacing, Sanctum refund.
+  - Wrote the five-phase work order [specs/story_and_endless/](specs/story_and_endless/README.md), the planned system docs `endless_mode.md` and `shop.md`, planned-change notes in seven system docs, and status lines on ADR-0007/0008/0009/0012.
+  - New art pack `concept_art/wisp_rush_endless_v1/`: `floor_template.json`, the rendered mask, layout and guide PNGs from `tools/art/make_endless_floor_template.py` (which also makes a dev-only placeholder arena), and three skin prompts that require the layout image.
+- **Files/systems:** `docs/GDD.md`, `docs/decisions/0013-*`, `0014-*`, `docs/specs/story_and_endless/*`, `docs/systems/{endless_mode,shop,rifts,meta_progression,forms,monetisation,challenges,save_manager,game_flow}.md`, `docs/PROJECT_CONTEXT.md`, `docs/ROADMAP.md` (M10), `concept_art/wisp_rush_endless_v1/*`, `tools/art/make_endless_floor_template.py`. No game code changed.
+- **Verified:**
+  - Template tool run: vertices match `ARENA_FLOOR_UV` + 80 px chamfers, UV area 0.3524; mask spot checks pass (centre in, chamfer corner out); guide, layout and a scratchpad placeholder reviewed.
+  - `tools/validate.sh` → OK (72 scripts); project map up to date. Tests not run: no game code changed.
+- **Follow-ups:**
+  - Owner: confirm GDD §14 #12 (one level per Rift run) before spec 02.
+  - Owner: generate the three Endless skins from `concept_art/wisp_rush_endless_v1/GENERATION_PROMPTS.md`; settle the art licence (§14 #1, #21) before selling cosmetics.
+  - The working tree still holds the uncommitted Home, Shop and transition work from 2026-09-13/14; commit it before spec 01 starts.
+
+## 2026-09-14 — Game-style simplified logo refinement
+- **Who:** Codex (GPT-5)
+- **Did:** Restyled the simplified Wisp Rush identity to match the approved game language: painterly
+  cyan-white soul flame, crisp dark contour, chipped obsidian crescent and restrained magenta rift
+  fracture; kept the exact title deterministic and omitted the old full plaque.
+- **Files/systems:** External brand-art handoff at `~/Desktop/wisp_rush_logo_game_style.png`; no
+  runtime art or code changed.
+- **Verified:** Final transparent PNG inspected at 2048×768 and composited over the approved Home
+  background to confirm contrast, hierarchy and style fit; `tools/validate.sh` → OK;
+  `tools/run_tests.sh` → 34 passed, 0 failed.
+- **Follow-ups:** Owner/Claude can compare this hybrid against the flatter simple version before
+  replacing the runtime logo through the generated-art pipeline.
+
+## 2026-09-14 — Animated screen transitions; Home kept alive to remove the navigation delay
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Owner: "no animations between screens" and "a delay when I press to a new screen". Measured on
+    the Galaxy S24 with a new debug-only `[Main] switch` log. Tap → first frame:
+    - Home, on every Back: 370–420 ms, because Home was rebuilt each time.
+    - Trials ~130 ms, Sanctum 76–122 ms, Daily ~50 ms.
+    The old 0.22 s veil fade was invisible: it had finished before the slow first frame was drawn.
+  - Main now builds Home once and keeps it (detached, not freed, while other screens show).
+  - Every screen change is a crossfade: the new screen fades and glides in over the dimming old one,
+    starting only after its first draw. A run never glides, hides its HUD until it lands, and is
+    frozen while it leaves. Rules in [game_flow.md](systems/game_flow.md).
+  - The Android export had started failing ("A valid Java SDK path is required"): Godot's editor
+    settings had `export/android/java_sdk_path` empty. It is set back to the only JDK installed
+    (OpenJDK 25), which earlier builds used.
+- **Files/systems:** `scenes/main/main.gd`, `scenes/screens/home_screen.gd` (re-show focus),
+  `tools/godot/test_screen_transitions.gd`, `docs/systems/game_flow.md`.
+- **Verified:**
+  - `tools/validate.sh` → OK; `tools/run_tests.sh` → **34 passed, 0 failed**.
+  - The new test drives a live Main with transitions on. Undoing the transition fails 3 checks;
+    rebuilding Home every visit fails it too.
+  - APK built.
+- **Follow-ups:**
+  - The owner's device test of the feel is pending.
+  - Trials and Sanctum still build in ~60–120 ms per open; keep them alive like Home if that still
+    feels slow.
+  - Remove the `[Main] switch` log once navigation feels right.
+
+## 2026-09-13 — Home without a nav bar: tap-the-Wisp Forms, button columns, animated PLAY, Shop
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Owner asked to remove the bottom nav. Top bar and logo stay; tapping the Wisp opens Forms;
+    Trials and Daily sit left, Shop and Remove Ads right; a bigger animated PLAY with an animated
+    Rifts button sits ~50 px+ under the Wisp; no animation may be in the way of the UI.
+  - Owner decisions (asked, not ASSUMPTIONs): Sanctum joins the left column; Shop and Remove Ads
+    are visible now and open a Shop with purchases disabled until billing exists
+    ([ADR-0012](decisions/0012-store-surface-before-billing.md)); the Shop sells only ADR-0009's
+    Remove Ads bundle plus Restore Purchases.
+  - `_layout_hero()` keeps the preview over the painted Wisp, shrinks orbit and glow to the room
+    between the columns (`OrbitMotes.get_extent_ratio()`), and places the caption + PLAY row 64 px
+    under the lowest animated pixel. PLAY breathes, pulses a glow and sweeps a light band; the
+    Rifts portal turns; Reduced Motion stills it all.
+  - First render showed captions under the tiles unreadable (DAILY vanished over a brazier) and PLAY
+    parked at the screen bottom; captions moved inside the stone tiles and PLAY under the Wisp.
+  - `ShopScreen` + Main routing; `MonetisationService.is_store_available()`.
+- **Files/systems:** `scenes/screens/{home_screen.gd,home_screen.tscn,orbit_motes.gd,shop_screen.gd,shop_screen.tscn}`,
+  `scenes/main/main.gd`, `scripts/autoload/monetisation_service.gd`,
+  `tools/godot/{test_menu_screens,test_screen_setup_order,test_main_progression_flow,test_monetisation,qa_capture}.gd`,
+  `tools/qa_matrix.sh`; docs `GDD.md` §11/§13/§14, ADR-0012 (+ ADR-0009 status),
+  `systems/{game_flow,monetisation,ui_design_system,forms}.md`, `PROJECT_CONTEXT.md` §5.2, `ROADMAP.md`.
+- **Verified:**
+  - `tools/validate.sh` → OK; `tools/run_tests.sh` → **33 passed, 0 failed**.
+  - `test_menu_screens` mounts Home in 1080×2337 and 1080×1920 frames (the headless root is square,
+    which never squeezed the orbit). Mutation-checked: removing the orbit clamp, the glow clamp,
+    or the bottom clearance each fails it.
+  - QA sheets for home and shop at 5 phone sizes reviewed.
+  - The Codex logo-handoff entry below records `test_menu_screens` failing on `%RiftsNav`: it ran
+    mid-change, after Home lost the nav but before the test was updated. It passes now.
+  - A `gdscript-reviewer` pass confirmed two visual bugs by running them, both now fixed and covered:
+    - Press tweens were never killed: a focus loss mid-dip left the Wisp shrunk, and a quick
+      re-press sprang back while still held.
+    - On 23:9-class screens (1080×2800) the preview's animated width overlapped the right column,
+      because the edge was capped by `free_width`, not by the breathing, swaying width.
+    New tests cover a tall 1080×2800 frame and press recovery; undoing either fix fails them.
+    Also fixed: Shop BUY/RESTORE no longer double-click (`SoundFx.BOUND_META`), the success font
+    size no longer sticks, refreshes no longer steal focus, the pending feedback is typed, and a
+    test no longer risks a null cast.
+  - Debug APK built and installed on the Galaxy S24 (SM-S921B). It boots in 1.4 s; the owner opened
+    Forms from the Wisp and played a run with no Godot errors, warnings or crashes in logcat.
+- **Follow-ups:**
+  - On tall phones the lower third under PLAY is empty painted stairs (the owner asked for PLAY
+    under the Wisp); `HERO_BOTTOM_CLEARANCE` moves it.
+  - Forms has no visible hint that the Wisp is tappable; consider one after a device pass.
+  - Shop icon reuses the unused `02_soul_shard_cluster` prop and NO ADS is a code-rendered struck
+    "AD"; dedicated icons would need the art pipeline.
+  - The phone still has the pre-review build; reinstall to get the review fixes.
+  - The Mac had about 0.5 GB of free disk during the build; exports may start failing.
+
+## 2026-09-13 — Simplified Wisp Rush logo handoff
+- **Who:** Codex (GPT-5)
+- **Did:** Reworked the ornate existing identity into a compact soul-flame emblem and exact
+  one-line `WISP RUSH` wordmark; exported the transparent final at
+  `~/Desktop/wisp_rush_logo_simple.png` for owner review and Claude handoff.
+- **Files/systems:** External brand-art handoff only; no runtime art or code changed.
+- **Verified:** Final PNG inspected at 2048×768 RGBA with genuine alpha and deterministic lettering;
+  `tools/validate.sh` → OK. Full tests: 32 passed, 1 unrelated current failure
+  (`test_menu_screens` still looks for the removed `%RiftsNav` node); the focused rerun reproduces it.
+- **Follow-ups:** If approved, Claude can intake the logo through the generated-art pipeline and
+  assess a square app-icon crop separately.
+
 ## 2026-09-13 — Living Home, bottom nav, card-carousel Forms and Rift Map
 - **Who:** Claude Code (Opus 5)
 - **Did:**

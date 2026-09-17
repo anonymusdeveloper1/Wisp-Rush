@@ -1,6 +1,6 @@
 # System: Audio
 
-> **Status:** ✅ done · **Last updated:** 2026-09-11 · **GDD section:** §10
+> **Status:** ✅ done · **Last updated:** 2026-09-15 · **GDD section:** §5.6, §10
 >
 > Why sounds are synthesized instead of loaded from files: [ADR-0004](../decisions/0004-runtime-synthesized-audio.md).
 
@@ -100,6 +100,11 @@ Settings dictionary keys come from `SaveManager` (`music_volume`, `sfx_volume`).
 - Loop seams are seamless: loop oscillators complete whole cycles in 8 s, LFOs have integer cycle
   counts and pulse-layer notes end inside the loop.
 - The node uses `PROCESS_MODE_ALWAYS`, so UI sounds and music ducking work while the tree is paused.
+- **Run intensity** (GameWorld `_update_music_state()`): combo / 12 + (wave − 1) × 0.07, clamped 0..1;
+  **forced to 1.0 while RUSH runs** ([rush_mode.md](rush_mode.md)), then recomputed when it ends.
+- Feel cues reuse existing ids, no new sounds: `dash` pitch + 0.04 per chain momentum step; a shard
+  sweep plays one rising `shard_pickup` run (≤ 6, +0.05 pitch each, 0.05 s apart); the slow-motion
+  finisher plays `pulse` at pitch 0.6; RUSH starts with `level_up` and ends with a soft `pulse` (−6 dB).
 - Replacing a sound with a real file later: install it under the same id (streams are stored as
   `AudioStream`), callers don't change.
 
@@ -121,5 +126,6 @@ Settings dictionary keys come from `SaveManager` (`music_volume`, `sfx_volume`).
 
 | Date | Change |
 |---|---|
+| 2026-09-15 | RUSH forces music intensity 1.0; momentum dash pitch, sweep chime run, finisher/RUSH cues (spec rush_and_feel) |
 | 2026-09-12 | Guard frames + loop_end fix after an Android audio-thread crash |
 | 2026-09-11 | Created: runtime-synthesized SFX + 3-layer adaptive music, bus layout, test |

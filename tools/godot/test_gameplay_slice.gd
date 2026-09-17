@@ -10,7 +10,6 @@ func _init() -> void:
 
 func _run_check() -> void:
 	var game := GAME_WORLD_SCENE.instantiate() as GameWorld
-	game.tutorial_enabled = false
 	game.run_seed = 1
 	root.add_child(game)
 	await create_timer(0.9).timeout
@@ -28,9 +27,9 @@ func _run_check() -> void:
 	if player.state != WispPlayer.State.WAITING_AT_EDGE:
 		failures += 1
 		push_error("gameplay_slice: player did not settle at an edge")
-	var upgrade_select := game.get_node("HUD/UpgradeSelect") as UpgradeSelect
-	if upgrade_select.visible:
-		upgrade_select.choose_index(0)
+	var upgrade_tray := game.get_node("HUD/UpgradeTray") as UpgradeTray
+	if upgrade_tray.is_open():
+		upgrade_tray.choose_index(0)
 		await process_frame
 	var pause_button := game.get_node("HUD/SafeHud/PauseButton") as Button
 	var resume_button := game.get_node(

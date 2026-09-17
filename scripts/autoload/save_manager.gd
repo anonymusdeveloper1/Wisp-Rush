@@ -7,7 +7,7 @@ signal progression_changed(snapshot: Dictionary)
 ## Emitted after settings change and save, with the full validated settings.
 signal settings_changed(settings: Dictionary)
 
-const SCHEMA_VERSION: int = 5
+const SCHEMA_VERSION: int = 8
 const DEFAULT_SAVE_PATH: String = "user://wisp_rush_save.json"
 const DEFAULT_TEMP_PATH: String = "user://wisp_rush_save.tmp.json"
 const DEFAULT_BACKUP_PATH: String = "user://wisp_rush_save.backup.json"
@@ -15,6 +15,16 @@ const DEFAULT_BACKUP_PATH: String = "user://wisp_rush_save.backup.json"
 const TEST_SAVE_PATH: String = "user://test_runs/wisp_rush_save.json"
 const TEST_TEMP_PATH: String = "user://test_runs/wisp_rush_save.tmp.json"
 const TEST_BACKUP_PATH: String = "user://test_runs/wisp_rush_save.backup.json"
+## Cosmetic kinds the Shop sells, for `purchase_cosmetic`, `equip_cosmetic`, `owns_cosmetic`.
+const KIND_FORM: StringName = &"form"
+const KIND_DASH_STYLE: StringName = &"dash_style"
+const KIND_ARENA_SKIN: StringName = &"arena_skin"
+## Dash style ids come from this catalog. It holds no textures, so the autoload can load it at boot;
+## the form and arena catalogs pull in art, so their ids stay listed below and must match the data.
+const DASH_STYLE_CATALOG: DashStyleCatalog = preload(
+	"res://data/dash_styles/default_dash_style_catalog.tres"
+)
+## Form identifiers accepted from disk; must match data/forms/default_catalog.tres.
 const VALID_FORM_IDS: Array[String] = [
 	"void",
 	"ash",
@@ -32,12 +42,70 @@ const VALID_RIFT_IDS: Array[String] = [
 	"reapers_court",
 ]
 const DEFAULT_RIFT_ID: String = "obsidian_garden"
-## Waves that pay a one-time depth reward, and the shards each pays.
+## Endless arena skin ids accepted from disk, in catalog order; must match
+## data/endless/default_endless_catalog.tres (test_endless_catalog checks it).
+const VALID_ARENA_SKIN_IDS: Array[String] = [
+	"astral_observatory",
+	"drowned_sanctum",
+	"moonpetal_shrine",
+	"monastery_yard",
+	"dusk_sandstone",
+	"slate_cliffs",
+	"cold_forge",
+	"bamboo_deck",
+	"basalt_shore",
+	"windswept_hill",
+	"rain_rooftops",
+	"rootwood_clearing",
+	"clockwork_bastion",
+	"sky_harbor",
+	"quartz_grotto",
+	"fungal_hollow",
+	"library_of_echoes",
+	"old_colosseum",
+	"storm_lighthouse",
+	"lantern_market",
+	"titans_palm",
+	"clocktower_crown",
+	"storm_anvil",
+	"world_tree_crown",
+	"galleon_wreck",
+	"eclipse_sanctum",
+	"starforged_citadel",
+	"abyssal_gate",
+	"aurora_throne",
+	"dragon_skull_throne",
+]
+## Skin every save owns and unknown ids fall back to (`EndlessCatalog.default_skin_id`).
+const DEFAULT_ARENA_SKIN_ID: String = "astral_observatory"
+## Retired arena skin ids and the skin that replaces them when a save is sanitized.
+const RETIRED_ARENA_SKIN_IDS: Dictionary[String, String] = {
+	"placeholder_void_slate": DEFAULT_ARENA_SKIN_ID,
+}
 ## Consent values accepted from disk; anything else falls back to "unknown".
 const VALID_CONSENT_STATES: Array[String] = ["unknown", "granted", "denied"]
+## Waves that pay a one-time depth reward, and the Rift Points each pays. Keyed on the lifetime
+## `highest_wave`; story runs never pass wave 4, so only Endless and daily runs reach them.
 const DEPTH_MILESTONES: Array[int] = [5, 10, 15, 20, 25]
 const DEPTH_REWARDS: Array[int] = [25, 50, 100, 175, 300]
 const MAX_COUNTER: int = 2000000000
+## Rift Points cost of each purchased Soul Sanctum level, per node id: index 0 is level 1.
+## Frozen at removal, ADR-0013. Resolved from res://data/sanctum/*.tres (SanctumNode.get_cost)
+## before that data was deleted; the v6 migration refunds these and nothing else.
+const SANCTUM_REFUND_COSTS: Dictionary[String, Array] = {
+	"keen_edge": [200, 320, 440],
+	"swift_soul": [200, 320, 440],
+	"shard_finder": [150, 240, 330, 420],
+	"rift_scholar": [160, 260, 360],
+	"soul_magnet": [140, 230, 320],
+	"long_chain": [180, 310, 440],
+	"warded_soul": [220, 370, 520],
+	"first_gift": [900],
+	"soul_reserve": [1500],
+}
+## Ids renamed with the currency in v6 (ADR-0013): Trials progress and daily challenge ids.
+const V6_TRIAL_RENAMES: Dictionary[String, String] = {"t08_soul_shards_m": "t08_rp_collected_m"}
+const V6_CHALLENGE_RENAMES: Dictionary[String, String] = {"shard_seeker": "rp_seeker"}
 
 var _data: Dictionary = {}
 var _save_path: String = DEFAULT_SAVE_PATH
@@ -95,14 +163,18 @@ func reload() -> Dictionary:
 	_play_time_since_save = 0.0
 	var main_result: Dictionary = _read_save_file(_save_path)
 	if bool(main_result.get(&"valid", false)):
-		_data = _validate_and_migrate(main_result[&"data"] as Dictionary)
+		var main_data: Dictionary = main_result[&"data"] as Dictionary
+		_data = _validate_and_migrate(main_data)
 		_main_was_valid = true
+		_persist_if_migrated(main_data)
 		return get_snapshot()
 	var backup_result: Dictionary = _read_save_file(_backup_path)
 	if bool(backup_result.get(&"valid", false)):
-		_data = _validate_and_migrate(backup_result[&"data"] as Dictionary)
+		var backup_data: Dictionary = backup_result[&"data"] as Dictionary
+		_data = _validate_and_migrate(backup_data)
 		_main_was_valid = false
 		push_warning("SaveManager recovered progression from the last valid backup")
+		_persist_if_migrated(backup_data)
 		return get_snapshot()
 	_data = _make_defaults()
 	_main_was_valid = false
@@ -177,13 +249,8 @@ func update_settings(changes: Dictionary) -> bool:
 	return saved
 
 
-## Clears first-run lesson completion so the next run replays the tutorial.
-func reset_tutorial() -> bool:
-	_data[&"tutorial_completed"] = false
-	return _save_and_emit()
-
-
-## Persists completion of the integrated first-run lesson.
+## Persists that the Tutorial screen was finished or skipped, so launches open Home from now on
+## (replays from the Rift Map never clear it).
 func mark_tutorial_completed() -> bool:
 	if bool(_data.get(&"tutorial_completed", false)):
 		return true
@@ -218,9 +285,23 @@ func record_run(summary: Dictionary) -> bool:
 		int(_data.get(&"bosses_defeated", 0)),
 		maxi(0, int(summary.get(&"bosses", 0))),
 	)
-	_data[&"soul_shards"] = _clamped_add(
-		int(_data.get(&"soul_shards", 0)),
-		maxi(0, int(summary.get(&"soul_shards", 0))),
+	# Endless owns its bests and run count; a daily run keeps only `daily_state` (via challenges).
+	if str(summary.get(&"mode", "")) == "endless":
+		_data[&"endless_best_score"] = maxi(
+			int(_data.get(&"endless_best_score", 0)), maxi(0, int(summary.get(&"score", 0)))
+		)
+		_data[&"endless_best_wave"] = maxi(
+			int(_data.get(&"endless_best_wave", 0)), maxi(1, int(summary.get(&"wave", 1)))
+		)
+		_data[&"endless_runs"] = _clamped_add(int(_data.get(&"endless_runs", 0)), 1)
+	# The run's own Rift Points: pickups and boss rewards, the score-based performance bonus and the
+	# level-clear bonus. Challenge, Trial and depth rewards arrive through their own calls, so nothing
+	# is paid twice.
+	_data[&"rift_points"] = _clamped_add(
+		int(_data.get(&"rift_points", 0)),
+		clampi(int(summary.get(&"rp_collected", 0)), 0, MAX_COUNTER)
+			+ clampi(int(summary.get(&"rp_performance", 0)), 0, MAX_COUNTER)
+			+ clampi(int(summary.get(&"rp_clear_bonus", 0)), 0, MAX_COUNTER),
 	)
 	var rift_id: String = str(summary.get(&"rift", DEFAULT_RIFT_ID))
 	if rift_id in VALID_RIFT_IDS:
@@ -230,59 +311,142 @@ func record_run(summary: Dictionary) -> bool:
 			maxi(0, int(summary.get(&"score", 0))),
 		)
 		_data[&"rift_bests"] = bests
-		var cleared: int = maxi(0, int(summary.get(&"rift_levels_cleared", 0)))
-		if cleared > 0:
+		# Only a story victory banks its level; `highest_wave` above stays a lifetime statistic.
+		var cleared: int = clampi(int(summary.get(&"rift_levels_cleared", 0)), 0, MAX_COUNTER)
+		if bool(summary.get(&"level_cleared", false)) and cleared > 0:
 			var levels: Dictionary = _data.get(&"rift_levels", {}) as Dictionary
 			levels[rift_id] = maxi(int(levels.get(rift_id, 0)), cleared)
 			_data[&"rift_levels"] = levels
 	return _save_and_emit()
 
 
-## Adds a non-negative challenge or daily reward to the persistent balance.
-func add_soul_shards(amount: int) -> bool:
+## Adds a non-negative Rift Points reward to the persistent balance.
+func add_rift_points(amount: int) -> bool:
 	if amount <= 0:
 		return false
-	_data[&"soul_shards"] = _clamped_add(int(_data.get(&"soul_shards", 0)), amount)
+	_data[&"rift_points"] = _clamped_add(int(_data.get(&"rift_points", 0)), amount)
 	return _save_and_emit()
 
 
-## Stores validated challenge/daily progress and adds its already-deduplicated reward.
+## Current Rift Points balance.
+func get_rift_points() -> int:
+	return maxi(0, int(_data.get(&"rift_points", 0)))
+
+
+## Stores validated challenge/daily progress and adds its already-deduplicated `reward_points`.
 func apply_challenge_result(result: Dictionary) -> bool:
 	_data[&"challenge_state"] = _sanitize_challenge_state(
 		result.get(&"challenge_state", {}) as Dictionary
 	)
 	_data[&"daily_state"] = _sanitize_daily_state(result.get(&"daily_state", {}) as Dictionary)
-	var reward: int = clampi(int(result.get(&"reward_shards", 0)), 0, 1000)
-	_data[&"soul_shards"] = _clamped_add(int(_data.get(&"soul_shards", 0)), reward)
+	var reward: int = clampi(int(result.get(&"reward_points", 0)), 0, 1000)
+	_data[&"rift_points"] = _clamped_add(int(_data.get(&"rift_points", 0)), reward)
 	return _save_and_emit()
 
 
-## Purchases one valid form when balance and boss requirement permit it.
-func purchase_form(form_id: StringName, price: int, requires_boss: bool = false) -> bool:
-	var id_text: String = String(form_id)
-	var owned: Array = _data.get(&"owned_forms", ["void"]) as Array
+## Buys one cosmetic of `kind` with Rift Points and equips it (buying equips).
+##
+## Refused without spending when the kind or id is unknown, the item is already owned, the price is
+## negative or above the balance, or `requirement_met` is false (the caller reads the gate from the
+## item's data, e.g. Eclipse's boss victory). Arena skins are also refused until Endless opens.
+func purchase_cosmetic(
+	kind: StringName, item_id: StringName, price: int, requirement_met: bool
+) -> bool:
+	if not _is_cosmetic_kind(kind):
+		return false
+	var id_text: String = String(item_id)
+	var owned: Array = _owned_cosmetics(kind)
 	if (
-		id_text not in VALID_FORM_IDS
+		id_text not in _valid_cosmetic_ids(kind)
 		or id_text in owned
 		or price < 0
-		or int(_data.get(&"soul_shards", 0)) < price
-		or (requires_boss and int(_data.get(&"bosses_defeated", 0)) <= 0)
+		or get_rift_points() < price
+		or not requirement_met
 	):
 		return false
 	owned.append(id_text)
-	_data[&"owned_forms"] = owned
-	_data[&"soul_shards"] = int(_data.get(&"soul_shards", 0)) - price
+	_data[_owned_key(kind)] = owned
+	_data[_equipped_key(kind)] = id_text
+	_data[&"rift_points"] = get_rift_points() - price
 	return _save_and_emit()
 
 
-## Equips one owned valid form.
-func equip_form(form_id: StringName) -> bool:
-	var id_text: String = String(form_id)
-	var owned: Array = _data.get(&"owned_forms", ["void"]) as Array
-	if id_text not in VALID_FORM_IDS or id_text not in owned:
+## Equips one owned cosmetic of `kind`.
+func equip_cosmetic(kind: StringName, item_id: StringName) -> bool:
+	if not owns_cosmetic(kind, item_id):
 		return false
-	_data[&"equipped_form"] = id_text
+	_data[_equipped_key(kind)] = String(item_id)
 	return _save_and_emit()
+
+
+## Whether the save owns the cosmetic `item_id` of `kind`.
+func owns_cosmetic(kind: StringName, item_id: StringName) -> bool:
+	if not _is_cosmetic_kind(kind):
+		return false
+	var id_text: String = String(item_id)
+	return id_text in _valid_cosmetic_ids(kind) and id_text in _owned_cosmetics(kind)
+
+
+func _is_cosmetic_kind(kind: StringName) -> bool:
+	return kind in [KIND_FORM, KIND_DASH_STYLE, KIND_ARENA_SKIN]
+
+
+func _owned_cosmetics(kind: StringName) -> Array:
+	var owned: Variant = _data.get(_owned_key(kind), [])
+	return owned as Array if owned is Array else []
+
+
+func _owned_key(kind: StringName) -> StringName:
+	match kind:
+		KIND_FORM:
+			return &"owned_forms"
+		KIND_DASH_STYLE:
+			return &"owned_dash_styles"
+	return &"owned_arena_skins"
+
+
+func _equipped_key(kind: StringName) -> StringName:
+	match kind:
+		KIND_FORM:
+			return &"equipped_form"
+		KIND_DASH_STYLE:
+			return &"equipped_dash_style"
+	return &"equipped_arena_skin"
+
+
+func _valid_cosmetic_ids(kind: StringName) -> Array[String]:
+	match kind:
+		KIND_FORM:
+			return VALID_FORM_IDS
+		KIND_DASH_STYLE:
+			return DASH_STYLE_CATALOG.get_style_ids()
+	return VALID_ARENA_SKIN_IDS
+
+
+## Owned ids of one kind read from disk: known ids only, no duplicates, the default always first;
+## the equipped id falls back to the default when it is not owned.
+func _sanitize_cosmetic(
+	raw: Dictionary, result: Dictionary, kind: StringName, default_id: String
+) -> void:
+	var valid: Array[String] = _valid_cosmetic_ids(kind)
+	var owned: Array[String] = [default_id]
+	if raw.get(_owned_key(kind)) is Array:
+		for value: Variant in raw[_owned_key(kind)] as Array:
+			var id_text: String = _current_cosmetic_id(kind, str(value))
+			if id_text in valid and id_text not in owned:
+				owned.append(id_text)
+	result[_owned_key(kind)] = owned
+	var equipped: String = _current_cosmetic_id(
+		kind, str(raw.get(_equipped_key(kind), default_id))
+	)
+	result[_equipped_key(kind)] = equipped if equipped in owned else default_id
+
+
+## Maps a retired cosmetic id to its replacement; other ids pass through unchanged.
+func _current_cosmetic_id(kind: StringName, id_text: String) -> String:
+	if kind == KIND_ARENA_SKIN:
+		return str(RETIRED_ARENA_SKIN_IDS.get(id_text, id_text))
+	return id_text
 
 
 ## Selects one known Rift as the arena the next run will use.
@@ -302,27 +466,11 @@ func debug_tools_allowed() -> bool:
 	return OS.is_debug_build()
 
 
-## Raises the lifetime best wave, which is what gates Rift unlocks.
-func debug_set_highest_wave(wave: int) -> bool:
-	if not debug_tools_allowed():
-		return false
-	_data[&"highest_wave"] = clampi(wave, 1, MAX_COUNTER)
-	return _save_and_emit()
-
-
-## Grants every cosmetic form without spending shards.
+## Grants every cosmetic form without spending Rift Points.
 func debug_unlock_all_forms() -> bool:
 	if not debug_tools_allowed():
 		return false
 	_data[&"owned_forms"] = VALID_FORM_IDS.duplicate()
-	return _save_and_emit()
-
-
-## Writes Soul Sanctum levels directly. The caller supplies catalog-derived maximums.
-func debug_set_sanctum_levels(levels: Dictionary) -> bool:
-	if not debug_tools_allowed():
-		return false
-	_data[&"sanctum_levels"] = _sanitize_id_counts(levels)
 	return _save_and_emit()
 
 
@@ -366,14 +514,20 @@ func _make_defaults() -> Dictionary:
 		&"total_multi_kills": 0,
 		&"bosses_defeated": 0,
 		&"play_time_seconds": 0.0,
-		&"soul_shards": 0,
+		&"rift_points": 0,
 		&"owned_forms": ["void"],
 		&"equipped_form": "void",
 		&"tutorial_completed": false,
 		&"selected_rift": DEFAULT_RIFT_ID,
 		&"rift_bests": {},
 		&"rift_levels": {},
-		&"sanctum_levels": {},
+		&"endless_best_score": 0,
+		&"endless_best_wave": 0,
+		&"endless_runs": 0,
+		&"owned_arena_skins": [DEFAULT_ARENA_SKIN_ID],
+		&"equipped_arena_skin": DEFAULT_ARENA_SKIN_ID,
+		&"owned_dash_styles": [String(DashStyleCatalog.DEFAULT_STYLE_ID)],
+		&"equipped_dash_style": String(DashStyleCatalog.DEFAULT_STYLE_ID),
 		&"trial_rank": 1,
 		&"trial_progress": {},
 		&"claimed_depth": 0,
@@ -388,17 +542,23 @@ func _make_defaults() -> Dictionary:
 			&"reduced_motion": false,
 			&"screen_shake": 1.0,
 			&"aim_arrow": true,
+			&"aim_assist": true,
 		},
 	}
 
 
 func _validate_and_migrate(source: Dictionary) -> Dictionary:
 	var raw: Dictionary = source.duplicate(true)
-	var version: int = int(raw.get(&"schema_version", 0))
+	var version: int = _stored_version(raw)
 	if version <= 0:
 		raw = _migrate_v0(raw)
+		version = 5
 	elif version > SCHEMA_VERSION:
 		push_warning("SaveManager found a future schema; preserving recognized safe fields")
+	if version < 6:
+		raw = _migrate_to_v6(raw)
+	# v6 -> v7 adds the Endless fields and v7 -> v8 the dash style fields; their defaults below are
+	# the migration.
 	var result: Dictionary = _make_defaults()
 	for key: StringName in [
 		&"best_score",
@@ -407,7 +567,10 @@ func _validate_and_migrate(source: Dictionary) -> Dictionary:
 		&"total_kills",
 		&"total_multi_kills",
 		&"bosses_defeated",
-		&"soul_shards",
+		&"rift_points",
+		&"endless_best_score",
+		&"endless_best_wave",
+		&"endless_runs",
 	]:
 		result[key] = _safe_int(raw.get(key, result[key]), int(result[key]), 0, MAX_COUNTER)
 	result[&"highest_wave"] = _safe_int(raw.get(&"highest_wave", 1), 1, 1, MAX_COUNTER)
@@ -420,15 +583,9 @@ func _validate_and_migrate(source: Dictionary) -> Dictionary:
 	result[&"tutorial_completed"] = (
 		raw[&"tutorial_completed"] if raw.get(&"tutorial_completed") is bool else false
 	)
-	var owned: Array[String] = ["void"]
-	if raw.get(&"owned_forms") is Array:
-		for value: Variant in raw[&"owned_forms"] as Array:
-			var id_text: String = str(value)
-			if id_text in VALID_FORM_IDS and id_text not in owned:
-				owned.append(id_text)
-	result[&"owned_forms"] = owned
-	var equipped: String = str(raw.get(&"equipped_form", "void"))
-	result[&"equipped_form"] = equipped if equipped in owned else "void"
+	_sanitize_cosmetic(raw, result, KIND_FORM, "void")
+	_sanitize_cosmetic(raw, result, KIND_DASH_STYLE, String(DashStyleCatalog.DEFAULT_STYLE_ID))
+	_sanitize_cosmetic(raw, result, KIND_ARENA_SKIN, DEFAULT_ARENA_SKIN_ID)
 	var selected_rift: String = str(raw.get(&"selected_rift", DEFAULT_RIFT_ID))
 	result[&"selected_rift"] = (
 		selected_rift if selected_rift in VALID_RIFT_IDS else DEFAULT_RIFT_ID
@@ -437,10 +594,6 @@ func _validate_and_migrate(source: Dictionary) -> Dictionary:
 		result[&"rift_bests"] = _sanitize_rift_bests(raw[&"rift_bests"] as Dictionary)
 	if raw.get(&"rift_levels") is Dictionary:
 		result[&"rift_levels"] = _sanitize_rift_bests(raw[&"rift_levels"] as Dictionary)
-	if raw.get(&"sanctum_levels") is Dictionary:
-		result[&"sanctum_levels"] = _sanitize_id_counts(
-			raw[&"sanctum_levels"] as Dictionary
-		)
 	result[&"trial_rank"] = _safe_int(raw.get(&"trial_rank", 1), 1, 1, 999)
 	result[&"claimed_depth"] = _safe_int(raw.get(&"claimed_depth", 0), 0, 0, 9999)
 	result[&"ads_removed"] = raw[&"ads_removed"] if raw.get(&"ads_removed") is bool else false
@@ -461,9 +614,23 @@ func _validate_and_migrate(source: Dictionary) -> Dictionary:
 	return result
 
 
+## Stored schema version, or 0 when it is missing or not a number.
+func _stored_version(raw: Dictionary) -> int:
+	var value: Variant = raw.get(&"schema_version", 0)
+	return int(value) if value is int or value is float else 0
+
+
+## Writes a save loaded from an older schema back out at once, so a migration runs exactly once
+## on disk. Future schemas are left untouched.
+func _persist_if_migrated(source: Dictionary) -> void:
+	if _stored_version(source) < SCHEMA_VERSION:
+		save_now()
+
+
+## v0 (pre-versioned) names → the v5 shape; `_migrate_to_v6` runs next.
 func _migrate_v0(old_data: Dictionary) -> Dictionary:
 	var migrated: Dictionary = old_data.duplicate(true)
-	migrated[&"schema_version"] = SCHEMA_VERSION
+	migrated[&"schema_version"] = 5
 	if old_data.has(&"high_score"):
 		migrated[&"best_score"] = old_data[&"high_score"]
 	if old_data.has(&"currency"):
@@ -477,20 +644,70 @@ func _migrate_v0(old_data: Dictionary) -> Dictionary:
 	return migrated
 
 
+## v1–v5 → v6 (ADR-0013): Soul Shards become Rift Points and the Soul Sanctum is refunded.
+##
+## `soul_shards` carries over as `rift_points`, plus the frozen cost of every Sanctum level the save
+## bought (unknown ids refund nothing, levels above a node's cap refund only up to the cap), and
+## `sanctum_levels` is dropped. Ids renamed with the currency keep their banked progress. Every
+## other key passes through to validation unchanged.
+func _migrate_to_v6(old_data: Dictionary) -> Dictionary:
+	var migrated: Dictionary = old_data.duplicate(true)
+	var balance: int = _safe_int(old_data.get(&"soul_shards", 0), 0, 0, MAX_COUNTER)
+	var refund: int = 0
+	if old_data.get(&"sanctum_levels") is Dictionary:
+		refund = _sanctum_refund(old_data[&"sanctum_levels"] as Dictionary)
+	migrated[&"rift_points"] = _clamped_add(balance, refund)
+	migrated.erase(&"soul_shards")
+	migrated.erase(&"sanctum_levels")
+	if migrated.get(&"trial_progress") is Dictionary:
+		var progress: Dictionary = migrated[&"trial_progress"] as Dictionary
+		for old_id: String in V6_TRIAL_RENAMES:
+			if progress.has(old_id):
+				progress[V6_TRIAL_RENAMES[old_id]] = progress[old_id]
+				progress.erase(old_id)
+	if migrated.get(&"challenge_state") is Dictionary:
+		for date_state: Variant in (migrated[&"challenge_state"] as Dictionary).values():
+			if date_state is Dictionary:
+				_rename_challenge_ids(date_state as Dictionary)
+	migrated[&"schema_version"] = 6
+	return migrated
+
+
+## Rift Points refunded for Sanctum levels, from the frozen SANCTUM_REFUND_COSTS table.
+func _sanctum_refund(levels: Dictionary) -> int:
+	var refund: int = 0
+	for key: Variant in levels.keys():
+		var costs: Array = SANCTUM_REFUND_COSTS.get(str(key), []) as Array
+		var level: int = _safe_int(levels[key], 0, 0, costs.size())
+		for index: int in level:
+			refund += int(costs[index])
+	return refund
+
+
+func _rename_challenge_ids(date_state: Dictionary) -> void:
+	if date_state.get(&"progress") is Dictionary:
+		var progress: Dictionary = date_state[&"progress"] as Dictionary
+		for old_id: String in V6_CHALLENGE_RENAMES:
+			if progress.has(old_id):
+				progress[V6_CHALLENGE_RENAMES[old_id]] = progress[old_id]
+				progress.erase(old_id)
+	if date_state.get(&"claimed") is Array:
+		var claimed: Array = date_state[&"claimed"] as Array
+		for index: int in claimed.size():
+			var id_text: String = str(claimed[index])
+			if V6_CHALLENGE_RENAMES.has(id_text):
+				claimed[index] = V6_CHALLENGE_RENAMES[id_text]
+
+
 ## Whether the player owns the Remove Ads purchase.
 func has_removed_ads() -> bool:
 	return bool(_data.get(&"ads_removed", false))
 
 
-## Marks ads removed and optionally grants the bundled shards.
-##
-## Restores pass zero, so re-restoring a purchase can never mint shards repeatedly.
-func grant_remove_ads(bonus_shards: int) -> bool:
+## Marks ads removed. Remove Ads carries no currency (ADR-0013), so purchase and restore both
+## change nothing else.
+func grant_remove_ads() -> bool:
 	_data[&"ads_removed"] = true
-	if bonus_shards > 0:
-		_data[&"soul_shards"] = _clamped_add(
-			int(_data.get(&"soul_shards", 0)), bonus_shards
-		)
 	return _save_and_emit()
 
 
@@ -525,11 +742,11 @@ func claim_depth_milestones() -> Dictionary:
 		waves.append(wave)
 		claimed = wave
 	if reward <= 0:
-		return {&"reward_shards": 0, &"waves": waves}
+		return {&"reward_points": 0, &"waves": waves}
 	_data[&"claimed_depth"] = claimed
-	_data[&"soul_shards"] = _clamped_add(int(_data.get(&"soul_shards", 0)), reward)
+	_data[&"rift_points"] = _clamped_add(int(_data.get(&"rift_points", 0)), reward)
 	_save_and_emit()
-	return {&"reward_shards": reward, &"waves": waves}
+	return {&"reward_points": reward, &"waves": waves}
 
 
 ## Deepest milestone wave already paid out.
@@ -547,54 +764,21 @@ func get_trial_progress() -> Dictionary:
 	return (_data.get(&"trial_progress", {}) as Dictionary).duplicate()
 
 
-## Stores a TrialTracker result and pays out its shard reward.
+## Stores a TrialTracker result and pays out its `reward_points`.
 func apply_trial_result(result: Dictionary) -> bool:
 	_data[&"trial_rank"] = _safe_int(result.get(&"rank", 1), 1, 1, 999)
 	if result.get(&"progress") is Dictionary:
 		_data[&"trial_progress"] = _sanitize_id_counts(
 			result[&"progress"] as Dictionary
 		)
-	var reward: int = clampi(int(result.get(&"reward_shards", 0)), 0, 10000)
+	var reward: int = clampi(int(result.get(&"reward_points", 0)), 0, 10000)
 	if reward > 0:
-		_data[&"soul_shards"] = _clamped_add(int(_data.get(&"soul_shards", 0)), reward)
+		_data[&"rift_points"] = _clamped_add(int(_data.get(&"rift_points", 0)), reward)
 	return _save_and_emit()
 
 
-## Purchased levels of every Soul Sanctum node, keyed by node id.
-func get_sanctum_levels() -> Dictionary:
-	return (_data.get(&"sanctum_levels", {}) as Dictionary).duplicate()
-
-
-## Purchased level of one Sanctum node.
-func get_sanctum_level(node_id: StringName) -> int:
-	var levels: Dictionary = _data.get(&"sanctum_levels", {}) as Dictionary
-	return maxi(0, int(levels.get(String(node_id), 0)))
-
-
-## Spends shards on one more level of a Sanctum node. The caller validates cost and prerequisites.
-func purchase_sanctum_level(node_id: StringName, price: int, max_level: int) -> bool:
-	var id_text: String = String(node_id)
-	if id_text.is_empty() or price < 0:
-		return false
-	var levels: Dictionary = _data.get(&"sanctum_levels", {}) as Dictionary
-	var current: int = maxi(0, int(levels.get(id_text, 0)))
-	if current >= max_level or int(_data.get(&"soul_shards", 0)) < price:
-		return false
-	levels[id_text] = current + 1
-	_data[&"sanctum_levels"] = levels
-	_data[&"soul_shards"] = int(_data.get(&"soul_shards", 0)) - price
-	return _save_and_emit()
-
-
-## Refunds every shard spent in the Sanctum and clears it. Used by the owner-facing reset only.
-func refund_sanctum(total_spent: int) -> bool:
-	_data[&"sanctum_levels"] = {}
-	_data[&"soul_shards"] = _clamped_add(int(_data.get(&"soul_shards", 0)), maxi(0, total_spent))
-	return _save_and_emit()
-
-
-## Keeps id-to-count maps sane: non-negative, bounded. Shared by Sanctum levels and Trial progress;
-## unknown ids are ignored by their catalog when applied.
+## Keeps id-to-count maps sane: non-negative, bounded. Used for Trial progress; unknown ids are
+## ignored by the catalog when applied.
 func _sanitize_id_counts(source: Dictionary) -> Dictionary:
 	var result: Dictionary = {}
 	for key: Variant in source.keys():
@@ -679,6 +863,10 @@ func _sanitize_settings(source: Dictionary) -> Dictionary:
 		# every existing save held the old line's default of OFF, which would hide the arrow.
 		&"aim_arrow": (
 			source[&"aim_arrow"] if source.get(&"aim_arrow") is bool else defaults[&"aim_arrow"]
+		),
+		# Gentle aim assist (owner decision 2026-09-15); saves without the key read the ON default.
+		&"aim_assist": (
+			source[&"aim_assist"] if source.get(&"aim_assist") is bool else defaults[&"aim_assist"]
 		),
 		&"haptics": source[&"haptics"] if source.get(&"haptics") is bool else defaults[&"haptics"],
 		&"reduced_motion": (

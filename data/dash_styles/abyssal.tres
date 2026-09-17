@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="DashStyleData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/dash_style_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+style_id = &"abyssal"
+display_name = "ABYSSAL"
+description = "The deep blue of the Rift's floor, flaring cyan at launch."
+price = 900
+trail_tint = Color(0.294, 0.435, 0.878, 1)
+burst_tint = Color(0.384, 0.91, 0.949, 1)
+uses_form_tint = false

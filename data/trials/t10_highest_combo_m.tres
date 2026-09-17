@@ -9,6 +9,6 @@ title = "ETERNAL CHAIN"
 description = "Hold a chain of 20 in a single run."
 metric = &"highest_combo"
 target = 20
-reward_shards = 105
+reward_points = 105
 tier = 10
 cumulative = false

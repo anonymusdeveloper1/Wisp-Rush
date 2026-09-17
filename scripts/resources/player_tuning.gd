@@ -5,7 +5,7 @@ extends Resource
 ## Horizontal design coordinate baseline used to scale movement and distances.
 @export_range(1.0, 4096.0, 1.0) var design_width: float = 1080.0
 ## Wisp dash speed in pixels per second at [member design_width].
-@export_range(100.0, 10000.0, 10.0) var dash_speed: float = 4400.0
+@export_range(100.0, 10000.0, 10.0) var dash_speed: float = 3960.0
 ## Intentional release-to-motion anticipation in seconds.
 @export_range(0.0, 0.25, 0.001) var windup_duration: float = 0.065
 ## Wall-impact animation lock in seconds.
@@ -50,3 +50,10 @@ extends Resource
 ## Maximum momentum, as a fraction of dash speed. Resets on a slow restart or on taking damage.
 @export_range(0.0, 1.0, 0.01) var momentum_max: float = 0.25
 
+
+@export_group("Aim assist")
+## Largest bend, in degrees, the release-time aim assist may apply to a swipe (owner decision
+## 2026-09-15). The dash bends only when a nearby direction slices more enemies than the raw one.
+@export_range(0.0, 20.0, 0.5) var aim_assist_degrees: float = 6.0
+## Angular step, in degrees, between the directions the aim assist samples on each side.
+@export_range(0.25, 5.0, 0.25) var aim_assist_step_degrees: float = 1.0

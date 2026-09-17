@@ -1,102 +1,86 @@
-# System: Meta progression (Soul Sanctum, Trials, depth milestones)
+# System: Trials and depth milestones
 
-> **Status:** ✅ done · **Last updated:** 2026-09-12 · **GDD section:** §6 ·
-> **ADR:** [0009](../decisions/0009-monetisation-model.md) (currency context)
+> **Status:** ✅ done · **Last updated:** 2026-09-15 · **GDD section:** §6 ·
+> **ADR:** [0013](../decisions/0013-rift-story-levels-endless-mode-and-rift-points.md) (Rift Points, no
+> permanent power)
+>
+> **Story audit (spec 02, 2026-09-15):** story runs last at most `waves_per_level` (4) waves. Tier 1–3
+> trials are all completable in story runs; deeper wave goals (tier 4+) say "in Endless" and complete
+> in Endless and daily runs (spec 03). Depth milestones stay keyed on `highest_wave`; story runs never
+> pass wave 4, so **only Endless and daily runs reach them** (no migration).
 
 ## Purpose
 
-Give a finished run something to carry forward. Before this, nothing persisted but cosmetics, and
-Soul Shards became inert once the six forms were owned (4,750 shards total).
+Give a finished run something to carry forward besides cosmetics: a persistent ladder of goals and
+one-time depth rewards, both paid in Rift Points. There is no permanent power — the Soul Sanctum was
+removed on 2026-09-15 (ADR-0013) and its spend refunded by the save v6 migration
+([save_manager.md](save_manager.md)).
 
 ## Files
 
 | Path | Role |
 |---|---|
-| `res://scripts/resources/sanctum_node.gd` / `sanctum_catalog.gd` | Permanent upgrade tree and its power budget |
-| `res://data/sanctum/*.tres` | Nine nodes and the catalog |
-| `res://scripts/utils/sanctum_effects.gd` | Resolves purchased levels into flat effect values |
-| `res://scenes/screens/sanctum_screen.*` | Browse, select and buy nodes |
 | `res://scripts/resources/trial_data.gd` / `trial_catalog.gd` | One goal, and the 12-tier ladder |
 | `res://data/trials/*.tres` | 36 authored trials plus the catalog |
 | `res://scripts/utils/trial_tracker.gd` | Applies a run to the ladder; pure and static |
 | `res://scenes/screens/trials_screen.*` | The three active goals and the rank |
-| `res://scripts/autoload/save_manager.gd` | Schema v5: sanctum, trials, depth, monetisation |
+| `res://scripts/autoload/save_manager.gd` | Rank, progress, claimed depth (schema v6) |
 
 ## Public API
 
 | Member | Kind | Description |
 |---|---|---|
-| `SanctumNode.get_value(level)` / `get_cost(level)` | method | Effect total and next-level price (−1 when maxed). |
-| `SanctumCatalog.is_unlocked(node, levels)` | method | Whether the prerequisite chain is satisfied. |
-| `SanctumCatalog.get_maxed_combat_power()` | method | Fractional power a maxed tree grants. |
-| `SanctumEffects.get_multiplier(key)` / `get_count(key)` | method | Resolved bonus for one effect key. |
-| `TrialTracker.apply_run(rank, progress, summary)` | static | New rank, progress, rewards, completions. |
+| `TrialTracker.apply_run(rank, progress, summary)` | static | New `rank`, `progress`, `reward_points`, `completed`, `ranked_up`. |
 | `TrialTracker.get_active_trials(rank)` | static | The three goals currently shown. |
-| `SaveManagerService.purchase_sanctum_level(id, price, max)` | method | Spends shards on one level. |
-| `SaveManagerService.apply_trial_result(result)` | method | Banks a ladder result and pays it. |
-| `SaveManagerService.claim_depth_milestones()` | method | Pays unclaimed depth rewards. |
+| `TrialData.reward_points` | export | Rift Points paid once when the trial completes. |
+| `TrialCatalog.VALID_METRICS` | const | Run-summary keys a trial may read (`rp_collected`, not the old `soul_shards`). |
+| `SaveManagerService.apply_trial_result(result)` | method | Banks a ladder result and pays its `reward_points`. |
+| `SaveManagerService.claim_depth_milestones()` | method | Pays unclaimed depth rewards; returns `reward_points` and `waves`. |
 
 ## Data & tuning
 
-**Soul Sanctum** — nine nodes, 8,970 shards to max, **0.167 combat power** against a hard 0.20
-budget. `SanctumCatalog.validate()` fails the build above it, so GDD §6's "must not trivialise a
-fresh start" is enforced rather than remembered.
-
-| Node | Max | Per level | Combat? | Prerequisite |
-|---|---|---|---|---|
-| Keen Edge | 3 | +2 % blade width | yes | — |
-| Swift Soul | 3 | +1.5 % dash speed | yes | — |
-| Shard Finder | 4 | +8 % shard find | no | — |
-| Rift Scholar | 3 | +5 % XP | no | — |
-| Soul Magnet | 3 | +12 % attraction | no | — |
-| Long Chain | 3 | +0.15 s combo grace | no | Rift Scholar |
-| Warded Soul | 3 | +0.08 s invulnerability | yes | Keen Edge |
-| First Gift | 1 | Start with 1 mutation | no | Swift Soul |
-| Soul Reserve | 1 | +1 Soul Fragment | yes | Warded Soul |
-
 **Trials** — 36 goals in 12 tiers of three. Each tier mixes a survival, a cumulative combat and a
-mastery goal; rewards rise 15 → 125 shards per trial. Clearing all three ranks the player up.
+mastery goal; rewards rise 15 → 125 RP per trial. Clearing all three ranks the player up.
+Story goals read the cumulative `level_clears` summary key (1 per story victory): FIRST STEPS
+(`t02_level_clears`, 2), PATHFINDER (`t03_level_clears`, 4), RIFT WALKER (`t06_level_clears_m`, 8)
+and ASCENDANT (`t07_level_clears_m`, 12) replace GO DEEPER wave 6/8 and the multi-level
+`rift_levels_cleared` / `run_level` goals (GDD §14 #23). GO DEEPER wave 10+ reads "Reach wave N in
+Endless."
+HOARDER (`t08_rp_collected_m`) reads `rp_collected`: Rift Points picked up or won from bosses in one
+run, not the performance bonus, so its target of 40 keeps its old difficulty (GDD §14 #22).
 
-**Depth milestones** — one-time shard rewards at waves 5/10/15/20/25 (25/50/100/175/300), keyed on
-the lifetime best wave.
+**Depth milestones** — one-time Rift Points rewards at waves 5/10/15/20/25 (25/50/100/175/300),
+keyed on the lifetime best wave.
 
 ## Dependencies
 
-[core_run.md](core_run.md) (run-start hook and reward choke points), [rifts.md](rifts.md),
-[save_manager.md](save_manager.md), [game_flow.md](game_flow.md), [forms.md](forms.md) (shares the
-shard economy), [ui_design_system.md](ui_design_system.md).
+[core_run.md](core_run.md) (run summary), [rifts.md](rifts.md), [save_manager.md](save_manager.md),
+[game_flow.md](game_flow.md) (Results shows the rewards), [shop.md](shop.md) (Rift Points),
+[ui_design_system.md](ui_design_system.md).
 
 ## Rules & behaviour
 
-- **Sanctum effects are applied once, at run start**, and never mutate a shared tuning Resource.
-  Invulnerability is a runtime field on `WispPlayer` for exactly this reason: writing it into
-  `PlayerTuning` would leak the bonus into later runs and into the `.tres` on disk.
-- Sanctum bonuses **compose** with run mutations rather than overwriting them — blade width and
-  dash speed multiply the mutation result.
-- Shard and XP bonuses are applied at the single choke point each award passes through
-  (`_award_soul_shards`, `_grant_experience`), so no reward path can miss them.
-- A saved level above a node's cap, or an unknown node id, is clamped or ignored on load.
 - Trials never expire and never pay twice. Single-run trials keep the **best** run seen; cumulative
   trials add up. Both cap at their target.
 - The ladder stops at the last authored tier instead of running off the end.
 - Depth milestones are keyed on the lifetime best wave, so a shallow replay never re-pays.
+- Trial and depth rewards reach the balance through their own SaveManager calls, after `record_run`;
+  Results adds them up as REWARDS ([game_flow.md](game_flow.md)).
+- The save v6 migration moves banked progress of the renamed HOARDER id to `t08_rp_collected_m`.
 
 ## How to test
 
-- `tools/run_tests.sh sanctum` — tree shape, power budget, cost curve, gating, purchase, clamping.
 - `tools/run_tests.sh trials` — ladder shape, escalation, progress rules, rank-up, depth milestones.
-- Visual: `WISP_ISOLATED_SAVE=1 tools/screenshot.sh res://scenes/screens/sanctum_screen.tscn 24 1080x1920`.
+- Visual: `tools/qa_matrix.sh trials`.
 
 ## Known issues / TODO
 
-- Sanctum nodes are gated by prerequisites and shards only. They are **not** gated on Rift level
-  progress, so "abilities unlock as you clear levels" is currently a shard economy, not a level one.
-- `get_maxed_combat_power()` weights flat effects (fragments, seconds) with a single
-  `FRAGMENT_POWER` constant. It is a guardrail, not a simulation; real balance needs device play.
 - The Trials screen is read-only; there is no claim animation or completion celebration.
 
 ## Change history
 
 | Date | Change |
 |---|---|
+| 2026-09-15 | Story audit: level-clear trials replace deep-wave and multi-level goals in tiers 2, 3, 6, 7 (spec 02) |
+| 2026-09-15 | Soul Sanctum removed (spec 01, ADR-0013); rewards renamed to Rift Points (`reward_points`); HOARDER reads `rp_collected`; system renamed "Trials and depth milestones" |
 | 2026-09-12 | Created: Soul Sanctum, Trials ladder, depth milestones, save schema v3→v5 |

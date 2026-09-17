@@ -1,20 +1,32 @@
 class_name ResultsScreen
 extends Control
-## End-of-run summary with fast restart as the primary action and Home/Forms as secondary.
+## End-of-run summary: a story victory or defeat, or a finished Endless or daily run.
 ##
-## Redesign v1 layout (handoff board panel 6, STYLE_GUIDE "Results"): RUN COMPLETE banner, the
-## score first as a hero AmberValueLabel over a code-drawn amber sunburst, personal best second on
-## a plate (or NEW BEST), run metrics third as three icon tiles, rewards fourth, then Restart as
-## the single PrimaryButton above the quieter Home/Forms row. All styling comes from the project
-## theme's type variations; the few colours drawn in code come from Palette. The `Panel` node keeps
-## its path (tests read Content/ScoreValue and Content/RestartButton) but draws no frame itself.
+## Redesign v1 layout (handoff board panel 6, STYLE_GUIDE "Results"): the outcome banner
+## (`LEVEL n CLEARED`, `LEVEL n FAILED`, or `WAVE w` on Endless rules) with the Rift or arena name
+## and any unlock banner (`SHATTERED RIFT OPEN`, or the depth reward), the score
+## as a hero AmberValueLabel over a code-drawn amber sunburst, personal best on a plate (or NEW
+## BEST), run metrics as three icon tiles, the Rift Points breakdown (collected, performance, clear
+## bonus on a victory, rewards, then the run total and the new balance), then one PrimaryButton
+## above the quieter Home/Forms row. The primary button is ENTER <NEW RIFT> when this clear opened
+## one, NEXT LEVEL, PLAY AGAIN on a mastered Rift or on Endless rules, or RETRY after a defeat;
+## Endless and daily Results hide WISP FORMS. All styling comes from the project theme's type
+## variations; the few colours drawn in code come from Palette. The `Panel` node keeps its path but
+## draws no frame itself.
 
-## Emitted when the player requests a fresh run.
+## Emitted when the player replays the same run profile (RETRY, PLAY AGAIN, a daily rerun).
 signal restart_requested
+## Emitted when the player plays the next level of the Rift just cleared.
+signal next_level_requested
+## Emitted when the player enters the Rift this clear opened.
+signal enter_rift_requested(rift_id: StringName)
 ## Emitted when the player leaves the run flow for Home.
 signal home_requested
-## Emitted when the player opens the cosmetic collection from the summary.
-signal forms_requested
+## Emitted when the player taps WISP FORMS; Main opens the Shop's WISPS tab.
+signal wisps_requested
+
+## What the primary button does for the current summary.
+enum PrimaryAction { RESTART, NEXT_LEVEL, ENTER_RIFT }
 
 ## Text shown on the best plate when this run set (or tied) the personal best.
 const NEW_BEST_TEXT: String = "NEW BEST"
@@ -41,11 +53,18 @@ const GLOW_CORE_SEGMENTS: int = 32
 const MAX_LAYOUT_HEIGHT: float = 2000.0
 
 var _summary: Dictionary = {}
+var _primary_action: PrimaryAction = PrimaryAction.RESTART
+var _enter_rift_id: StringName = &""
 var _animation_time: float = 0.0
 var _reduced_motion: bool = false
 
 @onready var _safe_margin: MarginContainer = $SafeMargin
 @onready var _panel: PanelContainer = $SafeMargin/Center/Panel
+@onready var _title: Label = %Title
+@onready var _rift_name: Label = %RiftName
+@onready var _unlock_banner: Label = %UnlockBanner
+@onready var _clear_reward: Control = %ClearReward
+@onready var _clear_value: Label = %ClearValue
 @onready var _score_glow: Control = %ScoreGlow
 @onready var _score_value: Label = %ScoreValue
 @onready var _best_caption: Label = %BestCaption
@@ -54,18 +73,20 @@ var _reduced_motion: bool = false
 @onready var _combo_value: Label = %ComboValue
 @onready var _wave_value: Label = %WaveValue
 @onready var _run_stats: Label = %RunStats
-@onready var _run_shards_value: Label = %RunShardsValue
-@onready var _goal_shards_value: Label = %GoalShardsValue
-@onready var _total_shards_value: Label = %TotalShardsValue
+@onready var _collected_value: Label = %CollectedValue
+@onready var _performance_value: Label = %PerformanceValue
+@onready var _rewards_value: Label = %RewardsValue
+@onready var _total_value: Label = %TotalValue
+@onready var _balance_value: Label = %BalanceValue
 @onready var _restart_button: Button = %RestartButton
 @onready var _home_button: Button = %HomeButton
 @onready var _forms_button: Button = %FormsButton
 
 
 func _ready() -> void:
-	_restart_button.pressed.connect(func() -> void: restart_requested.emit())
+	_restart_button.pressed.connect(_on_primary_pressed)
 	_home_button.pressed.connect(func() -> void: home_requested.emit())
-	_forms_button.pressed.connect(func() -> void: forms_requested.emit())
+	_forms_button.pressed.connect(func() -> void: wisps_requested.emit())
 	_score_glow.draw.connect(_draw_score_glow)
 	_reduced_motion = _read_reduced_motion()
 	set_process(not _reduced_motion)
@@ -83,15 +104,32 @@ func _process(delta: float) -> void:
 
 
 ## Supplies the completed run values displayed by this screen.
+##
+## Rift Points keys: `rp_collected`, `rp_performance` and `rp_clear_bonus` from GameWorld,
+## `rp_rewards` (challenges, Trials and depth milestones), `rp_earned` (the balance change) and
+## `rift_points_total` from Main. Story keys: `mode`, `level`, `victory` from GameWorld; `rift_name`,
+## `mastered`, `opened_rift_ids`, and `opened_rift_names` from Main. Endless and
+## daily keys: `arena_name` and `depth_reward` from Main.
 func setup(run_summary: Dictionary) -> void:
 	_summary = run_summary.duplicate(true)
 	if is_node_ready():
 		_apply_summary()
 
 
+## Text of the primary button (ENTER <RIFT>, NEXT LEVEL, PLAY AGAIN or RETRY).
+func get_primary_text() -> String:
+	return _restart_button.text
+
+
+## Rift Points the screen shows as this run's total: the balance change Main measured.
+func get_displayed_rp_total() -> int:
+	return _displayed_rp_total()
+
+
 func _apply_summary() -> void:
 	if not is_node_ready():
 		return
+	_apply_outcome()
 	var score: int = int(_summary.get(&"score", 0))
 	var best: int = int(_summary.get(&"best_score", 0))
 	var is_new_best: bool = score > 0 and score >= best
@@ -109,9 +147,90 @@ func _apply_summary() -> void:
 		bosses,
 		"" if bosses == 1 else "ES",
 	]
-	_run_shards_value.text = "+%d" % int(_summary.get(&"soul_shards", 0))
-	_goal_shards_value.text = "+%d" % int(_summary.get(&"challenge_reward", 0))
-	_total_shards_value.text = str(int(_summary.get(&"total_soul_shards", 0)))
+	_collected_value.text = RiftPoints.format_gain(int(_summary.get(&"rp_collected", 0)))
+	_performance_value.text = RiftPoints.format_gain(int(_summary.get(&"rp_performance", 0)))
+	_rewards_value.text = RiftPoints.format_gain(int(_summary.get(&"rp_rewards", 0)))
+	var clear_bonus: int = int(_summary.get(&"rp_clear_bonus", 0))
+	_clear_reward.visible = bool(_summary.get(&"victory", false))
+	_clear_value.text = RiftPoints.format_gain(clear_bonus)
+	_total_value.text = RiftPoints.format_gain(_displayed_rp_total())
+	_balance_value.text = RiftPoints.format(int(_summary.get(&"rift_points_total", 0)))
+
+
+func _displayed_rp_total() -> int:
+	if _summary.has(&"rp_earned"):
+		return maxi(0, int(_summary[&"rp_earned"]))
+	return (
+		maxi(0, int(_summary.get(&"rp_collected", 0)))
+		+ maxi(0, int(_summary.get(&"rp_performance", 0)))
+		+ maxi(0, int(_summary.get(&"rp_clear_bonus", 0)))
+		+ maxi(0, int(_summary.get(&"rp_rewards", 0)))
+	)
+
+
+## Banner, Rift or arena name, unlock banner and the primary button for a victory, defeat, Endless
+## or daily run.
+func _apply_outcome() -> void:
+	var is_story: bool = str(_summary.get(&"mode", "story")) == String(RunProfile.MODE_STORY)
+	_forms_button.visible = is_story
+	var level: int = maxi(1, int(_summary.get(&"level", 1)))
+	var victory: bool = is_story and bool(_summary.get(&"victory", false))
+	var opened_ids: Array = _summary.get(&"opened_rift_ids", []) as Array
+	var opened_names: PackedStringArray = (
+		_summary.get(&"opened_rift_names", PackedStringArray()) as PackedStringArray
+	)
+	var banners := PackedStringArray()
+	_enter_rift_id = &""
+	if not is_story:
+		var arena_name: String = str(_summary.get(&"arena_name", "")).to_upper()
+		var is_endless: bool = str(_summary.get(&"mode", "")) == String(RunProfile.MODE_ENDLESS)
+		var mode_name: String = "ENDLESS" if is_endless else "DAILY RUN"
+		_rift_name.text = (
+			mode_name if arena_name.is_empty() else "%s  •  %s" % [mode_name, arena_name]
+		)
+		_rift_name.visible = true
+		var depth_reward: int = int(_summary.get(&"depth_reward", 0))
+		if depth_reward > 0:
+			banners.append("DEPTH REWARD  %s" % RiftPoints.format_gain(depth_reward))
+		_unlock_banner.text = "\n".join(banners)
+		_unlock_banner.visible = not banners.is_empty()
+		_title.text = "WAVE %d" % maxi(1, int(_summary.get(&"wave", 1)))
+		_primary_action = PrimaryAction.RESTART
+		_restart_button.text = "PLAY AGAIN"
+		return
+	_rift_name.text = str(_summary.get(&"rift_name", "")).to_upper()
+	_rift_name.visible = not _rift_name.text.is_empty()
+	for rift_name: String in opened_names:
+		banners.append("%s OPEN" % rift_name.to_upper())
+	_unlock_banner.text = "\n".join(banners)
+	_unlock_banner.visible = victory and not banners.is_empty()
+	if not victory:
+		_title.text = "LEVEL %d FAILED" % level
+		_primary_action = PrimaryAction.RESTART
+		_restart_button.text = "RETRY"
+	elif not opened_ids.is_empty() and not opened_names.is_empty():
+		_title.text = "LEVEL %d CLEARED" % level
+		_primary_action = PrimaryAction.ENTER_RIFT
+		_enter_rift_id = StringName(str(opened_ids[0]))
+		_restart_button.text = "ENTER %s" % opened_names[0].to_upper()
+	elif bool(_summary.get(&"mastered", false)):
+		_title.text = "LEVEL %d CLEARED" % level
+		_primary_action = PrimaryAction.RESTART
+		_restart_button.text = "PLAY AGAIN"
+	else:
+		_title.text = "LEVEL %d CLEARED" % level
+		_primary_action = PrimaryAction.NEXT_LEVEL
+		_restart_button.text = "NEXT LEVEL"
+
+
+func _on_primary_pressed() -> void:
+	match _primary_action:
+		PrimaryAction.NEXT_LEVEL:
+			next_level_requested.emit()
+		PrimaryAction.ENTER_RIFT:
+			enter_rift_requested.emit(_enter_rift_id)
+		_:
+			restart_requested.emit()
 
 
 ## Soft amber core plus alternating long/short rays, drawn behind the score digits.

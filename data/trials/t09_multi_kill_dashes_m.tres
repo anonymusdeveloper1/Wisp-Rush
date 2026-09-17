@@ -9,6 +9,6 @@ title = "PERFECT ARC"
 description = "Land 6 multi-kill dashes in one run."
 metric = &"multi_kill_dashes"
 target = 6
-reward_shards = 95
+reward_points = 95
 tier = 9
 cumulative = false

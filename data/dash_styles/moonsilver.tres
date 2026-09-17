@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="DashStyleData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/dash_style_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+style_id = &"moonsilver"
+display_name = "MOONSILVER"
+description = "A cold silver streak, like moonlight on still water."
+price = 300
+trail_tint = Color(0.8, 0.86, 0.89, 1)
+burst_tint = Color(0.918, 0.992, 1, 1)
+uses_form_tint = false

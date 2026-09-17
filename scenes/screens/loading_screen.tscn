@@ -12,25 +12,85 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_loading")
 
-[node name="Logo" type="TextureRect" parent="."]
+[node name="Background" type="TextureRect" parent="."]
 unique_name_in_owner = true
 layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.5
-anchor_top = 0.42
-anchor_right = 0.5
-anchor_bottom = 0.42
-offset_left = -380.0
-offset_top = -276.0
-offset_right = 380.0
-offset_bottom = 276.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-pivot_offset = Vector2(380, 276)
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Scrim" type="TextureRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+
+[node name="Header" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.09
+anchor_right = 1.0
+anchor_bottom = 0.09
+offset_left = 140.0
+offset_right = -140.0
+offset_bottom = 640.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="Logo" type="TextureRect" parent="Header"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 470)
+layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("2_logo")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="LogoGlow" type="TextureRect" parent="Header/Logo"]
+unique_name_in_owner = true
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -120.0
+offset_top = -120.0
+offset_right = 120.0
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HeadingLabel" type="Label" parent="Header"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+theme_override_font_sizes/font_size = 64
+text = "ENDLESS"
+horizontal_alignment = 1
+
+[node name="SubheadingLabel" type="Label" parent="Header"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+theme_override_font_sizes/font_size = 36
+text = "ASTRAL OBSERVATORY"
+horizontal_alignment = 1
 
 [node name="Footer" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -38,25 +98,26 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 240.0
-offset_top = -430.0
-offset_right = -240.0
-offset_bottom = -320.0
+offset_left = 130.0
+offset_top = -360.0
+offset_right = -130.0
+offset_bottom = -200.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_constants/separation = 22
+mouse_filter = 2
+theme_override_constants/separation = 26
+alignment = 2
 
 [node name="StatusLabel" type="Label" parent="Footer"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_type_variation = &"CaptionLabel"
-theme_override_font_sizes/font_size = 28
-text = "GATHERING SOULS"
+theme_type_variation = &"TitleLabel"
+text = "LOADING..."
 horizontal_alignment = 1
+visible_characters_behavior = 1
 
 [node name="ProgressBar" type="ProgressBar" parent="Footer"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_type_variation = &"SlimProgressBar"
 max_value = 1.0
 show_percentage = false

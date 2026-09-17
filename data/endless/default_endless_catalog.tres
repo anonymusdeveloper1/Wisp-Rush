@@ -1,0 +1,42 @@
+[gd_resource type="Resource" script_class="EndlessCatalog" load_steps=34 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/endless_catalog.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/resources/arena_skin_data.gd" id="2_skin_script"]
+[ext_resource type="Resource" path="res://data/endless/default_endless_tuning.tres" id="3_tuning"]
+[ext_resource type="Resource" path="res://data/endless/skins/astral_observatory.tres" id="4_astral_observatory"]
+[ext_resource type="Resource" path="res://data/endless/skins/drowned_sanctum.tres" id="5_drowned_sanctum"]
+[ext_resource type="Resource" path="res://data/endless/skins/moonpetal_shrine.tres" id="6_moonpetal_shrine"]
+[ext_resource type="Resource" path="res://data/endless/skins/monastery_yard.tres" id="7_monastery_yard"]
+[ext_resource type="Resource" path="res://data/endless/skins/dusk_sandstone.tres" id="8_dusk_sandstone"]
+[ext_resource type="Resource" path="res://data/endless/skins/slate_cliffs.tres" id="9_slate_cliffs"]
+[ext_resource type="Resource" path="res://data/endless/skins/cold_forge.tres" id="10_cold_forge"]
+[ext_resource type="Resource" path="res://data/endless/skins/bamboo_deck.tres" id="11_bamboo_deck"]
+[ext_resource type="Resource" path="res://data/endless/skins/basalt_shore.tres" id="12_basalt_shore"]
+[ext_resource type="Resource" path="res://data/endless/skins/windswept_hill.tres" id="13_windswept_hill"]
+[ext_resource type="Resource" path="res://data/endless/skins/rain_rooftops.tres" id="14_rain_rooftops"]
+[ext_resource type="Resource" path="res://data/endless/skins/rootwood_clearing.tres" id="15_rootwood_clearing"]
+[ext_resource type="Resource" path="res://data/endless/skins/clockwork_bastion.tres" id="16_clockwork_bastion"]
+[ext_resource type="Resource" path="res://data/endless/skins/sky_harbor.tres" id="17_sky_harbor"]
+[ext_resource type="Resource" path="res://data/endless/skins/quartz_grotto.tres" id="18_quartz_grotto"]
+[ext_resource type="Resource" path="res://data/endless/skins/fungal_hollow.tres" id="19_fungal_hollow"]
+[ext_resource type="Resource" path="res://data/endless/skins/library_of_echoes.tres" id="20_library_of_echoes"]
+[ext_resource type="Resource" path="res://data/endless/skins/old_colosseum.tres" id="21_old_colosseum"]
+[ext_resource type="Resource" path="res://data/endless/skins/storm_lighthouse.tres" id="22_storm_lighthouse"]
+[ext_resource type="Resource" path="res://data/endless/skins/lantern_market.tres" id="23_lantern_market"]
+[ext_resource type="Resource" path="res://data/endless/skins/titans_palm.tres" id="24_titans_palm"]
+[ext_resource type="Resource" path="res://data/endless/skins/clocktower_crown.tres" id="25_clocktower_crown"]
+[ext_resource type="Resource" path="res://data/endless/skins/storm_anvil.tres" id="26_storm_anvil"]
+[ext_resource type="Resource" path="res://data/endless/skins/world_tree_crown.tres" id="27_world_tree_crown"]
+[ext_resource type="Resource" path="res://data/endless/skins/galleon_wreck.tres" id="28_galleon_wreck"]
+[ext_resource type="Resource" path="res://data/endless/skins/eclipse_sanctum.tres" id="29_eclipse_sanctum"]
+[ext_resource type="Resource" path="res://data/endless/skins/starforged_citadel.tres" id="30_starforged_citadel"]
+[ext_resource type="Resource" path="res://data/endless/skins/abyssal_gate.tres" id="31_abyssal_gate"]
+[ext_resource type="Resource" path="res://data/endless/skins/aurora_throne.tres" id="32_aurora_throne"]
+[ext_resource type="Resource" path="res://data/endless/skins/dragon_skull_throne.tres" id="33_dragon_skull_throne"]
+
+[resource]
+script = ExtResource("1_script")
+floor_polygon = PackedVector2Array(0.23002, 0.255, 0.75998, 0.255, 0.845, 0.30285, 0.845, 0.72215, 0.75998, 0.77, 0.23002, 0.77, 0.145, 0.72215, 0.145, 0.30285)
+skins = Array[ExtResource("2_skin_script")]([ExtResource("4_astral_observatory"), ExtResource("5_drowned_sanctum"), ExtResource("6_moonpetal_shrine"), ExtResource("7_monastery_yard"), ExtResource("8_dusk_sandstone"), ExtResource("9_slate_cliffs"), ExtResource("10_cold_forge"), ExtResource("11_bamboo_deck"), ExtResource("12_basalt_shore"), ExtResource("13_windswept_hill"), ExtResource("14_rain_rooftops"), ExtResource("15_rootwood_clearing"), ExtResource("16_clockwork_bastion"), ExtResource("17_sky_harbor"), ExtResource("18_quartz_grotto"), ExtResource("19_fungal_hollow"), ExtResource("20_library_of_echoes"), ExtResource("21_old_colosseum"), ExtResource("22_storm_lighthouse"), ExtResource("23_lantern_market"), ExtResource("24_titans_palm"), ExtResource("25_clocktower_crown"), ExtResource("26_storm_anvil"), ExtResource("27_world_tree_crown"), ExtResource("28_galleon_wreck"), ExtResource("29_eclipse_sanctum"), ExtResource("30_starforged_citadel"), ExtResource("31_abyssal_gate"), ExtResource("32_aurora_throne"), ExtResource("33_dragon_skull_throne")])
+default_skin_id = &"astral_observatory"
+tuning = ExtResource("3_tuning")

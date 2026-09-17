@@ -29,7 +29,7 @@ func _init() -> void:
 		&"multi_kill_dashes": 100,
 		&"wave": 100,
 		&"highest_combo": 100,
-		&"soul_shards": 100,
+		&"rp_collected": 100,
 		&"bosses": 10,
 		&"rapid_ricochets": 100,
 	}
@@ -37,7 +37,7 @@ func _init() -> void:
 	var expected_reward: int = ChallengeTracker.DAILY_COMPLETION_REWARD
 	for definition: Dictionary in first:
 		expected_reward += int(definition[&"reward"])
-	if int(result[&"reward_shards"]) != expected_reward:
+	if int(result[&"reward_points"]) != expected_reward:
 		failures += 1
 		push_error("challenge_tracker: completion reward total was incorrect")
 	var repeated_result: Dictionary = ChallengeTracker.apply_run(
@@ -47,7 +47,7 @@ func _init() -> void:
 		date_key,
 		true,
 	)
-	if int(repeated_result[&"reward_shards"]) != 0:
+	if int(repeated_result[&"reward_points"]) != 0:
 		failures += 1
 		push_error("challenge_tracker: already claimed rewards repeated")
 	if ChallengeTracker.get_date_key({&"year": 2026, &"month": 9, &"day": 3}) != "2026-09-03":

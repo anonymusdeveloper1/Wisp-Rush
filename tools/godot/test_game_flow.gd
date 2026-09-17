@@ -1,5 +1,5 @@
 extends SceneTree
-## Live-scene check for Home, pause, results, fast restart and tutorial session gating.
+## Live-scene check for Home, pause, results and fast restart (tutorial marked completed first).
 
 const MAIN_SCENE: PackedScene = preload("res://scenes/main/main.tscn")
 
@@ -22,6 +22,8 @@ func _run_check() -> void:
 	save_manager.configure_storage_paths(test_save, test_temp, test_backup)
 	save_manager.reload()
 	save_manager.reset_save()
+	# First launch opens the Tutorial screen; this check starts from Home.
+	save_manager.mark_tutorial_completed()
 	var main: Node = MAIN_SCENE.instantiate()
 	root.add_child(main)
 	await process_frame
@@ -61,7 +63,6 @@ func _run_check() -> void:
 		failures += 1
 		push_error("game_flow: second Play did not open GameWorld")
 	else:
-		second_game.tutorial_completed.emit()
 		second_game.run_ended.emit({&"score": 345, &"kills": 7, &"highest_combo": 4, &"wave": 1})
 	await process_frame
 	var results := main.get_child(0) as ResultsScreen
@@ -81,9 +82,9 @@ func _run_check() -> void:
 		restart_button.pressed.emit()
 	await process_frame
 	var restarted_game := main.get_child(0) as GameWorld
-	if restarted_game == null or restarted_game.tutorial_enabled:
+	if restarted_game == null:
 		failures += 1
-		push_error("game_flow: restart did not open a tutorial-gated fresh run")
+		push_error("game_flow: restart did not open a fresh run")
 	if failures == 0:
 		print("game_flow: Home → Pause/Home → Results → Restart passed")
 	main.queue_free()

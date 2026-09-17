@@ -4,7 +4,8 @@ extends Node
 
 ## Emitted whenever XP or its next threshold changes.
 signal experience_changed(current_xp: int, threshold: int, run_level: int)
-## Emitted once when enough XP is banked for a safe post-dash choice.
+## Emitted when XP first banks a level-up (and again after a pick that leaves one banked); GameWorld
+## banks it and offers cards only at a calm moment (docs/systems/mutations.md).
 signal level_ready
 ## Emitted after one pending level applies the chosen mutation.
 signal mutation_applied(mutation_id: StringName, mutation_level: int)
@@ -53,21 +54,6 @@ func add_experience(amount: int) -> void:
 
 
 ## Returns up to count distinct non-capped choices in deterministic shuffled order.
-## Immediately grants one random non-maxed mutation, for the Sanctum's First Gift node.
-##
-## Returns the granted mutation, or null when every mutation is already at its cap.
-func grant_random_mutation() -> MutationData:
-	var available: Array[MutationData] = []
-	for mutation: MutationData in _mutations:
-		if get_mutation_level(mutation.mutation_id) < mutation.max_level:
-			available.append(mutation)
-	if available.is_empty():
-		return null
-	var chosen: MutationData = available[_random.randi_range(0, available.size() - 1)]
-	apply_choice(chosen.mutation_id)
-	return chosen
-
-
 func offer_choices(count: int = 3) -> Array[MutationData]:
 	var eligible: Array[MutationData] = []
 	for mutation: MutationData in _mutations:
@@ -97,9 +83,7 @@ func apply_choice(mutation_id: StringName) -> bool:
 		return false
 	_current_xp -= _xp_threshold
 	_run_level += 1
-	_xp_threshold = roundi(
-		float(tuning.base_xp_threshold) * pow(tuning.xp_growth, float(_run_level - 1))
-	)
+	_xp_threshold = _threshold_for_level(_run_level)
 	_levels[mutation_id] = current_level + 1
 	_pending_level = _current_xp >= _xp_threshold
 	_offered_ids.clear()
@@ -128,6 +112,26 @@ func has_pending_level() -> bool:
 	return _pending_level
 
 
+## Returns how many level-ups are banked and still spendable: every threshold the current XP covers
+## along the curve, capped by the mutation levels left to pick. Unpicked levels are lost at run end.
+func get_banked_levels() -> int:
+	if not _pending_level:
+		return 0
+	var capacity: int = 0
+	for mutation: MutationData in _mutations:
+		capacity += maxi(0, mutation.max_level - get_mutation_level(mutation.mutation_id))
+	var banked: int = 0
+	var xp: int = _current_xp
+	var threshold: int = _xp_threshold
+	var level: int = _run_level
+	while xp >= threshold and banked < capacity:
+		banked += 1
+		xp -= threshold
+		level += 1
+		threshold = _threshold_for_level(level)
+	return banked
+
+
 ## Returns current XP banked toward the next run level.
 func get_current_xp() -> int:
 	return _current_xp
@@ -154,6 +158,11 @@ func get_total_mutation_levels() -> int:
 	for level: int in _levels.values():
 		total += level
 	return total
+
+
+## XP needed to leave one-based run [param level] (the curve of `apply_choice`).
+func _threshold_for_level(level: int) -> int:
+	return roundi(float(tuning.base_xp_threshold) * pow(tuning.xp_growth, float(level - 1)))
 
 
 func _load_mutations() -> void:

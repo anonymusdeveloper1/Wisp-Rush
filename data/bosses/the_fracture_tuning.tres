@@ -22,6 +22,6 @@ sweep_radius = 220.0
 sweep_blade_radius = 46.0
 lane_radius = 46.0
 score_reward = 1500
-shard_reward = 25
+rp_reward = 25
 experience_reward = 60
 victory_duration = 1.0

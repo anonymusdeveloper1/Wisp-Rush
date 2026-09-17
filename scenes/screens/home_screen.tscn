@@ -1,21 +1,19 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/screens/home_screen.gd" id="1_home"]
 [ext_resource type="Texture2D" path="res://assets/art/environment/home_background.png" id="2_background"]
 [ext_resource type="Texture2D" path="res://assets/art/branding/wisp_rush_logo.png" id="3_logo"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/forms/01_void.png" id="4_wisp"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/system/10_forms.png" id="6_forms"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/system/13_daily.png" id="7_daily"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/system/14_statistics.png" id="8_stats"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/system/15_settings.png" id="9_settings"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/system/02_soul_shards.png" id="10_shards"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/system/04_high_score.png" id="11_best"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/system/11_upgrades.png" id="12_sanctum"]
 [ext_resource type="Texture2D" path="res://assets/art/environment/props/10_void_portal_entrance.png" id="13_rifts"]
 [ext_resource type="Script" path="res://scenes/screens/home_ambience.gd" id="14_ambience"]
 [ext_resource type="Script" path="res://scenes/screens/orbit_motes.gd" id="15_orbit"]
-[ext_resource type="Resource" path="res://data/rifts/default_catalog.tres" id="16_rifts"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/system/03_combo_chain.png" id="17_trials"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/props/02_soul_shard_cluster.png" id="18_shop"]
 
 [node name="HomeScreen" type="Control"]
 layout_mode = 3
@@ -25,7 +23,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_home")
-rift_catalog = ExtResource("16_rifts")
 
 [node name="Background" type="TextureRect" parent="."]
 unique_name_in_owner = true
@@ -85,18 +82,18 @@ theme_override_constants/separation = 18
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="ShardsPlate" type="PanelContainer" parent="ContentMargin/Content/TopBar"]
+[node name="RiftPointsPlate" type="PanelContainer" parent="ContentMargin/Content/TopBar"]
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
 theme_type_variation = &"PanelPlate"
 
-[node name="Row" type="HBoxContainer" parent="ContentMargin/Content/TopBar/ShardsPlate"]
+[node name="Row" type="HBoxContainer" parent="ContentMargin/Content/TopBar/RiftPointsPlate"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 10
 
-[node name="ShardsIcon" type="TextureRect" parent="ContentMargin/Content/TopBar/ShardsPlate/Row"]
+[node name="RiftPointsIcon" type="TextureRect" parent="ContentMargin/Content/TopBar/RiftPointsPlate/Row"]
 custom_minimum_size = Vector2(46, 46)
 layout_mode = 2
 size_flags_vertical = 4
@@ -105,12 +102,20 @@ texture = ExtResource("10_shards")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="ShardsLabel" type="Label" parent="ContentMargin/Content/TopBar/ShardsPlate/Row"]
+[node name="RiftPointsLabel" type="Label" parent="ContentMargin/Content/TopBar/RiftPointsPlate/Row"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"ValueLabel"
 theme_override_font_sizes/font_size = 36
 text = "0"
+vertical_alignment = 1
+
+[node name="Unit" type="Label" parent="ContentMargin/Content/TopBar/RiftPointsPlate/Row"]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"CaptionLabel"
+text = "RP"
 vertical_alignment = 1
 
 [node name="BestPlate" type="PanelContainer" parent="ContentMargin/Content/TopBar"]
@@ -175,7 +180,7 @@ stretch_mode = 5
 
 [node name="HeroArea" type="Control" parent="ContentMargin/Content"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 360)
+custom_minimum_size = Vector2(0, 820)
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
@@ -206,7 +211,6 @@ unique_name_in_owner = true
 layout_mode = 0
 offset_right = 400.0
 offset_bottom = 400.0
-mouse_filter = 2
 texture = ExtResource("4_wisp")
 expand_mode = 1
 stretch_mode = 5
@@ -216,7 +220,189 @@ unique_name_in_owner = true
 script = ExtResource("15_orbit")
 side = 2
 
-[node name="RiftCaption" type="Label" parent="ContentMargin/Content"]
+[node name="LeftColumn" type="VBoxContainer" parent="ContentMargin/Content/HeroArea"]
+unique_name_in_owner = true
+layout_mode = 0
+mouse_filter = 2
+theme_override_constants/separation = 22
+
+[node name="TrialsButton" type="Button" parent="ContentMargin/Content/HeroArea/LeftColumn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 164)
+layout_mode = 2
+size_flags_horizontal = 4
+tooltip_text = "Trials"
+theme_type_variation = &"IconButton"
+
+[node name="Icon" type="TextureRect" parent="ContentMargin/Content/HeroArea/LeftColumn/TrialsButton"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 22.0
+offset_top = 14.0
+offset_right = -22.0
+offset_bottom = 110.0
+grow_horizontal = 2
+mouse_filter = 2
+texture = ExtResource("17_trials")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Caption" type="Label" parent="ContentMargin/Content/HeroArea/LeftColumn/TrialsButton"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -50.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 24
+text = "TRIALS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DailyButton" type="Button" parent="ContentMargin/Content/HeroArea/LeftColumn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 164)
+layout_mode = 2
+size_flags_horizontal = 4
+tooltip_text = "Daily Rift"
+theme_type_variation = &"IconButton"
+
+[node name="Icon" type="TextureRect" parent="ContentMargin/Content/HeroArea/LeftColumn/DailyButton"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 22.0
+offset_top = 14.0
+offset_right = -22.0
+offset_bottom = 110.0
+grow_horizontal = 2
+mouse_filter = 2
+texture = ExtResource("7_daily")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Caption" type="Label" parent="ContentMargin/Content/HeroArea/LeftColumn/DailyButton"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -50.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 24
+text = "DAILY"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RightColumn" type="VBoxContainer" parent="ContentMargin/Content/HeroArea"]
+unique_name_in_owner = true
+layout_mode = 0
+mouse_filter = 2
+theme_override_constants/separation = 22
+
+[node name="ShopButton" type="Button" parent="ContentMargin/Content/HeroArea/RightColumn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 164)
+layout_mode = 2
+size_flags_horizontal = 4
+tooltip_text = "Shop"
+theme_type_variation = &"IconButton"
+
+[node name="Icon" type="TextureRect" parent="ContentMargin/Content/HeroArea/RightColumn/ShopButton"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 22.0
+offset_top = 14.0
+offset_right = -22.0
+offset_bottom = 110.0
+grow_horizontal = 2
+mouse_filter = 2
+texture = ExtResource("18_shop")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Caption" type="Label" parent="ContentMargin/Content/HeroArea/RightColumn/ShopButton"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -50.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 24
+text = "SHOP"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RemoveAdsButton" type="Button" parent="ContentMargin/Content/HeroArea/RightColumn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 164)
+layout_mode = 2
+size_flags_horizontal = 4
+tooltip_text = "Remove ads"
+theme_type_variation = &"IconButton"
+
+[node name="AdGlyph" type="Label" parent="ContentMargin/Content/HeroArea/RightColumn/RemoveAdsButton"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 14.0
+offset_top = 14.0
+offset_right = -14.0
+offset_bottom = 110.0
+grow_horizontal = 2
+theme_type_variation = &"TitleLabel"
+theme_override_font_sizes/font_size = 44
+text = "AD"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RemoveAdsStrike" type="ColorRect" parent="ContentMargin/Content/HeroArea/RightColumn/RemoveAdsButton"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -42.0
+offset_top = 59.0
+offset_right = 42.0
+offset_bottom = 65.0
+grow_horizontal = 2
+rotation = -0.785398
+pivot_offset = Vector2(42, 3)
+mouse_filter = 2
+
+[node name="Caption" type="Label" parent="ContentMargin/Content/HeroArea/RightColumn/RemoveAdsButton"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -50.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 24
+text = "NO ADS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ActionBlock" type="VBoxContainer" parent="ContentMargin/Content/HeroArea"]
+unique_name_in_owner = true
+layout_mode = 0
+mouse_filter = 2
+theme_override_constants/separation = 14
+
+[node name="RiftCaption" type="Label" parent="ContentMargin/Content/HeroArea/ActionBlock"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"CaptionLabel"
@@ -224,81 +410,84 @@ theme_override_font_sizes/font_size = 28
 text = "OBSIDIAN GARDEN"
 horizontal_alignment = 1
 
-[node name="PlayButton" type="Button" parent="ContentMargin/Content"]
+[node name="ActionRow" type="HBoxContainer" parent="ContentMargin/Content/HeroArea/ActionBlock"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 0)
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="ActionBalance" type="Control" parent="ContentMargin/Content/HeroArea/ActionBlock/ActionRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(156, 156)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+
+[node name="PlayButton" type="Button" parent="ContentMargin/Content/HeroArea/ActionBlock/ActionRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(560, 0)
 layout_mode = 2
 size_flags_vertical = 4
 theme_type_variation = &"PrimaryButton"
+theme_override_font_sizes/font_size = 60
 text = "PLAY"
 
-[node name="NavBar" type="PanelContainer" parent="ContentMargin/Content"]
+[node name="PlayGlow" type="TextureRect" parent="ContentMargin/Content/HeroArea/ActionBlock/ActionRow/PlayButton"]
 unique_name_in_owner = true
+show_behind_parent = true
+layout_mode = 0
+mouse_filter = 2
+expand_mode = 1
+
+[node name="PlaySheenClip" type="Control" parent="ContentMargin/Content/HeroArea/ActionBlock/ActionRow/PlayButton"]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 26.0
+offset_top = 18.0
+offset_right = -26.0
+offset_bottom = -18.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PlaySheen" type="TextureRect" parent="ContentMargin/Content/HeroArea/ActionBlock/ActionRow/PlayButton/PlaySheenClip"]
+unique_name_in_owner = true
+layout_mode = 0
+mouse_filter = 2
+expand_mode = 1
+
+[node name="RiftsButton" type="Button" parent="ContentMargin/Content/HeroArea/ActionBlock/ActionRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(156, 156)
 layout_mode = 2
 size_flags_vertical = 4
-theme_type_variation = &"NavBar"
+tooltip_text = "Rift map"
+theme_type_variation = &"IconButton"
 
-[node name="NavRow" type="HBoxContainer" parent="ContentMargin/Content/NavBar"]
+[node name="RiftsIcon" type="TextureRect" parent="ContentMargin/Content/HeroArea/ActionBlock/ActionRow/RiftsButton"]
 unique_name_in_owner = true
-layout_mode = 2
-theme_override_constants/separation = 0
+layout_mode = 0
+mouse_filter = 2
+texture = ExtResource("13_rifts")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="RiftsNav" type="Button" parent="ContentMargin/Content/NavBar/NavRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 164)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_type_variation = &"NavButton"
+[node name="Caption" type="Label" parent="ContentMargin/Content/HeroArea/ActionBlock/ActionRow/RiftsButton"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -46.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 22
 text = "RIFTS"
-icon = ExtResource("13_rifts")
-icon_alignment = 1
-vertical_icon_alignment = 0
-expand_icon = true
-
-[node name="FormsNav" type="Button" parent="ContentMargin/Content/NavBar/NavRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 164)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_type_variation = &"NavButton"
-text = "FORMS"
-icon = ExtResource("6_forms")
-icon_alignment = 1
-vertical_icon_alignment = 0
-expand_icon = true
-
-[node name="SanctumNav" type="Button" parent="ContentMargin/Content/NavBar/NavRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 164)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_type_variation = &"NavButton"
-text = "SANCTUM"
-icon = ExtResource("12_sanctum")
-icon_alignment = 1
-vertical_icon_alignment = 0
-expand_icon = true
-
-[node name="TrialsNav" type="Button" parent="ContentMargin/Content/NavBar/NavRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 164)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_type_variation = &"NavButton"
-text = "TRIALS"
-icon = ExtResource("17_trials")
-icon_alignment = 1
-vertical_icon_alignment = 0
-expand_icon = true
-
-[node name="DailyNav" type="Button" parent="ContentMargin/Content/NavBar/NavRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 164)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_type_variation = &"NavButton"
-text = "DAILY"
-icon = ExtResource("7_daily")
-icon_alignment = 1
-vertical_icon_alignment = 0
-expand_icon = true
+horizontal_alignment = 1
+vertical_alignment = 1

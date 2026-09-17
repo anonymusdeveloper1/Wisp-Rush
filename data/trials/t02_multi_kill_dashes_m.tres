@@ -9,6 +9,6 @@ title = "CLEAN LINES"
 description = "Land 3 multi-kill dashes in one run."
 metric = &"multi_kill_dashes"
 target = 3
-reward_shards = 25
+reward_points = 25
 tier = 2
 cumulative = false

@@ -9,6 +9,6 @@ title = "SOUL COUNTER"
 description = "Score 4000 in a single run."
 metric = &"score"
 target = 4000
-reward_shards = 45
+reward_points = 45
 tier = 4
 cumulative = false

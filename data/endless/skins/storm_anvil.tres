@@ -1,0 +1,116 @@
+[gd_resource type="Resource" script_class="ArenaSkinData" load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/arena_skin_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/endless/thumbnails/storm_anvil.png" id="2_thumbnail"]
+[ext_resource type="Script" path="res://scripts/resources/arena_scenery_data.gd" id="3_scenery"]
+[ext_resource type="Script" path="res://scripts/resources/arena_scenery_zone.gd" id="4_zone"]
+[ext_resource type="Script" path="res://scripts/resources/arena_particle_emitter.gd" id="5_emitter"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/endless/masks/storm_anvil.png" id="6_mask"]
+
+[sub_resource type="Resource" id="Zone_1"]
+script = ExtResource("4_zone")
+zone_name = "storm"
+light_color = Color(0.498, 0.6588, 1, 1)
+light_alt_color = Color(0.9176, 0.9922, 1, 1)
+light_strength = 0.12
+breathe = 0
+breathe_hz = 0.15
+flicker = 0
+flicker_hz = 6
+flare_interval = 8
+flare_boost = 0.9
+flare_rise = 0.14
+flare_fade = 0.9
+flare_is_flash = true
+hue_cycle = 0.3
+hue_cycle_hz = 0.05
+color_shift = 0
+color_shift_cycles = 2
+color_shift_hz = 0.08
+twinkle = 0
+twinkle_hz = 1
+travel = 0
+travel_cycles = 8
+travel_hz = 0.5
+sweep_weight = 0
+warp_mode = 4
+warp_px = 2.4
+warp_hz = 0.05
+warp_cycles = 3.5
+
+[sub_resource type="Resource" id="Zone_2"]
+script = ExtResource("4_zone")
+zone_name = "forge fires"
+light_color = Color(1, 0.4784, 0.1804, 1)
+light_alt_color = Color(1, 0.7725, 0.4196, 1)
+light_strength = 1
+breathe = 0
+breathe_hz = 0.15
+flicker = 0.5
+flicker_hz = 5
+flare_interval = 0
+flare_boost = 0
+flare_rise = 0.3
+flare_fade = 1.2
+flare_is_flash = false
+hue_cycle = 0
+hue_cycle_hz = 0.05
+color_shift = 0.3
+color_shift_cycles = 2
+color_shift_hz = 0.08
+twinkle = 0
+twinkle_hz = 1
+travel = 0
+travel_cycles = 8
+travel_hz = 0.5
+sweep_weight = 0
+warp_mode = 2
+warp_px = 1.4
+warp_hz = 0.6
+warp_cycles = 16
+
+[sub_resource type="Resource" id="Emitter_1"]
+script = ExtResource("5_emitter")
+emitter_name = "embers"
+points_uv = PackedVector2Array(0.7099, 0.1262, 0.0956, 0.9133, 0.9267, 0.0993, 0.1265, 0.9163, 0.6908, 0.1358, 0.7343, 0.1268, 0.6897, 0.1142, 0.5824, 0.9061, 0.1031, 0.8750, 0.7365, 0.1041, 0.9150, 0.1280, 0.7163, 0.1256, 0.8778, 0.1250, 0.5664, 0.9061, 0.6780, 0.1094, 0.9235, 0.1202, 0.9214, 0.1148, 0.5802, 0.9085, 0.9426, 0.1154, 0.9362, 0.1441, 0.1328, 0.8959, 0.9033, 0.1047, 0.9267, 0.1071, 0.1020, 0.9031, 0.6844, 0.1214, 0.8767, 0.1286, 0.5824, 0.8977, 0.8937, 0.1465, 0.1562, 0.9163, 0.9352, 0.1316, 0.0956, 0.8906, 0.9299, 0.1519, 0.1063, 0.9175, 0.7088, 0.1220, 0.0903, 0.8864, 0.1201, 0.9001, 0.1456, 0.8911, 0.6706, 0.1005, 0.0914, 0.8959, 0.9075, 0.1256, 0.5824, 0.9073, 0.7184, 0.1100, 0.1477, 0.9169, 0.9182, 0.1106, 0.1233, 0.8816, 0.6918, 0.1011, 0.8778, 0.1382, 0.9394, 0.1411)
+amount = 14
+lifetime = 3.2
+direction = Vector2(0, -1)
+spread_degrees = 25
+speed_px = Vector2(14, 34)
+gravity_px = Vector2(0, -8)
+size_px = Vector2(9, 16)
+color = Color(1, 0.4784, 0.1804, 1)
+end_color = Color(0.9098, 0.2824, 0.1647, 1)
+alpha = 1
+pulses = 0
+additive = true
+sprite = 0
+spin_degrees = 0
+random_seed = 801
+
+[sub_resource type="Resource" id="Scenery"]
+script = ExtResource("3_scenery")
+mask = ExtResource("6_mask")
+scenery_saturation = 1.2
+scenery_contrast = 1.08
+scenery_exposure = 1.03
+shadow_lift = Color(0.498, 0.6588, 1, 1)
+shadow_lift_amount = 0.16
+highlight_lift = Color(0.6118, 0.8392, 1, 1)
+highlight_lift_amount = 0.12
+floor_saturation = 1.04
+zones = Array[ExtResource("4_zone")]([SubResource("Zone_1"), SubResource("Zone_2")])
+emitters = Array[ExtResource("5_emitter")]([SubResource("Emitter_1")])
+
+[resource]
+script = ExtResource("1_script")
+skin_id = &"storm_anvil"
+display_name = "STORM ANVIL"
+description = "The dark iron face of a giant anvil amid hammer, chains, and storm."
+tier = 2
+background_path = "res://assets/art/environment/endless/storm_anvil.png"
+thumbnail = ExtResource("2_thumbnail")
+price = 2000
+accent = Color(0.3843, 0.9098, 0.949, 1)
+scenery = SubResource("Scenery")

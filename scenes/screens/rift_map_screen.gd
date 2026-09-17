@@ -6,13 +6,18 @@ extends Control
 ## neighbours peeking in dimmed, the rule twist and personal best underneath and ENTER at the bottom.
 ## Behind it the screen shows the focused Rift's arena, crossfading as the player browses.
 ## Cards are built from the RiftCatalog so adding a Rift is a data change. Unlocking is derived from
-## the lifetime highest wave rather than a stored flag, so it can never desync from the save.
-## Locked Rifts stay previewable, with the lock and the wave gate shown in text as well as dimming.
+## the banked level clears (`rift_levels`, ADR-0013) rather than a stored flag, so it can never desync
+## from the save. ENTER plays the focused Rift's next level; a mastered Rift replays its last.
+## Locked Rifts stay previewable, with the lock and the clear that opens them (`CLEAR <RIFT> LEVEL 1`)
+## shown in text as well as dimming. TUTORIAL (a quiet SecondaryButton in the footer) is the only
+## way to replay the Tutorial screen after first launch (owner decision 2026-09-15).
 
 ## The player backed out without entering a Rift.
 signal back_requested
 ## The player chose an unlocked Rift and asked to start a run in it.
 signal play_requested(rift_id: StringName)
+## The player asked to replay the tutorial.
+signal tutorial_requested
 
 const LOCK_ICON: Texture2D = preload("res://assets/art/ui/system/17_lock.png")
 ## Brightness of a locked Rift's arena art on its card.
@@ -33,7 +38,6 @@ const BACKGROUND_FADE: float = 0.3
 
 var _rifts: Array[RiftData] = []
 var _selected_id: StringName = RiftCatalog.DEFAULT_RIFT_ID
-var _highest_wave: int = 1
 var _levels: Dictionary = {}
 var _bests: Dictionary = {}
 var _reduced_motion: bool = false
@@ -52,12 +56,14 @@ var _shade_texture: GradientTexture2D
 @onready var _status_label: Label = %StatusLabel
 @onready var _back_button: Button = %BackButton
 @onready var _enter_button: Button = %EnterButton
+@onready var _tutorial_button: Button = %TutorialButton
 
 
 func _ready() -> void:
 	_fallback_background = _background.texture
 	_back_button.pressed.connect(_on_back_pressed)
 	_enter_button.pressed.connect(_on_enter_pressed)
+	_tutorial_button.pressed.connect(func() -> void: tutorial_requested.emit())
 	_carousel.selection_changed.connect(_on_carousel_selection_changed)
 	_carousel.activated.connect(func(_index: int) -> void: _on_enter_pressed())
 	_apply()
@@ -86,14 +92,13 @@ func get_selected_rift_id() -> StringName:
 
 ## Whether a Rift is open to the current save, for tests and callers.
 func is_rift_unlocked(rift_id: StringName) -> bool:
-	return catalog != null and catalog.get_rift(rift_id).is_unlocked(_highest_wave)
+	return catalog != null and ContentUnlocks.is_rift_unlocked(catalog.get_rift(rift_id), _levels)
 
 
 func _apply() -> void:
 	if catalog == null:
 		push_error("RiftMapScreen has no RiftCatalog")
 		return
-	_highest_wave = maxi(1, int(_snapshot.get(&"highest_wave", 1)))
 	_bests = _snapshot.get(&"rift_bests", {}) as Dictionary
 	_levels = _snapshot.get(&"rift_levels", {}) as Dictionary
 	var settings: Variant = _snapshot.get(&"settings", {})
@@ -101,14 +106,14 @@ func _apply() -> void:
 	var stored: StringName = StringName(str(_snapshot.get(&"selected_rift", "")))
 	_selected_id = stored if not stored.is_empty() else RiftCatalog.DEFAULT_RIFT_ID
 	# A locked selection can survive in the save if the player reset progress; fall back cleanly.
-	if not catalog.get_rift(_selected_id).is_unlocked(_highest_wave):
+	if not catalog.get_rift(_selected_id).is_unlocked(_levels):
 		_selected_id = RiftCatalog.DEFAULT_RIFT_ID
 	_rifts = catalog.load_rifts()
 	var cards: Array[Control] = []
 	var hollow := PackedInt32Array()
 	for index: int in _rifts.size():
 		cards.append(_build_card(_rifts[index]))
-		if not _rifts[index].is_unlocked(_highest_wave):
+		if not _rifts[index].is_unlocked(_levels):
 			hollow.append(index)
 	_dots.count = _rifts.size()
 	_dots.hollow = hollow
@@ -126,7 +131,7 @@ func _on_carousel_selection_changed(index: int) -> void:
 ## Updates everything under the carousel and the backdrop for the focused Rift.
 func _refresh(fade: bool) -> void:
 	var rift: RiftData = catalog.get_rift(_selected_id)
-	var unlocked: bool = rift.is_unlocked(_highest_wave)
+	var unlocked: bool = rift.is_unlocked(_levels)
 	_rule_label.text = rift.rule_summary
 	var best: int = int(_bests.get(String(rift.rift_id), 0))
 	_best_icon.visible = unlocked and best > 0
@@ -139,7 +144,7 @@ func _refresh(fade: bool) -> void:
 		_status_label.text = "NO RUN YET"
 	else:
 		_status_label.theme_type_variation = &"CaptionLabel"
-		_status_label.text = "LOCKED  ·  YOUR BEST WAVE %d OF %d" % [_highest_wave, rift.unlock_wave]
+		_status_label.text = "LOCKED  ·  %s" % _unlock_text(rift)
 	_enter_button.disabled = not unlocked
 	_enter_button.icon = null if unlocked else LOCK_ICON
 	_enter_button.text = "ENTER" if unlocked else "LOCKED"
@@ -164,9 +169,9 @@ func _show_background(texture: Texture2D, fade: bool) -> void:
 
 
 ## One portrait card: the Rift's arena art filling the frame, name and tier on top, level progress
-## at the bottom, or a lock and the wave gate in the middle while it is locked.
+## at the bottom, or a lock and the clear that opens it in the middle while it is locked.
 func _build_card(rift: RiftData) -> Control:
-	var unlocked: bool = rift.is_unlocked(_highest_wave)
+	var unlocked: bool = rift.is_unlocked(_levels)
 	var card := Button.new()
 	card.theme_type_variation = &"CardButton"
 	card.name = "Card_%s" % rift.rift_id
@@ -208,10 +213,12 @@ func _build_card(rift: RiftData) -> Control:
 	column.add_child(_expanding_spacer())
 
 	if unlocked:
-		var cleared: int = mini(int(_levels.get(String(rift.rift_id), 0)), rift.level_count)
-		var level_text: String = "LEVEL %d / %d" % [cleared + 1, rift.level_count]
-		if cleared >= rift.level_count:
-			level_text = "ALL %d CLEARED  ·  ENDLESS" % rift.level_count
+		var cleared: int = ContentUnlocks.get_cleared_level(rift, _levels)
+		var level_text: String = "LEVEL %d / %d" % [
+			ContentUnlocks.get_next_level(rift, _levels), rift.level_count,
+		]
+		if ContentUnlocks.is_mastered(rift, _levels):
+			level_text = "MASTERED"
 		column.add_child(_card_label("Level", &"CaptionLabel", CARD_CAPTION_SIZE, level_text))
 		var progress := ProgressBar.new()
 		progress.name = "Progress"
@@ -228,9 +235,17 @@ func _build_card(rift: RiftData) -> Control:
 		lock.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		lock.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		column.add_child(lock)
-		column.add_child(_card_label("Gate", &"ValueLabel", CARD_LOCK_SIZE, "REACH WAVE %d" % rift.unlock_wave))
+		var gate := _card_label("Gate", &"ValueLabel", CARD_LOCK_SIZE, _unlock_text(rift))
+		gate.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		column.add_child(gate)
 		column.add_child(_expanding_spacer())
 	return card
+
+
+## The clear that opens a locked Rift, for example `CLEAR SHATTERED RIFT LEVEL 1`.
+func _unlock_text(rift: RiftData) -> String:
+	var required: RiftData = catalog.get_rift(rift.unlock_after_rift_id)
+	return "CLEAR %s LEVEL %d" % [required.display_name.to_upper(), rift.unlock_after_level]
 
 
 func _card_label(node_name: String, variation: StringName, font_size: int, text: String) -> Label:

@@ -30,7 +30,25 @@ extends Resource
 @export_range(1, 10, 1) var gift_reduction_per_level: int = 3
 ## Lowest allowed Reaper's Gift kill streak.
 @export_range(5, 50, 1) var gift_minimum_streak: int = 15
-## Base attraction radius for dropped Soul Shards in design-width pixels.
+## Base attraction radius for dropped Rift Points shard pickups in design-width pixels.
 @export_range(40.0, 600.0, 1.0) var shard_attraction_radius: float = 150.0
 ## Added attraction radius per Soul Hunger level in design-width pixels.
 @export_range(0.0, 200.0, 1.0) var hunger_attraction_per_level: float = 35.0
+
+@export_group("Upgrade offer")
+## Engine time scale while the upgrade card tray is up (Reduced Motion keeps normal speed).
+@export_range(0.05, 1.0, 0.01) var tray_time_scale: float = 0.3
+## Real seconds the tray stays up without a pick before it slides away (the level stays banked).
+@export_range(1.0, 30.0, 0.5) var tray_timeout: float = 6.0
+## Share of the screen height the tray's bottom edge sits above the bottom safe margin, so the cards
+## rest in the lower-middle of the screen instead of at the very bottom (owner 2026-09-15).
+@export_range(0.0, 0.6, 0.01) var tray_raise_share: float = 0.1
+## Real seconds the tray takes to slide up or away (instant under Reduced Motion).
+@export_range(0.0, 1.0, 0.01) var tray_slide_seconds: float = 0.22
+## Game seconds a calm moment (wave start, boss beaten, field clear) stays open for the tray to wait
+## out a running combo or a dash; longer than the 2.2 s combo timeout, so a field clear still offers.
+@export_range(0.5, 10.0, 0.1) var calm_window_seconds: float = 4.0
+## UPGRADE button glow pulses per second and brightness swing while a level-up is banked (still under
+## Reduced Motion).
+@export_range(0.1, 6.0, 0.1) var button_pulse_rate: float = 1.2
+@export_range(0.0, 1.0, 0.01) var button_pulse_amount: float = 0.35

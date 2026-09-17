@@ -2,7 +2,7 @@ class_name StatisticsScreen
 extends Control
 ## Lifetime statistics read from the persistent SaveManager snapshot.
 ##
-## The first RECORD_COUNT rows of `build_rows` (best score, highest rift, longest chain) are shown
+## The first RECORD_COUNT rows of `build_rows` (best score, highest wave, longest chain) are shown
 ## as PanelCard tiles; the rest are CaptionLabel/ValueLabel rows in the lifetime panel.
 ## All styling comes from the project theme (redesign v1).
 
@@ -49,9 +49,16 @@ static func build_rows(snapshot: Dictionary) -> Array[PackedStringArray]:
 	var owned_forms: Array = snapshot.get(&"owned_forms", ["void"]) as Array
 	return [
 		PackedStringArray(["BEST SCORE", "%06d" % int(snapshot.get(&"best_score", 0))]),
-		PackedStringArray(["HIGHEST RIFT", "%02d" % int(snapshot.get(&"highest_wave", 1))]),
+		PackedStringArray(["HIGHEST WAVE", "%02d" % int(snapshot.get(&"highest_wave", 1))]),
 		PackedStringArray(["LONGEST SOUL CHAIN", "×%d" % int(snapshot.get(&"highest_combo", 0))]),
 		PackedStringArray(["RUNS", str(int(snapshot.get(&"total_runs", 0)))]),
+		PackedStringArray([
+			"ENDLESS BEST SCORE", "%06d" % int(snapshot.get(&"endless_best_score", 0)),
+		]),
+		PackedStringArray([
+			"ENDLESS BEST WAVE", "%02d" % int(snapshot.get(&"endless_best_wave", 0)),
+		]),
+		PackedStringArray(["ENDLESS RUNS", str(int(snapshot.get(&"endless_runs", 0)))]),
 		PackedStringArray(["SOULS REAPED", str(int(snapshot.get(&"total_kills", 0)))]),
 		PackedStringArray(["MULTI-REAP DASHES", str(int(snapshot.get(&"total_multi_kills", 0)))]),
 		PackedStringArray(["REAPERS VANQUISHED", str(int(snapshot.get(&"bosses_defeated", 0)))]),
@@ -59,7 +66,7 @@ static func build_rows(snapshot: Dictionary) -> Array[PackedStringArray]:
 			"TIME IN THE RIFT",
 			format_play_time(int(float(snapshot.get(&"play_time_seconds", 0.0)))),
 		]),
-		PackedStringArray(["SOUL SHARDS", str(int(snapshot.get(&"soul_shards", 0)))]),
+		PackedStringArray(["RIFT POINTS", RiftPoints.format(int(snapshot.get(&"rift_points", 0)))]),
 		PackedStringArray(["FORMS COLLECTED", "%d / %d" % [owned_forms.size(), FORM_COUNT]]),
 	]
 

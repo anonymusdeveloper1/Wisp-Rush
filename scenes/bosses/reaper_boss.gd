@@ -9,7 +9,7 @@ signal summon_requested(world_positions: PackedVector2Array)
 ## Emitted after configuration and each valid exposed-core hit.
 signal health_changed(current_health: int, maximum_health: int)
 ## Emitted after the final dissolve with the authored encounter rewards.
-signal defeated(world_position: Vector2, score_reward: int, shard_reward: int)
+signal defeated(world_position: Vector2, score_reward: int, rp_reward: int)
 
 enum Phase { SCYTHE_SWEEP = 1, TELEPORT_HUNT = 2, DEATH_CORRIDORS = 3 }
 enum CycleState { INTRO, RECOVERY, WARNING, ATTACKING, EXPOSED, DEFEATED }
@@ -123,11 +123,14 @@ func configure_variant(data: BossData) -> void:
 	_core_ring.modulate = data.accent
 
 
+## Places the encounter in the arena and sets its health and timing; [param health_override] > 0
+## replaces the encounter health (rounded up to three equal phase bands, minimum 3; tutorial).
 func configure(
 	arena_rect: Rect2,
 	target_position: Vector2,
 	encounter_index: int,
 	seed: int,
+	health_override: int = 0,
 	) -> void:
 	_arena_rect = arena_rect
 	_target_position = target_position
@@ -138,6 +141,9 @@ func configure(
 	_maximum_health = tuning.base_health + _encounter_index * tuning.health_per_encounter
 	# Preserve three equal phase bands even as encounters gain health.
 	_maximum_health = maxi(6, int(ceil(float(_maximum_health) / 3.0)) * 3)
+	if health_override > 0:
+		# Scripted encounters (the tutorial) pick their own health; still three equal phase bands.
+		_maximum_health = maxi(3, int(ceil(float(health_override) / 3.0)) * 3)
 	_current_health = _maximum_health
 	_timing_multiplier = maxf(
 		tuning.minimum_timing_multiplier,
@@ -500,7 +506,7 @@ func _begin_defeat() -> void:
 	_warning_ring.visible = true
 	dissolve.chain().tween_callback(
 		func() -> void:
-			defeated.emit(global_position, tuning.score_reward, tuning.shard_reward)
+			defeated.emit(global_position, tuning.score_reward, tuning.rp_reward)
 			queue_free()
 	)
 

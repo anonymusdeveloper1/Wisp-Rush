@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_player_tuning")
 design_width = 1080.0
-dash_speed = 4400.0
+dash_speed = 3960.0
 windup_duration = 0.065
 wall_impact_duration = 0.14
 focus_duration = 0.32
@@ -26,3 +26,5 @@ launch_burst_decay = 0.11
 momentum_window = 0.35
 momentum_step = 0.08
 momentum_max = 0.25
+aim_assist_degrees = 6.0
+aim_assist_step_degrees = 1.0

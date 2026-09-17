@@ -1,6 +1,6 @@
 # System: Game feel & lifecycle
 
-> **Status:** ✅ done (device tuning pending) · **Last updated:** 2026-09-11 · **GDD section:** §8, §12
+> **Status:** ✅ done (device tuning pending) · **Last updated:** 2026-09-15 · **GDD section:** §5.6, §8, §12
 > (prompt §21, §26, §27)
 
 ## Purpose
@@ -15,7 +15,7 @@ safe across app interruptions and back presses.
 |---|---|
 | `res://scenes/gameplay/game_world.gd` | Trauma shake, hit-stop, feedback hooks, auto-pause, back handling, pause/confirm/settings overlays |
 | `res://scenes/gameplay/game_world.tscn` | PauseOverlay (Resume, Restart, Settings, Home) and ConfirmOverlay |
-| `res://scripts/components/vfx_pool.gd` | `VfxPool`: 24 pooled Sprite2D one-shots, no per-effect allocation |
+| `res://scripts/components/vfx_pool.gd` | `VfxPool`: 24 pooled Sprite2D one-shots (and flights), no per-effect allocation |
 | `res://scenes/gameplay/wall_splash_fx.gd` | `WallSplashFx`: the splash where the Wisp hits a wall — pooled droplet emitters plus a splat and flash through `VfxPool` |
 | `res://scripts/utils/haptics.gd` | `Haptics.pulse()` — mobile-only, settings-gated vibration |
 | `res://scripts/utils/sound_fx.gd` | `SoundFx` — null-safe Audio shortcuts and UI click binding |
@@ -43,6 +43,7 @@ GameWorld
 | `GameWorld.is_run_meaningful()` | method | Score, kills or wave > 1 → Restart/Home ask first. |
 | `GameWorld.restart_requested` | signal | Confirmed restart from the pause menu. |
 | `VfxPool.play(texture, position, rotation, start_scale, end_scale, duration, tint) -> int` | method | One pooled effect. |
+| `VfxPool.play_flight(texture, from, to, start_scale, end_scale, duration, tint) -> int` | method | One pooled sprite flying between canvas points (RUSH soul orbs). |
 | `Haptics.pulse(duration_ms, amplitude)` | static | Vibrate when enabled on mobile. |
 | `SoundFx.play / multi_kill / music_state / set_interrupted / bind_buttons` | static | Audio access. |
 
@@ -56,6 +57,8 @@ trauma decays 1.8/s. Strength = Screen Shake × (`REDUCED_MOTION_SHAKE` 0.3 when
 | Wall impact | 0.45 → 2.4 | `wall_impact` |
 | Double reap | 0.52 → 3.2 | medium haptic |
 | Triple+ reap | 0.62 → 4.6 | 60 ms hit-stop (time scale 0.08), large impact VFX, medium haptic |
+| Slow-motion finisher | 0.25 → 0.8 | 0.4 s at time scale 0.3, Soul White shade flash, low `pulse` ([rush_mode.md](rush_mode.md)) |
+| RUSH start | 0.5 → 3.0 | heavy haptic, `level_up`, 1.5× `RUSH` callout |
 | Player damage | 0.75 → 6.8 | heavy haptic |
 | Reaper hit / final hit | 0.35 / 1.0 → 1.5 / 12 | medium / double-heavy haptic |
 
@@ -69,7 +72,17 @@ trauma decays 1.8/s. Strength = Screen Shake × (`REDUCED_MOTION_SHAKE` 0.3 when
 - Redesign v1: telegraphs are amber (warning) and magenta (execution); VFX PNGs are straight alpha, so they use normal blending (additive would double-brighten them).
 - Shake moves the viewport canvas transform, so the HUD stays still; the backdrop is overscanned
   16 px; the offset and `Engine.time_scale` are always reset when GameWorld exits.
-- Reduced Motion scales shake to 30 %, disables hit-stop and halves the wall flash.
+- **One owner for `Engine.time_scale`** (2026-09-15): `_request_time_scale(scale, real_seconds)` adds
+  a request whose timer ignores time scale; the lowest active scale wins, none left = 1.0. Hit-stop
+  and the slow-motion finisher both request; the upgrade tray holds a keyed scale
+  (`_hold_time_scale`, [rush_mode.md](rush_mode.md)); nothing else writes the scale. Pause (and so app
+  interruption), death, level victory, scene exit and `_reset_view_effects()` clear every request and
+  hold. Before this, a hit-stop ending snapped any other slow motion back to 1.0.
+- **Finisher** (GDD §5.6): 5 kills in one dash (at that kill), a field clear (≤ once per 6 s) or a
+  boss killing blow; the flash blends over the run-state shade (`_set_world_shade`), so a boss or
+  victory shade set mid-flash is kept. Never under pause or while the upgrade tray is up.
+- Reduced Motion scales shake to 30 %, disables hit-stop, the finisher's slow motion and flash (its
+  sound stays), speed lines, the RUSH edge glow and soul-orb flights, and halves the wall flash.
 - Pooled effects are tinted with the equipped form; when full, the most-finished effect is recycled.
 - Focus loss or app pause opens the pause overlay (never resumes into danger); music ducks.
 - Restart/Home from pause confirm only when progress would be lost; in-run Settings hides Reset.
@@ -92,6 +105,7 @@ trauma decays 1.8/s. Strength = Screen Shake × (`REDUCED_MOTION_SHAKE` 0.3 when
 
 | Date | Change |
 |---|---|
+| 2026-09-15 | Time-scale request owner (hit-stop + finisher), finisher flash, `VfxPool.play_flight` (spec rush_and_feel) |
 | 2026-09-12 | Redesign v1 colours; VFX converted to straight alpha (ADR-0005) |
 | 2026-09-11 | Created and verified in Milestone 4 |
 

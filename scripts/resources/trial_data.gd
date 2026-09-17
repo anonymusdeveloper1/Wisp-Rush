@@ -1,6 +1,6 @@
 class_name TrialData
 extends Resource
-## One persistent goal in the Trials ladder: what it measures, the target, and its shard reward.
+## One persistent goal in the Trials ladder: what it measures, the target, and its Rift Points reward.
 ##
 ## Distinct from the date-seeded daily challenges in `ChallengeTracker`: Trials never rotate or
 ## expire, they are cleared once and banked forever, and they escalate by tier.
@@ -15,8 +15,8 @@ extends Resource
 @export var metric: StringName
 ## Value the metric must reach.
 @export_range(1, 1000000, 1) var target: int = 1
-## Soul Shards granted once when the trial completes.
-@export_range(0, 10000, 5) var reward_shards: int = 15
+## Rift Points granted once when the trial completes.
+@export_range(0, 10000, 5) var reward_points: int = 15
 ## One-based ladder tier; three trials share each tier.
 @export_range(1, 50, 1) var tier: int = 1
 ## True when progress accumulates across runs; false when a single run must hit the target.
@@ -50,6 +50,6 @@ func validate() -> PackedStringArray:
 		failures.append("metric is empty")
 	if target <= 0:
 		failures.append("target must be positive")
-	if reward_shards < 0:
+	if reward_points < 0:
 		failures.append("reward is negative")
 	return failures

@@ -24,10 +24,21 @@ const DISSOLVE_INWARD_SHARE: float = 0.3
 const ARRIVAL_POP_SCALE: float = 0.72
 ## Seconds the arrival pop takes to settle.
 const ARRIVAL_POP_DURATION: float = 0.22
+## Aim-preview target ring radius as a share of the sprite diameter (the art has soft margins).
+const TARGET_RING_RADIUS_SHARE: float = 0.44
+## Target ring stroke widths in design px: soft outer glow, inner glow, crisp rim, contrast hairline.
+const TARGET_RING_GLOW_WIDTH: float = 22.0
+const TARGET_RING_INNER_GLOW_WIDTH: float = 11.0
+const TARGET_RING_RIM_WIDTH: float = 4.5
+const TARGET_RING_HAIRLINE_WIDTH: float = 2.0
+## Target ring pulse (off under Reduced Motion): scale swing and rate in radians per second.
+const TARGET_RING_PULSE_AMOUNT: float = 0.06
+const TARGET_RING_PULSE_RATE: float = 8.0
+const TARGET_RING_SEGMENTS: int = 48
 
 ## Movement, collision, durability and reward values for this archetype.
 @export var tuning: EnemyTuning
-## Whether ACTIVE-state movement advances; deterministic tutorial targets disable it.
+## Whether ACTIVE-state movement advances; stationary Tutorial lesson targets disable it.
 @export var movement_enabled: bool = true
 
 var state: State = State.TELEGRAPH
@@ -35,6 +46,8 @@ var _health: int = 1
 var _target_position: Vector2 = Vector2.ZERO
 var _last_edge_position: Vector2 = Vector2.ZERO
 var _world_speed: float = 1.0
+## Arena movement-speed multiplier (a Rift's `enemy_speed_scale`, or the Endless cycle's).
+var _speed_scale: float = 1.0
 var _viewport_scale: float = 1.0
 var _arena_rect: Rect2 = Rect2()
 ## Painted floor as a screen-space polygon. Empty keeps the legacy rectangle containment.
@@ -47,6 +60,12 @@ var _slow_multiplier: float = 1.0
 var _last_damage_event_id: int = -1
 var _flash_tween: Tween
 var _arrival_tween: Tween
+## Aim preview: whether the Wisp's aim would slice this enemy; whether the ring holds still.
+var _targeted: bool = false
+var _targeted_still: bool = false
+var _target_time: float = 0.0
+## Soft cyan ring shown while targeted; built on first use so untargeted enemies pay nothing.
+var _target_ring: Node2D
 
 @onready var _sprite: AnimatedSprite2D = %Sprite
 @onready var _arrival_ring: Sprite2D = %ArrivalRing
@@ -67,6 +86,18 @@ func _ready() -> void:
 	_hit_flash.material = VfxPool.get_additive_material()
 	_arrival_ring.material = VfxPool.get_additive_material()
 	_apply_visual_scale()
+	# `_process` only pulses the target ring; it runs while targeted and not under Reduced Motion.
+	set_process(false)
+
+
+func _process(delta: float) -> void:
+	if _target_ring == null or not _targeted:
+		set_process(false)
+		return
+	_target_time += delta
+	var wave: float = sin(_target_time * TARGET_RING_PULSE_RATE)
+	_target_ring.scale = Vector2.ONE * (1.0 + wave * TARGET_RING_PULSE_AMOUNT)
+	_target_ring.modulate.a = 0.85 + 0.15 * wave
 
 
 func _physics_process(delta: float) -> void:
@@ -75,7 +106,7 @@ func _physics_process(delta: float) -> void:
 		State.TELEGRAPH:
 			_update_telegraph(delta)
 		State.ACTIVE:
-			_advance_active(delta * _world_speed * _slow_multiplier)
+			_advance_active(delta * _world_speed * _slow_multiplier * _speed_scale)
 
 
 ## Updates the steering target chosen by the owning run system.
@@ -91,6 +122,11 @@ func set_last_edge_position(world_position: Vector2) -> void:
 ## Applies a 0.05–1.0 run-local simulation multiplier such as Wisp Focus.
 func set_world_speed(multiplier: float) -> void:
 	_world_speed = clampf(multiplier, 0.05, 1.0)
+
+
+## Applies the arena's 0.5–2.0 movement-speed multiplier to ACTIVE-state movement.
+func set_speed_scale(scale: float) -> void:
+	_speed_scale = clampf(scale, 0.5, 2.0)
 
 
 ## Rescales design-coordinate movement, collision and art to the live viewport width.
@@ -136,7 +172,7 @@ func get_threat_cost() -> int:
 	return tuning.threat_cost
 
 
-## Returns the 0.0–1.0 chance of dropping one run Soul Shard.
+## Returns the 0.0–1.0 chance of dropping one Rift Points shard pickup.
 func get_shard_drop_chance() -> float:
 	return tuning.shard_drop_chance
 
@@ -156,15 +192,44 @@ func try_dash_hit(
 	) -> bool:
 	if state != State.ACTIVE or damage_event_id == _last_damage_event_id:
 		return false
-	var hit_radius: float = get_collision_radius() + corridor_radius
-	var distance: float = DashGeometry.distance_to_segment(
-		global_position,
-		segment_start,
-		segment_end,
-	)
-	if distance > hit_radius:
+	if not would_dash_hit(segment_start, segment_end, corridor_radius):
 		return false
 	return try_direct_hit(damage, damage_event_id)
+
+
+## Whether a dash sweeping [param segment_start]→[param segment_end] with [param corridor_radius]
+## would hit this enemy right now. A pure query with no side effects: the aim preview and aim assist
+## ask it, and [method try_dash_hit] uses the same test, so the highlight can never disagree with
+## combat. Ignores the once-per-dash guard (a preview is always for a new dash id).
+func would_dash_hit(segment_start: Vector2, segment_end: Vector2, corridor_radius: float) -> bool:
+	if state != State.ACTIVE:
+		return false
+	return DashGeometry.distance_to_segment(
+		global_position, segment_start, segment_end
+	) <= get_collision_radius() + corridor_radius
+
+
+## Lights (or clears) the aim-preview ring: the Wisp's current aim would slice this enemy.
+## [param still] holds the ring steady instead of pulsing (Reduced Motion). GameWorld owns when.
+func set_targeted(targeted: bool, still: bool = false) -> void:
+	var lit: bool = targeted and state == State.ACTIVE
+	if lit == _targeted and still == _targeted_still:
+		return
+	_targeted = lit
+	_targeted_still = still
+	if lit and _target_ring == null:
+		_build_target_ring()
+	if _target_ring != null:
+		_target_ring.visible = lit
+		_target_ring.scale = Vector2.ONE
+		_target_ring.modulate.a = 1.0
+	_target_time = 0.0
+	set_process(lit and not still)
+
+
+## Whether the aim-preview ring is lit, for tools.
+func is_targeted() -> bool:
+	return _targeted
 
 
 ## Applies a non-geometric mutation hit while preserving one-hit-per-event protection.
@@ -272,6 +337,7 @@ func _update_slow(delta: float) -> void:
 
 
 func _die(damage_event_id: int) -> void:
+	set_targeted(false)
 	state = State.DYING
 	killed.emit(
 		self,
@@ -356,3 +422,45 @@ func _apply_visual_scale() -> void:
 	_sprite.scale = _base_sprite_scale
 	_arrival_ring.scale = _base_sprite_scale
 	_hit_flash.scale = _base_sprite_scale
+	if _target_ring != null:
+		_target_ring.queue_redraw()
+
+
+## Radius of the aim-preview ring in viewport px; subclasses with a wider silhouette override it.
+func _target_ring_radius() -> float:
+	return maxf(
+		tuning.sprite_diameter * _viewport_scale * TARGET_RING_RADIUS_SHARE,
+		get_collision_radius() * 1.2,
+	)
+
+
+## Builds the code-drawn aim-preview ring once (cyan = friendly/navigation, never amber or magenta).
+func _build_target_ring() -> void:
+	_target_ring = Node2D.new()
+	_target_ring.name = "TargetRing"
+	# Above the sprite (z 0) and under the hit flash (z 2); the ring sits outside the silhouette.
+	_target_ring.z_index = 1
+	_target_ring.visible = false
+	_target_ring.draw.connect(_draw_target_ring)
+	add_child(_target_ring)
+
+
+func _draw_target_ring() -> void:
+	if tuning == null:
+		return
+	var radius: float = _target_ring_radius()
+	var width_scale: float = maxf(0.5, _viewport_scale)
+	_target_ring.draw_arc(Vector2.ZERO, radius, 0.0, TAU, TARGET_RING_SEGMENTS,
+		Color(Palette.SOUL_CYAN, 0.12), TARGET_RING_GLOW_WIDTH * width_scale, true)
+	_target_ring.draw_arc(Vector2.ZERO, radius, 0.0, TAU, TARGET_RING_SEGMENTS,
+		Color(Palette.SOUL_CYAN, 0.24), TARGET_RING_INNER_GLOW_WIDTH * width_scale, true)
+	# A dark hairline outside the rim keeps the ring legible on pale ice as well as dark basalt.
+	_target_ring.draw_arc(Vector2.ZERO,
+		radius + (TARGET_RING_RIM_WIDTH + TARGET_RING_HAIRLINE_WIDTH) * 0.5 * width_scale,
+		0.0, TAU, TARGET_RING_SEGMENTS, Color(Palette.VOID_CHARCOAL, 0.45),
+		TARGET_RING_HAIRLINE_WIDTH * width_scale, true)
+	_target_ring.draw_arc(Vector2.ZERO, radius, 0.0, TAU, TARGET_RING_SEGMENTS,
+		Color(Palette.SOUL_CYAN, 0.92), TARGET_RING_RIM_WIDTH * width_scale, true)
+	_target_ring.draw_arc(Vector2.ZERO, radius - TARGET_RING_RIM_WIDTH * width_scale, 0.0, TAU,
+		TARGET_RING_SEGMENTS, Color(Palette.SOUL_WHITE, 0.55),
+		TARGET_RING_HAIRLINE_WIDTH * width_scale, true)

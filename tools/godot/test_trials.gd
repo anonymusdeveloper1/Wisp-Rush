@@ -75,7 +75,7 @@ func _run() -> void:
 func _check_ladder_progression() -> void:
 	# An empty run must move nothing.
 	var idle: Dictionary = TrialTracker.apply_run(1, {}, {})
-	if int(idle[&"rank"]) != 1 or int(idle[&"reward_shards"]) != 0:
+	if int(idle[&"rank"]) != 1 or int(idle[&"reward_points"]) != 0:
 		_fail("an empty run advanced the ladder")
 	if bool(idle[&"ranked_up"]):
 		_fail("an empty run reported a rank-up")
@@ -85,15 +85,15 @@ func _check_ladder_progression() -> void:
 	var expected_reward: int = 0
 	for trial: TrialData in CATALOG.get_tier(1):
 		summary[trial.metric] = maxi(int(summary.get(trial.metric, 0)), trial.target)
-		expected_reward += trial.reward_shards
+		expected_reward += trial.reward_points
 	var cleared: Dictionary = TrialTracker.apply_run(1, {}, summary)
 	if int(cleared[&"rank"]) != 2:
 		_fail("clearing tier 1 did not rank up, got rank %d" % int(cleared[&"rank"]))
 	if not bool(cleared[&"ranked_up"]):
 		_fail("clearing tier 1 did not report a rank-up")
-	if int(cleared[&"reward_shards"]) < expected_reward:
+	if int(cleared[&"reward_points"]) < expected_reward:
 		_fail("tier 1 paid %d, expected at least %d" % [
-			int(cleared[&"reward_shards"]), expected_reward,
+			int(cleared[&"reward_points"]), expected_reward,
 		])
 	if (cleared[&"completed"] as PackedStringArray).size() < TrialCatalog.TRIALS_PER_TIER:
 		_fail("clearing tier 1 did not report three completions")
@@ -131,11 +131,11 @@ func _check_persistence() -> void:
 	if save.get_trial_rank() < 1:
 		_fail("default trial rank is below one")
 
-	var before: int = int(save.get_snapshot()[&"soul_shards"])
+	var before: int = int(save.get_snapshot()[&"rift_points"])
 	var result: Dictionary = {
 		&"rank": 3,
 		&"progress": {"t01_wave": 4},
-		&"reward_shards": 45,
+		&"reward_points": 45,
 	}
 	if not save.apply_trial_result(result):
 		_fail("applying a trial result failed")
@@ -143,10 +143,10 @@ func _check_persistence() -> void:
 		_fail("trial rank did not persist")
 	if int(save.get_trial_progress().get("t01_wave", 0)) != 4:
 		_fail("trial progress did not persist")
-	if int(save.get_snapshot()[&"soul_shards"]) != before + 45:
+	if int(save.get_snapshot()[&"rift_points"]) != before + 45:
 		_fail("the trial reward was not paid")
 	# Cumulative targets run into the thousands, so progress must not be clamped low.
-	save.apply_trial_result({&"rank": 3, &"progress": {"t12_score": 25000}, &"reward_shards": 0})
+	save.apply_trial_result({&"rank": 3, &"progress": {"t12_score": 25000}, &"reward_points": 0})
 	if int(save.get_trial_progress().get("t12_score", 0)) != 25000:
 		_fail("large trial progress was clamped away")
 
@@ -164,7 +164,7 @@ func _check_depth_milestones() -> void:
 	)
 	root.add_child(save)
 
-	if int(save.claim_depth_milestones()[&"reward_shards"]) != 0:
+	if int(save.claim_depth_milestones()[&"reward_points"]) != 0:
 		_fail("a fresh save paid a depth milestone before any run")
 	if save.get_claimed_depth() != 0:
 		_fail("a fresh save reports claimed depth above zero")
@@ -172,8 +172,8 @@ func _check_depth_milestones() -> void:
 	save.record_run({&"score": 1, &"wave": 12, &"rift": "obsidian_garden"})
 	var deep: Dictionary = save.claim_depth_milestones()
 	# Wave 12 clears the wave-5 and wave-10 milestones together.
-	if int(deep[&"reward_shards"]) != 75:
-		_fail("wave 12 paid %d shards, expected 75" % int(deep[&"reward_shards"]))
+	if int(deep[&"reward_points"]) != 75:
+		_fail("wave 12 paid %d RP, expected 75" % int(deep[&"reward_points"]))
 	if (deep[&"waves"] as PackedInt32Array).size() != 2:
 		_fail("wave 12 reported %d milestones, expected 2"
 			% (deep[&"waves"] as PackedInt32Array).size())
@@ -181,8 +181,8 @@ func _check_depth_milestones() -> void:
 		_fail("claimed depth is %d, expected 10" % save.get_claimed_depth())
 
 	# Claiming again, and replaying a shallower run, must both pay nothing.
-	if int(save.claim_depth_milestones()[&"reward_shards"]) != 0:
+	if int(save.claim_depth_milestones()[&"reward_points"]) != 0:
 		_fail("a depth milestone paid out twice")
 	save.record_run({&"score": 1, &"wave": 3, &"rift": "obsidian_garden"})
-	if int(save.claim_depth_milestones()[&"reward_shards"]) != 0:
+	if int(save.claim_depth_milestones()[&"reward_points"]) != 0:
 		_fail("a shallow run re-paid a depth milestone")

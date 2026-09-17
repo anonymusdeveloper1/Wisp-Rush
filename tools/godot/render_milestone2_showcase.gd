@@ -10,14 +10,13 @@ func _init() -> void:
 
 func _build_showcase() -> void:
 	var game := GAME_WORLD_SCENE.instantiate() as GameWorld
-	game.tutorial_enabled = true
 	game.run_seed = 714
 	# --write-movie windows lose focus; keep the roster animating instead of auto-pausing.
 	game.auto_pause_on_focus_loss = false
 	root.add_child(game)
 	await process_frame
 	await process_frame
-	game._tutorial_overlay.visible = false
+	game.debug_quiet_arena()
 	game._wave_label.text = "RIFT 05  •  FIELD GUIDE"
 	game._instruction_label.text = "THREE SOULS  •  THREE HAZARDS"
 	game._instruction_label.visible = true

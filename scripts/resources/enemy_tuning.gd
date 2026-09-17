@@ -20,7 +20,7 @@ extends Resource
 @export_range(0, 1000, 1) var experience_reward: int = 10
 ## Wave-director threat cost for one instance.
 @export_range(1, 20, 1) var threat_cost: int = 1
-## Chance from 0.0 to 1.0 to drop one run Soul Shard on defeat.
+## Chance from 0.0 to 1.0 to drop one Rift Points shard pickup on defeat.
 @export_range(0.0, 1.0, 0.01) var shard_drop_chance: float = 0.1
 ## Arrival telegraph duration in seconds before the enemy becomes active.
 @export_range(0.1, 3.0, 0.05) var telegraph_duration: float = 0.6

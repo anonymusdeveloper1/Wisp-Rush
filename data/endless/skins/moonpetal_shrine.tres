@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ArenaSkinData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/arena_skin_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/endless/thumbnails/moonpetal_shrine.png" id="2_thumbnail"]
+
+[resource]
+script = ExtResource("1_script")
+skin_id = &"moonpetal_shrine"
+display_name = "MOONPETAL SHRINE"
+description = "A stone shrine framed by ivory blossoms, a mossy gate, and clouds."
+tier = 1
+background_path = "res://assets/art/environment/endless/moonpetal_shrine.png"
+thumbnail = ExtResource("2_thumbnail")
+price = 1200
+accent = Color(0.9176, 0.9922, 1, 1)

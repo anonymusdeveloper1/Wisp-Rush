@@ -2,6 +2,7 @@ class_name ChallengeTracker
 extends RefCounted
 ## Produces deterministic offline goals and safely applies one completed run to their progress.
 
+## Rift Points paid once per local date for finishing a daily run.
 const DAILY_COMPLETION_REWARD: int = 10
 const CHALLENGE_COUNT: int = 3
 const _SEED_MODULUS: int = 2147483647
@@ -43,10 +44,10 @@ const _POOL: Array[Dictionary] = [
 		&"mode": &"max",
 	},
 	{
-		&"id": &"shard_seeker",
-		&"title": "SHARD SEEKER",
-		&"description": "Collect 8 Soul Shards",
-		&"metric": &"soul_shards",
+		&"id": &"rp_seeker",
+		&"title": "POINT SEEKER",
+		&"description": "Collect 8 Rift Points",
+		&"metric": &"rp_collected",
 		&"target": 8,
 		&"reward": 15,
 		&"mode": &"sum",
@@ -110,7 +111,7 @@ static func get_challenges(date_key: String) -> Array[Dictionary]:
 	return result
 
 
-## Applies run metrics, returns deduplicated rewards and replacement persistence dictionaries.
+## Applies run metrics, returns deduplicated `reward_points` and replacement persistence dictionaries.
 static func apply_run(
 		summary: Dictionary,
 		challenge_state: Dictionary,
@@ -132,7 +133,7 @@ static func apply_run(
 			if claimed_id not in claimed:
 				claimed.append(claimed_id)
 
-	var reward_shards: int = 0
+	var reward_points: int = 0
 	var completed_ids: Array[String] = []
 	for definition: Dictionary in get_challenges(date_key):
 		var challenge_id: String = str(definition[&"id"])
@@ -147,7 +148,7 @@ static func apply_run(
 		if updated >= int(definition[&"target"]) and challenge_id not in claimed:
 			claimed.append(challenge_id)
 			completed_ids.append(challenge_id)
-			reward_shards += int(definition[&"reward"])
+			reward_points += int(definition[&"reward"])
 	date_state[&"progress"] = progress
 	date_state[&"claimed"] = claimed
 	next_challenges[date_key] = date_state
@@ -170,14 +171,14 @@ static func apply_run(
 		)
 		if date_key not in completed_dates:
 			completed_dates.append(date_key)
-			reward_shards += DAILY_COMPLETION_REWARD
+			reward_points += DAILY_COMPLETION_REWARD
 			daily_rewarded = true
 	next_daily[&"completed_dates"] = completed_dates
 	next_daily[&"best_scores"] = best_scores
 	return {
 		&"challenge_state": next_challenges,
 		&"daily_state": next_daily,
-		&"reward_shards": reward_shards,
+		&"reward_points": reward_points,
 		&"completed_ids": completed_ids,
 		&"daily_rewarded": daily_rewarded,
 	}

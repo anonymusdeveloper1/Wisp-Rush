@@ -55,14 +55,30 @@ func try_dash_hit(
 	) -> bool:
 	if state != State.ACTIVE or damage_event_id == _last_damage_event_id:
 		return false
-	var ends: PackedVector2Array = get_tether_endpoints()
+	if would_dash_hit(segment_start, segment_end, corridor_radius):
+		return try_direct_hit(damage, damage_event_id)
+	return false
+
+
+## Tether rule as a pure query (aim preview): only a dash crossing the tether band counts.
+func would_dash_hit(segment_start: Vector2, segment_end: Vector2, corridor_radius: float) -> bool:
+	if state != State.ACTIVE:
+		return false
+	var offset: Vector2 = Vector2.RIGHT.rotated(_spin) * _half_length()
+	var end_a: Vector2 = global_position - offset
+	var end_b: Vector2 = global_position + offset
 	var hit_radius: float = corridor_radius + get_collision_radius() * 0.35
 	for index: int in TETHER_SAMPLES:
 		var t: float = float(index) / float(TETHER_SAMPLES - 1)
-		var point: Vector2 = ends[0].lerp(ends[1], t)
+		var point: Vector2 = end_a.lerp(end_b, t)
 		if DashGeometry.distance_to_segment(point, segment_start, segment_end) <= hit_radius:
-			return try_direct_hit(damage, damage_event_id)
+			return true
 	return false
+
+
+## The ring encloses both bodies, since the tether between them is the weak point.
+func _target_ring_radius() -> float:
+	return _half_length() + tuning.sprite_diameter * _viewport_scale * 0.3
 
 
 func _half_length() -> float:

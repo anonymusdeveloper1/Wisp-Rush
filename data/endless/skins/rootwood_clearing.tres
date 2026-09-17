@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ArenaSkinData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/arena_skin_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/endless/thumbnails/rootwood_clearing.png" id="2_thumbnail"]
+
+[resource]
+script = ExtResource("1_script")
+skin_id = &"rootwood_clearing"
+display_name = "ROOTWOOD CLEARING"
+description = "Packed earth inside woven roots and a towering dark forest."
+tier = 0
+background_path = "res://assets/art/environment/endless/rootwood_clearing.png"
+thumbnail = ExtResource("2_thumbnail")
+price = 300
+accent = Color(0.3686, 0.4902, 0.298, 1)

@@ -10,7 +10,7 @@ const CATALOG: TrialCatalog = preload("res://data/trials/default_catalog.tres")
 
 ## Applies one run summary to the ladder.
 ##
-## Returns `rank`, `progress`, `reward_shards`, `completed` (trial ids finished by this run) and
+## Returns `rank`, `progress`, `reward_points`, `completed` (trial ids finished by this run) and
 ## `ranked_up`. A tier only advances once all three of its trials are complete, and the ladder
 ## stops at the last authored tier rather than running off the end.
 static func apply_run(rank: int, progress: Dictionary, summary: Dictionary) -> Dictionary:
@@ -36,7 +36,7 @@ static func apply_run(rank: int, progress: Dictionary, summary: Dictionary) -> D
 			var after: int = trial.advance(before, run_value)
 			banked[key] = after
 			if trial.is_complete(after):
-				reward += trial.reward_shards
+				reward += trial.reward_points
 				completed.append(key)
 			else:
 				tier_done = false
@@ -51,7 +51,7 @@ static func apply_run(rank: int, progress: Dictionary, summary: Dictionary) -> D
 	return {
 		&"rank": current_rank,
 		&"progress": banked,
-		&"reward_shards": reward,
+		&"reward_points": reward,
 		&"completed": completed,
 		&"ranked_up": ranked_up,
 	}

@@ -397,11 +397,10 @@ func _check_lane_blind_spot() -> void:
 func _start() -> void:
 	paused = false
 	_game = GAME_WORLD_SCENE.instantiate() as GameWorld
-	_game.tutorial_enabled = false
 	_game.run_seed = 11
 	_game.auto_pause_on_focus_loss = false
-	_game.configure_run_profile(
-		FORMS.get_form(&"void"), "", RIFTS.get_rift(&"obsidian_garden"), 1
+	_game.configure_run(
+		RunProfile.story(RIFTS.get_rift(&"obsidian_garden"), 1, {}, FORMS.get_form(&"void"))
 	)
 	root.add_child(_game)
 	await create_timer(0.3).timeout

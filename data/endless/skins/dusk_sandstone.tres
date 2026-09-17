@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ArenaSkinData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/arena_skin_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/endless/thumbnails/dusk_sandstone.png" id="2_thumbnail"]
+
+[resource]
+script = ExtResource("1_script")
+skin_id = &"dusk_sandstone"
+display_name = "DUSK SANDSTONE"
+description = "A dark sandstone arena above shadowed dunes at dusk."
+tier = 0
+background_path = "res://assets/art/environment/endless/dusk_sandstone.png"
+thumbnail = ExtResource("2_thumbnail")
+price = 300
+accent = Color(0.9529, 0.6588, 0.2784, 1)

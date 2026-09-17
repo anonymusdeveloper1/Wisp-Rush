@@ -14,7 +14,6 @@ func _init() -> void:
 
 func _build_showcase() -> void:
 	var game := GAME_WORLD_SCENE.instantiate() as GameWorld
-	game.tutorial_enabled = false
 	game.run_seed = 714
 	# --write-movie windows lose focus; keep the fight running instead of auto-pausing.
 	game.auto_pause_on_focus_loss = false

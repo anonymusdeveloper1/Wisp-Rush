@@ -27,6 +27,9 @@ var _maximum_health: int = 3
 var _total_upgrade_levels: int = 0
 ## Threat-budget multiplier for the active Rift and level (RiftData.get_threat_multiplier).
 var _rift_threat_multiplier: float = 1.0
+## Continuous spawning (Endless rules): the next formation arrives while at most this many enemies
+## are alive, and a spent wave rolls straight into the next one. -1 keeps timed waves (story Rifts).
+var _refill_live_enemies: int = -1
 
 
 func _ready() -> void:
@@ -53,6 +56,9 @@ func advance(delta: float, live_threat: int) -> void:
 		return
 	_wave_remaining = maxf(0.0, _wave_remaining - delta)
 	_formation_gap_remaining = maxf(0.0, _formation_gap_remaining - delta)
+	if _refill_live_enemies >= 0:
+		_advance_continuous(live_threat)
+		return
 	if _wave_remaining <= 0.0 and live_threat <= 0:
 		_begin_next_wave()
 		return
@@ -64,6 +70,13 @@ func advance(delta: float, live_threat: int) -> void:
 ## Scales every wave budget for the active Rift and level; call before start() and on level up.
 func set_rift_threat_multiplier(multiplier: float) -> void:
 	_rift_threat_multiplier = clampf(multiplier, 0.25, 4.0)
+
+
+## Turns on continuous spawning: a new formation whenever at most [param refill_live_enemies] enemies
+## are alive (after the formation gap), and no waiting on the wave timer once a wave's budget is
+## spent. Pass -1 for timed waves. Owner decision 2026-09-15: Endless never goes quiet.
+func set_continuous(refill_live_enemies: int) -> void:
+	_refill_live_enemies = refill_live_enemies
 
 
 ## Supplies health and upgrade context used to soften unsafe low-health requests.
@@ -123,6 +136,21 @@ func _begin_next_wave() -> void:
 	_formation_gap_remaining = 0.0
 	wave_started.emit(_current_wave, _wave_budget)
 	print("[WaveDirector] wave=%d budget=%d" % [_current_wave, _wave_budget])
+
+
+func _advance_continuous(live_enemies: int) -> void:
+	var budget_spent: bool = _spent_budget >= _wave_budget
+	# Roll into the next wave as soon as this one has nothing left to send and the field is thinning,
+	# or its timer ran out; the next wave's first formation then follows without a gap.
+	if (budget_spent or _wave_remaining <= 0.0) and live_enemies <= _refill_live_enemies:
+		_begin_next_wave()
+		if _suspended:
+			return
+	if live_enemies > _refill_live_enemies or _formation_gap_remaining > 0.0:
+		return
+	if _spent_budget >= _wave_budget:
+		return
+	_request_affordable_formation()
 
 
 func _request_affordable_formation() -> void:

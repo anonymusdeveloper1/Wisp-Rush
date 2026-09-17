@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ArenaSkinData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/arena_skin_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/endless/thumbnails/slate_cliffs.png" id="2_thumbnail"]
+
+[resource]
+script = ExtResource("1_script")
+skin_id = &"slate_cliffs"
+display_name = "SLATE CLIFFS"
+description = "A slate cliff platform over sea mist and grey mountain peaks."
+tier = 0
+background_path = "res://assets/art/environment/endless/slate_cliffs.png"
+thumbnail = ExtResource("2_thumbnail")
+price = 300
+accent = Color(0.5608, 0.702, 0.7294, 1)

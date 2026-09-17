@@ -21,10 +21,9 @@ func _build_showcase() -> void:
 	if not user_args.is_empty():
 		rift_id = StringName(user_args[0])
 	var game := GAME_WORLD_SCENE.instantiate() as GameWorld
-	game.tutorial_enabled = false
 	game.run_seed = 91
 	game.auto_pause_on_focus_loss = false
-	game.configure_run_profile(FORMS.get_form(&"void"), "", RIFTS.get_rift(rift_id), 1)
+	game.configure_run(RunProfile.story(RIFTS.get_rift(rift_id), 1, {}, FORMS.get_form(&"void")))
 	root.add_child(game)
 	for _frame: int in 30:
 		await process_frame

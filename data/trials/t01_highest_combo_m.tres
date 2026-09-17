@@ -9,6 +9,6 @@ title = "UNBROKEN"
 description = "Hold a chain of 8 in a single run."
 metric = &"highest_combo"
 target = 8
-reward_shards = 15
+reward_points = 15
 tier = 1
 cumulative = false

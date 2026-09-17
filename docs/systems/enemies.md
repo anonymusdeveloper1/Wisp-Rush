@@ -1,6 +1,6 @@
 # System: Enemies
 
-> **Status:** ✅ done · **Last updated:** 2026-09-11 · **GDD section:** §5.4
+> **Status:** ✅ done · **Last updated:** 2026-09-15 · **GDD section:** §5.4
 
 ## Purpose
 
@@ -39,12 +39,14 @@ EnemyActor subclass (Node2D)  [group: enemies]
 | `set_arena_rect(rect)` | method | Supplies bounds and viewport scaling. |
 | `apply_slow(duration, multiplier)` | method | Applies an enemy-local Cold Wake slow. |
 | `is_slowed()` | method | Whether an enemy-local slow is currently active. |
-| `movement_enabled` | export | Disable steering for deterministic tutorial targets. |
+| `movement_enabled` | export | Disable steering for stationary targets (Tutorial screen lessons, test hooks). |
 | `is_contact_active()` | method | True only after the arrival telegraph and before death. |
 | `get_collision_radius()` | method | Live viewport-scaled contact radius. |
 | `get_current_health()` | method | Remaining family durability. |
 | `get_threat_cost()` / `get_shard_drop_chance()` | method | Wave and reward metadata. |
 | `try_dash_hit(from, to, corridor_radius, damage, dash_id)` | method | Tests one swept segment and applies at most one hit per dash. |
+| `would_dash_hit(from, to, corridor_radius)` | method | The same hit test with no side effects (Warden shield arc, Rift Spawn tether overrides); `try_dash_hit` uses it. Aim preview/assist query ([player_dash.md](player_dash.md)). |
+| `set_targeted(targeted, still)` / `is_targeted()` | method | Aim-preview ring (code-drawn `SOUL_CYAN`, built on first use; `still` = no pulse). Rift Spawn's ring encloses both bodies. Cleared on death. |
 | `try_direct_hit(damage, event_id)` | method | Applies mutation damage with per-event protection. |
 
 ## Data & tuning
@@ -80,6 +82,7 @@ Pure geometry from `DashGeometry`; GameWorld supplies targets/focus/slow and con
 
 | Date | Change |
 |---|---|
+| 2026-09-15 | `would_dash_hit` pure query + `set_targeted` aim-preview ring (aim help) |
 | 2026-09-12 | Redesign v1 art; sprites and hitboxes ×1.45 (ADR-0006) |
 | 2026-09-11 | Added shared EnemyActor, Shard Wraith, Bone Mote, threat and shard rewards |
 | 2026-09-11 | Exposed active contact radius and stationary-target control for health/tutorial |

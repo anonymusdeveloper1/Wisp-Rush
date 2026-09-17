@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="DashStyleCatalog" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/dash_style_catalog.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/resources/dash_style_data.gd" id="2_style_script"]
+[ext_resource type="Resource" path="res://data/dash_styles/soul.tres" id="3_soul"]
+[ext_resource type="Resource" path="res://data/dash_styles/moonsilver.tres" id="4_moonsilver"]
+[ext_resource type="Resource" path="res://data/dash_styles/verdant.tres" id="5_verdant"]
+[ext_resource type="Resource" path="res://data/dash_styles/abyssal.tres" id="6_abyssal"]
+
+[resource]
+script = ExtResource("1_script")
+styles = Array[ExtResource("2_style_script")]([ExtResource("3_soul"), ExtResource("4_moonsilver"), ExtResource("5_verdant"), ExtResource("6_abyssal")])

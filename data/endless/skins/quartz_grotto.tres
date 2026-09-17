@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ArenaSkinData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/arena_skin_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/endless/thumbnails/quartz_grotto.png" id="2_thumbnail"]
+
+[resource]
+script = ExtResource("1_script")
+skin_id = &"quartz_grotto"
+display_name = "QUARTZ GROTTO"
+description = "Dark cave stone framed by pale quartz in a glittering grotto."
+tier = 1
+background_path = "res://assets/art/environment/endless/quartz_grotto.png"
+thumbnail = ExtResource("2_thumbnail")
+price = 800
+accent = Color(0.9176, 0.9922, 1, 1)

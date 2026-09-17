@@ -11,15 +11,27 @@ func _init() -> void:
 func _run_checks() -> void:
 	var failures: int = 0
 	var game := GAME_WORLD_SCENE.instantiate() as GameWorld
-	game.tutorial_enabled = true
 	game.run_seed = 712
 	root.add_child(game)
 	await create_timer(0.8).timeout
+	# Real runs never teach any more (2026-09-15): stop the waves the lesson used to hold back.
+	game.debug_quiet_arena()
 
 	var player := game.get_node("WorldContent/PlayerLayer/WispPlayer") as WispPlayer
 	var progression := game.get_node("RunProgression") as RunProgression
 	var pickup_layer := game.get_node("WorldContent/PickupLayer") as Node2D
 	var effects_layer := game.get_node("WorldContent/EffectsLayer") as Node2D
+
+	# No permanent power (ADR-0013): with the Sanctum gone a run starts from the no-bonus baseline.
+	if (
+		player.get_maximum_health() != 3
+		or not is_equal_approx(player.get_blade_width_multiplier(), 1.0)
+		or not is_equal_approx(player.get_dash_speed_multiplier(), 1.0)
+		or not is_equal_approx(game._get_pickup_attraction_radius(), 150.0)
+		or progression.get_total_mutation_levels() != 0
+	):
+		failures += 1
+		push_error("mutation_effects: a fresh run did not start from the no-bonus baseline")
 
 	# Soul Hunger, Wide Reap and Void Velocity feed the live dash and scoring values.
 	progression._levels[&"soul_hunger"] = 2
@@ -34,13 +46,13 @@ func _run_checks() -> void:
 	):
 		failures += 1
 		push_error("mutation_effects: dash damage, width, speed or score scaling failed")
-	if not is_equal_approx(game._get_shard_attraction_radius(), 220.0):
+	if not is_equal_approx(game._get_pickup_attraction_radius(), 220.0):
 		failures += 1
 		push_error("mutation_effects: Soul Hunger attraction radius failed")
 
-	# Soul Hunger must also attract a real dropped shard from beyond the base radius.
+	# Soul Hunger must also attract a real dropped Rift Points shard from beyond the base radius.
 	var shard_start: Vector2 = player.global_position + Vector2(200.0, 0.0)
-	game._spawn_soul_shard(shard_start)
+	game._spawn_rp_pickup(shard_start)
 	await create_timer(0.12).timeout
 	var shard := pickup_layer.get_child(0) as SoulShardPickup
 	if shard.global_position.distance_to(player.global_position) >= 200.0:

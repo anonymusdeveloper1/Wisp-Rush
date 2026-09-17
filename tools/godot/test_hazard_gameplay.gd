@@ -13,10 +13,11 @@ func _run_check() -> void:
 	var impacts: Array[Vector2] = []
 	var wall_impacts: Array[Vector2] = []
 	var game := GAME_WORLD_SCENE.instantiate() as GameWorld
-	game.tutorial_enabled = true
 	game.run_seed = 713
 	root.add_child(game)
 	await create_timer(0.8).timeout
+	# Real runs never teach any more (2026-09-15): stop the waves the lesson used to hold back.
+	game.debug_quiet_arena()
 
 	var player := game.get_node("WorldContent/PlayerLayer/WispPlayer") as WispPlayer
 	player.obstacle_impacted.connect(

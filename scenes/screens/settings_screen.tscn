@@ -279,7 +279,7 @@ text = "AIM ARROW"
 [node name="AimArrowCaption" type="Label" parent="Margin/Content/Groups/FeelCard/Rows/AimArrowRow/AimArrowText"]
 layout_mode = 2
 theme_type_variation = &"CaptionLabel"
-text = "Show which way the dash will go"
+text = "Show the aim arrow and lit targets"
 
 [node name="AimArrowToggle" type="Button" parent="Margin/Content/Groups/FeelCard/Rows/AimArrowRow"]
 unique_name_in_owner = true
@@ -289,6 +289,36 @@ size_flags_vertical = 4
 theme_type_variation = &"SecondaryButton"
 toggle_mode = true
 text = "OFF"
+
+[node name="AimAssistRow" type="HBoxContainer" parent="Margin/Content/Groups/FeelCard/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="AimAssistText" type="VBoxContainer" parent="Margin/Content/Groups/FeelCard/Rows/AimAssistRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_constants/separation = 0
+
+[node name="AimAssistLabel" type="Label" parent="Margin/Content/Groups/FeelCard/Rows/AimAssistRow/AimAssistText"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "AIM ASSIST"
+
+[node name="AimAssistCaption" type="Label" parent="Margin/Content/Groups/FeelCard/Rows/AimAssistRow/AimAssistText"]
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+text = "Gently bends a dash into more enemies"
+
+[node name="AimAssistToggle" type="Button" parent="Margin/Content/Groups/FeelCard/Rows/AimAssistRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(230, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"SecondaryButton"
+toggle_mode = true
+button_pressed = true
+text = "ON"
 
 [node name="ReducedMotionRow" type="HBoxContainer" parent="Margin/Content/Groups/FeelCard/Rows"]
 layout_mode = 2
@@ -334,12 +364,6 @@ theme_override_constants/separation = 14
 layout_mode = 2
 theme_type_variation = &"CaptionLabel"
 text = "MORE"
-
-[node name="TutorialButton" type="Button" parent="Margin/Content/Groups/MoreCard/Rows"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_type_variation = &"SecondaryButton"
-text = "REPLAY TUTORIAL"
 
 [node name="AboutButton" type="Button" parent="Margin/Content/Groups/MoreCard/Rows"]
 unique_name_in_owner = true
@@ -468,7 +492,7 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(860, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
-text = "Best scores, statistics, Soul Shards, owned forms, challenge progress and settings will be erased from this device. This cannot be undone."
+text = "Best scores, statistics, Rift Points, owned forms, challenge progress and settings will be erased from this device. This cannot be undone."
 horizontal_alignment = 1
 autowrap_mode = 3
 

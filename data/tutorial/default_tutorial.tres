@@ -1,0 +1,141 @@
+[gd_resource type="Resource" script_class="TutorialCatalog" load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/tutorial_catalog.gd" id="1_catalog"]
+[ext_resource type="Script" path="res://scripts/resources/tutorial_lesson_data.gd" id="2_lesson"]
+
+[sub_resource type="Resource" id="Resource_aim_dash"]
+script = ExtResource("2_lesson")
+lesson_id = &"aim_dash"
+title = "AIM & DASH"
+demo_caption = "Drag to aim, release to dash across the arena."
+try_caption = "Your turn: drag, aim, release."
+success_callout = "NICE DASH"
+goal = &"wall_dash"
+player_start = Vector2(0.5, 1)
+demo_swipes = PackedVector2Array(0, -1)
+
+[sub_resource type="Resource" id="Resource_slice"]
+script = ExtResource("2_lesson")
+lesson_id = &"slice"
+title = "SLICE"
+demo_caption = "Aim at a Soul Wisp: it lights up when your dash will slice it."
+try_caption = "Aim until the Soul Wisp lights up, then release."
+success_callout = "SLICED"
+goal = &"kill"
+player_start = Vector2(0.5, 1)
+enemy_positions = PackedVector2Array(0.5, 0.45)
+demo_swipes = PackedVector2Array(0, 0)
+
+[sub_resource type="Resource" id="Resource_chain"]
+script = ExtResource("2_lesson")
+lesson_id = &"chain"
+title = "CHAIN"
+demo_caption = "Line up lit souls. ×3 by the arrow means one dash reaps three."
+try_caption = "Light up two or more (see the ×), then release."
+success_callout = "CHAIN REAP"
+goal = &"chain"
+goal_count = 2
+player_start = Vector2(0.5, 1)
+enemy_positions = PackedVector2Array(0.5, 0.28, 0.5, 0.5, 0.5, 0.72)
+demo_swipes = PackedVector2Array(0, 0)
+retry_on_miss = true
+
+[sub_resource type="Resource" id="Resource_redirect"]
+script = ExtResource("2_lesson")
+lesson_id = &"redirect"
+title = "REDIRECT"
+demo_caption = "Swipe again mid-dash to turn toward souls."
+try_caption = "Dash up, then swipe mid-dash into the souls."
+success_callout = "REDIRECT"
+goal = &"redirect_kill"
+player_start = Vector2(0.5, 1)
+enemy_positions = PackedVector2Array(0.18, 0.36, 0.3, 0.3)
+demo_swipes = PackedVector2Array(0, -1, 0, 0)
+redirect_swipe_index = 1
+retry_on_miss = true
+
+[sub_resource type="Resource" id="Resource_blockers"]
+script = ExtResource("2_lesson")
+lesson_id = &"blockers"
+title = "BLOCKERS"
+demo_caption = "Void crystals stop a dash. Go around them."
+try_caption = "Route around the crystal to the soul."
+success_callout = "ROUTED"
+goal = &"kill"
+player_start = Vector2(0.5, 1)
+enemy_positions = PackedVector2Array(0.5, 0.16)
+hazard_kind = &"split_void_crystal"
+hazard_position = Vector2(0.5, 0.52)
+demo_swipes = PackedVector2Array(-1, -0.8, 0, 0)
+
+[sub_resource type="Resource" id="Resource_danger"]
+script = ExtResource("2_lesson")
+lesson_id = &"danger"
+title = "DANGER"
+demo_caption = "Spikes cost a Soul Fragment. You have three."
+try_caption = "Reach the soul without getting hit."
+success_callout = "UNTOUCHED"
+goal = &"safe_kill"
+player_start = Vector2(0.5, 1)
+enemy_positions = PackedVector2Array(0.62, 0.2)
+hazard_kind = &"spike_bloom"
+hazard_position = Vector2(0.5, 0.55)
+demo_swipes = PackedVector2Array(0, -1, 0, 0)
+demo_shows_hit = true
+demo_hit_reform = Vector2(1, 0.7)
+hud_focus = &"health"
+
+[sub_resource type="Resource" id="Resource_growth"]
+script = ExtResource("2_lesson")
+lesson_id = &"growth"
+title = "RIFT POINTS & XP"
+demo_caption = "Kills fill XP. Level-ups wait for a calm moment, then cards slide up."
+try_caption = "Reap the souls. When the cards slide up, tap one."
+success_callout = "UPGRADED"
+goal = &"upgrade"
+player_start = Vector2(0.5, 1)
+enemy_positions = PackedVector2Array(0.5, 0.3, 0.5, 0.5, 0.5, 0.7)
+demo_swipes = PackedVector2Array(0, 0)
+retry_on_miss = true
+hud_focus = &"xp"
+experience_enabled = true
+demo_upgrade_tap = true
+drops_shards = true
+
+[sub_resource type="Resource" id="Resource_rush"]
+script = ExtResource("2_lesson")
+lesson_id = &"rush"
+title = "RUSH"
+demo_caption = "Kills fill RUSH. A full meter fires it."
+try_caption = "Fill RUSH, then reap during RUSH."
+success_callout = "RUSH REAP"
+goal = &"rush_kill"
+player_start = Vector2(0.5, 1)
+enemy_positions = PackedVector2Array(0.5, 0.3, 0.5, 0.5, 0.5, 0.7)
+rush_positions = PackedVector2Array(0.25, 0.55, 0.5, 0.55, 0.75, 0.55)
+demo_swipes = PackedVector2Array(0, 0)
+retry_on_miss = true
+hud_focus = &"rush"
+rush_enabled = true
+rush_start_share = 0.9
+
+[sub_resource type="Resource" id="Resource_boss"]
+script = ExtResource("2_lesson")
+lesson_id = &"boss"
+title = "BOSS"
+demo_caption = "Bosses open a glowing core. Strike it then."
+try_caption = "Defeat the Reaper: hit its open core."
+success_callout = "REAPER DOWN"
+goal = &"boss"
+player_start = Vector2(0.5, 1)
+spawns_boss = true
+demo_swipes = PackedVector2Array(0, 0)
+demo_drives_wisp = false
+reset_after_demo = false
+
+[resource]
+script = ExtResource("1_catalog")
+lessons = Array[ExtResource("2_lesson")]([SubResource("Resource_aim_dash"), SubResource("Resource_slice"), SubResource("Resource_chain"), SubResource("Resource_redirect"), SubResource("Resource_blockers"), SubResource("Resource_danger"), SubResource("Resource_growth"), SubResource("Resource_rush"), SubResource("Resource_boss")])
+arena_skin_id = &"astral_observatory"
+hold_seconds = 0.4
+boss_health = 3
