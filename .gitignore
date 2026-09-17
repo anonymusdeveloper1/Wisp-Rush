@@ -13,6 +13,10 @@
 # Node tooling
 node_modules/
 
+# Python bytecode from the art/theme/video tool scripts
+__pycache__/
+*.pyc
+
 # Devlog videos: footage/voice workspace and the local Kokoro TTS environment (large, machine-local)
 /video/
 /tools/video/.venv/
