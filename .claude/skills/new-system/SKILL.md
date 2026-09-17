@@ -14,8 +14,9 @@ Input: the system name (snake_case, e.g. `wisp_dash`) and the GDD section it imp
    - scene-owned → `scenes/<feature>/<thing>.tscn` + `<thing>.gd` (create the scene via
      `mcp__godot__create_scene` or as text per AGENTS.md §5);
    - reusable components → `scripts/components/<name>_component.gd` with `class_name`;
-   - tuning → `scripts/resources/<name>_config.gd` (`class_name`, `extends Resource`, `@export`s)
-     and an instance in `data/<name>/…tres`.
+   - tuning → `scripts/resources/<name>_tuning.gd` (`class_name`, `extends Resource`, `@export`s)
+     and an instance in `data/<name>/…tres`; authored content uses `<name>_data.gd` plus a
+     `<name>_catalog.gd` registry (existing examples: `rift_data.gd`, `rift_catalog.gd`).
    - every script: `##` class doc (one-line summary first), `##` on public API, static types.
 3. **Registries.** New input actions, physics layers, groups, autoloads or EventBus signals go in
    `project.godot` **and** the matching PROJECT_CONTEXT §5 table in the same change.

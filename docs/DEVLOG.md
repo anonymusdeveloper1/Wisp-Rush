@@ -4,6 +4,21 @@
 > [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) §7.6. Keep entries short — details belong in the docs
 > they changed.
 
+## 2026-09-17 — M10–M12 and devlog work committed; agent docs refreshed
+- **Who:** Claude Code (Opus 5)
+- **Did:**
+  - Owner: "analyze the project and read agent related files, then commit, push and merge to main". Committed the uncommitted M10 (story Rifts, Endless, Rift Points Shop), M11 (RUSH), M12 (Tutorial) and devlog video work on `feat/m10-m12-story-endless-rush-tutorial`, then merged it into `main`.
+  - Stopped tracking Python bytecode: `__pycache__/` and `*.pyc` are ignored; three old cpython-37 caches were untracked.
+  - Refreshed stale agent-facing facts:
+    - PROJECT_CONTEXT §2 said "Next: spec 02", save v6 and 33 tests; now specs 01–05 done, save v8, 34 tests;
+    - §3 tools tree; §4 autoload sentence; §5.1 Rifts and Endless rows; §5.8 `BossData` row (missing), `ReaperTuning` instances and `EconomyTuning` clear bonuses; §8 Endless;
+    - AGENTS.md: git rules are CONVENTIONS §12, not §11;
+    - `new-system` skill: resources are named `*_tuning.gd` / `*_data.gd` / `*_catalog.gd` (no `*_config.gd` exists);
+    - ROADMAP M10: the Endless skin art item is done (30 skins).
+- **Files/systems:** `.gitignore`, `AGENTS.md`, `.claude/skills/new-system/SKILL.md`, `docs/{PROJECT_CONTEXT.md,ROADMAP.md,DEVLOG.md}`.
+- **Verified:** `tools/validate.sh` → `VALIDATE: OK` (89 scripts checked, main booted) before the first commit; no secrets, key files or files near GitHub's size limit in the commit (largest ≈ 2.8 MB); the repo on GitHub is public. Tests not run (owner's standing call).
+- **Follow-ups:** the stale headless tests (11 failed on 2026-09-15) and the M10–M12 device pass are still open.
+
 ## 2026-09-17 — Devlog #4 "Four tricks for one swipe"
 - **Who:** Claude Code (Opus 5)
 - **Did:**

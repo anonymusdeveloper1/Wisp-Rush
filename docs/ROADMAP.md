@@ -143,7 +143,7 @@
 - ✅ Spec 02 — One level per Rift run; level-1 clears open the next Rift; victory/defeat Results; Trials audit (2026-09-15; implementation only, headless tests not updated or run by owner request — device pass pending)
 - ✅ Spec 03 — Endless mode on the floor template with cleared-Rift rosters and bosses; Endless bests; daily run on Endless rules (2026-09-15; implementation only on the placeholder skin, headless tests not written/updated/run by owner request — device pass pending)
 - ✅ Spec 04 — Rift Points Shop tabs (Wisps, Dashes, Arenas, No Ads); dash styles; Forms screen retired (2026-09-15; implementation only, headless tests not written/updated/run by owner request — device pass pending)
-- ⬜ Owner: generate the three Endless skins with `floor_template_layout.png` attached
+- ✅ Endless skin art generated on the floor layout: all 30 skins instead of three (Codex ImageGen from the owner's prompt, 2026-09-15)
 - ✅ Spec 05 — Validate, extract and wire the Endless skins; placeholder removed (2026-09-15: all 30 skins from the manifest, tier prices, lossy import, Shop thumbnails, animated Legendary/Mythic scenery (`ArenaAmbience`; rebuilt 2026-09-16 on masks + scenery shader + particles), `test_endless_catalog`. Pending: device pass)
 - ⬜ Device pass: Rift Points pacing (35–45 RP per median early run) and Endless difficulty per cycle
 

@@ -33,7 +33,7 @@
 - **Small, verifiable steps.** Run `tools/validate.sh` after each meaningful edit, not just at the end.
 - **Docs are part of the change.** Follow the update-trigger table in PROJECT_CONTEXT §7.2.
 - **Stay in scope.** Note unrelated problems in your DEVLOG entry's follow-ups or the ROADMAP backlog instead of fixing them silently.
-- **Git:** don't commit or push unless the owner asks. Commit messages follow CONVENTIONS §11.
+- **Git:** don't commit or push unless the owner asks. Commit messages follow CONVENTIONS §12.
 
 ## 3. Task workflow
 
