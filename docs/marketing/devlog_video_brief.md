@@ -39,7 +39,8 @@ burst, a real tutorial, and a navigation/loading pass that removed the freezes.
 - **Endless:** PLAY always starts Endless, open from the first launch, on one shared floor shape with
   a cosmetic skin over it. Every Rift's enemies and bosses can appear. Waves never pause: a new
   formation arrives while ≤ 2 enemies are alive.
-- **Shop:** one screen, four tabs — WISPS (6 forms), DASHES (4 trail colours), ARENAS (30 skins),
+- **Shop:** one screen, four tabs — CHARACTERS (6 Wisp forms + Veyra, Rook and Morrow, all animated),
+  DASHES (4 trail colours), ARENAS (30 skins),
   NO ADS. Prices: Simple 300 · Rare 800 · Legendary 2,000 · Mythic 3,500 RP (01–03 keep 0/800/1,200).
 - **Arena scenery:** a shader grades the painting (Mythic scenery roughly doubles in saturation), its
   own light sources breathe and flare, water/fire/aurora/clouds move, and glow particles (embers,
@@ -59,6 +60,11 @@ From the DEVLOG entries of 2026-09-15/16 (device = Galaxy S24, desktop = M2):
   before was 270 ms build + 196 ms worst frame.
 - Endless arena art in the build: **45 MB → 3.7 MB** after lossy import; APK ≈ 78 MB.
 - Dash speed lowered 10 % (4,400 → 3,960 px/s) at the owner's request.
+- Playable characters (2026-09-17/18): **3** characters, **37** runtime layers, **13** animation
+  states each, identical collision for every character, particle budget **≤ 40** each, nine live
+  Shop cards build in **133 ms** cold / **8 ms** warm and animate for under **0.1 ms/frame**
+  (desktop), landing turn-in **0.16 s**. Episode briefs:
+  [devlog_characters_episodes.md](devlog_characters_episodes.md).
 - Art checker: **24 of 30 skins pass every metric**; 6 pass by eye review (a wide flat decorative
   border reads as floor to the heuristic).
 
