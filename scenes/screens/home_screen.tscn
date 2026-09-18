@@ -12,6 +12,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/environment/props/10_void_portal_entrance.png" id="13_rifts"]
 [ext_resource type="Script" path="res://scenes/screens/home_ambience.gd" id="14_ambience"]
 [ext_resource type="Script" path="res://scenes/screens/orbit_motes.gd" id="15_orbit"]
+[ext_resource type="Script" path="res://scenes/player/visuals/playable_character_preview.gd" id="16_character_preview"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/system/03_combo_chain.png" id="17_trials"]
 [ext_resource type="Texture2D" path="res://assets/art/environment/props/02_soul_shard_cluster.png" id="18_shop"]
 
@@ -214,6 +215,16 @@ offset_bottom = 400.0
 texture = ExtResource("4_wisp")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="CharacterPreview" type="Control" parent="ContentMargin/Content/HeroArea"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_right = 400.0
+offset_bottom = 400.0
+mouse_filter = 2
+script = ExtResource("16_character_preview")
+fill_ratio = 0.94
 
 [node name="OrbitFront" type="Node2D" parent="ContentMargin/Content/HeroArea"]
 unique_name_in_owner = true

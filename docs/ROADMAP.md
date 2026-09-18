@@ -178,6 +178,29 @@
 - ⬜ Tests when wanted: a tutorial flow test (director walk, first-launch and Rift Map routing); stale tests that
       boot Main now mark the tutorial completed first
 
+## Milestone 13 — Playable characters
+
+> Owner request 2026-09-17 (three concept sheets, via a ChatGPT-written brief): "implement the three
+> attached character designs as selectable PLAYABLE CHARACTERS", then "implement just one for now so
+> i can see how it looks like", then (after Codex ran out of quota) "finish what he started, make
+> sure the animations work and are smooth in the gameplay and also add animation in the character or
+> wisp selecter and they are not just wisps but characters". Rules: GDD §6, §9, §14 #31,
+> [ADR-0015](decisions/0015-animated-playable-characters.md). System:
+> [playable_character_visuals.md](systems/playable_character_visuals.md).
+
+- ✅ Layer art for all three characters extracted from the generated sheets (`extract_playable_characters.py`)
+- ✅ Shared presentation-only rig: 13 states in a runtime AnimationTree, heading spring, travel-axis
+      squash, interrupts, particle rules, `ChainSpring` follow-through, skinned `RibbonChain` ribbons
+- ✅ Veyra (Codex prototype, rebuilt), Rook and Morrow rigs with their own secondary motion and trails
+- ✅ Characters in the catalog, save ids and Shop; CHARACTERS tab with every card animated, plus
+      selected and unlock flourishes; live hero on Home
+- ✅ Verified: `playable_character_visual` (states, smoothness, menus, GameWorld), `form_catalog`,
+      lineup/motion/showcase fixtures reviewed frame by frame
+- ⬜ Owner: approve the look and motion of the three characters, then set their prices (all 0 RP now)
+- ⬜ Device pass: readability at gameplay size, particle cost and feel on the phone
+- ⬜ Optional: mipmaps for the character layers (import-setting decision), physics interpolation for
+      120 Hz phones (affects every character)
+
 ## Milestone 9 — Monetisation
 
 > Owner decision 2026-09-12: **free with opt-in rewarded video plus one "Remove Ads + Shard Pack" IAP.**

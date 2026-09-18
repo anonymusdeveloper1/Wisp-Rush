@@ -71,7 +71,15 @@ func _run_checks() -> void:
 		&"play_time_seconds": 3725.0,
 		&"owned_forms": ["void", "ash"],
 	})
-	if rows[0][1] != "001200" or rows[7][1] != "1h 02m" or rows[9][1] != "2 / 6":
+	var values: Dictionary[String, String] = {}
+	for row: PackedStringArray in rows:
+		values[row[0]] = row[1]
+	var characters: String = "2 / %d" % FormCatalog.REQUIRED_FORM_COUNT
+	if (
+		values.get("BEST SCORE", "") != "001200"
+		or values.get("TIME IN THE RIFT", "") != "1h 02m"
+		or values.get("CHARACTERS COLLECTED", "") != characters
+	):
 		failures += 1
 		push_error("m4_systems: statistics rows are wrong: %s" % [rows])
 

@@ -1,6 +1,6 @@
 # System: Player dash
 
-> **Status:** ✅ done · **Last updated:** 2026-09-15 · **GDD section:** §4–5.1, §5.6, §8
+> **Status:** ✅ done · **Last updated:** 2026-09-17 · **GDD section:** §4–5.1, §5.6, §8
 
 ## Purpose
 
@@ -65,6 +65,9 @@ WispPlayer (CharacterBody2D)  wisp_player.gd
 | `set_damage_immune(on)` / `is_damage_immune()` | method | RUSH immunity to contact, hazard and boss damage; separate from hurt invulnerability, no blink. |
 | `set_rush_visuals(active, warning)` | method | Momentum visuals at full + steady Wisp aura; `warning` flickers the aura. |
 | `has_buffered_swipe()` | method | Whether a released swipe is waiting to fire. |
+| `set_cosmetic_form(texture, tint, visual_scene = null)` | method | Equipped character: a rig scene is instanced under `%CharacterVisualMount` and synced every frame; otherwise the single-image form sprite. Presentation only ([playable_character_visuals.md](playable_character_visuals.md)). |
+| `set_reduced_motion(enabled)` | method | Pause-menu Reduced Motion for the Wisp's breathing and the equipped rig. |
+| `play_attack_visual()` / `get_character_visual()` | method | GameWorld's dash-kill accent for a rigged character / the live rig (tests). |
 
 ## Data & tuning
 
@@ -165,6 +168,7 @@ Health state/presentation is detailed in [player_health.md](player_health.md).
 
 | Date | Change |
 |---|---|
+| 2026-09-17 | Animated character rigs: `%CharacterVisualMount`, `set_cosmetic_form(…, visual_scene)`, per-frame `sync_controller` (state, dash/drift/aim direction, speed), `play_attack_visual` (ADR-0015) |
 | 2026-09-15 | Aim help: `aim_preview_changed`, GameWorld path line + lit enemies + ×N, release-time aim assist (±6°, AIM ASSIST), `get_dash_corridor_radius` (owner decision) |
 | 2026-09-15 | Momentum window in game time; streak glow, speed lines, RUSH aura; RUSH speed modifier and damage immunity (spec rush_and_feel) |
 | 2026-09-12 | Movement flow: buffering, landing-lock cancel, mid-dash redirect, launch burst, momentum, aim arrow |

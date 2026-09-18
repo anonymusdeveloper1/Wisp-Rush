@@ -1,0 +1,219 @@
+[gd_scene load_steps=24 format=3]
+
+[ext_resource type="Script" path="res://scenes/player/visuals/rook_visual.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/rook/shadow_body.png" id="2_shadow"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/rook/skull.png" id="3_skull"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/rook/wing_frame_left.png" id="4_frame_left"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/rook/wing_frame_right.png" id="5_frame_right"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/rook/membrane_left.png" id="6_membrane_left"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/rook/membrane_right.png" id="7_membrane_right"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/rook/foot_left.png" id="8_foot_left"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/rook/foot_right.png" id="9_foot_right"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/rook/tail_segment.png" id="10_segment"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/rook/tail_fin.png" id="11_fin"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/rook/dash_streak.png" id="12_streak"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/rook/wing_dust.png" id="13_dust"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_add"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="Gradient_dust"]
+offsets = PackedFloat32Array(0, 0.3, 1)
+colors = PackedColorArray(1, 0.5, 1, 0, 0.95, 0.35, 1, 0.8, 0.55, 0.15, 0.85, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture_dust"]
+gradient = SubResource("Gradient_dust")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_dust"]
+particle_flag_disable_z = true
+emission_shape = 3
+emission_box_extents = Vector3(230, 40, 1)
+direction = Vector3(0, 1, 0)
+spread = 35.0
+initial_velocity_min = 30.0
+initial_velocity_max = 90.0
+gravity = Vector3(0, 0, 0)
+damping_min = 20.0
+damping_max = 40.0
+angle_min = -180.0
+angle_max = 180.0
+angular_velocity_min = -60.0
+angular_velocity_max = 60.0
+scale_min = 0.22
+scale_max = 0.42
+color_ramp = SubResource("GradientTexture_dust")
+
+[sub_resource type="Gradient" id="Gradient_streak"]
+offsets = PackedFloat32Array(0, 0.25, 1)
+colors = PackedColorArray(1, 0.97, 0.92, 0, 1, 0.95, 0.9, 0.95, 0.95, 0.7, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture_streak"]
+gradient = SubResource("Gradient_streak")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_streak"]
+particle_flag_disable_z = true
+emission_shape = 3
+emission_box_extents = Vector3(120, 50, 1)
+direction = Vector3(0, 1, 0)
+spread = 6.0
+initial_velocity_min = 10.0
+initial_velocity_max = 40.0
+gravity = Vector3(0, 0, 0)
+angle_min = 117.0
+angle_max = 118.0
+scale_min = 0.24
+scale_max = 0.36
+color_ramp = SubResource("GradientTexture_streak")
+
+[node name="RookVisual" type="Node2D"]
+script = ExtResource("1_script")
+design_size = 640.0
+preview_center = Vector2(8, 64)
+
+[node name="MotionRoot" type="Node2D" parent="."]
+unique_name_in_owner = true
+
+[node name="TrailParticles" type="GPUParticles2D" parent="MotionRoot"]
+unique_name_in_owner = true
+material = SubResource("CanvasItemMaterial_add")
+position = Vector2(0, -10)
+emitting = false
+amount = 12
+lifetime = 0.6
+visibility_rect = Rect2(-700, -700, 1400, 1400)
+local_coords = false
+process_material = SubResource("ParticleProcessMaterial_dust")
+texture = ExtResource("13_dust")
+
+[node name="DashParticles" type="GPUParticles2D" parent="MotionRoot"]
+unique_name_in_owner = true
+position = Vector2(0, 40)
+emitting = false
+amount = 6
+lifetime = 0.16
+visibility_rect = Rect2(-700, -700, 1400, 1400)
+local_coords = false
+process_material = SubResource("ParticleProcessMaterial_streak")
+texture = ExtResource("12_streak")
+
+[node name="Body" type="Node2D" parent="MotionRoot"]
+unique_name_in_owner = true
+
+[node name="TailRoot" type="Node2D" parent="MotionRoot/Body"]
+unique_name_in_owner = true
+position = Vector2(0, 92)
+rotation = 1.75
+scale = Vector2(0.36, 0.36)
+
+[node name="TailSegment0" type="Node2D" parent="MotionRoot/Body/TailRoot"]
+unique_name_in_owner = true
+
+[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/TailRoot/TailSegment0"]
+position = Vector2(-18, -78)
+texture = ExtResource("10_segment")
+centered = false
+
+[node name="TailSegment1" type="Node2D" parent="MotionRoot/Body/TailRoot/TailSegment0"]
+unique_name_in_owner = true
+position = Vector2(196, 0)
+rotation = -0.5
+scale = Vector2(0.84, 0.84)
+
+[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/TailRoot/TailSegment0/TailSegment1"]
+position = Vector2(-18, -78)
+texture = ExtResource("10_segment")
+centered = false
+
+[node name="TailSegment2" type="Node2D" parent="MotionRoot/Body/TailRoot/TailSegment0/TailSegment1"]
+unique_name_in_owner = true
+position = Vector2(196, 0)
+rotation = -0.62
+scale = Vector2(0.84, 0.84)
+
+[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/TailRoot/TailSegment0/TailSegment1/TailSegment2"]
+position = Vector2(-18, -78)
+texture = ExtResource("10_segment")
+centered = false
+
+[node name="TailFin" type="Node2D" parent="MotionRoot/Body/TailRoot/TailSegment0/TailSegment1/TailSegment2"]
+unique_name_in_owner = true
+position = Vector2(206, 0)
+rotation = -0.2
+scale = Vector2(1.7, 1.7)
+
+[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/TailRoot/TailSegment0/TailSegment1/TailSegment2/TailFin"]
+position = Vector2(-40, -60)
+texture = ExtResource("11_fin")
+centered = false
+
+[node name="WingLeft" type="Node2D" parent="MotionRoot/Body"]
+unique_name_in_owner = true
+position = Vector2(-40, -52)
+scale = Vector2(1, 1)
+
+[node name="Membrane" type="Sprite2D" parent="MotionRoot/Body/WingLeft"]
+position = Vector2(-270, -166)
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("7_membrane_right")
+centered = false
+
+[node name="Frame" type="Sprite2D" parent="MotionRoot/Body/WingLeft"]
+position = Vector2(-228, -160)
+texture = ExtResource("5_frame_right")
+centered = false
+
+[node name="WingRight" type="Node2D" parent="MotionRoot/Body"]
+unique_name_in_owner = true
+position = Vector2(40, -52)
+scale = Vector2(1, 1)
+
+[node name="Membrane" type="Sprite2D" parent="MotionRoot/Body/WingRight"]
+position = Vector2(-86, -166)
+scale = Vector2(1.2, 1.2)
+texture = ExtResource("6_membrane_left")
+centered = false
+
+[node name="Frame" type="Sprite2D" parent="MotionRoot/Body/WingRight"]
+position = Vector2(-110, -160)
+texture = ExtResource("4_frame_left")
+centered = false
+
+[node name="ShadowBody" type="Sprite2D" parent="MotionRoot/Body"]
+unique_name_in_owner = true
+position = Vector2(0, -8)
+scale = Vector2(0.55, 0.55)
+texture = ExtResource("2_shadow")
+
+[node name="FootLeft" type="Node2D" parent="MotionRoot/Body"]
+unique_name_in_owner = true
+position = Vector2(-26, 78)
+rotation = 0.1
+
+[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/FootLeft"]
+position = Vector2(0, 24)
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("9_foot_right")
+
+[node name="FootRight" type="Node2D" parent="MotionRoot/Body"]
+unique_name_in_owner = true
+position = Vector2(26, 78)
+rotation = -0.1
+
+[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/FootRight"]
+position = Vector2(0, 24)
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("8_foot_left")
+
+[node name="Skull" type="Node2D" parent="MotionRoot/Body"]
+unique_name_in_owner = true
+position = Vector2(0, -72)
+
+[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Skull"]
+scale = Vector2(0.46, 0.46)
+texture = ExtResource("3_skull")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+
+[node name="AnimationTree" type="AnimationTree" parent="."]
+unique_name_in_owner = true

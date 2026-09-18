@@ -5,7 +5,7 @@
 > the change. This file holds **meaning and intent**; the exhaustive, auto-generated inventory of
 > what exists is [generated/PROJECT_MAP.md](generated/PROJECT_MAP.md).
 
-_Last updated: 2026-09-17 · by: Claude Code (Opus 5)_
+_Last updated: 2026-09-18 · by: Claude Code (Opus 5)_
 
 ## 1. Identity
 
@@ -25,11 +25,13 @@ _Last updated: 2026-09-17 · by: Claude Code (Opus 5)_
   implementation only; runs on the owner's Android phone from a debug APK.
 - **Works:** Loading → Tutorial (first launch) → animated Home → Rift story or Endless runs (five Rifts, twists, bosses;
   30 arena skins) → Results with a Rift Points breakdown; Rift Map, Trials, Daily, four-tab RP Shop (No Ads disabled);
-  save v8; synthesized audio; Reduced Motion; Android back. 34 headless test scripts (`tools/run_tests.sh`), several stale since M10.
+  nine characters, three of them animated rigs (2026-09-17); save v8; synthesized audio; Reduced Motion; Android back.
+  35 headless test scripts (`tools/run_tests.sh`), ten stale since M10.
 - **Direction:** [ADR-0013](decisions/0013-rift-story-levels-endless-mode-and-rift-points.md) /
   [ADR-0014](decisions/0014-endless-arenas-share-one-floor-template.md), built from
   [specs/story_and_endless/](specs/story_and_endless/README.md) (specs 01–05 done).
-- **Next:** device pass (RP pacing, Endless difficulty, RUSH frequency, tutorial), then the rest of M9 and M6 ([ROADMAP.md](ROADMAP.md)).
+- **Next:** owner review of the three characters (prices still 0), then the device pass (RP pacing, Endless
+  difficulty, RUSH frequency, tutorial, characters) and the rest of M9 and M6 ([ROADMAP.md](ROADMAP.md)).
 
 Keep this section ≤ 10 lines. Details belong in ROADMAP.md and DEVLOG.md.
 
@@ -136,7 +138,8 @@ Hand-maintained tables that give **meaning** to what the project map lists. Keep
 | Run progression | ✅ done | [mutations.md](systems/mutations.md) | `res://scripts/components/run_progression.gd` |
 | Reaper boss | ✅ done | [reaper_boss.md](systems/reaper_boss.md) | `res://scenes/bosses/reaper_boss.tscn` |
 | Save manager | ✅ done | [save_manager.md](systems/save_manager.md) | `res://scripts/autoload/save_manager.gd` |
-| Cosmetic forms | ✅ done · bought in the Shop's WISPS tab (spec 04) | [forms.md](systems/forms.md) | `res://data/forms/default_catalog.tres` |
+| Cosmetic forms | ✅ done · nine characters in the Shop's CHARACTERS tab | [forms.md](systems/forms.md) | `res://data/forms/default_catalog.tres` |
+| Playable characters | ✅ Veyra, Rook, Morrow animated rigs (2026-09-17) · owner approval and device pass pending | [playable_character_visuals.md](systems/playable_character_visuals.md) | `res://scenes/player/visuals/playable_character_visual.gd` |
 | Daily/challenges | ✅ done | [challenges.md](systems/challenges.md) | `res://scripts/utils/challenge_tracker.gd` |
 | Audio | ✅ done | [audio.md](systems/audio.md) | `res://scripts/autoload/audio_service.gd` |
 | Game feel & lifecycle | ✅ done | [game_feel.md](systems/game_feel.md) | `res://scenes/gameplay/game_world.gd` |
@@ -155,10 +158,11 @@ Only entry points, levels and major reusable prefabs — the map lists every sce
 | Scene | Purpose | System |
 |---|---|---|
 | `res://scenes/main/main.tscn` | Composition root: Loading, Tutorial, Home, Shop, Rift Map, Daily, Trials, Statistics, Settings, GameWorld or Results; back routing | Game flow |
-| `res://scenes/screens/home_screen.tscn` | Home: top bar (Rift Points, best), tappable hero Wisp (→ Shop WISPS) over a living background between Trials/Daily and Shop/Remove Ads columns, ENDLESS (once open) + animated PLAY + Rifts under it | Game flow |
-| `res://scenes/screens/shop_screen.tscn` | The only place RP is spent: tabs WISPS, DASHES, ARENAS (card carousels, buy/equip) and NO ADS (Remove Ads + Restore, disabled until billing exists, no RP; ADR-0012, ADR-0013) | Shop / Monetisation |
+| `res://scenes/screens/home_screen.tscn` | Home: top bar (Rift Points, best), tappable live hero character (→ Shop CHARACTERS) over a living background between Trials/Daily and Shop/Remove Ads columns, ENDLESS (once open) + animated PLAY + Rifts under it | Game flow |
+| `res://scenes/screens/shop_screen.tscn` | The only place RP is spent: tabs CHARACTERS (animated cards), DASHES, ARENAS (card carousels, buy/equip) and NO ADS (Remove Ads + Restore, disabled until billing exists, no RP; ADR-0012, ADR-0013) | Shop / Monetisation |
 | `res://scenes/gameplay/game_world.tscn` | Responsive playable arena and run-local coordinator | Core run |
-| `res://scenes/player/wisp_player.tscn` | Aiming, dash, health and death player prefab | Player dash / health |
+| `res://scenes/player/wisp_player.tscn` | Aiming, dash, health and death player prefab; hosts the equipped character's rig | Player dash / health |
+| `res://scenes/player/visuals/{veyra,rook,morrow}_visual.tscn` | The three animated character rigs on the shared `PlayableCharacterVisual` base (ADR-0015) | Playable characters |
 | `res://scenes/enemies/soul_wisp.tscn` | One-hit steering enemy prefab | Enemies |
 | `res://scenes/enemies/shard_wraith.tscn` | Two-hit angular dart enemy prefab | Enemies |
 | `res://scenes/enemies/bone_mote.tscn` | Three-hit predictive charge enemy prefab | Enemies |
@@ -223,8 +227,8 @@ Only entry points, levels and major reusable prefabs — the map lists every sce
 | `RunProgressionTuning` | `res://scripts/resources/run_progression_tuning.gd` | `res://data/progression/default_run_progression.tres` | XP curve, shared mutation-effect tuning and the upgrade offer (tray slow motion, timeout, slide, calm window, indicator pulse) |
 | `ReaperTuning` | `res://scripts/resources/reaper_tuning.gd` | `res://data/bosses/default_reaper.tres`, `res://data/bosses/*_tuning.tres` | Reaper health, phase timings, attack geometry and rewards (one per boss variant) |
 | `BossData` | `res://scripts/resources/boss_data.gd` | `res://data/bosses/{reaper,reaper_ascended,hollow_choir,the_fracture,cinder_maw}.tres` | One boss variant on the shared `ReaperBoss` machine: atlas, toughness, accent; referenced by `RiftData.boss_id` ([ADR-0010](decisions/0010-data-driven-boss-variants.md)) |
-| `FormData` | `res://scripts/resources/form_data.gd` | `res://data/forms/*.tres` | Cosmetic form identity, price, requirement, texture and tint |
-| `FormCatalog` | `res://scripts/resources/form_catalog.gd` | `res://data/forms/default_catalog.tres` | Ordered six-form registry and validation |
+| `FormData` | `res://scripts/resources/form_data.gd` | `res://data/forms/*.tres` (9) | Character identity, price, requirement, portrait, tint and optional `visual_scene` rig |
+| `FormCatalog` | `res://scripts/resources/form_catalog.gd` | `res://data/forms/default_catalog.tres` | Ordered nine-character registry (`REQUIRED_FORM_COUNT`) and validation |
 | `DashStyleData` | `res://scripts/resources/dash_style_data.gd` | `res://data/dash_styles/*.tres` | Dash style: id, name, price, `trail_tint`, `burst_tint`, `uses_form_tint`; reserved-hue check |
 | `DashStyleCatalog` | `res://scripts/resources/dash_style_catalog.gd` | `res://data/dash_styles/default_dash_style_catalog.tres` | Ordered dash styles (SOUL free default), lookup, save ids, validation |
 | `RiftData` | `res://scripts/resources/rift_data.gd` | `res://data/rifts/*.tres` | Arena identity, backdrop, unlock gate and rule twist |
@@ -251,6 +255,9 @@ Only entry points, levels and major reusable prefabs — the map lists every sce
 | Phone layout QA: screens × 5 phone aspect ratios → `logs/qa/<screen>_sheet.png` | `tools/qa_matrix.sh [screens…]` |
 | Frame-time benchmark (crowded run) | `Godot --headless --path . --script res://tools/godot/bench_stress.gd` |
 | Regenerate runtime art from the redesign sheets | `python3 tools/art/extract_redesign.py`, then `tools/validate.sh` |
+| Regenerate the playable-character layers (and print their ribbon spines) | `python3 tools/art/extract_playable_characters.py [veyra rook morrow]`, then `tools/validate.sh` |
+| Character visual QA: reference vs rig, motion frames, Shop/Home/gameplay shots | `tools/godot/render_character_{lineup,motion,select_showcase,home_showcase,gameplay_showcase}.*` + `python3 tools/art/motion_contact_sheet.py <id>` ([playable_character_visuals.md](systems/playable_character_visuals.md)) |
+| What live character previews cost to build and run | `Godot --headless --path . --script res://tools/godot/bench_character_previews.gd` |
 | Rebuild the UI Theme | steps in [ui_design_system.md](systems/ui_design_system.md) |
 | Build + deploy the Android debug APK (device over USB) | `JAVA_HOME=$(/usr/libexec/java_home) "$GODOT" --headless --path . --export-debug "Android" build/android/wisp_rush_debug.apk` then `~/Library/Android/sdk/platform-tools/adb install -r -t build/android/wisp_rush_debug.apk` and `adb shell monkey -p com.cognitix.wisprush -c android.intent.category.LAUNCHER 1` (the activity is `GodotAppLauncher` and is **not exported**, so `am start -n` is denied) |
 | Render at an explicit window aspect | `tools/screenshot.sh [scene] [frames] [size]` (PNG remains at design resolution; runtime log reports the expanded arena) |
@@ -278,6 +285,7 @@ like this" in minutes. **A change is not done until its documentation is.**
 | What can we show publicly, and how do we film it? | `docs/marketing/devlog_video_brief.md` |
 | How is a devlog video made (rules, structure, Palmier blueprint, QA)? | `docs/marketing/devlog_video_recipe.md` |
 | Which hook should a devlog video open with? | `docs/marketing/devlog_hooks.md` |
+| What should the next devlog episodes cover, and how do I shoot them? | `docs/marketing/devlog_characters_episodes.md` (the planned character episodes); the episode table in `tools/video/README.md` is the status of record |
 | Where did an asset come from, how is it imported? | `docs/ASSETS.md` |
 | What does this class / method do? | `##` doc comments in the `.gd` file |
 
@@ -354,6 +362,7 @@ Newest first, one per work session:
 | Term | Meaning |
 |---|---|
 | Wisp | The player's small purple spirit; source art filenames retain the older `riftling` label |
+| Character | What the player equips: one of six single-image Wisp forms or one of the three animated characters (Veyra, Rook, Morrow). Cosmetic only. Code and save keep the older "form" names (`FormData`, `owned_forms`, the Shop's `wisps` tab id) |
 | Soul Fragment | One unit of player health; a normal run starts with three |
 | Soul Shard | The old name of the currency, renamed Rift Points on 2026-09-15 (ADR-0013, spec 01). Only file and class names keep it: `soul_shard_pickup.*` / `SoulShardPickup` and the `02_soul_shards` icon are the Rift Points pickup and icon. Never player-facing; unrelated to the Shard Wraith enemy |
 | Rift Points (RP) | The only currency: earned only by playing, spent only on cosmetics, never bought. Text: `1,250 RP` after numbers, "Rift Points" in sentences (`RiftPoints`) |

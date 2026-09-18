@@ -66,6 +66,8 @@ const FORM_SOURCE_SIZE: float = 512.0
 ## Idle breathing while waiting at an edge: a 2.5 % scale swing over a slow cycle (STYLE_GUIDE).
 const IDLE_BREATH_AMOUNT: float = 0.025
 const IDLE_BREATH_PERIOD: float = 2.6
+## Seconds before a dash reaches its wall in which an animated character turns to land on its feet.
+const LANDING_WINDOW: float = 0.16
 ## Distance from the Wisp's centre to the aim arrow, in collision radii.
 const ARROW_DISTANCE: float = 2.15
 ## Aim arrow size, in collision radii. It carries a dark outline so it reads on Frozen Choir's pale
@@ -154,7 +156,14 @@ var _dash_target_normal: Vector2 = Vector2.UP
 var _base_sprite_scale: Vector2 = Vector2.ONE
 var _impact_tween: Tween
 var _cosmetic_texture: Texture2D
+var _cosmetic_visual_scene: PackedScene
 var _cosmetic_tint: Color = Palette.SOUL_CYAN
+var _character_visual: PlayableCharacterVisual
+## Inward normal of the wall the Wisp rests against; an animated character stands on it.
+var _resting_normal: Vector2 = Vector2.UP
+## Latest resolved aim and edge-drift headings, so an animated character leans the way it will go.
+var _visual_aim_direction: Vector2 = Vector2.UP
+var _drift_direction: Vector2 = Vector2.ZERO
 var _breath_time: float = 0.0
 var _reduced_motion: bool = false
 ## Whether pointer and keyboard input steer the Wisp; the tutorial turns it off while it demonstrates.
@@ -170,6 +179,7 @@ var _aim_preview_active: bool = false
 @onready var _health: HealthComponent = %HealthComponent
 @onready var _sprite: AnimatedSprite2D = %Sprite
 @onready var _form_sprite: Sprite2D = %FormSprite
+@onready var _character_visual_mount: Node2D = %CharacterVisualMount
 @onready var _collision_shape: CollisionShape2D = %CollisionShape
 @onready var _aim_arrow: Node2D = %AimArrow
 @onready var _aim_arrow_glow: Polygon2D = %Glow
@@ -186,8 +196,8 @@ func _ready() -> void:
 	_sprite.play(&"reform")
 	_aim_arrow.visible = false
 	_impact_burst.visible = false
-	_apply_cosmetic_form()
 	_reduced_motion = _read_reduced_motion()
+	_apply_cosmetic_form()
 	_build_momentum_nodes()
 
 
@@ -230,11 +240,10 @@ func _process(delta: float) -> void:
 			0.0 if _reduced_motion else ARROW_PULSE_AMOUNT
 		)
 		_aim_arrow.scale = Vector2.ONE * _player_radius * ARROW_SCALE * pulse
-	if _reduced_motion or (state != State.WAITING_AT_EDGE and state != State.AIMING):
-		return
-	_breath_time += delta
-	var breath: float = 1.0 + sin(_breath_time * TAU / IDLE_BREATH_PERIOD) * IDLE_BREATH_AMOUNT
-	_sprite.scale = _base_sprite_scale * breath
+	if not _reduced_motion and (state == State.WAITING_AT_EDGE or state == State.AIMING):
+		_breath_time += delta
+		var breath: float = 1.0 + sin(_breath_time * TAU / IDLE_BREATH_PERIOD) * IDLE_BREATH_AMOUNT
+		_sprite.scale = _base_sprite_scale * breath
 	_sync_form_visual()
 
 
@@ -249,7 +258,12 @@ func _physics_process(delta: float) -> void:
 				_enter_waiting()
 		State.WAITING_AT_EDGE, State.AIMING:
 			_process_keyboard_aim()
+			_update_resting_normal()
+			var drift_start: Vector2 = global_position
 			_apply_edge_drift(delta)
+			var drifted: Vector2 = global_position - drift_start
+			if drifted.length_squared() > 0.0001:
+				_drift_direction = drifted.normalized()
 		State.WINDUP:
 			_state_time_remaining -= delta
 			if _state_time_remaining <= 0.0:
@@ -579,6 +593,7 @@ func set_arena_rect(rect: Rect2) -> void:
 	if not _arena_initialized:
 		position = Vector2(_play_bounds.get_center().x, _play_bounds.end.y)
 		_arena_initialized = true
+		_resting_normal = Vector2.UP
 		if _play_polygon.size() >= 3:
 			_snap_to_polygon_edge()
 	elif _play_polygon.size() >= 3:
@@ -675,11 +690,36 @@ func set_run_combat_modifiers(damage: int, blade_width: float, dash_speed: float
 
 
 ## Applies a persistent form to presentation only; combat geometry and tuning never change.
-func set_cosmetic_form(texture: Texture2D, tint: Color) -> void:
+## [param visual_scene] is optional so every existing static form keeps the same lightweight path.
+func set_cosmetic_form(
+		texture: Texture2D,
+		tint: Color,
+		visual_scene: PackedScene = null,
+	) -> void:
 	_cosmetic_texture = texture
 	_cosmetic_tint = tint
+	_cosmetic_visual_scene = visual_scene
 	if is_node_ready():
 		_apply_cosmetic_form()
+
+
+## Applies the Reduced Motion setting to the Wisp's own idle breathing and the equipped character's
+## rig; the pause menu can change it in the middle of a run.
+func set_reduced_motion(enabled: bool) -> void:
+	_reduced_motion = enabled
+	if _character_visual != null:
+		_character_visual.set_reduced_motion(enabled)
+
+
+## Plays the equipped character's attack accent after a dash damages an enemy.
+func play_attack_visual() -> void:
+	if _character_visual != null:
+		_character_visual.play_attack()
+
+
+## The optional animated presentation instance, exposed for visual-state tests.
+func get_character_visual() -> PlayableCharacterVisual:
+	return _character_visual
 
 
 ## Returns the current run-local damaging-corridor multiplier.
@@ -757,6 +797,7 @@ func interrupt_dash_at(world_position: Vector2, impact_normal: Vector2) -> bool:
 	_state_time_remaining = tuning.wall_impact_duration
 	_sprite.rotation = 0.0
 	_sprite.play(&"wall_impact")
+	_resting_normal = impact_normal
 	_play_impact_feedback(impact_normal)
 	obstacle_impacted.emit(global_position, impact_normal, _dash_id)
 	focus_started.emit(tuning.focus_duration, tuning.focus_world_speed)
@@ -895,6 +936,7 @@ func _take_damage(safe_edge_position: Vector2) -> bool:
 	_hide_aim_preview()
 	global_position = safe_edge_position
 	_snap_to_nearest_edge()
+	_update_resting_normal()
 	_invulnerability_remaining = tuning.invulnerability_duration
 	_invulnerability_elapsed = 0.0
 	if not _health.apply_damage(1):
@@ -1108,6 +1150,8 @@ func _update_aim_preview(direction: Vector2) -> void:
 	# pose (the charge, the dash heading, the hurt flinch).
 	if state == State.WAITING_AT_EDGE or state == State.AIMING:
 		_sprite.rotation = clampf(resolved_direction.angle(), -0.42, 0.42)
+		if not resolved_direction.is_zero_approx():
+			_visual_aim_direction = resolved_direction
 	if (
 		not _aim_arrow_enabled
 		or resolved_direction.is_zero_approx()
@@ -1192,6 +1236,7 @@ func _finish_dash() -> void:
 		inward_normal = DashGeometry.inward_edge_normal(position, _play_bounds)
 	_sprite.rotation = 0.0
 	_sprite.play(&"wall_impact")
+	_resting_normal = inward_normal
 	_play_impact_feedback(inward_normal)
 	wall_impacted.emit(global_position, inward_normal, _dash_id)
 	focus_started.emit(tuning.focus_duration, tuning.focus_world_speed)
@@ -1246,20 +1291,124 @@ func _update_invulnerability(delta: float) -> void:
 
 
 func _apply_cosmetic_form() -> void:
+	_clear_character_visual()
+	if _cosmetic_visual_scene != null:
+		var instance: Node = _cosmetic_visual_scene.instantiate()
+		_character_visual = instance as PlayableCharacterVisual
+		if _character_visual == null:
+			instance.queue_free()
+			push_error("Cosmetic visual scene root must extend PlayableCharacterVisual")
+		else:
+			_character_visual_mount.add_child(_character_visual)
+			_character_visual.set_reduced_motion(_reduced_motion)
 	_form_sprite.texture = _cosmetic_texture
-	_form_sprite.visible = _cosmetic_texture != null
-	_sprite.visible = _cosmetic_texture == null
+	_form_sprite.visible = _cosmetic_texture != null and _character_visual == null
+	_sprite.visible = _cosmetic_texture == null and _character_visual == null
 	_aim_arrow_glow.color = Color(_cosmetic_tint.r, _cosmetic_tint.g, _cosmetic_tint.b, 0.5)
 	_aim_arrow_head.color = Color(_cosmetic_tint.lightened(0.6), 0.95)
 	_sync_form_visual()
 
 
 func _sync_form_visual() -> void:
-	if not is_node_ready() or not _form_sprite.visible:
+	if not is_node_ready():
 		return
-	_form_sprite.rotation = _sprite.rotation
-	_form_sprite.scale = _sprite.scale * (SOURCE_FRAME_SIZE / FORM_SOURCE_SIZE)
-	_form_sprite.modulate = Color(1.0, 1.0, 1.0, _sprite.modulate.a)
+	if _form_sprite.visible:
+		_form_sprite.rotation = _sprite.rotation
+		_form_sprite.scale = _sprite.scale * (SOURCE_FRAME_SIZE / FORM_SOURCE_SIZE)
+		_form_sprite.modulate = Color(1.0, 1.0, 1.0, _sprite.modulate.a)
+	if _character_visual != null:
+		# Only the uniform base size is mirrored: the rig plays its own squash, stretch and breathing.
+		_character_visual.sync_controller(
+			_base_sprite_scale.x * SOURCE_FRAME_SIZE,
+			_sprite.modulate.a,
+			_get_character_visual_state(),
+			_get_character_visual_direction(),
+			_get_character_speed_amount(),
+			_dash_target_normal if state == State.DASHING or state == State.WINDUP else _resting_normal,
+			_get_landing_progress(),
+		)
+
+
+func _clear_character_visual() -> void:
+	if _character_visual == null:
+		return
+	_character_visual_mount.remove_child(_character_visual)
+	_character_visual.queue_free()
+	_character_visual = null
+
+
+## How near a live dash is to its wall, 0 until the last [constant LANDING_WINDOW] seconds and 1 at
+## contact, so an animated character can turn its feet toward the wall before it arrives.
+func _get_landing_progress() -> float:
+	if state != State.DASHING:
+		return 0.0
+	var speed: float = get_current_dash_speed()
+	if speed <= 0.0:
+		return 0.0
+	return clampf(1.0 - position.distance_to(_dash_target) / speed / LANDING_WINDOW, 0.0, 1.0)
+
+
+## Re-reads the wall the Wisp is resting against (it slides along edges on Frozen Choir).
+func _update_resting_normal() -> void:
+	if not _arena_initialized:
+		return
+	if _play_polygon.size() >= 3:
+		_resting_normal = DashGeometry.polygon_inward_normal(position, _play_polygon)
+	else:
+		_resting_normal = DashGeometry.inward_edge_normal(position, _play_bounds)
+
+
+## Dash heading while launching, flying or landing; slide heading on a drifting edge; aim otherwise.
+func _get_character_visual_direction() -> Vector2:
+	match state:
+		State.WINDUP, State.DASHING, State.WALL_IMPACT:
+			if not _dash_direction.is_zero_approx():
+				return _dash_direction
+		State.WAITING_AT_EDGE:
+			if _edge_drift_speed > 0.0 and not _drift_direction.is_zero_approx():
+				return _drift_direction
+		State.AIMING:
+			return _visual_aim_direction
+	return _dash_direction if not _dash_direction.is_zero_approx() else _visual_aim_direction
+
+
+## 0 at rest, a slow drift on Frozen Choir edges, a coiled windup, 1 in full flight.
+func _get_character_speed_amount() -> float:
+	match state:
+		State.DASHING:
+			return 1.0
+		State.WINDUP:
+			return 0.6
+		State.WAITING_AT_EDGE, State.AIMING:
+			return 0.35 if _edge_drift_speed > 0.0 else 0.0
+	return 0.0
+
+
+func _get_character_visual_state() -> StringName:
+	match state:
+		State.SPAWNING:
+			return PlayableCharacterVisual.REVIVE_SPAWN
+		State.WAITING_AT_EDGE:
+			return (
+				PlayableCharacterVisual.MOVE_FLY
+				if _edge_drift_speed > 0.0
+				else PlayableCharacterVisual.IDLE_HOVER
+			)
+		State.AIMING:
+			return PlayableCharacterVisual.AIM_CHARGE
+		State.WINDUP:
+			return PlayableCharacterVisual.DASH_START
+		State.DASHING:
+			return PlayableCharacterVisual.DASH_LOOP
+		State.WALL_IMPACT:
+			return PlayableCharacterVisual.DASH_END
+		State.HURT:
+			return PlayableCharacterVisual.HIT_REACTION
+		State.DEAD:
+			return PlayableCharacterVisual.DEATH
+		State.VICTORY:
+			return PlayableCharacterVisual.VICTORY
+	return PlayableCharacterVisual.IDLE_HOVER
 
 
 func _on_health_changed(current_health: int, maximum_health: int) -> void:
@@ -1303,7 +1452,7 @@ func _enter_waiting() -> void:
 	_sprite.scale = _base_sprite_scale
 	_sprite.play(&"idle")
 	_breath_time = 0.0
-	_reduced_motion = _read_reduced_motion()
+	set_reduced_motion(_read_reduced_motion())
 	_hide_aim_preview()
 
 

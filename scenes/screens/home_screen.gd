@@ -15,7 +15,7 @@ extends Control
 
 ## Emitted when PLAY is activated; the host starts an Endless run with the equipped skin.
 signal play_requested
-## Emitted when the player taps the hero Wisp; Main opens the Shop's WISPS tab.
+## Emitted when the player taps the hero character; Main opens the Shop's CHARACTERS tab.
 signal wisps_requested
 ## Emitted when the player opens today's deterministic Rift.
 signal daily_requested
@@ -100,6 +100,8 @@ var _reduced_motion: bool = false
 var _ads_removed: bool = false
 var _equipped_texture: Texture2D = null
 var _equipped_tint: Color = Palette.SOUL_CYAN
+var _equipped_form: FormData
+var _applied_visual_form_id: StringName = &""
 var _endless_best_score: int = 0
 var _endless_best_wave: int = 0
 var _hero_rest: Vector2 = Vector2.ZERO
@@ -121,6 +123,7 @@ var _play_press_tween: Tween
 @onready var _hero_pocket: TextureRect = %HeroPocket
 @onready var _hero_glow: TextureRect = %HeroGlow
 @onready var _wisp_preview: TextureRect = %WispPreview
+@onready var _character_preview: PlayableCharacterPreview = %CharacterPreview
 @onready var _orbit_back: OrbitMotes = %OrbitBack
 @onready var _orbit_front: OrbitMotes = %OrbitFront
 @onready var _left_column: VBoxContainer = %LeftColumn
@@ -217,6 +220,7 @@ func setup(snapshot: Dictionary, equipped_form: FormData) -> void:
 	if settings is Dictionary:
 		_reduced_motion = bool((settings as Dictionary).get(&"reduced_motion", false))
 	if equipped_form != null:
+		_equipped_form = equipped_form
 		_equipped_texture = equipped_form.texture
 		_equipped_tint = equipped_form.tint
 	_endless_best_score = int(snapshot.get(&"endless_best_score", 0))
@@ -265,6 +269,7 @@ func get_hero_motion_rect() -> Rect2:
 func _refresh() -> void:
 	if _equipped_texture != null:
 		_wisp_preview.texture = _equipped_texture
+	_apply_equipped_visual()
 	_best_label.text = _group_digits(_endless_best_score)
 	_rift_points_label.text = RiftPoints.group_digits(_rift_points)
 	_hero_glow.self_modulate = Color(_equipped_tint, 1.0)
@@ -279,6 +284,7 @@ func _refresh() -> void:
 		orbit.set_process(not _reduced_motion)
 		orbit.visible = not _reduced_motion
 	_ambience.set_active(not _reduced_motion)
+	_character_preview.set_reduced_motion(_reduced_motion)
 	_animation_time = 0.0
 	_animate_hero()
 	_animate_actions()
@@ -355,6 +361,8 @@ func _layout_hero() -> void:
 	var preview_size := Vector2(edge, edge)
 	_wisp_preview.size = preview_size
 	_wisp_preview.pivot_offset = preview_size * 0.5
+	_character_preview.size = preview_size
+	_character_preview.pivot_offset = preview_size * 0.5
 	var pocket_size: Vector2 = preview_size * HERO_POCKET_SCALE
 	_hero_pocket.size = pocket_size
 	_hero_pocket.position = _hero_rest - pocket_size * 0.5
@@ -394,6 +402,9 @@ func _animate_hero() -> void:
 	_wisp_preview.position = centre - _wisp_preview.size * 0.5
 	_wisp_preview.scale = Vector2.ONE * breathe * _hero_press_scale
 	_wisp_preview.rotation = sin(t * SWAY_SPEED) * SWAY_AMOUNT
+	_character_preview.position = _wisp_preview.position
+	_character_preview.scale = _wisp_preview.scale
+	_character_preview.rotation = _wisp_preview.rotation
 	_hero_glow.position = centre - _hero_glow.size * 0.5
 	_hero_glow.scale = Vector2.ONE * (1.0 + (breathe - 1.0) * 2.0)
 	_hero_glow.modulate.a = HERO_GLOW_ALPHA + sin(t * BREATHE_SPEED) * HERO_GLOW_PULSE
@@ -403,6 +414,20 @@ func _animate_hero() -> void:
 	_orbit_back.position = ring_centre
 	_orbit_front.position = ring_centre
 	_orbit_front.sync_time(_orbit_back.get_time())
+
+
+func _apply_equipped_visual() -> void:
+	if _equipped_form == null:
+		_character_preview.visible = false
+		_wisp_preview.self_modulate.a = 1.0
+		return
+	if _applied_visual_form_id != _equipped_form.form_id:
+		var animated: bool = _character_preview.set_form(_equipped_form)
+		_applied_visual_form_id = _equipped_form.form_id
+		_character_preview.visible = animated
+		_wisp_preview.self_modulate.a = 0.0 if animated else 1.0
+		if animated:
+			_character_preview.play_selected.call_deferred()
 
 
 ## Sizes PLAY's glow and light sweep and the Rift portal icon to their buttons.
@@ -448,7 +473,7 @@ func _animate_actions() -> void:
 	_rifts_icon.scale = Vector2.ONE * (1.0 + sin(t * RIFT_ICON_PULSE_SPEED) * RIFT_ICON_PULSE)
 
 
-## A tap on the hero Wisp opens the Shop's WISPS tab; a drag or a cancelled touch does not.
+## A tap on the hero character opens the Shop's CHARACTERS tab; a drag or a cancelled touch does not.
 ##
 ## Mouse events only: a touch arrives as an emulated mouse press, so handling both would act twice.
 func _on_wisp_preview_gui_input(event: InputEvent) -> void:

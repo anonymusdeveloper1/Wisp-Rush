@@ -399,7 +399,11 @@ func _ready() -> void:
 	_boss_hud.visible = false
 	_boss_warning.add_theme_color_override(&"font_color", Palette.RIFT_MAGENTA)
 	if _cosmetic_form != null:
-		_player.set_cosmetic_form(_cosmetic_form.texture, _cosmetic_form.tint)
+		_player.set_cosmetic_form(
+			_cosmetic_form.texture,
+			_cosmetic_form.tint,
+			_cosmetic_form.visual_scene,
+		)
 		_form_portrait.texture = _cosmetic_form.texture
 	_apply_arena()
 	_update_player_mutation_stats()
@@ -611,7 +615,11 @@ func configure_run(profile: RunProfile) -> void:
 	if profile.run_seed != 0 and not is_node_ready():
 		run_seed = profile.run_seed
 	if is_node_ready() and _cosmetic_form != null:
-		_player.set_cosmetic_form(_cosmetic_form.texture, _cosmetic_form.tint)
+		_player.set_cosmetic_form(
+			_cosmetic_form.texture,
+			_cosmetic_form.tint,
+			_cosmetic_form.visual_scene,
+		)
 		_form_portrait.texture = _cosmetic_form.texture
 	if is_node_ready():
 		_player.set_momentum_presentation(feel_tuning, _get_dash_trail_tint())
@@ -2285,6 +2293,7 @@ func _on_enemy_killed(
 	if damage_event_id > 0:
 		dash_kill_index = _kills_by_dash.get(damage_event_id, 0) + 1
 		_kills_by_dash[damage_event_id] = dash_kill_index
+		_player.play_attack_visual()
 	_remaining_live_enemies = maxi(0, _remaining_live_enemies - 1)
 	_spawn_split_children(enemy, world_position)
 	_fill_rush_from_kill(world_position, dash_kill_index)
@@ -2828,6 +2837,7 @@ func _close_settings_overlay() -> void:
 func _apply_feel_settings(settings: Dictionary) -> void:
 	_reduced_motion = bool(settings.get(&"reduced_motion", false))
 	_ambience.set_active(not _reduced_motion)
+	_player.set_reduced_motion(_reduced_motion)
 	_player.set_aim_arrow_enabled(bool(settings.get(&"aim_arrow", true)))
 	_player.set_aim_assist_enabled(bool(settings.get(&"aim_assist", true)))
 	_shake_strength = clampf(float(settings.get(&"screen_shake", 1.0)), 0.0, 1.0) * (

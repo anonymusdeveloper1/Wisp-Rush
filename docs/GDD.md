@@ -32,7 +32,7 @@ Rifts level by level, then chase scores in Endless on arenas you unlock with Rif
   mutations, then beat the Rift's boss around 55–75 seconds to clear the level — or die and retry.
 - **Minutes (Endless):** the same waves with no end; a boss from a cleared Rift arrives every four
   waves, and each victory makes the next cycle harder.
-- **Sessions:** clear levels, open new Rifts and Endless, earn Rift Points, unlock Wisp forms, dash
+- **Sessions:** clear levels, open new Rifts and Endless, earn Rift Points, unlock characters, dash
   styles and Endless arenas, climb the Trials and play the daily run.
 
 This is explicitly **not** orbit, tap-to-reverse, ring-gap or slingshot movement.
@@ -217,7 +217,7 @@ the day that rotates through every Endless skin, owned or not. Missing days have
 
 | Tab | Items | Paid with |
 |---|---|---|
-| Wisps | Forms: Void (default), Ash (250), Venom (500), Bloodmoon (800), Frost (1,200), Eclipse (2,000 plus first boss victory); characters later | RP |
+| Characters | Wisp forms: Void (default), Ash (250), Venom (500), Bloodmoon (800), Frost (1,200), Eclipse (2,000 plus first boss victory). Animated characters: Veyra, the Last Wisp; Rook, the Bonewing; Morrow, the Runebound (0 while the owner reviews them, §14 #31). Every character plays exactly like the Wisp | RP |
 | Dashes | Trail styles: Soul (default) plus tints of the existing trail, never led by warning amber or rift magenta | RP |
 | Arenas | 30 Endless skins in four tiers: Astral Observatory (free default), Drowned Sanctum 800, Moonpetal Shrine 1,200, the rest Simple 300 · Rare 800 · Legendary 2,000 · Mythic 3,500; Legendary skins have light animated scenery, Mythic skins rich animated scenery (never over the floor) | RP |
 | No Ads | Remove Ads (no currency inside) and Restore Purchases | Real money ([ADR-0012](decisions/0012-store-surface-before-billing.md)) |
@@ -261,6 +261,11 @@ authority is `concept_art/wisp_rush_redesign_v1/STYLE_GUIDE.md`.
   dominant bottom-reachable primary actions; all text code-rendered.
 - Hierarchy: Wisp (cyan-white core) → Soul Wisp → Shard Wraith → Bone Mote → Reaper (tallest,
   darkest). Cosmetic forms keep scale, anchor and collision silhouette.
+- Playable characters ([ADR-0015](decisions/0015-animated-playable-characters.md)): Veyra, Rook and
+  Morrow are layered rigs animated in code — a full state set from idle to death, springy
+  appendages, a restrained particle trail each — drawn inside the Wisp's visual box on the same
+  collision circle. Their layers are generated from the owner's concept sheets
+  (`concept_art/wisp_rush_playable_characters_v1/`).
 - Runtime art is generated from the concept sheets by `tools/art/extract_redesign.py`; the previous
   violet art is archived in `assets/legacy_v1/` and never ships.
 - Floors: each Rift's wall follows its own painted floor ([ADR-0011](decisions/0011-polygon-playfield-from-art.md)).
@@ -298,7 +303,7 @@ Motion stills the decoration; the hand gesture still plays because it is informa
 **Home** (owner decision 2026-09-13, revised the same day; content updated by ADR-0013 on 2026-09-14):
 stone-and-cyan, no bottom navigation.
 - **Top:** slim top bar (Rift Points, best, Statistics, Settings) and the logo. Best is the Endless best.
-- **Middle:** the equipped Wisp, alive; **tapping it opens the Shop's Wisps tab**. Left column: Trials,
+- **Middle:** the equipped character, alive; **tapping it opens the Shop's Characters tab**. Left column: Trials,
   Daily. Right column: Shop, Remove Ads (hidden once ads are removed).
 - **Under the Wisp**, at least 50 px below its lowest animated pixel: a caption (`ENDLESS`, or
   `ENDLESS • BEST WAVE n`), then a large animated PLAY (not full width) that starts Endless, with the
@@ -308,7 +313,7 @@ stone-and-cyan, no bottom navigation.
   the background comes alive (brazier flicker, rune pulse, mist, rising motes) over unchanged art;
   PLAY breathes with a glow pulse and a periodic light sweep; the Rifts portal icon turns. No
   animation ever passes over a button. Reduced Motion stills it all.
-- **Shop** has four tabs: Wisps, Dashes, Arenas (Endless skins) and No Ads. The first three spend
+- **Shop** has four tabs: Characters, Dashes, Arenas (Endless skins) and No Ads. The first three spend
   Rift Points; No Ads (Remove Ads + Restore Purchases) stays disabled until billing exists
   ([ADR-0012](decisions/0012-store-surface-before-billing.md)).
 
@@ -343,7 +348,7 @@ large, focusable and have visible desktop/controller focus styling.
 
 | Release MVP | Explicitly later / provider-dependent |
 |---|---|
-| Tutorial; Rift story mode (5 Rifts × 8 levels); Endless mode with template arena skins; 20+ formations; 3+ enemies; 3+ hazards; 8 mutations; 3-phase boss encounters; Rift Points Shop (6 forms, dash styles, arena skins); daily/challenges; complete screen flow; local save/statistics/settings; final feedback; unsigned Android/iOS export configuration | Real ads, analytics, IAP/store verification, cloud saves, accounts, backend, signed store builds; paid cosmetics (custom Wisps, characters); Endless events built from the Rift twists |
+| Tutorial; Rift story mode (5 Rifts × 8 levels); Endless mode with template arena skins; 20+ formations; 3+ enemies; 3+ hazards; 8 mutations; 3-phase boss encounters; Rift Points Shop (6 Wisp forms and 3 animated characters, dash styles, arena skins); daily/challenges; complete screen flow; local save/statistics/settings; final feedback; unsigned Android/iOS export configuration | Real ads, analytics, IAP/store verification, cloud saves, accounts, backend, signed store builds; paid cosmetics (custom Wisps, characters); Endless events built from the Rift twists |
 
 Release contains no dead buttons, placeholder/debug panels, fake purchases, required network calls
 or legacy art. Monetisation integration stays hidden unless backed by a real platform provider —
@@ -385,11 +390,13 @@ except the Shop and Remove Ads entry points, visible with purchases disabled dur
 | 28 | ASSUMPTION (RUSH and feel build, simplest choices): a pause or upgrade choice freezes a running RUSH (its 6 s are game time) — only run end and leaving the run end it; the meter does not fill while RUSH runs and the bar drains with the time left; a "boss core hit" is any boss health loss, the killing blow included; Soul Link kills count toward a dash's 5 kills, Death Pulse kills do not; a field clear is a kill that leaves no regular enemy alive (split children count) during waves with no boss pending or alive; on death the shards sweep at the fatal hit (during the dissolve) and any left collect instantly before the summary; the finisher is refused after run end, and a hit-stop during it dips lower (lowest time scale wins); Reduced Motion keeps the RUSH start shake (already scaled to 30 %) and the warning flicker; the RUSH row (label + Soul White `RushProgressBar`) sits under SOUL LEVEL and pushes the boss panel and callouts 34 px down; dash pitch follows real momentum steps, not RUSH's full visuals. | Implemented 2026-09-15; owner may revise |
 | 29 | ASSUMPTION (Tutorial screen build, simplest choices): the ghost hand is code-drawn placeholder art (ROADMAP M6); the boss lesson's demo shows the hand and caption only (the real Wisp does not strike, so the fight is the player's); the danger lesson's demo forces its hit as the demo dash nears the spikes (so the Soul Fragment loss and blink always show), and Soul Fragments refill 0.6 s after any hit (at once if one more would kill); the Rift Points & XP lesson's demo fills the XP bar and the ghost hand taps a card once the tray slides up (§5.5), and the player's kills (topped up once every soul is reaped) bank the level whose cards slide up at the lesson's calm moment; RUSH starts at 90 % so two kills fire it, and fresh targets appear when RUSH starts; a redirect lesson counts a kill on a leg started mid-dash; misses in the chain, redirect, XP and RUSH lessons rebuild the lesson; the pause menu is off in the tutorial (focus loss does not pause); the TUTORIAL button on the Rift Map is a SecondaryButton between BACK and ENTER; Settings' REPLAY TUTORIAL is removed; lesson captions and placements live in `data/tutorial/default_tutorial.tres`. | Implemented 2026-09-15; owner may retune |
 | 30 | ASSUMPTION (upgrade offer build, simplest choices under §5.5): a calm moment stays open 4 game seconds (longer than the 2.2 s combo timeout, so a field clear can still offer once the combo runs out); a hit while the cards are up does not send them away; picks are refused while the cards are still sliding in (no accidental double pick), and the next banked set slides in again from below; the 6 s timeout is real time and restarts for each new set; a boss arriving closes the tray and a pending boss waits for an open tray; Back/Escape pause as usual with the cards up and Resume shows them again in slow motion; the indicator sits right of the XP bar under the pause button, a `PanelPlate` with the upgrades icon and an amber ×N; cards never take keyboard focus; in the tutorial the tray rests above the caption band, a dimmed hand taps a card once as a hint, and swiping or timing out asks for another lesson calm moment. All values in `RunProgressionTuning` (Upgrade offer). | Implemented 2026-09-15; tune on device |
+| 31 | ASSUMPTION (playable characters, owner request 2026-09-17): Veyra, Rook and Morrow are cosmetic — same collision, controls, dash, health and scoring as the Wisp, and their dash is their attack; they cost 0 RP until the owner sets prices; the Shop's Wisps tab is called Characters (owner: "they are not just wisps but characters") and every card is animated (the six single-image forms idle on a shared rig); in a run a character dives along its dash, turns feet-first to land standing on whatever wall it hits (hanging from the ceiling included), coils as a pre-attack while the aim arrow is up, and plays spawn, hit, death and victory reactions; a card coming into focus or being equipped plays a selected flourish and a purchase an unlock flourish; the HUD keeps each character's still portrait. | Implemented 2026-09-17 (ADR-0015); owner approval, prices and a device pass pending; art licence as #21 |
 
 ## Change history
 
 | Date | Change | Source |
 |---|---|---|
+| 2026-09-17 | Playable characters Veyra, Rook and Morrow (animated rigs, cosmetic only); Wisps tab renamed Characters with animated cards (§3, §6, §9, §11, §13, §14 #31; ADR-0015) | Owner request; ASSUMPTION #31 |
 | 2026-09-16 | Animated Legendary/Mythic scenery rebuilt on the painting (masks, scenery shader, glow particles, Mythic set pieces): more vibrant scenery, floor only a luminance-kept saturation lift; Reduced Motion static (§6, §8, §9) | Owner feedback 2026-09-15 (device test) |
 | 2026-09-15 | 30 Endless arena skins with tiers and prices; animated Legendary/Mythic scenery (§6, §14 #19, #26) | Owner decision 2026-09-15 |
 | 2026-09-15 | Upgrade tray simplified to three cards and a timeout bar; UPGRADE READY indicator removed (§5.5) | Owner |

@@ -1,6 +1,6 @@
 class_name ShopScreen
 extends Control
-## The Shop: the one place Rift Points are spent. Four tabs - WISPS, DASHES, ARENAS, NO ADS.
+## The Shop: the one place Rift Points are spent. Four tabs - CHARACTERS, DASHES, ARENAS, NO ADS.
 ##
 ## Each RP tab is a FocusCarousel of cards that behaves like the old Forms picker (owner reference
 ## 2026-09-13): swipe or tap a side card to browse, locked items stay previewable, one description
@@ -23,6 +23,7 @@ signal tab_changed(tab: StringName)
 ## The player left the Shop.
 signal back_requested
 
+## The CHARACTERS tab; its id keeps the older "wisps" name (sessions and fixtures refer to it).
 const TAB_WISPS: StringName = &"wisps"
 const TAB_DASHES: StringName = &"dashes"
 const TAB_ARENAS: StringName = &"arenas"
@@ -50,6 +51,9 @@ const LOCKED_GLOW_ALPHA: float = 0.14
 const ARENA_VISUAL_RADIUS: int = 2
 ## Seconds per pulse of the animated dash preview (static under Reduced Motion).
 const DASH_PREVIEW_PERIOD: float = 1.2
+## Share of a CHARACTERS card's picture area a rigged character and a single-image form fill.
+const CHARACTER_FILL: float = 0.94
+const PORTRAIT_FILL: float = 0.9
 
 @export var form_catalog: FormCatalog
 @export var dash_style_catalog: DashStyleCatalog
@@ -69,6 +73,8 @@ var _glow_texture: GradientTexture2D
 var _preview_time: float = 0.0
 ## Trail and burst nodes of the DASHES cards, animated in `_process`.
 var _dash_previews: Array[CanvasItem] = []
+## Live character previews of the CHARACTERS cards by form id (rigs and animated portraits alike).
+var _character_previews: Dictionary[StringName, PlayableCharacterPreview] = {}
 var _tab_buttons: Dictionary[StringName, Button] = {}
 ## ARENAS card indices whose thumbnail is filled, and the card index they were last filled around.
 var _arena_filled: Dictionary[int, bool] = {}
@@ -145,10 +151,12 @@ func _process(delta: float) -> void:
 ## `bosses_defeated`, `rift_levels`, `ads_removed` and `settings`, plus `store_available`, which
 ## Main adds because the store is not part of the save.
 func setup(snapshot: Dictionary, tab: StringName) -> void:
+	var previous: Dictionary = _snapshot
 	_snapshot = snapshot.duplicate(true)
 	_tab = tab if tab in TABS else TAB_WISPS
 	if is_node_ready():
 		_rebuild()
+		_celebrate_character_changes(previous)
 
 
 ## The tab on screen.
@@ -187,6 +195,10 @@ func _rebuild() -> void:
 	_no_ads_page.visible = not rp_tab
 	if rp_tab and _built_tab != _tab:
 		_build_cards()
+	elif rp_tab and not _selected_ids.has(_tab):
+		# A snapshot can arrive after the cards were built (fixtures add the screen before setting it
+		# up). Until the player browses this tab, its carousel follows the equipped item.
+		_focus_selected_card()
 	_refresh()
 	if rp_tab:
 		_carousel.grab_focus.call_deferred()
@@ -196,6 +208,7 @@ func _build_cards() -> void:
 	_built_tab = _tab
 	_items = _items_for(_tab)
 	_dash_previews.clear()
+	_character_previews.clear()
 	_arena_filled.clear()
 	_arena_centre = -1
 	var cards: Array[Control] = []
@@ -205,6 +218,7 @@ func _build_cards() -> void:
 	_carousel.set_cards(cards, _index_of(_selected_id(_tab)))
 	_syncing = false
 	_dots.count = _items.size()
+	_play_selected_character_preview()
 	if _tab == TAB_ARENAS:
 		_fill_arena_visuals(_index_of(_selected_id(_tab)))
 
@@ -225,12 +239,20 @@ func _items_for(tab: StringName) -> Array[Resource]:
 	return items
 
 
+## Moves the carousel to this tab's selected item without reporting it as a player pick.
+func _focus_selected_card() -> void:
+	_syncing = true
+	_carousel.select(_index_of(_selected_id(_tab)), false)
+	_syncing = false
+
+
 func _on_carousel_selection_changed(index: int) -> void:
 	if _syncing or index < 0 or index >= _items.size():
 		return
 	_selected_ids[_tab] = _item_id(_items[index])
 	_feedback_label.text = ""
 	_refresh()
+	_play_selected_character_preview()
 
 
 func _refresh() -> void:
@@ -482,6 +504,8 @@ func _build_card(item: Resource) -> Control:
 	return card
 
 
+## Every character card is alive: a rigged character plays its own rig, a single-image form idles
+## on the shared rig. Both react when their card comes into focus.
 func _add_form_visual(visual: Control, form: FormData) -> void:
 	if _glow_texture == null:
 		_glow_texture = _portrait_glow_texture()
@@ -489,9 +513,49 @@ func _add_form_visual(visual: Control, form: FormData) -> void:
 	glow.name = "Glow"
 	glow.self_modulate = Color(form.tint, 1.0)
 	visual.add_child(glow)
-	var portrait := _texture_rect(form.texture, TextureRect.STRETCH_KEEP_ASPECT_CENTERED)
-	portrait.name = "Portrait"
-	visual.add_child(portrait)
+	var preview := PlayableCharacterPreview.new()
+	preview.name = "Portrait"
+	preview.fill_ratio = CHARACTER_FILL if form.visual_scene != null else PORTRAIT_FILL
+	preview.set_reduced_motion(_reduced_motion())
+	visual.add_child(preview)
+	if preview.set_form(form, true):
+		_character_previews[form.form_id] = preview
+	else:
+		visual.remove_child(preview)
+		preview.queue_free()
+		var portrait := _texture_rect(form.texture, TextureRect.STRETCH_KEEP_ASPECT_CENTERED)
+		portrait.name = "Portrait"
+		visual.add_child(portrait)
+
+
+func _play_selected_character_preview() -> void:
+	if _tab != TAB_WISPS:
+		return
+	var preview: PlayableCharacterPreview = _character_previews.get(_selected_id(_tab))
+	if preview != null:
+		preview.play_selected.call_deferred()
+
+
+## After Main re-reads the save: a character bought just now plays its unlock flourish, one equipped
+## just now its selected flourish.
+func _celebrate_character_changes(previous: Dictionary) -> void:
+	if previous.is_empty() or _built_tab != TAB_WISPS:
+		return
+	var before: Variant = previous.get(&"owned_forms", [])
+	var owned_before: Array = before as Array if before is Array else []
+	for form_id: Variant in _owned_ids(SaveManagerService.KIND_FORM):
+		if form_id in owned_before:
+			continue
+		var bought: PlayableCharacterPreview = _character_previews.get(StringName(str(form_id)))
+		if bought != null:
+			bought.play_unlocked.call_deferred()
+			return
+	var equipped_before := StringName(str(previous.get(&"equipped_form", "void")))
+	var equipped_now: StringName = _equipped_id(TAB_WISPS)
+	if equipped_now != equipped_before:
+		var equipped: PlayableCharacterPreview = _character_previews.get(equipped_now)
+		if equipped != null:
+			equipped.play_selected.call_deferred()
 
 
 ## A long trail with the launch burst at its head, in the style's tints (SOUL: the form's tint).

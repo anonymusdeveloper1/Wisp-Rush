@@ -9,7 +9,8 @@ extends Control
 ## Requests return to the Home screen.
 signal back_requested
 
-const FORM_COUNT: int = 6
+## Characters the collection row counts against.
+const FORM_COUNT: int = FormCatalog.REQUIRED_FORM_COUNT
 ## Leading rows of `build_rows` shown as record tiles instead of list rows.
 const RECORD_COUNT: int = 3
 ## Opacity of the void-charcoal shade over the menu background.
@@ -67,7 +68,7 @@ static func build_rows(snapshot: Dictionary) -> Array[PackedStringArray]:
 			format_play_time(int(float(snapshot.get(&"play_time_seconds", 0.0)))),
 		]),
 		PackedStringArray(["RIFT POINTS", RiftPoints.format(int(snapshot.get(&"rift_points", 0)))]),
-		PackedStringArray(["FORMS COLLECTED", "%d / %d" % [owned_forms.size(), FORM_COUNT]]),
+		PackedStringArray(["CHARACTERS COLLECTED", "%d / %d" % [owned_forms.size(), FORM_COUNT]]),
 	]
 
 

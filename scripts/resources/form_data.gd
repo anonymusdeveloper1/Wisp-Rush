@@ -1,6 +1,6 @@
 class_name FormData
 extends Resource
-## Data-driven cosmetic identity, unlock requirement, supplied art and feedback tint.
+## One playable character (a Wisp form or a rigged character): identity, price, art and feedback tint.
 
 ## Stable identifier stored in progression data.
 @export var form_id: StringName
@@ -12,8 +12,11 @@ extends Resource
 @export_range(0, 100000, 1) var price: int = 0
 ## Requires at least one lifetime Reaper victory before purchase.
 @export var requires_boss_victory: bool = false
-## Supplied full-resolution form illustration.
+## Full-resolution portrait: the in-game art of a single-image form, the HUD and Home picture of a rigged one.
 @export var texture: Texture2D
+## Optional presentation-only animated rig (root extends [PlayableCharacterVisual]). Null keeps
+## the single-image path; [member texture] is then the in-game art as well as the portrait.
+@export var visual_scene: PackedScene
 ## Cosmetic feedback tint for aim, impact and surrounding UI.
 @export var tint: Color = Color.WHITE
 

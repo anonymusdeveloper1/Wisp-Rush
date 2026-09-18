@@ -309,7 +309,7 @@ func _build_developer_card() -> void:
 			func() -> bool: return DevUnlock.unlock_everything(save)],
 		["UNLOCK ALL RIFTS", "Raises the lifetime best wave past every gate",
 			func() -> bool: return DevUnlock.unlock_rifts(save)],
-		["UNLOCK ALL FORMS", "Owns all six cosmetic forms",
+		["UNLOCK ALL CHARACTERS", "Owns every character in the Shop",
 			func() -> bool: return DevUnlock.unlock_forms(save)],
 		["COMPLETE ALL TRIALS", "Finishes the whole ladder",
 			func() -> bool: return DevUnlock.complete_trials(save)],

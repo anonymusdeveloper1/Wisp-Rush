@@ -7,7 +7,7 @@
 
 **Main scene:** `res://scenes/main/main.tscn` · **Features:** `4.7, Forward Plus`
 
-**Counts:** 35 scenes · 89 scripts · 150 resources · 2 shaders · 302 asset files
+**Counts:** 39 scenes · 96 scripts · 153 resources · 2 shaders · 338 asset files
 
 ## Autoloads
 
@@ -67,9 +67,13 @@ _None._
 | `res://scenes/hazards/split_void_crystal.tscn` | `SplitVoidCrystal` (Node2D) | `res://scenes/hazards/split_void_crystal.gd` | 4 | — | `hazards` |
 | `res://scenes/main/main.tscn` | `Main` (Node) | `res://scenes/main/main.gd` | 1 | — | — |
 | `res://scenes/pickups/soul_shard_pickup.tscn` | `SoulShardPickup` (Node2D) | `res://scenes/pickups/soul_shard_pickup.gd` | 2 | — | `pickups` |
-| `res://scenes/player/wisp_player.tscn` | `WispPlayer` (CharacterBody2D) | `res://scenes/player/wisp_player.gd` | 10 | — | — |
+| `res://scenes/player/visuals/morrow_visual.tscn` | `MorrowVisual` (Node2D) | `res://scenes/player/visuals/morrow_visual.gd` | 25 | — | — |
+| `res://scenes/player/visuals/playable_character_visual.tscn` | `PlayableCharacterVisual` (Node2D) | `res://scenes/player/visuals/playable_character_visual.gd` | 5 | — | — |
+| `res://scenes/player/visuals/rook_visual.tscn` | `RookVisual` (Node2D) | `res://scenes/player/visuals/rook_visual.gd` | 29 | — | — |
+| `res://scenes/player/visuals/veyra_visual.tscn` | `VeyraVisual` (Node2D) | `res://scenes/player/visuals/veyra_visual.gd` | 20 | — | — |
+| `res://scenes/player/wisp_player.tscn` | `WispPlayer` (CharacterBody2D) | `res://scenes/player/wisp_player.gd` | 11 | — | — |
 | `res://scenes/screens/daily_screen.tscn` | `DailyScreen` (Control) | `res://scenes/screens/daily_screen.gd` | 36 | `res://assets/ui/theme/ornaments/banner_top.tscn`, `res://assets/ui/theme/ornaments/crest_bottom.tscn`, `res://assets/ui/theme/ornaments/crest_top.tscn` | — |
-| `res://scenes/screens/home_screen.tscn` | `HomeScreen` (Control) | `res://scenes/screens/home_screen.gd` | 52 | — | — |
+| `res://scenes/screens/home_screen.tscn` | `HomeScreen` (Control) | `res://scenes/screens/home_screen.gd` | 53 | — | — |
 | `res://scenes/screens/loading_screen.tscn` | `LoadingScreen` (Control) | `res://scenes/screens/loading_screen.gd` | 11 | — | — |
 | `res://scenes/screens/results_screen.tscn` | `ResultsScreen` (Control) | `res://scenes/screens/results_screen.gd` | 88 | `res://assets/ui/theme/ornaments/amber_top.tscn`, `res://assets/ui/theme/ornaments/banner_top.tscn`, `res://assets/ui/theme/ornaments/card_top.tscn` | — |
 | `res://scenes/screens/rift_map_screen.tscn` | `RiftMapScreen` (Control) | `res://scenes/screens/rift_map_screen.gd` | 19 | `res://assets/ui/theme/ornaments/banner_top.tscn` | — |
@@ -112,7 +116,14 @@ _None._
 | `res://scenes/hazards/split_void_crystal.gd` | `SplitVoidCrystal` | `HazardActor` | Indestructible warned obstacle that truncates dash corridors through its narrow body. | — | — | `blocks_dash` |
 | `res://scenes/main/main.gd` | — | `Node` | Composition root: boot loading, navigation between screens, back handling and app lifecycle. | — | — | `is_navigating` |
 | `res://scenes/pickups/soul_shard_pickup.gd` | `SoulShardPickup` | `Node2D` | Rift Points pickup (a soul shard) collected by dash sweeps or short-range attraction to the Wisp. | `collected` | — | `configure`, `set_attraction_radius`, `sweep_to`, `is_sweeping`, `is_auto_collected`, `collect_now`, `try_dash_collect` |
-| `res://scenes/player/wisp_player.gd` | `WispPlayer` | `CharacterBody2D` | Converts swipe, mouse and keyboard aim into an exact edge-to-edge Wisp dash. | `dash_started`, `dash_segment_swept`, `dash_redirected`, `aim_preview_changed`, `wall_impacted`, `focus_started`, `obstacle_impacted`, `health_changed`, `damaged`, `died` | `tuning`, `dash_damage` | `request_dash`, `teleport_dash_to`, `set_arena_polygon`, `get_dash_target`, `set_aim_arrow_enabled`, `is_aim_arrow_visible`, `get_aim_arrow_direction`, `set_aim_assist_enabled`, `is_aim_assist_enabled`, `set_aim_target_counter`, `is_aim_preview_active`, `get_dash_corridor_radius`, `get_aim_line_start_distance`, `get_assisted_direction`, `get_momentum`, `get_current_dash_speed`, `get_momentum_steps`, `get_momentum_visual_level`, `set_momentum_presentation`, `set_rush_speed_multiplier`, `get_rush_speed_multiplier`, `set_damage_immune`, `is_damage_immune`, `set_rush_visuals`, `has_buffered_swipe`, `redirect_dash`, `set_edge_drift`, `set_arena_rect`, `cancel_active_aim`, `set_input_enabled`, `is_input_enabled`, `preview_aim`, `perform_swipe`, `place_at_edge`, `get_collision_radius`, `get_current_health`, `get_maximum_health`, `set_run_combat_modifiers`, `set_cosmetic_form`, `get_blade_width_multiplier`, `get_dash_speed_multiplier`, `increase_maximum_health`, `heal`, `play_victory`, `is_vulnerable`, `take_contact_damage`, `take_hazard_damage`, `interrupt_dash_at` |
+| `res://scenes/player/visuals/chain_spring.gd` 🛠 | `ChainSpring` | `RefCounted` | Follow-through for a chain of pivots: tails, ribbons, scarves and bone segments. | — | — | `setup`, `step`, `impulse`, `reset`, `get_offset`, `get_joint_count` |
+| `res://scenes/player/visuals/morrow_visual.gd` | `MorrowVisual` | `PlayableCharacterVisual` | Morrow, the Runebound: a calm hooded caster whose hands and runes float around him. | — | — | — |
+| `res://scenes/player/visuals/playable_character_preview.gd` | `PlayableCharacterPreview` | `Control` | Control-hosted live preview of a [FormData]: its animated rig, or its portrait on the shared rig. | — | `fill_ratio` | `set_form`, `set_reduced_motion`, `play_selected`, `play_unlocked`, `get_visual` |
+| `res://scenes/player/visuals/playable_character_visual.gd` | `PlayableCharacterVisual` | `Node2D` | Shared presentation-only contract for an animated playable character. | `visual_state_changed` | `design_size`, `preview_center`, `squash_amount`, `bounce_amount`, `forward_rotation_offset`, `heading_frequency`, `heading_damping`, `settle_frequency`, `settle_damping`, `aim_lean`, `move_lean`, `trail_ratio_fast`, `trail_ratio_slow`, `portrait_texture` | `sync_controller`, `request_state`, `play_attack`, `play_character_selected`, `play_character_unlocked`, `set_preview_mode`, `set_reduced_motion`, `get_animation_states`, `get_current_visual_state`, `get_design_size`, `get_state_length`, `get_speed`, `get_landing`, `get_layer_bounds`, `get_standing_heading` |
+| `res://scenes/player/visuals/ribbon_chain.gd` 🛠 | `RibbonChain` | `Node2D` | A painted ribbon (tail, scarf) that bends smoothly: a skinned Polygon2D on its own Bone2D chain. | — | `texture`, `spine`, `cell_size`, `mesh_z_index`, `phase_offset` | `step`, `get_bones`, `get_mesh`, `get_tip_global_position` |
+| `res://scenes/player/visuals/rook_visual.gd` | `RookVisual` | `PlayableCharacterVisual` | Rook, the Bonewing: powerful wing beats at rest, a glide in flight, folded wings in a dash. | — | — | — |
+| `res://scenes/player/visuals/veyra_visual.gd` | `VeyraVisual` | `PlayableCharacterVisual` | Veyra, the Last Wisp: soft hover, pulsing core, fluttering fins, floating halo and three tails. | — | — | — |
+| `res://scenes/player/wisp_player.gd` | `WispPlayer` | `CharacterBody2D` | Converts swipe, mouse and keyboard aim into an exact edge-to-edge Wisp dash. | `dash_started`, `dash_segment_swept`, `dash_redirected`, `aim_preview_changed`, `wall_impacted`, `focus_started`, `obstacle_impacted`, `health_changed`, `damaged`, `died` | `tuning`, `dash_damage` | `request_dash`, `teleport_dash_to`, `set_arena_polygon`, `get_dash_target`, `set_aim_arrow_enabled`, `is_aim_arrow_visible`, `get_aim_arrow_direction`, `set_aim_assist_enabled`, `is_aim_assist_enabled`, `set_aim_target_counter`, `is_aim_preview_active`, `get_dash_corridor_radius`, `get_aim_line_start_distance`, `get_assisted_direction`, `get_momentum`, `get_current_dash_speed`, `get_momentum_steps`, `get_momentum_visual_level`, `set_momentum_presentation`, `set_rush_speed_multiplier`, `get_rush_speed_multiplier`, `set_damage_immune`, `is_damage_immune`, `set_rush_visuals`, `has_buffered_swipe`, `redirect_dash`, `set_edge_drift`, `set_arena_rect`, `cancel_active_aim`, `set_input_enabled`, `is_input_enabled`, `preview_aim`, `perform_swipe`, `place_at_edge`, `get_collision_radius`, `get_current_health`, `get_maximum_health`, `set_run_combat_modifiers`, `set_cosmetic_form`, `set_reduced_motion`, `play_attack_visual`, `get_character_visual`, `get_blade_width_multiplier`, `get_dash_speed_multiplier`, `increase_maximum_health`, `heal`, `play_victory`, `is_vulnerable`, `take_contact_damage`, `take_hazard_damage`, `interrupt_dash_at` |
 | `res://scenes/screens/daily_screen.gd` | `DailyScreen` | `Control` | Offline daily-run screen: today's portal, arena and seed, best, three local goal rows and Play. | `play_daily_requested`, `back_requested` | — | `setup` |
 | `res://scenes/screens/home_ambience.gd` | `HomeAmbience` | `Control` | Living background for the Home screen: flickering braziers, pulsing runes, drifting mist and | — | — | `set_active`, `is_active`, `uv_to_local`, `get_cover_scale` |
 | `res://scenes/screens/home_screen.gd` | `HomeScreen` | `Control` | Home: top bar and wordmark, a living hero Wisp between two button columns, then PLAY and Rifts. | `play_requested`, `wisps_requested`, `daily_requested`, `rift_map_requested`, `trials_requested`, `statistics_requested`, `settings_requested`, `shop_requested`, `remove_ads_requested` | — | `setup`, `get_orbits`, `is_animating`, `get_play_caption`, `get_hero_motion_rect` |
@@ -121,7 +132,7 @@ _None._
 | `res://scenes/screens/results_screen.gd` | `ResultsScreen` | `Control` | End-of-run summary: a story victory or defeat, or a finished Endless or daily run. | `restart_requested`, `next_level_requested`, `enter_rift_requested`, `home_requested`, `wisps_requested` | — | `setup`, `get_primary_text`, `get_displayed_rp_total` |
 | `res://scenes/screens/rift_map_screen.gd` | `RiftMapScreen` | `Control` | Rift map: a portrait card carousel of the arena ladder, each card showing the Rift's own arena. | `back_requested`, `play_requested`, `tutorial_requested` | `catalog` | `setup`, `get_selected_rift_id`, `is_rift_unlocked` |
 | `res://scenes/screens/settings_screen.gd` | `SettingsScreen` | `Control` | Player settings: volumes, haptics, reduced motion, shake, about and reset. | `back_requested`, `progress_reset` | `allow_progress_reset` | `setup`, `handle_back`, `build_about_text` |
-| `res://scenes/screens/shop_screen.gd` | `ShopScreen` | `Control` | The Shop: the one place Rift Points are spent. Four tabs - WISPS, DASHES, ARENAS, NO ADS. | `purchase_requested`, `equip_requested`, `store_purchase_requested`, `restore_requested`, `tab_changed`, `back_requested` | `form_catalog`, `dash_style_catalog`, `endless_catalog` | `setup`, `get_tab`, `get_selected_id`, `show_feedback` |
+| `res://scenes/screens/shop_screen.gd` | `ShopScreen` | `Control` | The Shop: the one place Rift Points are spent. Four tabs - CHARACTERS, DASHES, ARENAS, NO ADS. | `purchase_requested`, `equip_requested`, `store_purchase_requested`, `restore_requested`, `tab_changed`, `back_requested` | `form_catalog`, `dash_style_catalog`, `endless_catalog` | `setup`, `get_tab`, `get_selected_id`, `show_feedback` |
 | `res://scenes/screens/statistics_screen.gd` | `StatisticsScreen` | `Control` | Lifetime statistics read from the persistent SaveManager snapshot. | `back_requested` | — | `setup`, `build_rows`, `format_play_time` |
 | `res://scenes/screens/trials_screen.gd` | `TrialsScreen` | `Control` | Trials: the three persistent goals the player is working on, and the ladder rank they feed. | `back_requested` | — | `setup` |
 | `res://scenes/tutorial/tutorial_director.gd` | `TutorialDirector` | `Node` | Runs the Tutorial screen's lessons in order: set up, ghost-hand demo, player try, success beat. | `lesson_started`, `caption_changed`, `lesson_passed`, `completion_started`, `completed` | — | `start`, `stop`, `get_lesson_index`, `get_lesson_count`, `get_phase` |
@@ -148,8 +159,8 @@ _None._
 | `res://scripts/resources/endless_catalog.gd` | `EndlessCatalog` | `Resource` | The Endless floor template, its arena skins, the default skin and Endless tuning (ADR-0014). | — | `floor_polygon`, `skins`, `default_skin_id`, `tuning` | `get_skin`, `get_arena_of_the_day`, `get_ambience_keep_out`, `is_region_clear_of_floor`, `is_point_clear_of_floor`, `validate_scenery`, `validate` |
 | `res://scripts/resources/endless_tuning.gd` | `EndlessTuning` | `Resource` | Boss cadence, per-cycle difficulty and the fixed daily pool for Endless rules. | — | `boss_wave_interval`, `threat_start`, `threat_per_cycle`, `threat_cap`, `refill_live_enemies`, `speed_scale_start`, `speed_scale_per_cycle`, `speed_scale_cap`, `daily_roster_rift_ids`, `daily_boss_ids` | `get_threat_multiplier`, `get_speed_scale` |
 | `res://scripts/resources/enemy_tuning.gd` | `EnemyTuning` | `Resource` | Shared data schema for an enemy's movement, collision, durability and rewards. | — | `design_width`, `movement_speed`, `turn_speed`, `collision_radius`, `sprite_diameter`, `maximum_health`, `score_reward`, `experience_reward`, `threat_cost`, `shard_drop_chance`, `telegraph_duration`, `dissolve_duration`, `action_interval`, `action_telegraph`, `action_duration`, `action_speed_multiplier`, `split_kind`, `split_count`, `split_scale`, `shield_arc_degrees`, `tether_length` | — |
-| `res://scripts/resources/form_catalog.gd` | `FormCatalog` | `Resource` | Ordered registry for the six persistent, gameplay-neutral Wisp forms. | — | `form_paths` | `load_forms`, `validate`, `get_form` |
-| `res://scripts/resources/form_data.gd` | `FormData` | `Resource` | Data-driven cosmetic identity, unlock requirement, supplied art and feedback tint. | — | `form_id`, `display_name`, `description`, `price`, `requires_boss_victory`, `texture`, `tint` | `validate` |
+| `res://scripts/resources/form_catalog.gd` | `FormCatalog` | `Resource` | Ordered registry of the playable characters: six single-image Wisp forms and three rigged characters. | — | `form_paths` | `load_forms`, `validate`, `get_form` |
+| `res://scripts/resources/form_data.gd` | `FormData` | `Resource` | One playable character (a Wisp form or a rigged character): identity, price, art and feedback tint. | — | `form_id`, `display_name`, `description`, `price`, `requires_boss_victory`, `texture`, `visual_scene`, `tint` | `validate` |
 | `res://scripts/resources/formation_catalog.gd` | `FormationCatalog` | `Resource` | Ordered Resource paths for the complete validated encounter-template catalog. | — | `formation_paths` | `load_formations`, `validate` |
 | `res://scripts/resources/formation_data.gd` | `FormationData` | `Resource` | Data-driven normalized enemy and optional hazard placement for one readable encounter. | — | `formation_id`, `minimum_wave`, `threat_cost`, `enemy_kinds`, `normalized_positions`, `hazard_kind`, `hazard_position`, `allow_mirror`, `allow_rotation` | `validate`, `get_transformed_positions`, `get_transformed_hazard_position` |
 | `res://scripts/resources/hazard_tuning.gd` | `HazardTuning` | `Resource` | Shared viewport scaling, collision and cycle values for one arena hazard type. | — | `design_width`, `sprite_diameter`, `blocking_radius`, `danger_radius`, `arrival_telegraph`, `safe_duration`, `pulse_duration`, `active_duration`, `rotation_speed`, `orbit_radius`, `blade_radius`, `threat_cost` | — |
@@ -269,7 +280,10 @@ _None._
 | `res://data/forms/default_catalog.tres` | `Resource` | `FormCatalog` |
 | `res://data/forms/eclipse.tres` | `Resource` | `FormData` |
 | `res://data/forms/frost.tres` | `Resource` | `FormData` |
+| `res://data/forms/morrow.tres` | `Resource` | `FormData` |
+| `res://data/forms/rook.tres` | `Resource` | `FormData` |
 | `res://data/forms/venom.tres` | `Resource` | `FormData` |
+| `res://data/forms/veyra.tres` | `Resource` | `FormData` |
 | `res://data/forms/void.tres` | `Resource` | `FormData` |
 | `res://data/hazards/blade_ring.tres` | `Resource` | `HazardTuning` |
 | `res://data/hazards/spike_bloom.tres` | `Resource` | `HazardTuning` |
@@ -345,7 +359,7 @@ _None._
 
 ## Assets
 
-`.gd` × 1 · `.gdshader` × 2 · `.json` × 1 · `.png` × 290 · `.py` × 1 · `.pyc` × 1 · `.tres` × 1 · `.tscn` × 5
+`.gd` × 1 · `.gdshader` × 2 · `.json` × 1 · `.png` × 327 · `.py` × 1 · `.tres` × 1 · `.tscn` × 5
 
 - `res://assets/art/branding/wisp_rush_app_icon_master.png`
 - `res://assets/art/branding/wisp_rush_app_icon_store.png`
@@ -417,6 +431,43 @@ _None._
 - `res://assets/art/characters/hollow_choir/10_stagger.png`
 - `res://assets/art/characters/hollow_choir/11_shatter.png`
 - `res://assets/art/characters/hollow_choir/12_dissolve.png`
+- `res://assets/art/characters/playable/morrow/cloak_body.png`
+- `res://assets/art/characters/playable/morrow/cloth_wisp.png`
+- `res://assets/art/characters/playable/morrow/front_flap.png`
+- `res://assets/art/characters/playable/morrow/hand_left.png`
+- `res://assets/art/characters/playable/morrow/hand_right.png`
+- `res://assets/art/characters/playable/morrow/hood.png`
+- `res://assets/art/characters/playable/morrow/mask.png`
+- `res://assets/art/characters/playable/morrow/preview.png`
+- `res://assets/art/characters/playable/morrow/rune_fragment.png`
+- `res://assets/art/characters/playable/morrow/rune_stone.png`
+- `res://assets/art/characters/playable/morrow/scarf_a.png`
+- `res://assets/art/characters/playable/morrow/scarf_b.png`
+- `res://assets/art/characters/playable/rook/dash_streak.png`
+- `res://assets/art/characters/playable/rook/foot_left.png`
+- `res://assets/art/characters/playable/rook/foot_right.png`
+- `res://assets/art/characters/playable/rook/membrane_left.png`
+- `res://assets/art/characters/playable/rook/membrane_right.png`
+- `res://assets/art/characters/playable/rook/preview.png`
+- `res://assets/art/characters/playable/rook/shadow_body.png`
+- `res://assets/art/characters/playable/rook/skull.png`
+- `res://assets/art/characters/playable/rook/tail_fin.png`
+- `res://assets/art/characters/playable/rook/tail_segment.png`
+- `res://assets/art/characters/playable/rook/wing_dust.png`
+- `res://assets/art/characters/playable/rook/wing_frame_left.png`
+- `res://assets/art/characters/playable/rook/wing_frame_right.png`
+- `res://assets/art/characters/playable/veyra/core.png`
+- `res://assets/art/characters/playable/veyra/eyes.png`
+- `res://assets/art/characters/playable/veyra/halo_left.png`
+- `res://assets/art/characters/playable/veyra/halo_right.png`
+- `res://assets/art/characters/playable/veyra/left_fin.png`
+- `res://assets/art/characters/playable/veyra/outer_body.png`
+- `res://assets/art/characters/playable/veyra/preview.png`
+- `res://assets/art/characters/playable/veyra/right_fin.png`
+- `res://assets/art/characters/playable/veyra/soul_spark.png`
+- `res://assets/art/characters/playable/veyra/tail_a.png`
+- `res://assets/art/characters/playable/veyra/tail_b.png`
+- `res://assets/art/characters/playable/veyra/tail_c.png`
 - `res://assets/art/characters/reaper/01_idle_a.png`
 - `res://assets/art/characters/reaper/02_idle_b.png`
 - `res://assets/art/characters/reaper/03_attack_windup.png`
@@ -645,7 +696,6 @@ _None._
 - `res://assets/ui/theme/textures/slot.png`
 - `res://assets/ui/theme/textures/slot_selected.png`
 - `res://assets/ui/theme/textures/slot_small.png`
-- `res://assets/ui/theme/tools/__pycache__/build_theme_textures.cpython-37.pyc`
 - `res://assets/ui/theme/tools/build_theme_textures.py`
 - `res://assets/ui/theme/tools/build_wisp_theme.gd`
 - `res://assets/ui/theme/wisp_theme.tres`
@@ -659,13 +709,14 @@ _None._
 | systems | [System: Core run](../systems/core_run.md) |
 | systems | [System: Endless mode](../systems/endless_mode.md) |
 | systems | [System: Enemies](../systems/enemies.md) |
-| systems | [System: Cosmetic forms](../systems/forms.md) |
+| systems | [System: Cosmetic forms (the character catalog)](../systems/forms.md) |
 | systems | [System: Game feel & lifecycle](../systems/game_feel.md) |
 | systems | [System: Game flow](../systems/game_flow.md) |
 | systems | [System: Arena hazards](../systems/hazards.md) |
 | systems | [System: Trials and depth milestones](../systems/meta_progression.md) |
 | systems | [System: Monetisation](../systems/monetisation.md) |
 | systems | [System: Run progression and mutations](../systems/mutations.md) |
+| systems | [System: Playable characters](../systems/playable_character_visuals.md) |
 | systems | [System: Player dash](../systems/player_dash.md) |
 | systems | [System: Player health](../systems/player_health.md) |
 | systems | [System: Reaper boss](../systems/reaper_boss.md) |
@@ -691,6 +742,7 @@ _None._
 | decisions | [ADR-0012: The Shop is visible before billing exists, with purchases disabled](../decisions/0012-store-surface-before-billing.md) |
 | decisions | [ADR-0013: Rift story levels, a cosmetic Endless mode and earned-only Rift Points](../decisions/0013-rift-story-levels-endless-mode-and-rift-points.md) |
 | decisions | [ADR-0014: Endless arenas share one canonical floor template](../decisions/0014-endless-arenas-share-one-floor-template.md) |
+| decisions | [ADR-0015: Animated playable characters are presentation-only rigs on the Wisp controller](../decisions/0015-animated-playable-characters.md) |
 
 ## Documentation gaps
 

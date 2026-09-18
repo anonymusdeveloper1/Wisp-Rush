@@ -4,6 +4,133 @@
 > [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) §7.6. Keep entries short — details belong in the docs
 > they changed.
 
+## 2026-09-18 — Legendary and Mythic character approval concepts
+- **Who:** Codex (GPT-5)
+- **Did:** Designed two non-Wisp playable-character candidates without changing runtime code:
+  Legendary **Bram, the Rift Knight** is a complete armored warrior with a restrained 13-group rig;
+  Mythic **Nymera, the Ninefold** is a full quadrupedal celestial fox with about 34 independently
+  moving groups. Discarded the initial too-Wisp-like direction, then archived the replacement concept
+  sheets, exact generation prompts, tier rules and post-approval handoff scope.
+- **Files/systems:** `concept_art/wisp_rush_character_candidates_v1/`, `docs/ASSETS.md`.
+- **Verified:** reviewed both native-resolution RGB sheets for character consistency, mobile-scale
+  silhouette and a clear complexity gap; `tools/validate.sh` → `VALIDATE: OK`; no gameplay files or
+  catalog data changed.
+- **Follow-ups:** owner approves or revises each name, silhouette, palette and rarity. Only after
+  approval: prepare Claude's isolated-layer/rig/animation/test implementation brief.
+
+## 2026-09-18 — Characters dive, land on their feet and coil before a strike
+- **Who:** Claude Code (Opus 5)
+- **Did:** Owner, after the slow-motion clip: "create a dive animation that looks like the character
+  is diving and slicing through enemies not just flying, make sure they land on their feet on the
+  walls, and when the user presses the screen to attack when the arrow appears animation as
+  pre-attack animation".
+  - **Dive:** `dash_start` coils deeper and snaps into a blade profile; `dash_loop` is long and thin
+    along the travel axis. Each rig knifes its side parts back (Veyra's fins, Rook's wings folded
+    into a stoop, Morrow's hands) and streams its ribbons straighter.
+  - **Feet on walls:** `WispPlayer` passes the inward normal of the wall it rests against and how
+    near a dash is to its wall (`LANDING_WINDOW` 0.16 s). A resting character's up axis is that
+    normal — it stands on the floor, sideways on a side wall and hangs from the ceiling — and a dash
+    turns feet-first over the last moments of the flight, with each rig bracing (fins and wings
+    forward, feet and hands dropping). Aim and drift lean relative to the wall, not screen-up.
+  - **Pre-attack:** `aim_charge` is now a wind-up — the body coils back along its own axis and
+    shivers while the arrow is up; Veyra's fins flare forward and her core charges, Rook cocks his
+    wings high for a stoop, Morrow raises both hands and spins the runes in.
+- **Files/systems:** `scenes/player/wisp_player.gd`, `scenes/player/visuals/*` (base + three rigs),
+  `tools/godot/{render_character_motion,test_playable_character_visual}.gd`, system doc, ADR-0015,
+  GDD §14 #31.
+- **Verified:** `tools/validate.sh` OK; `test_playable_character_visual` passes with new assertions
+  that the standing heading follows each wall normal and that a character is within 0.3 rad of
+  standing after landing on the ceiling and on the floor. Re-rendered the 4× slow-motion clip
+  (`WISP_MOTION_CLIP=1`, now with a real touch-and-hold aim before the first dash) and reviewed the
+  aim coil, dive, kill accent, mid-dash turn and both landings frame by frame.
+  - Wrote [devlog_characters_episodes.md](marketing/devlog_characters_episodes.md): two shoot-ready
+    devlog episodes (A "Three characters, one hitbox", B "They land on their feet") with hooks that
+    repeat neither EP03's nor EP04's, beat tables, the new capture commands and the numbers that are
+    safe to show; registered as EP06/EP07 in the episode table and linked from the brief.
+- **Follow-ups:** device pass on the new dive and landings; the owner may want the landing window or
+  the dive profile retuned per character. The two devlog episodes are shot one per request when the
+  owner asks.
+
+## 2026-09-17 — Playable characters: Veyra, Rook and Morrow (M13)
+- **Who:** Claude Code (Opus 5), finishing Codex's prototype
+- **Did:**
+  - Owner: "codex has started working on adding new characters … find what he did, analyze, finish
+    what he started, make sure the animations work and are smooth in the gameplay and also add
+    animation in the character or wisp selecter and they are not just wisps but characters".
+  - Found Codex's uncommitted Veyra prototype (rig, shared state machine, Shop/Home previews, save
+    wiring, one test) plus the layer sheets it had already generated for **Rook and Morrow** — the
+    owner had narrowed that session to one character, and it hit its quota mid-QA. No DEVLOG,
+    registry, GDD or ADR entry existed for it.
+  - Extractor now serves all three characters (`extract_playable_characters.py`: per-character cells,
+    Veyra's halo split in two, printed ribbon spines, per-character contact sheets).
+  - Rewrote the shared base ([playable_character_visuals.md](systems/playable_character_visuals.md),
+    [ADR-0015](decisions/0015-animated-playable-characters.md)): squash and stretch on the travel axis
+    (they were inverted, so dashes read as pancakes), a damped heading spring instead of a lerp, the
+    uniform base size only (the controller's wall-impact squash no longer lands on the rig's rotated
+    axes), one-shot interrupts, per-character squash/bounce strengths, `%FormImage` so single-image
+    forms animate on the same rig, and `get_layer_bounds()` for sizing.
+  - New `ChainSpring` (spring joints with lag, per-frame lag cap, travelling sway) and `RibbonChain`
+    (skinned Polygon2D on its own Bone2D chain along the printed spine) — Veyra's tails and Morrow's
+    scarves now bend instead of swinging as rigid cutouts.
+  - Built **Rook** (wing beats → glide → fold, springy segmented tail, dangling feet, bone-white dash
+    streaks and wing dust) and **Morrow** (breathing cloak, tilting mask, hands on independent orbits,
+    three runes on a tilted ring that never crosses his face, trailing scarves, rune fragments and
+    cloth wisps); rebuilt **Veyra** (skinned tails, split halo, blinks, core flare).
+  - Selector: the Shop's WISPS tab is now **CHARACTERS** (also on Results, Home's tap target, the
+    Statistics row and the debug unlock), every card animates, a focused or equipped card plays the
+    selected flourish and a purchase the unlock flourish (the Shop diffs the save snapshot itself).
+  - `WispPlayer` passes the real dash/drift/aim direction (the drift heading was stale, so a Frozen
+    Choir slide faced the previous dash).
+  - Fixed while checking phone layouts: a Shop whose snapshot arrives *after* it entered the tree
+    (fixtures do that; Main sets up first) refreshed its text but left the carousel on the first card,
+    so QA sheets showed one character with another's description. Its carousel now follows the
+    equipped item until the player browses that tab.
+  - Cost work after benchmarking nine live cards: animation libraries and the state machine are built
+    once and shared by every rig, and `FormCatalog` caches loaded characters for the session. Building
+    the CHARACTERS tab went from ~480 ms to 133 ms cold and ~8 ms warm; animating nine previews costs
+    under 0.1 ms/frame (`tools/godot/bench_character_previews.gd`).
+- **Files/systems:** `scenes/player/visuals/*` (7 scripts, 4 scenes), `scenes/player/wisp_player.*`,
+  `scenes/gameplay/game_world.gd`, `scenes/screens/{shop,home,results,settings,statistics}_screen.*`,
+  `scripts/resources/form_{data,catalog}.gd`, `scripts/autoload/save_manager.gd`,
+  `data/forms/{veyra,rook,morrow}.tres` + catalog, `assets/art/characters/playable/*`,
+  `concept_art/wisp_rush_playable_characters_v1/*`, `tools/art/{extract_playable_characters.py,motion_contact_sheet.py}`,
+  `tools/godot/{render_character_*,test_playable_character_visual,test_form_catalog,test_m4_systems}`,
+  docs (ADR-0015, system doc, forms/shop/game_flow/player_dash, GDD §3/§6/§9/§11/§13/§14 #31,
+  PROJECT_CONTEXT, ASSETS, ROADMAP M13).
+- **Verified:**
+  - Live run through the Godot MCP server (Shop CHARACTERS tab): `[Shop] ready`, audio synthesized,
+    no errors; the only warnings are the project's existing Variant-narrowing ones.
+  - `tools/validate.sh` → `VALIDATE: OK`. `tools/run_tests.sh` → 25 passed, 10 failed; every failure
+    is a pre-existing stale test (removed `FormsScreen`, `configure_run_profile`, `purchase_form`,
+    `DevUnlock` signatures). `test_m4_systems` now reads Statistics rows by label instead of index,
+    so it passes again.
+  - New `test_playable_character_visual`: 13 states per character, no collision in a rig, ≤ 40
+    particles, ribbon weights summing to 1, silhouette vs `design_size`, the real controller through
+    spawn → dash → kill → redirect → landing → hit → victory → death with a per-frame snap check,
+    Reduced Motion stillness, Home's live hero, the Shop's nine animated cards with both flourishes,
+    and a production GameWorld per character.
+  - Frame-by-frame review of `render_character_motion` sheets at 60 fps for all three. Fixed from it:
+    a 0.3 s tumble when righting after a downward dash, tails splaying from that righting, a one-frame
+    eye snap when a dash interrupted a blink, oversized soul sparks, Rook's second pair of eyes below
+    the skull, Morrow's runes crossing his mask, and his hands covering it on a kill.
+  - The smoothness check also caught a real bug: Morrow's rune counter-spin jumped once per orbit
+    because the orbit angle was wrapped at 2π.
+  - Looked at: lineup vs reference art, Shop CHARACTERS tab, Home with each character, and each
+    character mid-dash in a real GameWorld. `tools/qa_matrix.sh shop_wisps`: the longer CHARACTERS
+    label fits all five phone aspect ratios.
+  - Fixed from the `gdscript-reviewer` pass: Reduced Motion changed mid-run now reaches the equipped
+    rig (`WispPlayer.set_reduced_motion`), a dash kill on the fatal frame can no longer cut the death
+    animation, a hidden rig stops processing entirely (the Shop keeps cards in the tree while another
+    tab shows), `ChainSpring`'s lag cap became a rate so the whip matches at 30/60/120 fps, a cleared
+    ribbon no longer leaves its spring on freed bones, and Veyra's hot path lost its per-frame array
+    literals.
+- **Follow-ups:** unrelated: a headless boot reports one leaked `RefCounted` (refcount 0) at exit
+  even with no character rig loaded — engine-side, worth a look sometime. Owner review of the look and
+  motion, then prices (all three are 0 RP); device pass
+  (readability at gameplay size, particle cost, 120 Hz feel); optional mipmaps for character layers
+  (import-setting decision) and physics interpolation for 120 Hz phones; art licence before selling
+  characters (GDD §14 #1, #21); the ten stale tests still need the owner's cleanup call.
+
 ## 2026-09-17 — M10–M12 and devlog work committed; agent docs refreshed
 - **Who:** Claude Code (Opus 5)
 - **Did:**

@@ -1,14 +1,15 @@
 # System: Shop & Rift Points
 
 > **Status:** ✅ Rift Points (spec 01) and the four-tab Shop with dash styles (spec 04) built 2026-09-15 ·
-> **Last updated:** 2026-09-15 · **GDD section:** §6, §11, §14 #16 ·
+> **Last updated:** 2026-09-17 · **GDD section:** §6, §11, §14 #16, #31 ·
 > **ADR:** [0013](../decisions/0013-rift-story-levels-endless-mode-and-rift-points.md),
 > [0012](../decisions/0012-store-surface-before-billing.md) ·
 > **Specs:** [01](../specs/story_and_endless/01_rift_points.md), [04](../specs/story_and_endless/04_shop.md) (both built)
 
 ## Purpose
 Rift Points (RP) are the only currency, earned only by playing. The Shop spends them on cosmetics —
-Wisp forms, dash styles and Endless arena skins — and hosts the real-money Remove Ads tab.
+characters (Wisp forms and animated characters), dash styles and Endless arena skins — and hosts the
+real-money Remove Ads tab.
 
 ## Files
 | Path | Role | State |
@@ -21,7 +22,8 @@ Wisp forms, dash styles and Endless arena skins — and hosts the real-money Rem
 | `res://tools/godot/calibrate_rp.gd` | Scripted bot runs that log score and RP (not a test) | ✅ |
 | `res://scenes/screens/shop_screen.tscn` / `.gd` | RP balance, tab bar, one `FocusCarousel` per RP tab, NO ADS panel | ✅ |
 | `res://scripts/resources/dash_style_data.gd` · `dash_style_catalog.gd` · `res://data/dash_styles/*.tres` | Dash styles (trail + launch burst tints) | ✅ |
-| `res://scripts/resources/form_catalog.gd`, `endless_catalog.gd` | Wisp and arena items | ✅ (30 arena skins) |
+| `res://scripts/resources/form_catalog.gd`, `endless_catalog.gd` | Character and arena items | ✅ (9 characters, 30 arena skins) |
+| `res://scenes/player/visuals/playable_character_preview.gd` | Live character on each CHARACTERS card ([playable_character_visuals.md](playable_character_visuals.md)) | ✅ |
 
 ## Public API
 | Member | Kind | Description |
@@ -38,7 +40,8 @@ Wisp forms, dash styles and Endless arena skins — and hosts the real-money Rem
 | `DashStyleCatalog.get_style(id)` / `get_style_ids()` / `validate()` | method | Lookup with SOUL fallback / save validation ids / id, free-default and hue checks. |
 
 Kinds: `SaveManagerService.KIND_FORM` `&"form"`, `KIND_DASH_STYLE` `&"dash_style"`, `KIND_ARENA_SKIN`
-`&"arena_skin"`. Tabs: `ShopScreen.TAB_WISPS` `&"wisps"`, `TAB_DASHES`, `TAB_ARENAS`, `TAB_NO_ADS`.
+`&"arena_skin"`. Tabs: `ShopScreen.TAB_WISPS` `&"wisps"` (labelled CHARACTERS since 2026-09-17; the id
+keeps the old name), `TAB_DASHES`, `TAB_ARENAS`, `TAB_NO_ADS`.
 
 ## Data & tuning (starting values; calibrate on a device)
 | Field | Value | Meaning |
@@ -49,7 +52,7 @@ Kinds: `SaveManagerService.KIND_FORM` `&"form"`, `KIND_DASH_STYLE` `&"dash_style
 | `repeat_clear_fraction` | 0.25 | ⬜ spec 02: share of the first-clear bonus paid on repeats |
 | Pacing target | 35–45 RP per median early run | GDD §14 #16 |
 | Other sources (unchanged) | pickups (`EnemyTuning.shard_drop_chance`, 1 RP each), 1 RP per 3 kills in a multi-reap, boss `rp_reward` 25 (×2 in Reaper's Court), daily 10, challenges 15–25, Trials 15–125, depth 25–300 | |
-| Forms | void 0 · ash 250 · venom 500 · bloodmoon 800 · frost 1,200 · eclipse 2,000 + first boss victory | RP |
+| Characters | void 0 · ash 250 · venom 500 · bloodmoon 800 · frost 1,200 · eclipse 2,000 + first boss victory · veyra 0 · rook 0 · morrow 0 (owner review; GDD §14 #31) | RP |
 | Dash styles | soul 0 (plays the form's tint, `uses_form_tint`) · moonsilver 300 · verdant 600 · abyssal 900 | RP; tints from Palette (Verdant lightened from moss green, Abyssal a deep blue) |
 | Arena skins (30) | astral_observatory 0 (default) · drowned_sanctum 800 · moonpetal_shrine 1,200 · others by tier: Simple 300 · Rare 800 · Legendary 2,000 · Mythic 3,500 — full table in [endless_mode.md](endless_mode.md) | RP; owner decision 2026-09-15. ARENAS cards show a 282×502 thumbnail (never the full background), `<TIER>  ·  PLAYS IN ENDLESS`, and, for Legendary/Mythic, the static scenery grade + glow (`ArenaAmbience.create_material`; the animation plays only in a run) |
 
@@ -94,14 +97,17 @@ calibration** (`EconomyTuning.placeholder = true`).
 - **Shop screen:** header (SHOP, RP balance), a tab bar (`NavBar` of toggle `NavButton`s), then per RP
   tab a card carousel like the old Forms picker with a description and one main button:
   `BUY  •  800 RP` · disabled `NEED 120 RP` · disabled gate reason (`BEAT A BOSS FIRST` for Eclipse,
-  `UNLOCK ENDLESS FIRST` for arenas) · `EQUIP` · disabled `EQUIPPED`. WISPS cards show the portrait,
+  `UNLOCK ENDLESS FIRST` for arenas) · `EQUIP` · disabled `EQUIPPED`. CHARACTERS cards show the character
+  alive (its rig, or its portrait on the shared rig): the focused card plays a selected flourish, a
+  purchase the unlock flourish and an equip the selected one (the Shop diffs the old and new
+  snapshot in `setup`),
   DASHES an animated trail + burst preview (static under Reduced Motion), ARENAS the background
   thumbnail labelled `PLAYS IN ENDLESS`. Only the active tab's cards are built; ARENAS cards start as
   empty frames and get their thumbnail + scenery material only within `ARENA_VISUAL_RADIUS` (2) of the
   focused card as the carousel scrolls, one shared `ShaderMaterial` per `ArenaSceneryData`. NO ADS is the ADR-0012 panel (Remove Ads + Restore, disabled
   without a store) and shows no RP.
-- **Routing:** Home's Wisp tap → WISPS; SHOP → the last tab viewed this session (default WISPS);
-  NO ADS → NO ADS; Results' WISP FORMS → WISPS. Back returns where the Shop was opened from (Results
+- **Routing:** Home's hero tap → CHARACTERS; SHOP → the last tab viewed this session (default
+  CHARACTERS); NO ADS → NO ADS; Results' CHARACTERS → CHARACTERS. Back returns where the Shop was opened from (Results
   is re-shown from its stored summary, nothing is banked twice).
 - **Feedback:** a purchase plays `ui_purchase`, an equip `ui_confirm`, a failure `ui_error`, each with
   a message line.
@@ -136,6 +142,7 @@ calibration** (`EconomyTuning.placeholder = true`).
 ## Change history
 | Date | Change |
 |---|---|
+| 2026-09-17 | WISPS tab renamed CHARACTERS; every character card animates; unlock and selected flourishes; a snapshot that arrives after the cards were built re-focuses the equipped card |
 | 2026-09-16 | Lazy ARENAS card visuals (focused ± 2, shared scenery materials), active tab only |
 | 2026-09-15 | Spec 04 built: four-tab Shop, dash styles, `purchase_cosmetic` / `equip_cosmetic`, Forms screen retired |
 | 2026-09-15 | Spec 01 built: Rift Points everywhere, `EconomyTuning` performance bonus, calibration tool and bot numbers, Remove Ads without currency |

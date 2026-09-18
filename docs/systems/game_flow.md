@@ -1,6 +1,6 @@
 # System: Game flow
 
-> **Status:** ✅ done · **Last updated:** 2026-09-15 · **GDD section:** §11
+> **Status:** ✅ done · **Last updated:** 2026-09-17 · **GDD section:** §11
 >
 > **Changed 2026-09-15:** story runs (spec 02), ENDLESS with Endless/daily Results (spec 03), and the
 > Shop replacing the Forms route ([spec 04](../specs/story_and_endless/04_shop.md), [shop.md](shop.md)).
@@ -20,7 +20,7 @@ and every Home destination, the run, Results, and consistent back handling. Scre
 | `res://scenes/screens/home_screen.*` | Home: top bar, logo, tappable hero Wisp between two button columns, Rift caption + animated PLAY + Rifts under it |
 | `res://scenes/screens/home_ambience.gd` | `HomeAmbience`: living background (brazier flicker, rune pulse, mist, rising motes) |
 | `res://scenes/screens/orbit_motes.gd` | `OrbitMotes`: soul sparks orbiting the hero; a back and a front instance give depth; `get_extent_ratio()` bounds them |
-| `res://scenes/screens/results_screen.*` | Run summary and Rift Points breakdown: Rush Again (primary), Return Home, Wisp Forms |
+| `res://scenes/screens/results_screen.*` | Run summary and Rift Points breakdown: Rush Again (primary), Return Home, Characters |
 | `res://scripts/utils/rift_points.gd` | `RiftPoints`: `1,250 RP` / `+45 RP` formatting shared by every currency label |
 | Forms / Rift Map / Daily / Trials / Shop / Statistics / Settings | See [forms.md](forms.md), [rifts.md](rifts.md), [challenges.md](challenges.md), [meta_progression.md](meta_progression.md), [monetisation.md](monetisation.md), [settings.md](settings.md) |
 
@@ -54,12 +54,12 @@ HomeScreen (Control)
 |---|---|---|
 | `LoadingScreen.finished(resources)` | signal | Boot resources ready; Main shows the Tutorial (save `tutorial_completed` false) or Home. |
 | `TutorialScreen.finished(skipped)` / `RiftMapScreen.tutorial_requested` | signals | Main marks the tutorial completed and routes (Home on first launch, Rift Map on a replay) / opens a replay. |
-| `HomeScreen.play/wisps/daily/rift_map/trials/statistics/settings/shop/remove_ads_requested` | signals | Home destinations: `wisps_requested` (tap on the Wisp) → Shop WISPS, `shop_requested` → last Shop tab, `remove_ads_requested` → Shop NO ADS. |
+| `HomeScreen.play/wisps/daily/rift_map/trials/statistics/settings/shop/remove_ads_requested` | signals | Home destinations: `wisps_requested` (tap on the hero character) → Shop CHARACTERS, `shop_requested` → last Shop tab, `remove_ads_requested` → Shop NO ADS. |
 | `HomeScreen.setup(snapshot, equipped_form)` | method | Best, Rift Points, equipped form, Reduced Motion, `ads_removed` and the Endless best wave for PLAY's caption. |
 | `HomeScreen.get_orbits()` / `is_animating()` / `get_rift_caption()` / `get_hero_motion_rect()` | methods | Test helpers: orbit halves, motion state, caption text, bounds of every hero animation. |
 | `ShopScreen.setup(rift_points, ads_removed, store_available)` / `show_feedback()` / `can_buy()` | methods | See [monetisation.md](monetisation.md). |
 | `GameWorld.home_requested` / `restart_requested` / `run_ended(summary)` | signals | Leave, restart or finish a run. |
-| `ResultsScreen.restart/next_level/home/wisps_requested`, `enter_rift_requested(rift_id)` | signals | Post-run navigation; `restart_requested` replays the same profile; `wisps_requested` opens Shop WISPS, whose Back re-shows these Results. |
+| `ResultsScreen.restart/next_level/home/wisps_requested`, `enter_rift_requested(rift_id)` | signals | Post-run navigation; `restart_requested` replays the same profile; `wisps_requested` opens Shop CHARACTERS, whose Back re-shows these Results. |
 | `ResultsScreen.setup(summary)` / `get_displayed_rp_total()` / `get_primary_text()` | methods | Run values plus `rp_collected`, `rp_performance`, `rp_clear_bonus`, `rp_rewards`, `rp_earned`, `rift_points_total`, and Main's `rift_name`, `mastered`, `opened_rift_ids`/`names`; test helpers. |
 | `handle_back() -> bool` | optional method | A screen consumes back first (GameWorld, SettingsScreen, TutorialScreen → skip confirm). |
 
@@ -152,7 +152,7 @@ ChallengeTracker, FormCatalog. The run: [core_run.md](core_run.md), [game_feel.m
   banked clear opens a Rift (`ContentUnlocks.get_newly_unlocked`), Main makes it `selected_rift`.
 - **Results outcome** (spec 02): victory → banner `LEVEL n CLEARED`, the Rift name, unlock banners
   (`SHATTERED RIFT OPEN`) and primary **ENTER <NEW RIFT>** (this clear opened one), **NEXT LEVEL**, or
-  **PLAY AGAIN** (mastered). Defeat → `LEVEL n FAILED`, primary **RETRY**. Secondary RETURN HOME and WISP FORMS. Endless and daily
+  **PLAY AGAIN** (mastered). Defeat → `LEVEL n FAILED`, primary **RETRY**. Secondary RETURN HOME and CHARACTERS. Endless and daily
   → banner `WAVE w`, `ENDLESS  •  <ARENA>` / `DAILY RUN  •  <ARENA>`, best = Endless best / today's
   daily best, a `DEPTH REWARD` banner when one paid, primary **PLAY AGAIN**, secondary RETURN HOME only.
 - **Results Rift Points** (spec 01): RP COLLECTED (`rp_collected`: pickups, multi-reaps, bosses),
@@ -187,6 +187,7 @@ ChallengeTracker, FormCatalog. The run: [core_run.md](core_run.md), [game_feel.m
 
 | Date | Change |
 |---|---|
+| 2026-09-17 | Shop WISPS tab and Results' WISP FORMS are labelled CHARACTERS (routes unchanged) |
 | 2026-09-16 | Cover-then-build navigation (veil, latest wins), run prewarm behind the run loading screen, image-based loading screen |
 | 2026-09-15 | Tutorial screen: first-launch route after Loading, Rift Map TUTORIAL replay back to the Rift Map, no glide; Settings replay removed |
 | 2026-09-15 | Shop (spec 04): Forms screen and route removed; Wisp tap / Results → Shop WISPS, SHOP → last tab, NO ADS → NO ADS tab; Shop Back returns to its origin |

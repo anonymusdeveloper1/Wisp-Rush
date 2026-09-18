@@ -1,23 +1,31 @@
 class_name FormCatalog
 extends Resource
-## Ordered registry for the six persistent, gameplay-neutral Wisp forms.
+## Ordered registry of the playable characters: six single-image Wisp forms and three rigged characters.
+##
+## Every entry is cosmetic only - collision, stats and controls never change with the character.
 
-const REQUIRED_FORM_COUNT: int = 6
+## Number of catalog entries; the Statistics screen counts collected characters against it.
+const REQUIRED_FORM_COUNT: int = 9
 
 ## Form `.tres` paths in intended collection-screen order.
 @export var form_paths: PackedStringArray = PackedStringArray()
 
+## Loaded characters, kept for the session. The Shop rebuilds its cards on every tab switch and an
+## animated character's rig carries a dozen textures, so dropping them would reload art each time.
+var _loaded: Array[FormData] = []
 
-## Loads every configured form while reporting malformed paths.
+
+## Loads every configured character (cached) while reporting malformed paths.
 func load_forms() -> Array[FormData]:
-	var forms: Array[FormData] = []
+	if not _loaded.is_empty():
+		return _loaded.duplicate()
 	for path: String in form_paths:
 		var resource: Resource = load(path)
 		if resource is FormData:
-			forms.append(resource as FormData)
+			_loaded.append(resource as FormData)
 		else:
 			push_error("FormCatalog could not load FormData: %s" % path)
-	return forms
+	return _loaded.duplicate()
 
 
 ## Returns count, duplicate, required-Void and per-resource authoring failures.

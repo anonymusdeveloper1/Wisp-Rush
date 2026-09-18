@@ -22,6 +22,29 @@ A full run takes about 30 s. The run writes these files to `logs/redesign/assets
 After a run, Godot must re-import the art (open the editor, or run `tools/validate.sh`) before the
 game shows it.
 
+## Playable-character layers
+
+`extract_playable_characters.py` isolates the approved transparent cutout sheets under
+`concept_art/wisp_rush_playable_characters_v1/assets/` into independent runtime PNG layers for
+Veyra, Rook and Morrow:
+
+```sh
+python3 tools/art/extract_playable_characters.py              # all three
+python3 tools/art/extract_playable_characters.py rook morrow  # only these
+```
+
+It uses fixed cells (the cell order of each `GENERATION_PROMPT.md`), removes detached generation
+speckles by connected area, preserves nearby soft glow, and writes a QA contact sheet per character
+to `logs/playable_characters/<id>_parts.png`. The complete source sheets are never runtime textures.
+
+For every ribbon layer (Veyra's tails, Morrow's scarves) it also prints a `SPINE` line — the centre
+line the rig bends the ribbon along, as `PackedVector2Array(...)` in texture pixels. After replacing
+a source sheet, paste the printed spines into the `RibbonChain` nodes of
+`scenes/player/visuals/<id>_visual.tscn` (the yellow overlay on the contact sheet shows them), then
+run `tools/validate.sh` and `tools/run_tests.sh playable_character_visual`. Motion review:
+`tools/art/motion_contact_sheet.py` tiles the frames of `render_character_motion.tscn`
+([playable_character_visuals.md](../../docs/systems/playable_character_visuals.md)).
+
 ### `.import` files and uids
 
 A replaced file keeps its existing `.import` file, so it keeps its `uid`, and scenes that reference
@@ -100,4 +123,3 @@ smooth and desaturated (never by brightness), keep the top share, close, keep th
 fill enclosed holes (runes, cracks), erode, then cast 24 rays from the centroid, clamp single-ray
 spikes against their neighbours and pull in any edge whose midpoint leaves the floor. The top is
 clamped to V 0.255 so the resting Wisp never sits behind the HUD.
-

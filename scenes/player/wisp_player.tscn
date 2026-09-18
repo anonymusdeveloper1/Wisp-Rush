@@ -116,6 +116,10 @@ unique_name_in_owner = true
 visible = false
 z_index = 4
 
+[node name="CharacterVisualMount" type="Node2D" parent="."]
+unique_name_in_owner = true
+z_index = 4
+
 [node name="CollisionShape" type="CollisionShape2D" parent="."]
 unique_name_in_owner = true
 shape = SubResource("CircleShape_wisp")

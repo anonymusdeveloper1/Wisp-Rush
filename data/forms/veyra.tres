@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="FormData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/form_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/veyra/preview.png" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/player/visuals/veyra_visual.tscn" id="3"]
+
+[resource]
+script = ExtResource("1")
+form_id = &"veyra"
+display_name = "VEYRA"
+description = "The Last Wisp — her ribbons remember every turn."
+price = 0
+texture = ExtResource("2")
+visual_scene = ExtResource("3")
+tint = Color(0.42, 0.9, 1, 1)

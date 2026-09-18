@@ -10,7 +10,7 @@ extends Control
 ## bonus on a victory, rewards, then the run total and the new balance), then one PrimaryButton
 ## above the quieter Home/Forms row. The primary button is ENTER <NEW RIFT> when this clear opened
 ## one, NEXT LEVEL, PLAY AGAIN on a mastered Rift or on Endless rules, or RETRY after a defeat;
-## Endless and daily Results hide WISP FORMS. All styling comes from the project theme's type
+## Endless and daily Results hide CHARACTERS. All styling comes from the project theme's type
 ## variations; the few colours drawn in code come from Palette. The `Panel` node keeps its path but
 ## draws no frame itself.
 
@@ -22,7 +22,7 @@ signal next_level_requested
 signal enter_rift_requested(rift_id: StringName)
 ## Emitted when the player leaves the run flow for Home.
 signal home_requested
-## Emitted when the player taps WISP FORMS; Main opens the Shop's WISPS tab.
+## Emitted when the player taps CHARACTERS; Main opens the Shop's CHARACTERS tab.
 signal wisps_requested
 
 ## What the primary button does for the current summary.
