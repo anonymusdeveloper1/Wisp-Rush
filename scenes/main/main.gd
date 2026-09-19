@@ -99,7 +99,14 @@ var _prewarm_game: GameWorld
 var _prewarm_ready: bool = false
 
 
+## Seconds until the next display refresh-rate check ([FramePacing]).
+var _pacing_countdown: float = FramePacing.POLL_SECONDS
+
+
 func _ready() -> void:
+	# Step the simulation at the screen's own refresh rate, so a dash is redrawn at a fresh position
+	# every frame on a 90 or 120 Hz phone instead of holding each one for two ([FramePacing]).
+	var physics_hz: int = FramePacing.match_display()
 	_save_manager = get_node("/root/SaveManager") as SaveManagerService
 	assert(_save_manager != null, "Main requires the SaveManager autoload")
 	var audio: AudioService = SoundFx.audio()
@@ -112,9 +119,21 @@ func _ready() -> void:
 		overlay.name = "DebugOverlay"
 		get_tree().root.add_child.call_deferred(overlay)
 	var version: String = Engine.get_version_info()["string"]
-	print("[Main] boot ok | godot=%s" % version)
+	print("[Main] boot ok | godot=%s | physics=%d Hz" % [version, physics_hz])
 	_build_veil()
 	_show_loading()
+
+
+## Adaptive phone displays change refresh rate while the game runs, so the simulation rate follows
+## them instead of being fixed at whatever the screen happened to be doing at boot.
+func _process(delta: float) -> void:
+	_pacing_countdown -= delta
+	if _pacing_countdown > 0.0:
+		return
+	_pacing_countdown = FramePacing.POLL_SECONDS
+	var changed: int = FramePacing.poll()
+	if changed > 0:
+		print("[Main] physics rate now %d Hz (display changed)" % changed)
 
 
 func _notification(what: int) -> void:
