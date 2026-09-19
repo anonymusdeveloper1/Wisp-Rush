@@ -36,6 +36,7 @@ const SFX_IDS: Array[StringName] = [
 	&"player_dissolve",
 	&"level_up",
 	&"upgrade_choice",
+	&"soul_pulse",
 	&"reaper_appear",
 	&"reaper_windup",
 	&"reaper_sweep",
@@ -77,6 +78,8 @@ static func render_sfx(id: StringName) -> PackedFloat32Array:
 			buffer = _level_up()
 		&"upgrade_choice":
 			buffer = _upgrade_choice()
+		&"soul_pulse":
+			buffer = _soul_pulse()
 		&"reaper_appear":
 			buffer = _reaper_appear()
 		&"reaper_windup":
@@ -242,6 +245,22 @@ static func _upgrade_choice() -> PackedFloat32Array:
 	_chorus(b, 0.0, 0.65, 440.0, 443.5, 0.22, 0.07, 0.22, 7.0, 0.2)
 	_tone(b, 0.0, 0.65, 587.33, 592.0, 0.1, 0.08, 0.18)
 	_bell(b, 0.05, 1174.66, 0.08, 0.12)
+	return b
+
+
+## Low, soft swell for the moments that punctuate a run: a slow-motion finisher and the end of
+## RUSH. Dark and round rather than bright — an octave-falling chorus with a little filtered air
+## under it, and no bell, so it lands as weight instead of a chime. Callers pitch it down
+## (`RunFeelTuning.finisher_pulse_pitch`) and quieten it (`end_sound_volume_db`) per moment.
+##
+## It is deliberately NOT called `pulse`: that id belongs to the `pulse` music layer, and
+## AudioService files a stream as music or SFX by name.
+static func _soul_pulse() -> PackedFloat32Array:
+	var b := _buffer(0.7)
+	_chorus(b, 0.0, 0.7, 130.81, 65.41, 0.5, 0.035, 0.3, 14.0, 0.45)
+	_tone(b, 0.0, 0.7, 196.0, 98.0, 0.18, 0.05, 0.26, 0.35)
+	_tone(b, 0.0, 0.7, 261.63, 130.81, 0.08, 0.06, 0.2, 0.2)
+	_noise(b, 0.0, 0.45, 0.8, 0.04, 0.22, 700.0, 180.0, 50.0, 141)
 	return b
 
 

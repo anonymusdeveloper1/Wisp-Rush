@@ -51,7 +51,7 @@ extends Resource
 @export_range(0.0, 1.0, 0.01) var finisher_flash_alpha: float = 0.3
 ## Screen-shake trauma added by a finisher.
 @export_range(0.0, 1.0, 0.01) var finisher_trauma: float = 0.25
-## Pitch of the finisher's low `pulse` sound.
+## Pitch of the finisher's low `soul_pulse` sound.
 @export_range(0.25, 2.0, 0.01) var finisher_pulse_pitch: float = 0.6
 
 @export_group("RUSH")
@@ -84,7 +84,7 @@ extends Resource
 ## Pulses per second of the full meter, the edge glow and the warning flicker.
 @export_range(0.1, 20.0, 0.1) var pulse_rate: float = 3.0
 @export_range(1.0, 40.0, 0.5) var warning_flicker_rate: float = 14.0
-## Volume offset of the soft `pulse` sound that ends RUSH.
+## Volume offset of the soft `soul_pulse` sound that ends RUSH.
 @export_range(-24.0, 6.0, 0.5) var end_sound_volume_db: float = -6.0
 
 

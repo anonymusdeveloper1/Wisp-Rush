@@ -3095,12 +3095,12 @@ func _try_kill_finisher(dash_kill_index: int) -> void:
 
 
 ## Slow-motion finisher: ~0.4 s at ×0.3 through the time-scale owner, a light Soul White flash, a small
-## trauma kick and a low `pulse`. Never under the pause menu or the upgrade choice; Reduced Motion
+## trauma kick and a low `soul_pulse`. Never under the pause menu or the upgrade choice; Reduced Motion
 ## keeps only the sound (and whatever callout the moment already shows).
 func _play_finisher(reason: StringName) -> void:
 	if _run_over or get_tree().paused or _upgrade_tray.is_open():
 		return
-	SoundFx.play(&"pulse", feel_tuning.finisher_pulse_pitch)
+	SoundFx.play(&"soul_pulse", feel_tuning.finisher_pulse_pitch)
 	print("[GameWorld] finisher | reason=%s reduced_motion=%s" % [reason, _reduced_motion])
 	if _reduced_motion:
 		return
@@ -3216,7 +3216,7 @@ func _end_rush(play_sound: bool) -> void:
 	_rush_display_target = 0.0
 	_rush_display = 0.0
 	if play_sound and feel_tuning != null:
-		SoundFx.play(&"pulse", 1.0, feel_tuning.end_sound_volume_db)
+		SoundFx.play(&"soul_pulse", 1.0, feel_tuning.end_sound_volume_db)
 	if not _run_over:
 		_update_music_state()
 	if is_node_ready():

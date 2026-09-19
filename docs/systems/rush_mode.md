@@ -58,7 +58,7 @@ GameWorld
 - **Auto-collect:** `sweep_seconds` 0.35 (0.15 under Reduced Motion), `sweep_sound_cap` 6,
   `sweep_pitch_step` 0.05, `sweep_chime_interval` 0.05 s.
 - **Finisher:** `finisher_kills` 5, `finisher_time_scale` 0.3, `finisher_seconds` 0.4 (real),
-  `field_clear_cooldown` 6.0, flash alpha 0.3, trauma 0.25, `pulse` pitch 0.6.
+  `field_clear_cooldown` 6.0, flash alpha 0.3, trauma 0.25, `soul_pulse` pitch 0.6.
 - **RUSH:** `meter_max` 100, `per_kill` 4, `per_extra_dash_kill` 4, `per_boss_hit` 10, `damage_drain` 0,
   `duration` 6.0, `warning_seconds` 1.0, `speed_multiplier` 1.3, `score_multiplier` 2.0,
   `blocks_damage` true, `start_trauma` 0.5, `orb_flight_seconds` 0.3, `edge_glow_alpha` 0.28,
@@ -69,7 +69,7 @@ Presentation-only constants (orb size, callout scale, glow texture size, HUD off
 
 ## Dependencies
 [player_dash.md](player_dash.md) (momentum), [game_feel.md](game_feel.md) (shake, hit-stop, VfxPool),
-[core_run.md](core_run.md) (kills, score, waves, bosses, summary), [audio.md](audio.md) (`pulse`,
+[core_run.md](core_run.md) (kills, score, waves, bosses, summary), [audio.md](audio.md) (`soul_pulse`,
 `level_up`, `shard_pickup`, music intensity), [ui_design_system.md](ui_design_system.md). No autoload.
 
 ## Rules & behaviour

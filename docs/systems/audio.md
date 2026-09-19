@@ -60,6 +60,7 @@ so the game needs no audio files.
 | `player_dissolve` | Descending airy dissolve (0.75 s) |
 | `level_up` | Rising D–A–D arpeggio shimmer with a bell |
 | `upgrade_choice` | Warm open-fifth confirm swell |
+| `soul_pulse` | Low octave-falling swell under a finisher and the end of RUSH (named apart from the `pulse` music layer) |
 | `reaper_appear` | Deep dark beating swell (1.35 s) |
 | `reaper_windup` | Rising dissonant tension scrape |
 | `reaper_sweep` | Heavy low whoosh |
@@ -104,7 +105,9 @@ Settings dictionary keys come from `SaveManager` (`music_volume`, `sfx_volume`).
   **forced to 1.0 while RUSH runs** ([rush_mode.md](rush_mode.md)), then recomputed when it ends.
 - Feel cues reuse existing ids, no new sounds: `dash` pitch + 0.04 per chain momentum step; a shard
   sweep plays one rising `shard_pickup` run (≤ 6, +0.05 pitch each, 0.05 s apart); the slow-motion
-  finisher plays `pulse` at pitch 0.6; RUSH starts with `level_up` and ends with a soft `pulse` (−6 dB).
+  finisher plays `soul_pulse` at pitch 0.6; RUSH starts with `level_up` and ends with a soft
+  `soul_pulse` (−6 dB). The id is deliberately not `pulse`: `AudioService` files a stream as music or
+  SFX by name, so an SFX sharing the `pulse` music layer's id is never reachable.
 - Replacing a sound with a real file later: install it under the same id (streams are stored as
   `AudioStream`), callers don't change.
 
@@ -126,6 +129,7 @@ Settings dictionary keys come from `SaveManager` (`music_volume`, `sfx_volume`).
 
 | Date | Change |
 |---|---|
+| 2026-09-18 | `soul_pulse` added: the finisher and RUSH-end cues asked for `pulse`, a music-layer id, so both were silently dropped from M10 until now. The audio test now scans every `SoundFx.play()` call site and fails on an id the synth cannot render |
 | 2026-09-15 | RUSH forces music intensity 1.0; momentum dash pitch, sweep chime run, finisher/RUSH cues (spec rush_and_feel) |
 | 2026-09-12 | Guard frames + loop_end fix after an Android audio-thread crash |
 | 2026-09-11 | Created: runtime-synthesized SFX + 3-layer adaptive music, bus layout, test |

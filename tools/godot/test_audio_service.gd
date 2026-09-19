@@ -60,6 +60,7 @@ func _run() -> void:
 
 	_check_bus_layout()
 	_check_settings(service)
+	_check_played_ids_exist()
 
 	# An unknown id must not crash (it only warns once). Known ids are not played here: the
 	# headless Dummy driver never mixes, so started playbacks would be reported as leaked at exit.
@@ -72,6 +73,41 @@ func _run() -> void:
 		print("test_audio_service: %d checks passed (%d SFX, %d music layers, %.0f ms synthesis)"
 				% [_checks, Synth.SFX_IDS.size(), Synth.MUSIC_LAYERS.size(), elapsed_ms])
 	quit(_failures)
+
+
+## Every id the project actually plays must be a real SFX id.
+##
+## `SoundFx.play()` is null-safe and `play_sfx()` only warns, so a typo or a music-layer id used as
+## an effect is silent at runtime and easy to miss: `game_world.gd` asked for `pulse` — the name of a
+## music layer — from M10 until 2026-09-18, and both sounds were dropped for every player.
+func _check_played_ids_exist() -> void:
+	var played: Dictionary[StringName, String] = {}
+	for directory: String in ["res://scenes", "res://scripts"]:
+		_collect_played_ids(directory, played)
+	_check(not played.is_empty(), "found SoundFx.play() call sites to check")
+	for id: StringName in played:
+		_check(
+			Synth.SFX_IDS.has(id),
+			"%s plays SFX %s, which AudioSynth can render" % [played[id], id]
+		)
+		_check(
+			not Synth.MUSIC_LAYERS.has(id),
+			"%s plays %s, which is not a music layer id" % [played[id], id]
+		)
+
+
+## Recursively records every `SoundFx.play(&"id"` literal under [param directory] against its file.
+func _collect_played_ids(directory: String, played: Dictionary[StringName, String]) -> void:
+	for sub: String in DirAccess.get_directories_at(directory):
+		_collect_played_ids("%s/%s" % [directory, sub], played)
+	var pattern := RegEx.create_from_string(r'SoundFx\.play\(\s*&"([a-z0-9_]+)"')
+	for file_name: String in DirAccess.get_files_at(directory):
+		if not file_name.ends_with(".gd"):
+			continue
+		var path: String = "%s/%s" % [directory, file_name]
+		var text: String = FileAccess.get_file_as_string(path)
+		for found: RegExMatch in pattern.search_all(text):
+			played[StringName(found.get_string(1))] = path
 
 
 ## Validates format and level of [param stream] and returns its decoded samples (empty on error).

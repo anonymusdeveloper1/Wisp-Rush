@@ -42,6 +42,7 @@ const SFX_TRIM_DB: Dictionary[StringName, float] = {
 	&"slice": -2.0,
 	&"shard_pickup": -6.0,
 	&"wall_impact": -4.0,
+	&"soul_pulse": -4.0,
 	&"ui_confirm": -6.0,
 	&"ui_back": -6.0,
 	&"ui_purchase": -4.0,
