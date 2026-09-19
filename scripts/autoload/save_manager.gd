@@ -35,6 +35,8 @@ const VALID_FORM_IDS: Array[String] = [
 	"veyra",
 	"rook",
 	"morrow",
+	"ilyra",
+	"bram",
 ]
 ## Rift identifiers accepted from disk; must match data/rifts/default_catalog.tres.
 const VALID_RIFT_IDS: Array[String] = [

@@ -1,7 +1,7 @@
 extends SceneTree
 ## Playable characters: rig contract, controller-driven states, smoothness, menus and GameWorld.
 ##
-## For Veyra, Rook and Morrow: the full animation vocabulary, no collision in the rig, a particle
+## For every rigged character: the full animation vocabulary, no collision in the rig, a particle
 ## budget, skinned ribbons whose weights add up, a silhouette that matches `design_size`, the real
 ## WispPlayer driving every gameplay state, no per-frame snaps, Reduced Motion, the Home hero, the
 ## Shop's animated CHARACTERS cards (selected and unlock flourishes) and a production GameWorld.
@@ -12,7 +12,7 @@ const HOME_SCENE: PackedScene = preload("res://scenes/screens/home_screen.tscn")
 const SHOP_SCENE: PackedScene = preload("res://scenes/screens/shop_screen.tscn")
 const ENDLESS_CATALOG: EndlessCatalog = preload("res://data/endless/default_endless_catalog.tres")
 const CATALOG: FormCatalog = preload("res://data/forms/default_catalog.tres")
-const RIGGED: Array[StringName] = [&"veyra", &"rook", &"morrow"]
+const RIGGED: Array[StringName] = [&"veyra", &"rook", &"morrow", &"ilyra", &"bram"]
 const ARENA := Rect2(140.0, 420.0, 800.0, 1100.0)
 ## Largest believable change in one 1/60 s frame (scaled by the real frame time); more is a snap.
 const MAX_HEADING_STEP: float = 1.45
@@ -36,6 +36,8 @@ func _run() -> void:
 		await _check_rig_contract(form)
 		await _check_controller_flow(form)
 	await _check_reduced_motion(CATALOG.get_form(&"morrow"))
+	await _check_reduced_motion(CATALOG.get_form(&"ilyra"))
+	await _check_reduced_motion(CATALOG.get_form(&"bram"))
 	await _check_home(CATALOG.get_form(&"rook"))
 	await _check_shop()
 	for form_id: StringName in RIGGED:

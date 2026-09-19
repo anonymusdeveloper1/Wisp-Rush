@@ -4,7 +4,7 @@
 >
 > **Changed 2026-09-15 ([spec 04](../specs/story_and_endless/04_shop.md)):** the Forms screen is retired;
 > forms are bought and equipped in the Shop ([shop.md](shop.md)). `FormData` and `FormCatalog` stay.
-> **Changed 2026-09-17:** the catalog holds nine characters — the six Wisp forms plus the animated
+> **Changed 2026-09-18:** the catalog holds eleven characters — the six Wisp forms plus the animated
 > Veyra, Rook and Morrow ([playable_character_visuals.md](playable_character_visuals.md)) — and the
 > Shop tab is CHARACTERS.
 
@@ -18,7 +18,7 @@ animated characters) using earned Rift Points while keeping every gameplay value
 | Path | Role |
 |---|---|
 | `res://scripts/resources/form_data.gd` | Character identity, price, requirement, portrait, tint and optional `visual_scene` rig |
-| `res://scripts/resources/form_catalog.gd` | Ordered nine-character registry (`REQUIRED_FORM_COUNT`) and validation |
+| `res://scripts/resources/form_catalog.gd` | Ordered eleven-character registry (`REQUIRED_FORM_COUNT`) and validation |
 | `res://data/forms/*.tres` | Void, Ash, Venom, Bloodmoon, Frost, Eclipse, Veyra, Rook and Morrow |
 | `res://scenes/screens/shop_screen.tscn` / `.gd` | CHARACTERS tab: the animated card carousel, buy/equip ([shop.md](shop.md)) |
 | `res://scripts/components/focus_carousel.gd` / `page_dots.gd` | Shared card picker + page indicator ([ui_design_system.md](ui_design_system.md)) |
@@ -68,7 +68,7 @@ and tint; the Shop animates every card ([playable_character_visuals.md](playable
 
 ## How to test
 
-- Tap the hero on Home (or CHARACTERS on Results) to open the Shop's CHARACTERS tab. Verify all nine
+- Tap the hero on Home (or CHARACTERS on Results) to open the Shop's CHARACTERS tab. Verify all eleven
   cards animate, locked cards preview, purchases are rejected/accepted and the equip persists.
 - `tools/run_tests.sh form_catalog` and `playable_character_visual`.
 - Headless screen tests still target the retired Forms screen and are stale (owner cleans them up).
@@ -82,6 +82,7 @@ and tint; the Shop animates every card ([playable_character_visuals.md](playable
 
 | Date | Change |
 |---|---|
+| 2026-09-18 | Eleven characters: Ilyra (Mythic) and Bram (Legendary) added with `FormData.tier`, shown as a badge on the focused card |
 | 2026-09-17 | Nine characters (Veyra, Rook, Morrow added, `visual_scene`); tab renamed CHARACTERS; animated cards |
 | 2026-09-15 | Forms screen retired; forms live in the Shop's WISPS tab (spec 04) |
 | 2026-09-15 | Prices and balance in Rift Points (`RiftPoints.format`, spec 01) |

@@ -1,11 +1,11 @@
 class_name FormCatalog
 extends Resource
-## Ordered registry of the playable characters: six single-image Wisp forms and three rigged characters.
+## Ordered registry of the playable characters: six single-image Wisp forms and the rigged characters.
 ##
 ## Every entry is cosmetic only - collision, stats and controls never change with the character.
 
 ## Number of catalog entries; the Statistics screen counts collected characters against it.
-const REQUIRED_FORM_COUNT: int = 9
+const REQUIRED_FORM_COUNT: int = 11
 
 ## Form `.tres` paths in intended collection-screen order.
 @export var form_paths: PackedStringArray = PackedStringArray()

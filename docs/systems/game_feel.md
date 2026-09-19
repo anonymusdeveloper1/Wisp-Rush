@@ -18,6 +18,7 @@ safe across app interruptions and back presses.
 | `res://scripts/components/vfx_pool.gd` | `VfxPool`: 24 pooled Sprite2D one-shots (and flights), no per-effect allocation |
 | `res://scenes/gameplay/wall_splash_fx.gd` | `WallSplashFx`: the splash where the Wisp hits a wall — pooled droplet emitters plus a splat and flash through `VfxPool` |
 | `res://scripts/utils/haptics.gd` | `Haptics.pulse()` — mobile-only, settings-gated vibration |
+| `res://scripts/utils/frame_pacing.gd` | `FramePacing.match_display()` — simulation rate follows the screen's refresh rate |
 | `res://scripts/utils/sound_fx.gd` | `SoundFx` — null-safe Audio shortcuts and UI click binding |
 | `res://scenes/debug/debug_overlay.gd` | `DebugOverlay` — F3 performance overlay, debug builds only |
 | `res://scenes/main/main.gd` | Android back / Escape routing, app pause → music duck |
@@ -57,7 +58,7 @@ trauma decays 1.8/s. Strength = Screen Shake × (`REDUCED_MOTION_SHAKE` 0.3 when
 | Wall impact | 0.45 → 2.4 | `wall_impact` |
 | Double reap | 0.52 → 3.2 | medium haptic |
 | Triple+ reap | 0.62 → 4.6 | 60 ms hit-stop (time scale 0.08), large impact VFX, medium haptic |
-| Slow-motion finisher | 0.25 → 0.8 | 0.4 s at time scale 0.3, Soul White shade flash, low `pulse` ([rush_mode.md](rush_mode.md)) |
+| Slow-motion finisher | 0.25 → 0.8 | 0.4 s at time scale 0.3, Soul White shade flash, low `soul_pulse` ([rush_mode.md](rush_mode.md)) |
 | RUSH start | 0.5 → 3.0 | heavy haptic, `level_up`, 1.5× `RUSH` callout |
 | Player damage | 0.75 → 6.8 | heavy haptic |
 | Reaper hit / final hit | 0.35 / 1.0 → 1.5 / 12 | medium / double-heavy haptic |

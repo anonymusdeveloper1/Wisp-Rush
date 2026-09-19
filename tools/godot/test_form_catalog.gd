@@ -1,8 +1,13 @@
 extends SceneTree
-## Validates the character catalog: nine entries, prices, the Eclipse gate, rigs and save ids.
+## Validates the character catalog: every entry, prices, the Eclipse gate, rigs, tiers and save ids.
 
 const CATALOG: FormCatalog = preload("res://data/forms/default_catalog.tres")
-const RIGGED: Array[StringName] = [&"veyra", &"rook", &"morrow"]
+const RIGGED: Array[StringName] = [&"veyra", &"rook", &"morrow", &"ilyra", &"bram"]
+## Characters that carry a collectible tier; everything else must stay STANDARD.
+const TIERS: Dictionary[StringName, FormData.Tier] = {
+	&"ilyra": FormData.Tier.MYTHIC,
+	&"bram": FormData.Tier.LEGENDARY,
+}
 
 
 func _init() -> void:
@@ -13,7 +18,7 @@ func _init() -> void:
 		for failure: String in validation:
 			push_error("form_catalog: %s" % failure)
 	var forms: Array[FormData] = CATALOG.load_forms()
-	var expected_prices: Array[int] = [0, 250, 500, 800, 1200, 2000, 0, 0, 0]
+	var expected_prices: Array[int] = [0, 250, 500, 800, 1200, 2000, 0, 0, 0, 0, 0]
 	if forms.size() != expected_prices.size():
 		failures += 1
 		push_error("form_catalog: expected %d characters, got %d" % [
@@ -41,6 +46,10 @@ func _init() -> void:
 				failures += 1
 				push_error("form_catalog: %s rig root is not a PlayableCharacterVisual" % form.form_id)
 			instance.free()
+		var expected_tier: FormData.Tier = TIERS.get(form.form_id, FormData.Tier.STANDARD)
+		if form.tier != expected_tier:
+			failures += 1
+			push_error("form_catalog: %s has the wrong tier" % form.form_id)
 		if String(form.form_id) not in SaveManagerService.VALID_FORM_IDS:
 			failures += 1
 			push_error("form_catalog: save rejects %s" % form.form_id)
@@ -48,5 +57,5 @@ func _init() -> void:
 		failures += 1
 		push_error("form_catalog: save ids and catalog disagree")
 	if failures == 0:
-		print("form_catalog: six Wisp forms plus Veyra, Rook and Morrow validated")
+		print("form_catalog: %d characters validated (%d rigged)" % [forms.size(), RIGGED.size()])
 	quit(failures)

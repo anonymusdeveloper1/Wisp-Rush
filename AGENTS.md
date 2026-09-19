@@ -15,7 +15,11 @@
    (theme type variations, `Palette`), `concept_art/wisp_rush_redesign_v1/STYLE_GUIDE.md` (art/UX
    authority) and its six-screen board, plus [ADR-0005](docs/decisions/0005-visual-redesign-v1.md)
    (redesign, generated art pipeline) and [ADR-0006](docs/decisions/0006-inset-playfield-and-larger-sprites.md)
-   (inset playfield, sprite/hitbox scale).
+   (inset playfield, sprite/hitbox scale). **Adding or changing a playable character?** Read
+   [docs/guides/character_rig_recipe.md](docs/guides/character_rig_recipe.md) first (layers, Bone2D
+   chains and skinned Polygon2D ribbons, `ChainSpring`, the runtime state machine, the QA loop and
+   the mistakes already made), then [docs/systems/playable_character_visuals.md](docs/systems/playable_character_visuals.md)
+   and [ADR-0015](docs/decisions/0015-animated-playable-characters.md).
 5c. **Making a devlog video (TikTok / YouTube Shorts)?** [docs/marketing/devlog_video_recipe.md](docs/marketing/devlog_video_recipe.md)
    (owner-approved recipe: rules, structures, Palmier Pro blueprint, QA), [docs/marketing/devlog_hooks.md](docs/marketing/devlog_hooks.md)
    (the hook library every episode picks from), [tools/video/README.md](tools/video/README.md)

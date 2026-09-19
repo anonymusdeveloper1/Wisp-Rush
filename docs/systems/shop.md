@@ -24,6 +24,7 @@ real-money Remove Ads tab.
 | `res://scripts/resources/dash_style_data.gd` · `dash_style_catalog.gd` · `res://data/dash_styles/*.tres` | Dash styles (trail + launch burst tints) | ✅ |
 | `res://scripts/resources/form_catalog.gd`, `endless_catalog.gd` | Character and arena items | ✅ (9 characters, 30 arena skins) |
 | `res://scenes/player/visuals/playable_character_preview.gd` | Live character on each CHARACTERS card ([playable_character_visuals.md](playable_character_visuals.md)) | ✅ |
+| `%TierLabel` in `shop_screen.tscn` | Collectible tier of the focused character (`FormData.tier`), above the description | ✅ |
 
 ## Public API
 | Member | Kind | Description |

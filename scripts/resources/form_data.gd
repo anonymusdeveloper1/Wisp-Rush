@@ -2,6 +2,18 @@ class_name FormData
 extends Resource
 ## One playable character (a Wisp form or a rigged character): identity, price, art and feedback tint.
 
+## Collectible tier. Presentation only: it labels a character in the Shop and never changes
+## collision, stats, controls or scoring. Everything that shipped before the Legendary and Mythic
+## characters stays [constant TIER_STANDARD].
+enum Tier {
+	STANDARD, ## The six Wisp forms and the first three rigged characters.
+	LEGENDARY, ## A fully rigged character with a deliberately restrained animation budget.
+	MYTHIC, ## The richest rigs: many coordinated parts and layered follow-through.
+}
+
+## Player-facing label for each [enum Tier], in enum order.
+const TIER_NAMES: Array[String] = ["", "LEGENDARY", "MYTHIC"]
+
 ## Stable identifier stored in progression data.
 @export var form_id: StringName
 ## Player-facing form name.
@@ -19,6 +31,13 @@ extends Resource
 @export var visual_scene: PackedScene
 ## Cosmetic feedback tint for aim, impact and surrounding UI.
 @export var tint: Color = Color.WHITE
+## Collectible tier shown on the focused Shop card; never read by gameplay.
+@export var tier: Tier = Tier.STANDARD
+
+
+## Player-facing tier label, empty for [constant Tier.STANDARD] so ordinary cards show no badge.
+func get_tier_name() -> String:
+	return TIER_NAMES[tier] if tier >= 0 and tier < TIER_NAMES.size() else ""
 
 
 ## Returns authoring failures so the full collection can be checked without opening the editor.

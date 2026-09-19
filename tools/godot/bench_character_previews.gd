@@ -1,8 +1,8 @@
 extends SceneTree
 ## Benchmark: what live character previews cost to build and to run (the Shop's CHARACTERS tab).
 ##
-## Prints build time for nine previews cold (first load of every character's art) and warm, plus the
-## per-frame cost while all nine animate. Compare the per-frame figure against the "nothing alive"
+## Prints build time for every preview cold (first load of every character's art) and warm, plus the
+## per-frame cost while they all animate. Compare the per-frame figure against the "nothing alive"
 ## baseline — in headless that baseline is the main loop itself, not the rigs.
 ##
 ## Usage:
@@ -12,6 +12,7 @@ extends SceneTree
 const CATALOG: FormCatalog = preload("res://data/forms/default_catalog.tres")
 const IDS: Array[StringName] = [
 	&"void", &"ash", &"venom", &"bloodmoon", &"frost", &"eclipse", &"veyra", &"rook", &"morrow",
+	&"ilyra", &"bram",
 ]
 
 
@@ -21,9 +22,9 @@ func _init() -> void:
 
 func _run() -> void:
 	await _measure("baseline (nothing alive)", [])
-	await _measure("all 9, cold", IDS)
-	await _measure("all 9, warm (second open)", IDS)
-	await _measure("all 9, warm again", IDS)
+	await _measure("all %d, cold" % IDS.size(), IDS)
+	await _measure("all %d, warm (second open)" % IDS.size(), IDS)
+	await _measure("all %d, warm again" % IDS.size(), IDS)
 	quit(0)
 
 

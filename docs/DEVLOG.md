@@ -4,19 +4,389 @@
 > [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) §7.6. Keep entries short — details belong in the docs
 > they changed.
 
-## 2026-09-18 — Legendary and Mythic character approval concepts
+## 2026-09-18 — Ilyra v3.1 continuous skinned-source replacement
+- **Who:** Codex (GPT-5)
+- **Did:** Followed Claude's superseding `ART_REQUEST_SKINNED.md` contract for Ilyra only. Replaced
+  the 12 rigid arm segments, four thigh/shin pieces and two-piece torso (18 PNGs) with four whole
+  arms, two whole legs and one connected torso (seven PNGs), leaving a 55-part pack. The arms and
+  legs were generated against the approved identity lock; the torso losslessly flattens the
+  approved chest/hips at their prior registration. Added four-point deformation chains to the
+  manifest, re-rendered the neutral assembly, and updated the pack README, exact prompt/finishing
+  provenance and asset ledger. All 48 retained PNGs remain byte-identical. Created no Bram art and
+  changed no runtime code, scenes, catalog or `data/forms`.
+- **Files/systems:** `concept_art/wisp_rush_playable_characters_v3/{README,GENERATION_PROMPTS}.md`,
+  `parts/ilyra/`, `assembly/ilyra_assembly_reference.png`, `docs/ASSETS.md`, generated project map.
+- **Verified:** 55 PNGs / 55 manifest entries; 18/18 superseded files absent; all seven new parts are
+  single connected straight-alpha components with four in-bounds vertical chain points, ≥8 px
+  transparent padding and zero RGB below alpha 0; 48/48 retained hashes unchanged; every internal
+  joint survives −70°/+70° mesh bends and `arm_ul` passes the torso/shoulder socket sweep; assembly
+  fits the 1024² frame and reads at 61×64 px; `tools/validate.sh` → `VALIDATE: OK`;
+  `tools/run_tests.sh` → 25 passed / 10 failed, matching the pre-existing stale form/unlock/save
+  baseline, while `test_playable_character_visual` passes.
+- **Follow-ups:** Claude updates the extractor and rebuilds Ilyra's runtime rig from the v3.1
+  manifest, then the owner completes the phone gate. Bram remains blocked until that sign-off.
+
+## 2026-09-18 — Ilyra v3 production rig-source handoff
+- **Who:** Codex (GPT-5)
+- **Did:** Followed Claude's `concept_art/wisp_rush_playable_characters_v3/ART_REQUEST.md` contract
+  and produced Ilyra only: 66 isolated straight-alpha RGBA parts, a 66-entry pivot/tip/rest/draw-order
+  manifest, and a neutral 1024² assembly rendered purely from that manifest. Missing rig geometry was
+  generated against the owner-approved v2 identity lock; already-approved braids, skirt panels,
+  sashes, crown and heart pixels were preserved, de-matted and put at one uniform source scale. A
+  visual QA pass rejected cuffs baked into the first hand board, detached fan/braid fragments and a
+  vertical slash texture; the final hands are bare, cloth centre lines are vertical, fan membrane
+  states have identical alpha and VFX are near-white/tintable. Copied both locked references
+  byte-for-byte as §5 requires, but created no Bram parts. Added the pack README, verbatim prompt and
+  finishing provenance, and ASSETS rows. No runtime code, scenes, forms, catalog or runtime art was
+  changed.
+- **Files/systems:** `concept_art/wisp_rush_playable_characters_v3/{README,GENERATION_PROMPTS}.md`,
+  `references/`, `parts/ilyra/`, `assembly/ilyra_assembly_reference.png`, `docs/ASSETS.md`.
+- **Verified:** 66 PNGs / 66 manifest entries; every PNG is RGBA with ≥8 px transparent padding and
+  zero RGB under alpha 0; magenta contact sheet clean; all five heads share 272×246 registration;
+  five fan ribs share 176 px height; elbow and knee composites show no gap at −60°/0°/+60°; assembly
+  fits `(55, 5)–(970, 968)` and remains recognisable at 61×64 px; approved reference copies have
+  matching SHA-256; `tools/validate.sh` → `VALIDATE: OK`; full suite 25 passed / 10 failed, the same
+  pre-existing stale tests documented in the preceding character session.
+- **Follow-ups:** Claude rebuilds Ilyra's runtime rig from this source and manifest, then the owner
+  completes the phone gate. Generate no Bram v3 parts until that explicit sign-off. Generated-art
+  licence still requires confirmation before release.
+
+## 2026-09-19 — The wall hold never actually ran; fixed at the source
+- **Who:** Claude Code (Opus 5)
+- **Did:** The owner reported that none of the previous round was visible in game. It was not, and the
+  cause was a real defect rather than tuning: **the hold was keyed off `get_landing()`**, and
+  `WispPlayer._get_landing_progress()` returns `0.0` the moment `state != State.DASHING`. So the pose
+  appeared during the last 0.16 s of *flight* and was gone by the time she was standing on the wall —
+  the one moment it was written for.
+  - The hold is now driven by the surface she is resting against: the floor's inward normal points up,
+    a side wall's is sideways, a ceiling's points down, so `1 - surface_normal.dot(UP)` is 0 on the
+    floor and 1 on anything she has to hold. It holds for as long as she is there.
+  - Same bug in the legs: the knee fold also keyed off `_brace`, so she stood straight-legged against
+    the wall. It now folds into the hold too.
+  - **Verified by measurement, not by eye.** A throwaway probe printed the real joint angles per
+    situation, which is what caught the legs:
+
+    | | ArmLl (shoulder, elbow, wrist) | LegL | arc scale |
+    |---|---|---|---|
+    | rest on floor | 1.78, 0.26, 0.20 | 1.57, 0.00 | 1.00 |
+    | rest on side wall | 3.37, -1.55, -0.85 | 2.05, -0.73 | 1.00 |
+    | mid dash | 1.31, -0.15, -0.11 | 1.64, -0.11 | 2.50 |
+
+    The hold swings her left arm 1.6 rad further and folds that elbow hard, only on a wall; the knees
+    fold asymmetrically (-0.73 against +0.34); the dash sweep grows 2.5x. All four arms trail at
+    different angles through a dash.
+- **Files/systems:** `scenes/player/visuals/ilyra_visual.gd`.
+- **Verified:** `validate.sh` OK; `playable_character_visual` passes; joint angles measured as above;
+  motion sheet shows the hold persisting across every wall-rest frame rather than one; installed and
+  launched on the owner's SM-S921B with Ilyra equipped.
+- **Lesson:** a controller value named for a *transition* (`landing`) is not a state. Anything that
+  should persist while resting must read the resting condition, not the approach to it. Worth
+  checking Bram's `_plant` for the same mistake when he moves to skinned limbs.
+
+## 2026-09-19 — Ilyra's hold and dash rebuilt from the owner's references
+- **Who:** Claude Code (Opus 5)
+- **Did:** The owner sent three pose references (a climber holding a wall edge, a sheet of aerial
+  falling poses, and a pixel-art sheet whose dash attack is one wide fire sweep). Pinterest links are
+  not fetchable — login-walled and JavaScript-rendered — so they were pasted as images instead; worth
+  remembering for next time.
+  - **The hold is asymmetric now.** The climbing reference takes the surface with one side and
+    counterbalances with the other; the rig was doing a symmetric two-arm brace that read as standing
+    to attention. `GRIP_POSE` gives all four arms their own (shoulder, elbow, wrist) offsets — her
+    left pair bites, her right pair swings free — only her left hand closes, `GRIP_KNEE` folds one
+    leg under her while the other stays long, and the waist twists into the hold.
+  - **The dive trails.** The falling sheet has limbs streaming at different angles, never collapsed
+    onto one axis, so `DASH_TRAIL` gives each arm its own angle through a fold instead of pulling
+    them all to zero.
+  - **The dash is one wide sweep.** In the pixel reference the character travels *inside* a single
+    broad slash rather than flicking small arcs. A `_sweep` accent (eased slower than `_cut`, so the
+    arcs grow instead of popping) stretches both blade arcs along the travel axis until they read as
+    one edge carried across the arena.
+  - Also seated the fans properly: her fist now closes part-way up the shaft with the butt emerging
+    below, rather than the fan balancing on top of her hand.
+  - Removed two per-frame array allocations found while editing (`CONVENTIONS` §8).
+- **Files/systems:** `scenes/player/visuals/ilyra_visual.gd`.
+- **Verified:** `validate.sh` OK; `playable_character_visual` passes (no per-frame snaps despite the
+  larger swings — the sweep is eased at 7/s precisely to stay inside the contract); grip inspected at
+  Shop scale; slow-motion clip re-filmed to `logs/clips/ilyra_slowmo.mp4`.
+- **Follow-ups:** the clip's timeline lands on the floor, so the one-sided wall hold is still easier
+  to see in a side-wall landing than in this film. APK not yet reinstalled — the phone was
+  disconnected. Bram is still on cut segments.
+
+## 2026-09-19 — Ilyra holds her fans, holds the wall, and cuts with the dash
+- **Who:** Claude Code (Opus 5)
+- **Did:** Three fixes the owner called out on the skinned rig, then filmed it.
+  - **She was not actually holding the fans.** Measured rather than eyeballed: the pack seats each
+    `fan_handle` so its butt ends **57 px past her fist**, and gives it `draw_order` 66 against the
+    hand's 46 — so the handle drew *over* the fist and the grip read as floating. `_seat_fan()` now
+    solves the handle's local position from its own length and angle so the butt lands in the palm,
+    keeping whatever angle the pack authored, and lifts the gripping hand's `z_index` above it.
+  - **Wall landings read as standing.** The hold is much stronger now: the free pair reaches past her
+    hips, the elbows fold hard so the forearms lie along the surface and the wrists cock back, on top
+    of the knees and ankles that already folded.
+  - **The dash is her attack.** It used to fold the fans shut into a spearhead, which read as a dive
+    rather than a strike. A new `_cut` accent holds both fans ~85 % open through `dash_start` and
+    `dash_loop`, lights the membranes, and trails an arc off each blade that sweeps ahead of her.
+  - **Filmed it**: `logs/clips/ilyra_slowmo.mp4`, 4× slow motion through launch, kill accent,
+    mid-dash turn, dive and landing, with the live state captioned.
+- **Files/systems:** `scenes/player/visuals/ilyra_visual.gd`,
+  `docs/systems/playable_character_visuals.md`, `docs/guides/character_rig_recipe.md`.
+- **Verified:** `validate.sh` OK; `playable_character_visual` passes; full suite 25 passed / 10 failed
+  (the documented stale set); grip inspected at Shop scale on both hands; slow-motion clip reviewed.
+- **Follow-ups:** APK rebuilt but **not installed — the phone disconnected during the deploy**. The
+  wall hold is hard to judge from this clip because its timeline lands on the *floor*; a side-wall
+  landing would show it better. Bram is still on cut segments.
+
+## 2026-09-18 — Ilyra's limbs are skinned meshes; the joint seams are gone
+- **Who:** Claude Code (Opus 5)
+- **Did:** Codex delivered the skinned part pack — the eighteen cut arm/leg/torso segments replaced by
+  **seven whole paintings carrying a `chain` of joint points** (torso, four arms, two legs), 55 parts
+  in total. Rebuilt her on it.
+  - **`build_character_rig.py`** now emits any part with a `chain` as a `RibbonChain` whose spine is
+    that chain, so a limb is one painting stretched over three bones. Cloth still uses a straight
+    pivot→tip spine driven by a `ChainSpring`; limbs have their bones **posed** by the rig script.
+  - **Riders re-parent onto bones.** The generated scene parents a hand to the arm's *root*, which is
+    right for a cutout and wrong for a skinned limb — the hand would sit still while the elbow bent
+    under it. `_mount_riders()` moves each part onto the bone that carries it with `reparent(bone,
+    true)`; the bones are still at rest at `_ready`, so everything lands with the offset it was
+    authored with. Hands ride the wrist bone, boots the ankle, head and arms the upper torso, skirt
+    and sashes the hips, the heart the chest.
+  - **The seams are gone.** At Shop scale the arms are continuous through shoulder, elbow and wrist —
+    the paint deforms instead of two pieces rotating over each other.
+  - **The owner's two asks, both in:** her free hands now plant on the surface she lands against
+    (`_grip` follows `get_landing()`, the lower pair reaches out and the hands close), and a kill is
+    led by those hands punching out along the travel axis with the fans crossing a beat behind, over
+    an eight-petal `AttackParticles` burst.
+- **Files/systems:** `scenes/player/visuals/ilyra_visual.{gd,tscn}`, `tools/art/build_character_rig.py`,
+  `tools/art/extract_playable_characters.py`, `assets/art/characters/playable/ilyra/`,
+  `scripts/utils/frame_pacing.gd`, `scenes/main/main.gd`, `data/forms/{ilyra,bram}.tres`,
+  `docs/guides/character_rig_recipe.md`, `docs/systems/playable_character_visuals.md`.
+- **Verified:** `validate.sh` OK; `playable_character_visual` passed first run (all 13 states, no
+  collision, particle budget, skin weights, sizing, the real controller through every state with no
+  per-frame snaps, Reduced Motion, both menus, a production GameWorld); `form_catalog` passes; full
+  suite 25 passed / 10 failed — the documented stale set, no new regressions; motion contact sheet
+  reviewed through idle, aim, dash, kill and landing; installed on the owner's SM-S921B, which boots
+  `physics=120 Hz` with no script errors and no UID warnings.
+  - **Adaptive displays.** Deploying caught the S24 reporting **60 Hz** at one launch and **120 Hz**
+    at the next: Samsung's panel moves between its modes while the game runs, so reading the rate
+    once at boot leaves the simulation mismatched for the rest of the session. `FramePacing.poll()`
+    now re-reads the screen every two seconds and re-rates the simulation only when it changed;
+    `Main` logs the change. This also explains the earlier confusion — the panel really was at 60 Hz
+    when the "120 Hz simulation" build was tested, so that result never came from a refresh match.
+  - **Stale UID.** The device logged `invalid UID … using text path instead` for Ilyra's
+    `preview.png`: it is regenerated by the ingest and gets a fresh UID each time, while the export
+    resolved one from an older run. Pinned the real UID (read from the `.import`, not invented) into
+    `ilyra.tres` and `bram.tres`. The warning is gone.
+- **Follow-ups:** Bram is still on cut segments and should move to skinned limbs when his v3 parts
+  are made. The owner's verdict on Ilyra's motion is the gate for starting them.
+
+## 2026-09-18 — Simulation follows the screen, not one phone
+- **Who:** Claude Code (Opus 5)
+- **Did:** The owner confirmed the 120 Hz simulation felt smooth on their S24, then asked the right
+  question: *would it be smooth on other devices?* It would not. Pinning
+  `physics_ticks_per_second=120` tunes the game to one screen — it wastes half the physics budget on
+  a 60 Hz phone, gives an uneven 4:3 step on the many 90 Hz mid-range Androids, and judders again
+  above 120 Hz.
+  - **Re-opened physics interpolation properly this time** rather than leaving it at "rejected".
+    Godot's docs say nodes animated per frame in `_process` should not rely on it, which matched the
+    symptom exactly, so the rigs were opted out with `PHYSICS_INTERPOLATION_MODE_OFF`. That fixed
+    Ilyra's effect sprites but the contract still failed 2 of 5 runs on Veyra's `MotionRoot`.
+    Measured the baseline to be sure the flakiness was not pre-existing: 5/5 clean without
+    interpolation, so it is genuinely the trigger. The cause is pacing, not a measurement bug — the
+    sampler does refresh its baseline on skipped frames — and the cubic squash curve can outrun a
+    linear per-frame budget once frame times vary. Making it work would mean opting out the rigs,
+    both ambiences, the tutorial hand, the VFX pool and most screens, and adding
+    `reset_physics_interpolation()` at every teleport: a lot of regression surface across the whole
+    game for something the simpler fix also delivers.
+  - **`FramePacing.match_display()`** instead, called once from `Main._ready()`: read the screen's
+    refresh rate and step the simulation at it, clamped to 60-120 Hz. A 60 Hz phone pays nothing, 90
+    and 120 Hz match exactly, and anything above is capped so the physics cost stays bounded. Where a
+    display cannot report a rate — headless runs and every automated test — it falls back to 60 Hz,
+    so the tuned simulation stays reproducible. The boot line now prints the rate it chose.
+- **Files/systems:** `scripts/utils/frame_pacing.gd` (new), `scenes/main/main.gd`, `project.godot`
+  (the `[physics]` override removed), `docs/systems/{game_feel,playable_character_visuals}.md`,
+  `docs/ROADMAP.md`, ADR-0015.
+- **Verified:** `validate.sh` OK and the boot line reads `physics=60 Hz` headless (the fallback);
+  `playable_character_visual` 3/3 clean; a real run through the Godot MCP picks the rate from the
+  Mac's display. Android APK rebuilt but **not yet installed — the phone was disconnected**.
+- **Follow-ups:** confirm on the S24 that the boot line reads `physics=120 Hz` and that it still
+  feels smooth; if a 90 Hz device ever shows uneven pacing, that is the case for revisiting
+  interpolation with the per-frame nodes opted out.
+
+## 2026-09-18 — 120 Hz simulation; skinned meshes chosen over 3D for the seams
+- **Who:** Claude Code (Opus 5)
+- **Did:** Owner tested the rebuilt Ilyra on the phone: still not smooth, and parts visibly out of
+  line. Diagnosed both rather than tuning blind.
+  - **The seams are the technique, not the tuning.** The rig reproduces the v3 assembly reference to
+    0.01 px, so the gaps are in the source geometry and in what rigid cutouts can do: the joint caps
+    were authored to ±60°, but `aim`, the dash fold, the kill and the flourishes all swing past that,
+    and beyond a cap two cutouts rotating over each other must show a seam. The arms also float off
+    the shoulders in the reference itself.
+  - **Owner asked whether to switch to 3D.** Recommended against it and said why: the whole game is
+    2D painted art, the other four characters are 2D rigs, there is no modelling or rigging pipeline
+    (an image generator cannot produce a rigged skinned model), and it would not fix the judder. The
+    real answer is skinned 2D meshes — one painting per limb with bones inside it, which is exactly
+    what `RibbonChain` already does for her braids. Owner chose that.
+  - **Judder.** Tried Godot's physics interpolation first; it shifted frame pacing enough that the
+    rig smoothness contract failed *intermittently* on Veyra and Rook (0.32-0.33 scale steps inside a
+    normal-length frame, passing on one run and failing the next). Rejected it and set
+    `physics/common/physics_ticks_per_second=120` instead, which halves the step without touching how
+    anything is drawn. Three consecutive clean runs of `playable_character_visual`, full suite back to
+    25 passed / 10 pre-existing failures.
+  - Wrote `concept_art/wisp_rush_playable_characters_v3/ART_REQUEST_SKINNED.md`: whole uncut arms,
+    legs and torso replacing the eighteen cut segments (18 files become 7), each with a `chain` of
+    joint points for mesh weighting, plus the rules that make a painting deformable — draw it
+    straight, never put a gold band on a joint, keep the width even through a bend, and include the
+    shoulder socket so the limb cannot float.
+- **Files/systems:** `project.godot` (`[physics]`), `concept_art/wisp_rush_playable_characters_v3/ART_REQUEST_SKINNED.md`.
+- **Verified:** `validate.sh` OK; `playable_character_visual` 3/3 clean runs at 120 Hz; full suite 25
+  passed / 10 failed (the documented stale set); Android debug build installed and launched on the
+  owner's SM-S921B, no script errors.
+- **Follow-ups:** owner's verdict on whether 120 Hz fixed the judder. Then Ilyra's limbs and torso
+  move to skinned `Polygon2D` meshes once the new art lands, and Bram only after she is signed off.
+  Still open: the cosmetic stale-UID warning on `ilyra.tres`'s portrait.
+
+## 2026-09-18 — Ilyra rebuilt on separated parts: real joints, folding fans, blinks
+- **Who:** Claude Code (Opus 5)
+- **Did:** The owner tested the first Ilyra on a phone and she read as a still pose. The cause was
+  the source art, not the tuning: her v2 rig came from the approval sheet's component row, so each
+  arm was one painting split at the elbow with a straight crop box (a bent elbow showed a seam, and
+  shoulders and wrists could not rotate at all), the torso was masked out of a turnaround and could
+  not twist, and the fan "folded" by cross-fading two paintings. Wrote an art request
+  (`concept_art/wisp_rush_playable_characters_v3/ART_REQUEST.md`) for one PNG per rig group plus a
+  pivot manifest; Codex delivered 66 parts, a manifest and an assembly reference.
+  - **Intake.** `extract_playable_characters.py` gained `PART_PACKS`: a pack is copied **byte for
+    byte**, because the manifest's pivots are in each file's own pixel space and any re-crop would
+    move every joint. `preview.png` is derived from the pack's assembly reference, so the HUD and
+    card portrait can never drift from the rig.
+  - **`tools/art/build_character_rig.py`.** Generates the rig scene from the manifest: absolute rest
+    transforms into parent-relative ones, pivots into sprite offsets, draw order into `z_index`
+    (tree order cannot express it — her legs must draw behind the torso they hang from), the fan
+    mechanism mirrored once at its chain root, and `design_size` / `preview_center` measured from the
+    assembled silhouette. The rig matched the assembly reference to the pixel on the first run once
+    the mirror was applied at the root rather than at every node.
+  - **Motion.** Each of the four arms is shoulder → elbow → wrist easing at falling rates, so a
+    gesture starts at the shoulder and lands in the hand two frames later; hips counter-rotate
+    against the chest; each fan opens and shuts by rotating five ribs about one rivet; knees and
+    ankles fold on arrival; five registered head paintings carry self-timed blinks and focused,
+    joyful and pained faces.
+  - **Owner feedback mid-pass:** her free hands now plant on the surface she lands against, and a
+    kill is *led* by those hands with the fans crossing a beat behind (`_slash` on a fast ramp,
+    `_slash_follow` on a slower one) over an eight-petal burst.
+- **Files/systems:** `tools/art/build_character_rig.py` (new), `tools/art/extract_playable_characters.py`,
+  `scenes/player/visuals/ilyra_visual.{gd,tscn}` (the scene is generated — hand edits are lost),
+  `assets/art/characters/playable/ilyra/`, `concept_art/wisp_rush_playable_characters_v3/`,
+  `docs/systems/playable_character_visuals.md`, `docs/ASSETS.md`, `docs/guides/character_rig_recipe.md`.
+- **Verified:** `validate.sh` OK; `playable_character_visual` and `form_catalog` pass; full suite 25
+  passed / 10 failed — the same documented stale-since-M10 scripts. Lineup bounds match the pack's
+  assembly reference exactly (978.98 vs `design_size` 979, centre (0, −138.5)); motion contact sheets
+  reviewed frame by frame for idle, aim, dash, the hands-first kill and the wall landing;
+  Shop/Home/GameWorld screenshots inspected; Android debug build installed and launched on the
+  owner's SM-S921B with no errors.
+- **Follow-ups:** owner's device verdict on the motion is the gate before Bram's parts are generated.
+  The exported build logs one cosmetic warning — `ilyra.tres` carries a stale UID for `preview.png`
+  from before the portrait was regenerated, so Godot falls back to the text path and loads it
+  correctly; the MCP `update_project_uids` tool resaved nothing (its path handling is wrong), and
+  clearing `.godot/`'s UID cache is denied to agents, so this needs an editor open or a source-side
+  UID. Unrelated and still open: on a 120 Hz phone positions step at the 60 Hz physics rate.
+
+## 2026-09-18 — The finisher and RUSH-end sounds were never audible
+- **Who:** Claude Code (Opus 5)
+- **Did:** Fixed `WARNING: [Audio] unknown SFX id: pulse`, seen on the Android debug build.
+  `game_world.gd` asked for `&"pulse"` for both the slow-motion finisher and the end of RUSH, but
+  `pulse` is one of the three **music layers**, not an effect — so `play_sfx()` found no stream and
+  warned, and neither sound had played since M10 introduced them. The id could not simply be
+  registered either: `AudioSynth.render_all_pcm()` keys effects and music in one dictionary and
+  `AudioService._install_pending()` files a stream as music or SFX **by name**, so an effect called
+  `pulse` would be overwritten by the 8-second music loop and filed as music.
+  - Added `soul_pulse` to `SFX_IDS` — a low octave-falling chorus with filtered air under it and no
+    bell, so it lands as weight rather than a chime, matching what both call sites and both tuning
+    fields (`finisher_pulse_pitch` 0.6, `end_sound_volume_db` −6) were written for. Trimmed −4 dB
+    like `wall_impact`.
+  - Pointed both call sites at it and corrected the doc comments that described "a low `pulse`".
+  - **Regression guard:** `test_audio_service` now scans every `.gd` under `scenes/` and `scripts/`
+    for `SoundFx.play(&"id")` and fails if the id is not renderable, or if it is a music-layer id.
+    Verified by reintroducing the bug — the test failed naming the file and the id.
+- **Files/systems:** `scripts/utils/audio_synth.gd`, `scripts/autoload/audio_service.gd`,
+  `scenes/gameplay/game_world.gd`, `scripts/resources/run_feel_tuning.gd`,
+  `tools/godot/test_audio_service.gd`, `docs/systems/{audio,game_feel,rush_mode}.md`.
+- **Verified:** `validate.sh` OK; `test_audio_service` passes (every SFX renders, levels and edges
+  clean, the new call-site scan covers 15 played ids); full suite 25 passed / 10 failed — the same
+  documented stale-since-M10 scripts, no new regressions; a real run through the Godot MCP reports
+  `[Audio] synthesized 22 sounds` (was 21) with no warnings and no errors.
+- **Follow-ups:** the sound has only been verified headlessly and at boot — hearing it needs a
+  multi-kill finisher or a RUSH ending on device, so it is worth a listen on the owner's next phone
+  session. Unrelated and still open: on a 120 Hz phone positions step at the 60 Hz physics rate.
+
+## 2026-09-18 — Ilyra and Bram: two more animated characters, and collectible tiers
+- **Who:** Claude Code (Opus 5)
+- **Did:** Implemented the two owner-approved characters from
+  `concept_art/wisp_rush_playable_characters_v2/`, Ilyra first and fully verified before Bram existed,
+  per that pack's `IMPLEMENTATION_BRIEF.md`.
+  - **Art pipeline.** Approval sheets are opaque, so `tools/art/make_rig_source.py` now derives the
+    transparent rig source the extractor needs: Ilyra's reference already carried a clean subject
+    matte, Bram's is keyed off near-black. `extract_playable_characters.py` gained versioned
+    `SOURCE_SHEETS` (v1 output stays byte-identical) and `MASKS`, a polygon cut for a part the sheet
+    never isolates — Ilyra has no separate torso anywhere but inside her front turnaround. Its
+    component labelling is `scipy.ndimage.label` now; the hand-rolled union-find degenerated to
+    minutes on Bram's silhouette. 28 Ilyra layers, 17 Bram layers, both contact sheets reviewed.
+  - **Ilyra (Mythic, ~30 groups).** Four two-part arms that counter-pose with the pairs a beat apart
+    and the forearms easing slower than the upper arms; folding fans (the open painting cross-fades
+    to the closed one); six skirt panels on their own springs; two skinned braids and four skinned
+    sashes; three crown pieces orbiting clear of her face.
+  - **Bram (Legendary, ~14 groups).** Deliberately quieter: weight shift, breathing visor and
+    reactor, two spring-driven cape panels, a shield-first dive with the sword arm folded behind it,
+    one clean cut with a single narrow arc, and a landing that compresses through both boots.
+  - **Tiers.** `FormData.tier` (`STANDARD`/`LEGENDARY`/`MYTHIC`) with a `%TierLabel` badge above the
+    Shop description — presentation only, and it never replaces price or ownership state.
+  - **Owner feedback on device:** Ilyra read as a still pose in a run. Her idle sway was 0.09 rad,
+    about one pixel on a 130 px character, so her arms and fans were moving invisibly. Raised the
+    idle choreography to 0.30 + 0.14 rad with per-arm phase, forearms 0.07 → 0.34, fan
+    counter-rotation 0.16 → 0.42 plus a breathing fold, and turned `attack` into a real opposed
+    cross-slash (upper arms 2.0/1.45 rad, the lower pair answering). No new art was needed.
+- **Files/systems:** `scenes/player/visuals/{ilyra,bram}_visual.{gd,tscn}`,
+  `scripts/resources/form_data.gd` + `form_catalog.gd`, `data/forms/{ilyra,bram}.tres` + catalog,
+  `scripts/autoload/save_manager.gd`, `scenes/screens/shop_screen.{gd,tscn}`,
+  `tools/art/{make_rig_source,extract_playable_characters}.py`,
+  `tools/godot/{test_form_catalog,test_playable_character_visual,render_character_lineup,bench_character_previews}.gd`,
+  `assets/art/characters/playable/{ilyra,bram}/`, plus the character, forms, Shop, ASSETS, GDD,
+  ROADMAP and rig-recipe docs and ADR-0015's addendum.
+- **Verified:** `validate.sh` OK; `form_catalog` and `playable_character_visual` pass (all 13 states,
+  no collision in a rig, particle budget, skin weights, sizing, the real controller through every
+  state with no per-frame snaps, Reduced Motion, both menus, a production GameWorld); full suite 25
+  passed / 10 failed — the same ten documented stale-since-M10 scripts, which reference scenes and
+  methods absent from committed HEAD, so no new regressions. Lineup, motion contact sheets and
+  Shop/Home/GameWorld screenshots reviewed; `qa_matrix.sh shop_wisps` 5/5; preview benchmark 11 cold
+  234 ms, warm ~8 ms, per-frame cost indistinguishable from baseline; real run through the Godot MCP
+  and an Android debug build on the owner's SM-S921B, both with no errors.
+- **Next:** the owner asked for properly separated Mythic parts so the rig can be a real `Bone2D`
+  skeleton (shoulder/elbow/wrist on four arms, a twisting waist, fans that fold rib by rib,
+  bending knees, blinks) with particle work. Wrote the art request for Codex at
+  `concept_art/wisp_rush_playable_characters_v3/ART_REQUEST.md`: 66 Ilyra PNGs and 32 Bram PNGs,
+  one part per file with a pivot manifest, Ilyra first and tested before Bram.
+- **Follow-ups:** owner approval of the motion and prices (all 0 RP, and whether Legendary/Mythic
+  should cost more); on a 120 Hz phone positions still step at the 60 Hz physics rate, which reads as
+  judder for every character — enabling physics interpolation is a project-wide owner decision;
+  pre-existing and unrelated, `game_world.gd` plays `&"pulse"` as an SFX but that id belongs to a
+  music layer, so the finisher and run-end sounds are silently dropped (task chip raised); a couple
+  of Ilyra's six skirt panels carry a hair-thin sliver of the neighbour they were painted touching;
+  generated-art licence still required before sale.
+
+## 2026-09-18 — Bram and Ilyra approved; sequential implementation handoff staged
 - **Who:** Codex (GPT-5)
 - **Did:** Designed two non-Wisp playable-character candidates without changing runtime code:
   Legendary **Bram, the Rift Knight** is a complete armored warrior with a restrained 13-group rig;
-  Mythic **Nymera, the Ninefold** is a full quadrupedal celestial fox with about 34 independently
-  moving groups. Discarded the initial too-Wisp-like direction, then archived the replacement concept
-  sheets, exact generation prompts, tier rules and post-approval handoff scope.
-- **Files/systems:** `concept_art/wisp_rush_character_candidates_v1/`, `docs/ASSETS.md`.
-- **Verified:** reviewed both native-resolution RGB sheets for character consistency, mobile-scale
+  after the owner liked Bram but rejected the fox direction, Mythic **Ilyra, the Astral Dancer**
+  replaced it with a complete four-armed humanoid and about 34 independently moving groups. Discarded
+  the rejected art. The owner then approved both active directions and requested Ilyra first, Bram
+  second. Moved them into the versioned playable-character source pack and wrote the codebase-aware
+  art, layer, animation, catalog/rarity, verification and documentation handoff plus a ready-to-paste
+  Claude prompt.
+- **Files/systems:** `concept_art/wisp_rush_playable_characters_v2/`, `docs/{ASSETS,GDD,ROADMAP}.md`.
+- **Verified:** reviewed both native-resolution RGB/RGBA sheets for character consistency, mobile-scale
   silhouette and a clear complexity gap; `tools/validate.sh` → `VALIDATE: OK`; no gameplay files or
   catalog data changed.
-- **Follow-ups:** owner approves or revises each name, silhouette, palette and rarity. Only after
-  approval: prepare Claude's isolated-layer/rig/animation/test implementation brief.
+- **Follow-ups:** Claude implements and verifies Ilyra completely before starting Bram; owner sets
+  final prices after the 0 RP review/device pass; generated-art licence remains required before sale.
 
 ## 2026-09-18 — Characters dive, land on their feet and coil before a strike
 - **Who:** Claude Code (Opus 5)
@@ -43,6 +413,11 @@
   standing after landing on the ceiling and on the floor. Re-rendered the 4× slow-motion clip
   (`WISP_MOTION_CLIP=1`, now with a real touch-and-hold aim before the first dash) and reviewed the
   aim coil, dive, kill accent, mid-dash turn and both landings frame by frame.
+  - Wrote [guides/character_rig_recipe.md](guides/character_rig_recipe.md) so another agent can build
+    a character from scratch: layer extraction and ribbon spines, the rig conventions, how the Bone2D
+    chain and skinned Polygon2D actually work (rest poses, sibling meshes, weights summing to 1),
+    `ChainSpring` tuning, the runtime state machine and heading springs, particles, wiring, the QA
+    order, and a table of the mistakes this build already made.
   - Wrote [devlog_characters_episodes.md](marketing/devlog_characters_episodes.md): two shoot-ready
     devlog episodes (A "Three characters, one hitbox", B "They land on their feet") with hooks that
     repeat neither EP03's nor EP04's, beat tables, the new capture commands and the numbers that are

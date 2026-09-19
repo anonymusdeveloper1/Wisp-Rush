@@ -6,11 +6,13 @@ PNGs are deterministic fixed-cell extracts with isolated-alpha cleanup, so the g
 complete concept sheet. Each run also writes a QA contact sheet per character to
 ``logs/playable_characters/<id>_parts.png`` and prints the ribbon spines the rigs use.
 
-Requirements: Python 3.7+, Pillow 9.5 and numpy 1.21.
+Requirements: Python 3.7+, Pillow 9.5, numpy 1.21 and scipy 1.7.
 
     python3 tools/art/extract_playable_characters.py              # every character
     python3 tools/art/extract_playable_characters.py rook morrow  # only these
 """
+import json
+import shutil
 import sys
 from collections import deque
 from pathlib import Path
@@ -18,6 +20,7 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
+from scipy import ndimage
 
 
 REPO = Path(__file__).resolve().parents[2]
@@ -26,6 +29,35 @@ OUTPUT = REPO / "assets/art/characters/playable"
 CONTACTS = REPO / "logs/playable_characters"
 
 Box = Tuple[int, int, int, int]
+Polygon = List[Tuple[int, int]]
+
+# Source packs are versioned: v1 characters keep their original sheet (and therefore byte-identical
+# output), while later packs point at their own approved rig source. `tools/art/make_rig_source.py`
+# builds these transparent sheets from the opaque approved references.
+SOURCE_SHEETS: Dict[str, Path] = {
+	"bram": REPO / "concept_art/wisp_rush_playable_characters_v2/assets/bram_rig_source.png",
+}
+
+# Newer packs ship one transparent PNG per rig group plus a `manifest.json` of pivots, so there is
+# nothing to cut: the art is ingested verbatim (re-cropping would invalidate every pivot) and only
+# checked. `tools/art/build_character_rig.py` turns the same manifest into the rig scene.
+PART_PACKS: Dict[str, Path] = {
+	"ilyra": REPO / "concept_art/wisp_rush_playable_characters_v3/parts/ilyra",
+}
+# Parts that bend on a bone chain at runtime; their spine runs straight from pivot to tip, because
+# the pack authors every hanging part vertically at rest.
+PACK_RIBBONS: Dict[str, List[str]] = {
+	"ilyra": ["braid_l", "braid_r", "sash_1", "sash_2", "sash_3", "sash_4"],
+}
+
+# Some approved sheets isolate a part only inside a turnaround pose (Ilyra's torso sits between four
+# arms and two braids). A mask polygon, in sheet pixels, cuts that silhouette out before the usual
+# component cleanup runs; the painted pixels inside it are never altered.
+# Some approved sheets isolate a part only inside a turnaround pose. A mask polygon, in sheet pixels,
+# cuts that silhouette out before the usual component cleanup runs; the painted pixels inside it are
+# never altered. (Ilyra needed this for her v2 torso; she ships from a per-file pack now.)
+MASKS: Dict[str, Dict[str, Polygon]] = {
+}
 
 # Fixed cells are intentional: each generated sheet is an approved source artifact, not a runtime
 # atlas. `min_area` removes the detached colour specks the generator leaves between painted parts.
@@ -76,6 +108,30 @@ CHARACTERS: Dict[str, Dict[str, Tuple[Box, int]]] = {
 		"rune_fragment": ((960, 850, 1090, 1025), 700),
 		"cloth_wisp": ((1200, 835, 1405, 1050), 700),
 	},
+	# Bram's separated-components row carries every rig group he needs. His two effect layers are cut
+	# from the action poses, where a high `min_area` keeps the painted arc and drops the knight
+	# fragments that share the cell.
+	"bram": {
+		"preview": ((20, 26, 640, 767), 1500),
+		"helmet": ((30, 787, 171, 943), 900),
+		# Visor and chest gem are drawn again over their own painted pixels, so brightening their
+		# modulate lights them up without a second additive shape showing at rest.
+		"visor": ((58, 870, 137, 910), 200),
+		"torso": ((259, 795, 414, 989), 900),
+		"chest_core": ((316, 830, 359, 883), 200),
+		"arm_upper_left": ((427, 797, 519, 884), 500),
+		"arm_lower_left": ((427, 876, 519, 982), 500),
+		"arm_upper_right": ((524, 792, 620, 880), 500),
+		"arm_lower_right": ((524, 872, 620, 982), 500),
+		"shield": ((629, 790, 795, 971), 900),
+		"blade": ((803, 782, 908, 978), 700),
+		"leg_left": ((920, 794, 1018, 975), 700),
+		"leg_right": ((1071, 792, 1170, 975), 700),
+		"cape_left": ((1178, 777, 1339, 968), 900),
+		"cape_right": ((1353, 777, 1509, 968), 900),
+		"blade_arc": ((1062, 442, 1124, 622), 800),
+		"dash_streak": ((985, 575, 1068, 655), 600),
+	},
 }
 
 # Ribbon layers bend on a bone chain. The spine runs from the attachment root (given as a fraction
@@ -88,60 +144,25 @@ SPINE_POINTS = 5
 
 
 def label_components(mask: np.ndarray) -> Tuple[np.ndarray, List[int]]:
-	"""Label 8-connected seed pixels using row runs; returns labels and component areas."""
-	h, w = mask.shape
-	labels = np.zeros((h, w), dtype=np.int32)
-	parent: List[int] = [0]
-	areas: List[int] = [0]
-	next_label = 0
-	for y in range(h):
-		x = 0
-		while x < w:
-			if not mask[y, x]:
-				x += 1
-				continue
-			x0 = x
-			while x < w and mask[y, x]:
-				x += 1
-			x1 = x
-			neighbours = set()
-			if y > 0:
-				neighbours.update(int(value) for value in labels[y - 1, max(0, x0 - 1):min(w, x1 + 1)] if value)
-			if not neighbours:
-				next_label += 1
-				parent.append(next_label)
-				areas.append(0)
-				label = next_label
-			else:
-				label = min(neighbours)
-				for other in neighbours:
-					root = other
-					while parent[root] != root:
-						root = parent[root]
-					parent[other] = label
-					parent[root] = label
-			labels[y, x0:x1] = label
-
-	def find(value: int) -> int:
-		while parent[value] != value:
-			parent[value] = parent[parent[value]]
-			value = parent[value]
-		return value
-
-	for value in range(1, next_label + 1):
-		parent[value] = find(value)
-	for y in range(h):
-		for x in range(w):
-			value = int(labels[y, x])
-			if value:
-				root = parent[value]
-				labels[y, x] = root
-				areas[root] += 1
+	"""Label 8-connected regions of [param mask]; returns labels and area per label (index 0 unused)."""
+	labels, count = ndimage.label(mask, structure=np.ones((3, 3), dtype=int))
+	if count == 0:
+		return labels, [0]
+	areas: List[int] = np.bincount(labels.ravel(), minlength=count + 1).tolist()
+	areas[0] = 0
 	return labels, areas
 
 
-def extract_part(sheet: Image.Image, box: Box, min_area: int) -> Image.Image:
+def extract_part(
+	sheet: Image.Image, box: Box, min_area: int, mask: Optional[Polygon] = None
+) -> Image.Image:
 	part = sheet.crop(box).convert("RGBA")
+	if mask is not None:
+		# Cut the authored silhouette out of the pose before cleanup, in cell-local pixels.
+		local = [(x - box[0], y - box[1]) for x, y in mask]
+		stencil = Image.new("L", part.size, 0)
+		ImageDraw.Draw(stencil).polygon(local, fill=255)
+		part.putalpha(Image.composite(part.getchannel("A"), Image.new("L", part.size), stencil))
 	alpha = np.asarray(part.getchannel("A"))
 	labels, areas = label_components(alpha >= 24)
 	kept_ids = [index for index, area in enumerate(areas) if index and area >= min_area]
@@ -171,6 +192,12 @@ def ribbon_spine(art: Image.Image, root_hint: Tuple[float, float], count: int) -
 	step = 3
 	alpha = np.asarray(art.getchannel("A"))[::step, ::step]
 	mask = alpha >= 60
+	# A speck closer to the root hint than the ribbon body would strand the walk on a few pixels
+	# (Ilyra's braids carry a loose hair wisp above the clasp), so only the painted body is walked.
+	labels, areas = label_components(mask)
+	bodies: List[int] = [index for index in range(1, len(areas)) if areas[index] > 0]
+	if bodies:
+		mask = labels == max(bodies, key=lambda index: areas[index])
 	h, w = mask.shape
 	root_x = min(w - 1, int(root_hint[0] * w))
 	root_y = min(h - 1, int(root_hint[1] * h))
@@ -224,16 +251,98 @@ def make_contact(name: str, outputs: Dict[str, Image.Image], spines: Dict[str, L
 	return path
 
 
+def ingest_pack(name: str) -> None:
+	"""Copies a per-file part pack into the runtime folder, verifying it and printing ribbon spines.
+
+	The pack's `manifest.json` gives each part's pivot in its own pixel space, so the PNGs are copied
+	byte for byte: trimming or padding them here would silently move every joint in the rig.
+	"""
+	source: Path = PART_PACKS[name]
+	manifest_path: Path = source / "manifest.json"
+	if not manifest_path.exists():
+		raise FileNotFoundError(manifest_path)
+	manifest = json.loads(manifest_path.read_text())
+	parts: Dict = manifest["parts"]
+	out_dir = OUTPUT / name
+	out_dir.mkdir(parents=True, exist_ok=True)
+	outputs: Dict[str, Image.Image] = {}
+	problems: List[str] = []
+	for part in sorted(parts):
+		spec = parts[part]
+		art_path: Path = source / spec["file"]
+		if not art_path.exists():
+			raise FileNotFoundError(art_path)
+		art = Image.open(art_path)
+		if art.mode != "RGBA":
+			problems.append("%s is %s, not RGBA" % (part, art.mode))
+		art = art.convert("RGBA")
+		if np.asarray(art.getchannel("A")).max() == 0:
+			problems.append("%s is fully transparent" % part)
+		pivot = spec["pivot"]
+		if not (0 <= pivot[0] < art.width and 0 <= pivot[1] < art.height):
+			problems.append("%s pivot %s falls outside %s" % (part, pivot, art.size))
+		shutil.copyfile(art_path, out_dir / spec["file"])
+		outputs[part] = art
+	if problems:
+		raise SystemExit("Pack %s failed verification:\n  %s" % (name, "\n  ".join(problems)))
+	shutil.copyfile(manifest_path, out_dir / "manifest.json")
+	outputs["preview"] = build_pack_preview(name, source, out_dir)
+	spines: Dict[str, List] = {}
+	for part in PACK_RIBBONS.get(name, []):
+		spec = parts[part]
+		spines[part] = straight_spine(spec["pivot"], spec["tip"], SPINE_POINTS)
+	contact = make_contact(name, outputs, spines)
+	print("PLAYABLE ART: %d %s parts (pack) -> %s" % (len(outputs), name, out_dir))
+	for part, points in spines.items():
+		values = ", ".join("%d, %d" % (round(px), round(py)) for px, py in points)
+		print("  SPINE %s/%s: PackedVector2Array(%s)" % (name, part, values))
+	print("  CONTACT: %s" % contact)
+
+
+def build_pack_preview(name: str, source: Path, out_dir: Path) -> Image.Image:
+	"""Derives the character's portrait from the pack's assembly reference.
+
+	`FormData.texture` is the HUD portrait and the Shop card art. A part pack has no single picture of
+	the character, but its assembly reference is exactly one: every part composited into the neutral
+	rest pose on transparent. Trimming that to content gives a portrait that always matches the rig.
+	"""
+	assembly: Path = source.parent.parent / "assembly" / ("%s_assembly_reference.png" % name)
+	if not assembly.exists():
+		raise FileNotFoundError(assembly)
+	art = Image.open(assembly).convert("RGBA")
+	content = art.getchannel("A").point(lambda value: 255 if value >= 3 else 0).getbbox()
+	if content is None:
+		raise RuntimeError("assembly reference for %s is empty" % name)
+	art = art.crop((
+		max(0, content[0] - 8), max(0, content[1] - 8),
+		min(art.width, content[2] + 8), min(art.height, content[3] + 8),
+	))
+	art.save(out_dir / "preview.png", optimize=True)
+	return art
+
+
+def straight_spine(pivot: List[int], tip: List[int], count: int) -> List[Tuple[float, float]]:
+	"""Evenly spaced centre line from pivot to tip, for a part authored straight at rest."""
+	return [
+		(
+			pivot[0] + (tip[0] - pivot[0]) * index / float(count - 1),
+			pivot[1] + (tip[1] - pivot[1]) * index / float(count - 1),
+		)
+		for index in range(count)
+	]
+
+
 def extract_character(name: str) -> None:
-	source = SOURCES / ("%s_rig_source.png" % name)
+	source = SOURCE_SHEETS.get(name, SOURCES / ("%s_rig_source.png" % name))
 	if not source.exists():
 		raise FileNotFoundError(source)
 	out_dir = OUTPUT / name
 	out_dir.mkdir(parents=True, exist_ok=True)
 	sheet = Image.open(source).convert("RGBA")
+	masks: Dict[str, Polygon] = MASKS.get(name, {})
 	outputs: Dict[str, Image.Image] = {}
 	for part, (box, min_area) in CHARACTERS[name].items():
-		art = extract_part(sheet, box, min_area)
+		art = extract_part(sheet, box, min_area, masks.get(part))
 		art.save(out_dir / (part + ".png"), optimize=True)
 		outputs[part] = art
 	spines: Dict[str, List] = {}
@@ -249,10 +358,14 @@ def extract_character(name: str) -> None:
 
 
 def main(names: Optional[List[str]] = None) -> None:
-	for name in names or list(CHARACTERS):
-		if name not in CHARACTERS:
-			raise SystemExit("Unknown character %r (known: %s)" % (name, ", ".join(CHARACTERS)))
-		extract_character(name)
+	known: List[str] = list(CHARACTERS) + [n for n in PART_PACKS if n not in CHARACTERS]
+	for name in names or known:
+		if name in PART_PACKS:
+			ingest_pack(name)
+		elif name in CHARACTERS:
+			extract_character(name)
+		else:
+			raise SystemExit("Unknown character %r (known: %s)" % (name, ", ".join(known)))
 
 
 if __name__ == "__main__":

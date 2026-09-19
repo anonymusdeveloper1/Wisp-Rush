@@ -188,7 +188,8 @@
 > [ADR-0015](decisions/0015-animated-playable-characters.md). System:
 > [playable_character_visuals.md](systems/playable_character_visuals.md).
 
-- ✅ Layer art for all three characters extracted from the generated sheets (`extract_playable_characters.py`)
+- ✅ Layer art for all five characters extracted from the generated sheets (`make_rig_source.py` →
+      `extract_playable_characters.py`; versioned source packs keep v1 output byte-identical)
 - ✅ Shared presentation-only rig: 13 states in a runtime AnimationTree, heading spring, travel-axis
       squash, interrupts, particle rules, `ChainSpring` follow-through, skinned `RibbonChain` ribbons
 - ✅ Veyra (Codex prototype, rebuilt), Rook and Morrow rigs with their own secondary motion and trails
@@ -196,10 +197,18 @@
       selected and unlock flourishes; live hero on Home
 - ✅ Verified: `playable_character_visual` (states, smoothness, menus, GameWorld), `form_catalog`,
       lineup/motion/showcase fixtures reviewed frame by frame
-- ⬜ Owner: approve the look and motion of the three characters, then set their prices (all 0 RP now)
+- ✅ Owner-approved v2 designs and implementation handoff: Mythic Ilyra, then Legendary Bram
+      (`concept_art/wisp_rush_playable_characters_v2/`, GDD §14 #32)
+- ✅ Ilyra (Mythic) implemented and verified through her completion gate: 28 clean layers, all 13
+      states, targeted tests, Reduced Motion, Shop/Home/GameWorld screenshots, real run
+- ✅ Bram (Legendary) implemented after Ilyra's gate; combined regression (25 pass / 10 pre-existing
+      stale), `qa_matrix shop_wisps` 5/5 and the preview benchmark (11 cold 234 ms, warm ~8 ms) run
+- ⬜ Owner: approve the look and motion of the five characters, then set their prices (all 0 RP now),
+      including whether Legendary and Mythic should cost more than the rest
 - ⬜ Device pass: readability at gameplay size, particle cost and feel on the phone
-- ⬜ Optional: mipmaps for the character layers (import-setting decision), physics interpolation for
-      120 Hz phones (affects every character)
+- ⬜ Optional: mipmaps for the character layers (import-setting decision)
+- ✅ High-refresh phones: the simulation now steps at the screen's rate (`FramePacing`), so a dash is
+      redrawn at a fresh position every frame at 60, 90 or 120 Hz
 
 ## Milestone 9 — Monetisation
 

@@ -37,6 +37,12 @@ const REAPER_ICON: Texture2D = preload("res://assets/art/ui/system/18_reaper.png
 const DASH_TRAIL_SHORT: Texture2D = preload("res://assets/art/vfx/01_dash_trail_short.png")
 const DASH_TRAIL_LONG: Texture2D = preload("res://assets/art/vfx/02_dash_trail_long.png")
 ## Brightness of an unowned item's visual, so ownership reads at a glance on every card.
+## Badge colour per collectible tier; [constant FormData.Tier.STANDARD] shows no badge at all.
+const TIER_COLOURS: Dictionary[FormData.Tier, Color] = {
+	FormData.Tier.LEGENDARY: Palette.WARNING_AMBER,
+	FormData.Tier.MYTHIC: Palette.RIFT_MAGENTA,
+}
+
 const LOCKED_VISUAL_BRIGHTNESS: float = 0.42
 ## Card text sizes in the 1080-wide design space.
 const CARD_NAME_SIZE: int = 44
@@ -86,6 +92,7 @@ var _scenery_materials: Dictionary[ArenaSceneryData, ShaderMaterial] = {}
 @onready var _carousel_page: Control = %CarouselPage
 @onready var _carousel: FocusCarousel = %Carousel
 @onready var _dots: PageDots = %Dots
+@onready var _tier_label: Label = %TierLabel
 @onready var _description_label: Label = %DescriptionLabel
 @onready var _requirement_label: Label = %RequirementLabel
 @onready var _no_ads_page: Control = %NoAdsPage
@@ -270,11 +277,13 @@ func _refresh() -> void:
 	_dots.hollow = hollow
 	var selected_index: int = _index_of(_selected_id(_tab))
 	if selected_index >= _items.size():
+		_apply_tier(null)
 		_description_label.text = ""
 		_action_button.text = "EQUIPPED"
 		_action_button.disabled = true
 		return
 	var item: Resource = _items[selected_index]
+	_apply_tier(item)
 	_description_label.text = str(item.get(&"description"))
 	var price: int = _price(item)
 	var gate: String = _gate_reason(item)
@@ -371,6 +380,17 @@ func _item_id(item: Resource) -> StringName:
 	if item is ArenaSkinData:
 		return (item as ArenaSkinData).skin_id
 	return (item as FormData).form_id
+
+
+## Shows the focused character's collectible tier above its description. Ordinary characters and
+## every non-character tab show nothing, and the badge never replaces price or ownership state.
+func _apply_tier(item: Resource) -> void:
+	var form := item as FormData
+	var label: String = form.get_tier_name() if form != null else ""
+	_tier_label.text = label
+	_tier_label.visible = not label.is_empty()
+	if form != null:
+		_tier_label.modulate = TIER_COLOURS.get(form.tier, Palette.TEXT_MUTED)
 
 
 func _price(item: Resource) -> int:

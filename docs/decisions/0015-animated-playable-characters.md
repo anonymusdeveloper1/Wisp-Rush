@@ -63,5 +63,26 @@
   dive always lands on its feet. Anything that reads the rig's rotation must expect that.
 - Prices, and whether characters stay cosmetic-only, are owner decisions (GDD §14 #31); the art's
   licence must be confirmed before characters are sold (GDD §14 #1, #21).
-- The physics loop runs at 60 Hz; on a 120 Hz phone the character's position still steps at 60 Hz.
-  Physics interpolation would fix that for every character and is a separate decision.
+- The physics loop used to run at a fixed 60 Hz, so on a 90 or 120 Hz phone each position was drawn
+  more than once and a dash read as judder. Since 2026-09-18 `FramePacing.match_display()` steps the
+  simulation at the screen's own rate (clamped 60-120 Hz) at boot, which costs nothing on a 60 Hz
+  device. Godot's physics interpolation is the cheaper textbook fix, but every node animated per
+  frame in `_process` must opt out of it — the rigs, both ambiences, the tutorial hand, the VFX pool
+  and most screens — and with it enabled the rig smoothness contract failed intermittently. Revisit
+  it only if that per-frame animation moves onto the physics tick.
+
+## Addendum 2026-09-18 — collectible tiers and versioned source packs
+
+Ilyra (Mythic) and Bram (Legendary) join the roster, taking the catalog to eleven characters. Two
+small extensions follow from them, and neither changes the decision above:
+
+- **Tiers are a label.** `FormData.tier` is `STANDARD` / `LEGENDARY` / `MYTHIC`, defaulting to
+  `STANDARD` for everything that shipped before. The Shop prints it on the focused card above the
+  description; no other system reads it. Characters remain purely cosmetic — a Mythic rig buys more
+  coordinated motion, never a different collision footprint, dash, damage or score.
+- **Source packs are versioned.** `SOURCE_SHEETS` in the extractor maps a character to its rig
+  source, so the v1 pack keeps producing byte-identical layers while later packs live beside it.
+  Approval sheets are opaque presentation art, so `tools/art/make_rig_source.py` derives the
+  transparent sheet the extractor needs, and `MASKS` cuts a part out of a pose when the sheet never
+  isolates it (Ilyra's torso). The component labelling is `scipy.ndimage.label`, which replaced a
+  hand-rolled union-find that degenerated to minutes on a dense silhouette; v1 output is unchanged.
