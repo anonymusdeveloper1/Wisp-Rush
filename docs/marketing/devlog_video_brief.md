@@ -1,5 +1,9 @@
 # Devlog video brief — session 2026-09-15 → 2026-09-16
 
+> **Newer brief:** the 2026-09-19 → 2026-09-20 session has its own at
+> [devlog_video_brief_2026_09_20.md](devlog_video_brief_2026_09_20.md) — the roster cut and the
+> switch from bone rigs to hand-drawn frame animation. Read that one first for current work.
+
 > **For the agent (or human) cutting TikTok / YouTube devlog videos.** What changed in this session,
 > which parts are worth filming, how to capture them, and what must never be claimed. Facts live in
 > [DEVLOG.md](../DEVLOG.md) (newest first) and the system docs; this file only adds the video angle.

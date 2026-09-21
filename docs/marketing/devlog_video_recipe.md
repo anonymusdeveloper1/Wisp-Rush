@@ -6,6 +6,13 @@
 > [devlog_video_brief.md](devlog_video_brief.md) (§4 numbers, §6 hard rules, §7 rough edges). The
 > reference cut is the Palmier project "Wisp Rush Devlog 02 - Why Buttons Froze". **Read it, never
 > edit it.**
+>
+> **Build surface, from 2026-09-20 (owner):** episodes are assembled in **Remotion**
+> (`tools/video/remotion`), not Palmier. Everything editorial in this file is unchanged — hooks,
+> structures, safe numbers, the sound map, safe zones, caption style, QA and loudness. Only §6
+> changes: its element cookbook is now implemented as React components in `src/components`, with
+> the values in `src/style`. §6 stays as the specification those components answer to, and as the
+> record of how EP01–EP04 were cut.
 
 ## 0. Checklist
 
@@ -22,6 +29,9 @@
 
 ## 1. Owner rules (2026-09-16)
 
+- **Edit in Remotion** (owner, 2026-09-20), one composition per episode in `tools/video/remotion`.
+  The cookbook below is the style specification those components implement; EP01–EP04 were cut in
+  Palmier and are not being remade.
 - **Under 60 s** (aim 35–50 s), 1080×1920, 60 fps, H.264. One export serves TikTok and YouTube Shorts.
 - **One topic per video**, taken from one coding session.
 - **Vary the hook** (owner, 2026-09-16: "not every video shall have that comment hook"). Take the
@@ -80,7 +90,9 @@ Pick one of each, and log the pair in hooks §6.
 | Speed flex | A burst of the new content (e.g. 30 arenas in 3 s) under one big claim word | content drops | — |
 | Payoff first | The best 1–2 s of the result (8-kill slow motion), then "here's how". EP04: the lit 8-enemy line at half speed under the series tag, the hook number (Anton 230 amber) and the promise words, then the slice with a white flash | feel / gameplay changes | EP04 |
 | Black word card | REF3-style: one glowing word or number on black ("576 MS"), then the story. EP03: "NEVER," (white) and "EVER." (red `#FF3B5C`) slam in on the spoken words, then the old look with rings, a red strike and a hurt-Wisp joke beat | numbers, warnings, surprises | EP03 |
-| Question / challenge | "Can you spot what changed?" or "Which one would you pick?" over a split screen | before/after, choices | — |
+| Question / challenge | "Can you spot what changed?" or "Which one would you pick?" over a split screen | before/after, choices | EP08 |
+| Roster wall strike-out | Every item the game has ever had fills the screen as a grid; the ones being removed take a red strike and drain of colour on the spoken word | removals, roster or content cuts | EP05 |
+| Counter slam | One number alone on black at the house slam curve, then its unit under it, then the evidence behind it | a single surprising figure | EP07 |
 
 Timings below are for a ~44 s cut. Scale them, but keep the order. EP02's frame map is in §9.
 
@@ -178,7 +190,16 @@ All commands are in the README; this is what each episode needs.
 Graphic pieces drawn from real UI must match it: step cards use the game's stone `panel_card`, and
 colours come from the GDD §9 palette.
 
-## 6. Build the timeline in Palmier
+## 6. Build the timeline
+
+> **Implemented in Remotion** since EP05: §6.3's cookbook is `src/components`, §6.4's motion rules
+> are `src/style/motion.ts`, §6.5's type is `src/style/fonts.ts` with `Headline`/`Label`/
+> `MarkerNote`, §6.6's captions are `<Captions>` fed by the Kokoro SRT through
+> `tools/video/srt_to_ts.py`, and §6.7's sound map is `<Sfx>` / `<MusicBed>`. The values below are
+> still the spec — change them here and in the component together. §6.1 and §6.2 are Palmier-only
+> and apply to EP01–EP04.
+
+### 6.0 Palmier project and library (EP01–EP04)
 
 ### 6.1 Project and library
 - `manage_project create`, name `Wisp Rush Devlog NN - <Title>`, `aspectRatio 9:16`, `fps 60`,
