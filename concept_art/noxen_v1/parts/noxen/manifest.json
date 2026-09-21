@@ -1,0 +1,258 @@
+{
+  "character": "noxen",
+  "canvas": {
+    "reference_height_px": 1086
+  },
+  "coordinate_system": "Godot 2D: +x right, +y down; rest positions are relative to collision centre",
+  "parts": {
+    "rear_cloak": {
+      "file": "rear_cloak.png",
+      "pivot": [
+        184,
+        191
+      ],
+      "rest_position": [
+        0,
+        10
+      ],
+      "rest_rotation_deg": 0,
+      "draw_order": 10,
+      "parent": null,
+      "assembly_visible": true
+    },
+    "hood": {
+      "file": "hood.png",
+      "pivot": [
+        172,
+        156
+      ],
+      "rest_position": [
+        0,
+        -215
+      ],
+      "rest_rotation_deg": 0,
+      "draw_order": 45,
+      "parent": "rear_cloak",
+      "assembly_visible": true
+    },
+    "mask": {
+      "file": "mask.png",
+      "pivot": [
+        96,
+        111
+      ],
+      "rest_position": [
+        0,
+        -205
+      ],
+      "rest_rotation_deg": 0,
+      "draw_order": 52,
+      "parent": "hood",
+      "assembly_visible": true
+    },
+    "chest_core": {
+      "file": "chest_core.png",
+      "pivot": [
+        72,
+        109
+      ],
+      "rest_position": [
+        0,
+        -42
+      ],
+      "rest_rotation_deg": 0,
+      "draw_order": 56,
+      "parent": "rear_cloak",
+      "assembly_visible": true
+    },
+    "cloak_fin_l": {
+      "file": "cloak_fin_l.png",
+      "pivot": [
+        262,
+        28
+      ],
+      "rest_position": [
+        -125,
+        -5
+      ],
+      "rest_rotation_deg": 0,
+      "draw_order": 24,
+      "parent": "rear_cloak",
+      "assembly_visible": true
+    },
+    "cloak_fin_r": {
+      "file": "cloak_fin_r.png",
+      "pivot": [
+        42,
+        28
+      ],
+      "rest_position": [
+        125,
+        -5
+      ],
+      "rest_rotation_deg": 0,
+      "draw_order": 24,
+      "parent": "rear_cloak",
+      "assembly_visible": true
+    },
+    "front_flap": {
+      "file": "front_flap.png",
+      "pivot": [
+        75,
+        14
+      ],
+      "rest_position": [
+        0,
+        112
+      ],
+      "rest_rotation_deg": 0,
+      "draw_order": 40,
+      "parent": "rear_cloak",
+      "assembly_visible": true
+    },
+    "shadow_tail": {
+      "file": "shadow_tail.png",
+      "pivot": [
+        114,
+        14
+      ],
+      "rest_position": [
+        0,
+        178
+      ],
+      "rest_rotation_deg": 0,
+      "draw_order": 8,
+      "parent": "rear_cloak",
+      "assembly_visible": true
+    },
+    "veilflame_l": {
+      "file": "veilflame_l.png",
+      "pivot": [
+        126,
+        371
+      ],
+      "rest_position": [
+        -115,
+        -385
+      ],
+      "rest_rotation_deg": 0,
+      "draw_order": 16,
+      "parent": "hood",
+      "assembly_visible": true
+    },
+    "veilflame_r": {
+      "file": "veilflame_r.png",
+      "pivot": [
+        127,
+        363
+      ],
+      "rest_position": [
+        115,
+        -385
+      ],
+      "rest_rotation_deg": 0,
+      "draw_order": 16,
+      "parent": "hood",
+      "assembly_visible": true
+    },
+    "root_ribbon_l": {
+      "file": "root_ribbon_l.png",
+      "pivot": [
+        107,
+        14
+      ],
+      "rest_position": [
+        -66,
+        320
+      ],
+      "rest_rotation_deg": 0,
+      "draw_order": 13,
+      "parent": "shadow_tail",
+      "assembly_visible": true,
+      "tip": [
+        107,
+        380
+      ]
+    },
+    "root_ribbon_r": {
+      "file": "root_ribbon_r.png",
+      "pivot": [
+        98,
+        14
+      ],
+      "rest_position": [
+        66,
+        320
+      ],
+      "rest_rotation_deg": 0,
+      "draw_order": 13,
+      "parent": "shadow_tail",
+      "assembly_visible": true,
+      "tip": [
+        98,
+        360
+      ]
+    },
+    "vfx_mote": {
+      "file": "vfx_mote.png",
+      "pivot": [
+        24,
+        24
+      ],
+      "rest_position": [
+        0,
+        0
+      ],
+      "rest_rotation_deg": 0,
+      "draw_order": 0,
+      "parent": null,
+      "assembly_visible": false
+    },
+    "vfx_streak": {
+      "file": "vfx_streak.png",
+      "pivot": [
+        48,
+        14
+      ],
+      "rest_position": [
+        0,
+        0
+      ],
+      "rest_rotation_deg": 0,
+      "draw_order": 0,
+      "parent": null,
+      "assembly_visible": false
+    },
+    "vfx_shard": {
+      "file": "vfx_shard.png",
+      "pivot": [
+        22,
+        34
+      ],
+      "rest_position": [
+        0,
+        0
+      ],
+      "rest_rotation_deg": 0,
+      "draw_order": 0,
+      "parent": null,
+      "assembly_visible": false
+    }
+  },
+  "assembly": {
+    "canvas_size": [
+      900,
+      1180
+    ],
+    "collision_centre": [
+      450,
+      540
+    ],
+    "alternate_layers_hidden": [
+      "vfx_mote",
+      "vfx_streak",
+      "vfx_shard"
+    ],
+    "mirrored_instances": []
+  }
+}

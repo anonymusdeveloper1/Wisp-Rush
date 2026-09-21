@@ -1,0 +1,170 @@
+{
+  "character": "Eclipse Wisp",
+  "id": "eclipse",
+  "total_frames": 108,
+  "cell": [
+    256,
+    256
+  ],
+  "columns": 12,
+  "rows": [
+    {
+      "row": 0,
+      "state": "idle_hover",
+      "frames": 12,
+      "fps": 6.7,
+      "loop": true,
+      "neighbor_difference_mean": 0.10691,
+      "neighbor_difference_max": 0.17887
+    },
+    {
+      "row": 1,
+      "state": "move_fly",
+      "frames": 8,
+      "fps": 11.4,
+      "loop": true,
+      "neighbor_difference_mean": 0.14887,
+      "neighbor_difference_max": 0.24364
+    },
+    {
+      "row": 2,
+      "state": "dash_start",
+      "frames": 2,
+      "fps": 16.0,
+      "loop": false,
+      "neighbor_difference_mean": 0.25427,
+      "neighbor_difference_max": 0.25427
+    },
+    {
+      "row": 3,
+      "state": "dash_loop",
+      "frames": 4,
+      "fps": 12.5,
+      "loop": true,
+      "neighbor_difference_mean": 0.22956,
+      "neighbor_difference_max": 0.26694
+    },
+    {
+      "row": 4,
+      "state": "dash_end",
+      "frames": 2,
+      "fps": 12.0,
+      "loop": false,
+      "neighbor_difference_mean": 0.20021,
+      "neighbor_difference_max": 0.20021
+    },
+    {
+      "row": 5,
+      "state": "attack",
+      "frames": 3,
+      "fps": 12.5,
+      "loop": false,
+      "neighbor_difference_mean": 0.27205,
+      "neighbor_difference_max": 0.28522
+    },
+    {
+      "row": 6,
+      "state": "hit_reaction",
+      "frames": 3,
+      "fps": 9.4,
+      "loop": false,
+      "neighbor_difference_mean": 0.27611,
+      "neighbor_difference_max": 0.28799
+    },
+    {
+      "row": 7,
+      "state": "death",
+      "frames": 6,
+      "fps": 12.0,
+      "loop": false,
+      "neighbor_difference_mean": 0.21409,
+      "neighbor_difference_max": 0.26289
+    },
+    {
+      "row": 8,
+      "state": "revive_spawn",
+      "frames": 6,
+      "fps": 10.3,
+      "loop": false,
+      "neighbor_difference_mean": 0.25908,
+      "neighbor_difference_max": 0.31373
+    },
+    {
+      "row": 9,
+      "state": "victory",
+      "frames": 8,
+      "fps": 8.9,
+      "loop": true,
+      "neighbor_difference_mean": 0.16458,
+      "neighbor_difference_max": 0.28659
+    },
+    {
+      "row": 10,
+      "state": "wall_bottom",
+      "frames": 8,
+      "fps": 6.7,
+      "loop": true,
+      "neighbor_difference_mean": 0.14693,
+      "neighbor_difference_max": 0.21762
+    },
+    {
+      "row": 11,
+      "state": "wall_top",
+      "frames": 8,
+      "fps": 6.7,
+      "loop": true,
+      "neighbor_difference_mean": 0.17598,
+      "neighbor_difference_max": 0.27416
+    },
+    {
+      "row": 12,
+      "state": "wall_left",
+      "frames": 8,
+      "fps": 6.7,
+      "loop": true,
+      "neighbor_difference_mean": 0.14781,
+      "neighbor_difference_max": 0.2137
+    },
+    {
+      "row": 13,
+      "state": "storefront_idle",
+      "frames": 12,
+      "fps": 6.0,
+      "loop": true,
+      "neighbor_difference_mean": 0.10154,
+      "neighbor_difference_max": 0.16326
+    },
+    {
+      "row": 14,
+      "state": "storefront_flourish",
+      "frames": 8,
+      "fps": 12.9,
+      "loop": false,
+      "neighbor_difference_mean": 0.19125,
+      "neighbor_difference_max": 0.35156
+    },
+    {
+      "row": 15,
+      "state": "storefront_unlock",
+      "frames": 10,
+      "fps": 11.0,
+      "loop": false,
+      "neighbor_difference_mean": 0.14239,
+      "neighbor_difference_max": 0.30486
+    }
+  ],
+  "dash_contact_frame": {
+    "state": "dash_loop",
+    "index": 2
+  },
+  "wall_right": "mirror wall_left at runtime",
+  "character_selected": "storefront_flourish",
+  "character_unlocked": "storefront_unlock",
+  "aim_charge": "not generated",
+  "qa": {
+    "frames": 108,
+    "unique_frames": 108,
+    "maximum_alpha_bbox_centre_offset_px": 0.5,
+    "transparent_rgb": "zeroed"
+  }
+}
