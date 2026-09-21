@@ -1,6 +1,8 @@
-[gd_resource type="Resource" script_class="FormData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="FormData" load_steps=5 format=3]
 [ext_resource type="Script" path="res://scripts/resources/form_data.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/forms/01_void.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/void/void_portrait.png" id="2"]
+[ext_resource type="Resource" path="res://data/characters/dash_effects/void.tres" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/player/visuals/void_visual.tscn" id="4"]
 [resource]
 script = ExtResource("1")
 form_id = &"void"
@@ -8,4 +10,7 @@ display_name = "VOID"
 description = "The first light to answer the rift."
 price = 0
 texture = ExtResource("2")
+visual_scene = ExtResource("4")
+dash_effect = ExtResource("3")
+menu_frames_path = "res://data/characters/void_menu.tres"
 tint = Color(0.384, 0.91, 0.949, 1)

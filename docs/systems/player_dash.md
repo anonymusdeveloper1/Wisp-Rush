@@ -1,6 +1,6 @@
 # System: Player dash
 
-> **Status:** ✅ done · **Last updated:** 2026-09-17 · **GDD section:** §4–5.1, §5.6, §8
+> **Status:** ✅ done · per-character dash signatures 2026-09-19 · **Last updated:** 2026-09-19 · **GDD section:** §4–5.1, §5.6, §8
 
 ## Purpose
 
@@ -8,6 +8,13 @@ Turn one touch/mouse drag or a desktop QA aim vector into a precise edge-to-edge
 state machine, aim preview, authoritative movement segment and wall-impact presentation.
 
 ## Files
+
+| Path | Role (dash signatures, added 2026-09-19) |
+|---|---|
+| `res://scripts/resources/dash_effect_data.gd` | `DashEffectData`: one character's dash signature — `Signature` (RIBBON, BLADE_ARC, TWIN_ARC, DUST_WAKE, RUNE_WAKE, SOUL_FLARE), three tints, spark count, ribbon width and life, `arc_spread`, `burst_scale`. Validates its tints against the reserved hues |
+| `res://data/characters/dash_effects/*.tres` (12) | One per character, referenced by `FormData.dash_effect` |
+| `res://scenes/gameplay/dash_effect_fx.gd` | `DashEffectFx`: the pool that draws them — six `Line2D` ribbons and three `CPUParticles2D` spark emitters, all on `VfxPool`'s one shared additive material, at absolute z 0 beside `VfxPool` |
+
 
 | Path | Role |
 |---|---|
@@ -71,7 +78,7 @@ WispPlayer (CharacterBody2D)  wisp_player.gd
 
 ## Data & tuning
 
-`default_player_tuning.tres`: design width 1080 px; dash 3,960 px/s (−10 %, owner 2026-09-15); windup 0.065 s; wall impact
+`default_player_tuning.tres`: design width 1080 px; dash 3,168 px/s (−20 %, owner 2026-09-20; was 3,960 after a −10 % pass on 2026-09-15); windup 0.065 s; wall impact
 0.14 s; focus 0.32 s at 0.32×; minimum swipe 28 px at design density; radius 3% viewport width;
 blade bonus 14 px at design width; aim assist ±`aim_assist_degrees` 6.0 sampled every
 `aim_assist_step_degrees` 1.0 (group "Aim assist"). The landing inset is 1.35× collision radius so transparent-frame
@@ -83,6 +90,24 @@ Input actions in PROJECT_CONTEXT §5.4; GameWorld supplies the dynamic arena and
 Health state/presentation is detailed in [player_health.md](player_health.md).
 
 ## Rules & behaviour
+
+**Dash signatures (2026-09-19).** Each character carries its own `DashEffectData`, keyed off the
+equipped character — there is no save field and nothing to buy, because the Shop's DASHES tab was
+removed on the same day. `GameWorld` resolves it in `configure_run` and:
+
+- draws the signature **per leg**, not per dash: on a wall impact for the leg that landed, and in
+  `_on_player_dash_started` for the leg a redirect just ended. A four-redirect chain therefore
+  leaves four streaks rather than one;
+- reads its tints first in `_get_dash_burst_tint` / `_get_dash_trail_tint`, falling through to the
+  old dash style and then the form tint, so a character without a signature is unchanged;
+- scales the shared launch burst by `burst_scale`, so a signature that already carries the launch
+  (Ilyra's twin fans at 0.45) turns the generic flash down instead of stacking on it.
+
+Momentum is the only intensity knob (`get_momentum_visual_level()`), so a chain grows the ribbon and
+RUSH pins it without a branch of its own. Reduced Motion keeps a shorter, thinner ribbon and throws
+no sparks. Everything is built in code — no new art and no shader — and the ribbons and sparks share
+`VfxPool.get_additive_material()` so the whole signature stays in one 2D batch.
+
 
 **Flow** (owner decision 2026-09-12, GDD §5.1):
 - **No swipe is ever lost.** Touches are tracked in every state except DEAD/VICTORY. Previously a
@@ -168,6 +193,7 @@ Health state/presentation is detailed in [player_health.md](player_health.md).
 
 | Date | Change |
 |---|---|
+| 2026-09-19 | Per-character dash signatures: `DashEffectData`, `DashEffectFx` and twelve `.tres`. Replaces the purchasable dash styles as the thing that decides how a dash looks; the old styles stay as the fallback |
 | 2026-09-17 | Animated character rigs: `%CharacterVisualMount`, `set_cosmetic_form(…, visual_scene)`, per-frame `sync_controller` (state, dash/drift/aim direction, speed), `play_attack_visual` (ADR-0015) |
 | 2026-09-15 | Aim help: `aim_preview_changed`, GameWorld path line + lit enemies + ×N, release-time aim assist (±6°, AIM ASSIST), `get_dash_corridor_radius` (owner decision) |
 | 2026-09-15 | Momentum window in game time; streak glow, speed lines, RUSH aura; RUSH speed modifier and damage immunity (spec rush_and_feel) |

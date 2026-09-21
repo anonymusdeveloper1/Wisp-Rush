@@ -27,17 +27,21 @@ const DASH_STYLE_CATALOG: DashStyleCatalog = preload(
 ## Form identifiers accepted from disk; must match data/forms/default_catalog.tres.
 const VALID_FORM_IDS: Array[String] = [
 	"void",
-	"ash",
-	"venom",
-	"bloodmoon",
-	"frost",
 	"eclipse",
 	"veyra",
-	"rook",
-	"morrow",
+	"noxen",
+	"verdant_shade",
 	"ilyra",
-	"bram",
+	"morrow",
+	"rook",
 ]
+## Forms that no longer exist, and what a save that names one gets instead. `ilyra_2` was the
+## whole-frame sprite experiment; it won, so it *is* Ilyra now and anyone who owned it keeps it.
+## Ash, Venom, Bloodmoon, Frost and Bram were retired outright on 2026-09-20 and need no entry:
+## `_sanitize_cosmetic` already drops an unknown id and falls the equipped slot back to "void".
+const RETIRED_FORM_IDS: Dictionary[String, String] = {
+	"ilyra_2": "ilyra",
+}
 ## Rift identifiers accepted from disk; must match data/rifts/default_catalog.tres.
 const VALID_RIFT_IDS: Array[String] = [
 	"obsidian_garden",
@@ -451,6 +455,8 @@ func _sanitize_cosmetic(
 func _current_cosmetic_id(kind: StringName, id_text: String) -> String:
 	if kind == KIND_ARENA_SKIN:
 		return str(RETIRED_ARENA_SKIN_IDS.get(id_text, id_text))
+	if kind == KIND_FORM:
+		return str(RETIRED_FORM_IDS.get(id_text, id_text))
 	return id_text
 
 

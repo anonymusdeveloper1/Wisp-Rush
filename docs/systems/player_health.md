@@ -1,12 +1,19 @@
 # System: Player health
 
-> **Status:** ✅ done · **Last updated:** 2026-09-11 · **GDD section:** §5.3
+> **Status:** ✅ done · one starting fragment, no revive, Soul Vessel drops (2026-09-19) ·
+> **Last updated:** 2026-09-19 · **GDD section:** §5.3
 
 ## Purpose
 
 Track the Wisp's Soul Fragments independently from movement, and turn valid enemy contact into a
 readable hurt/invulnerability/death sequence. GameWorld selects a safe reform edge; WispPlayer owns
 the state and visuals.
+
+A run starts on **one** fragment and death is final. The maximum is a starting value, not a
+ceiling: each [SoulVesselPickup](../../scenes/pickups/soul_vessel_pickup.gd) collected raises it by
+one and fills it, with no cap, so how long a run survives is how many vessels it found. Nothing
+revives the player — `MonetisationService.PLACEMENT_REVIVE` is plumbing with no UI and stays
+unbuilt ([monetisation.md](monetisation.md)).
 
 ## Files
 
@@ -15,7 +22,9 @@ the state and visuals.
 | `res://scripts/components/health_component.gd` | Reusable integer health state and signals |
 | `res://scenes/player/wisp_player.tscn` | Composes HealthComponent under the Wisp |
 | `res://scenes/player/wisp_player.gd` | Vulnerability rules and hurt/death presentation |
-| `res://data/player/default_player_tuning.tres` | Health, hurt, invulnerability and death timing |
+| `res://data/player/default_player_tuning.tres` | Starting fragments (1), hurt, invulnerability and death timing |
+| `res://scenes/pickups/soul_vessel_pickup.gd` / `.tscn` | The rare floor drop that adds a fragment; a `SoulShardPickup` with the vessel icon, so it attracts, sweeps and expires the same way |
+| `res://data/progression/default_run_progression.tres` | `soul_vessel_drop_chance` — how often a kill drops one |
 
 ## Scene / node structure
 

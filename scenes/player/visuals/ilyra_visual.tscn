@@ -1,61 +1,41 @@
-[gd_scene load_steps=64 format=3]
+[gd_scene load_steps=42 format=3]
 
-[ext_resource type="Script" path="res://scenes/player/visuals/ribbon_chain.gd" id="1_ribbon_chain"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/torso.png" id="2_torso"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/hair_back.png" id="3_hair_back"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/braid_l.png" id="4_braid_l"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/braid_r.png" id="5_braid_r"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/sash_1.png" id="6_sash_1"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/sash_2.png" id="7_sash_2"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/sash_3.png" id="8_sash_3"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/sash_4.png" id="9_sash_4"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/leg_l.png" id="10_leg_l"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/boot_l.png" id="11_boot_l"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/leg_r.png" id="12_leg_r"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/boot_r.png" id="13_boot_r"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/skirt_panel_1.png" id="14_skirt_panel_1"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/skirt_panel_2.png" id="15_skirt_panel_2"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/arm_ll.png" id="16_arm_ll"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/hand_cup_l.png" id="17_hand_cup_l"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/hand_open_l.png" id="18_hand_open_l"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/arm_lr.png" id="19_arm_lr"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/hand_cup_r.png" id="20_hand_cup_r"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/hand_open_r.png" id="21_hand_open_r"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/arm_ul.png" id="22_arm_ul"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/hand_grip_l.png" id="23_hand_grip_l"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/fan_handle.png" id="24_fan_handle"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/fan_membrane.png" id="25_fan_membrane"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/fan_membrane_lit.png" id="26_fan_membrane_lit"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/fan_rib_a.png" id="27_fan_rib_a"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/fan_rib_b.png" id="28_fan_rib_b"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/fan_rib_c.png" id="29_fan_rib_c"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/fan_rib_d.png" id="30_fan_rib_d"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/fan_rib_e.png" id="31_fan_rib_e"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/vfx_fan_arc.png" id="32_vfx_fan_arc"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/arm_ur.png" id="33_arm_ur"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/hand_grip_r.png" id="34_hand_grip_r"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/skirt_panel_3.png" id="35_skirt_panel_3"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/skirt_panel_4.png" id="36_skirt_panel_4"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/skirt_panel_5.png" id="37_skirt_panel_5"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/skirt_panel_6.png" id="38_skirt_panel_6"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/heart_glow.png" id="39_heart_glow"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/heart_core.png" id="40_heart_core"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/vfx_bloom.png" id="41_vfx_bloom"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/vfx_ring.png" id="42_vfx_ring"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/shoulder_ornament_l.png" id="43_shoulder_ornament_l"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/shoulder_ornament_r.png" id="44_shoulder_ornament_r"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/head_blink.png" id="45_head_blink"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/head_focused.png" id="46_head_focused"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/head_joy.png" id="47_head_joy"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/head_neutral.png" id="48_head_neutral"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/crown_shard_l.png" id="49_crown_shard_l"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/crown_shard_r.png" id="50_crown_shard_r"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/crown_star.png" id="51_crown_star"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/head_pain.png" id="52_head_pain"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/vfx_star.png" id="53_vfx_star"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/vfx_streak.png" id="54_vfx_streak"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/vfx_petal.png" id="55_vfx_petal"]
-[ext_resource type="Script" path="res://scenes/player/visuals/ilyra_visual.gd" id="56_ilyra_visual"]
+[ext_resource type="Script" path="res://scenes/player/visuals/ilyra_visual.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/idle_hover.png" id="2_idle_hover"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/idle_blink.png" id="3_idle_blink"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/move_fly_00.png" id="4_move_fly_00"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/move_fly_01.png" id="5_move_fly_01"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/aim_charge.png" id="6_aim_charge"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/dash_start_00.png" id="7_dash_start_00"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/dash_start_01.png" id="8_dash_start_01"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/dash_loop_00.png" id="9_dash_loop_00"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/dash_loop_01_attack.png" id="10_dash_loop_01_attack"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/dash_end.png" id="11_dash_end"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/hit_reaction.png" id="12_hit_reaction"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/death.png" id="13_death"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/revive_spawn.png" id="14_revive_spawn"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/victory.png" id="15_victory"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/character_selected.png" id="16_character_selected"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/character_unlocked.png" id="17_character_unlocked"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/wall_bottom.png" id="18_wall_bottom"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/wall_top.png" id="19_wall_top"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/wall_left.png" id="20_wall_left"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/wall_right.png" id="21_wall_right"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/ornaments/sparkle_small.png" id="22_vfx_star"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/ornaments/slash_arc.png" id="23_vfx_streak"]
+[ext_resource type="Script" path="res://scenes/player/visuals/character_aura.gd" id="24_aura"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/ornaments/sparkle_small.png" id="25_orn_sparkle_small"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/ornaments/crown_shard_l.png" id="26_orn_crown_shard_l"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/ornaments/sparkle_large.png" id="27_orn_sparkle_large"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/ornaments/crown_center.png" id="28_orn_crown_center"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/ornaments/sparkle_twin.png" id="29_orn_sparkle_twin"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/ornaments/crown_shard_r.png" id="30_orn_crown_shard_r"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/storefront/storefront_welcome.png" id="31_storefront_welcome"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/storefront/storefront_blink.png" id="32_storefront_blink"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/storefront/storefront_flourish.png" id="33_storefront_flourish"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/ilyra/storefront/storefront_settle.png" id="34_storefront_settle"]
+
+[ext_resource type="Resource" path="res://data/characters/ilyra_menu_video.tres" id="90_video"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_add"]
 blend_mode = 1
@@ -70,7 +50,7 @@ gradient = SubResource("Gradient_trail")
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_trail"]
 particle_flag_disable_z = true
 emission_shape = 1
-emission_sphere_radius = 190.0
+emission_sphere_radius = 150.0
 direction = Vector3(0, 1, 0)
 spread = 34.0
 initial_velocity_min = 40.0
@@ -86,29 +66,10 @@ scale_min = 0.3
 scale_max = 0.6
 color_ramp = SubResource("GradientTexture_trail")
 
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_burst"]
-particle_flag_disable_z = true
-emission_shape = 1
-emission_sphere_radius = 210.0
-direction = Vector3(0, -1, 0)
-spread = 180.0
-initial_velocity_min = 180.0
-initial_velocity_max = 420.0
-gravity = Vector3(0, 0, 0)
-damping_min = 240.0
-damping_max = 420.0
-angle_min = -180.0
-angle_max = 180.0
-angular_velocity_min = -220.0
-angular_velocity_max = 220.0
-scale_min = 0.4
-scale_max = 0.85
-color_ramp = SubResource("GradientTexture_trail")
-
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_dash"]
 particle_flag_disable_z = true
 emission_shape = 1
-emission_sphere_radius = 140.0
+emission_sphere_radius = 110.0
 direction = Vector3(0, 1, 0)
 spread = 22.0
 initial_velocity_min = 110.0
@@ -122,16 +83,224 @@ scale_min = 0.35
 scale_max = 0.7
 color_ramp = SubResource("GradientTexture_trail")
 
+[sub_resource type="SpriteFrames" id="SpriteFrames_poses"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_idle_hover")
+}],
+"loop": true,
+"name": &"idle_hover",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_idle_blink")
+}],
+"loop": true,
+"name": &"idle_blink",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_move_fly_00")
+}],
+"loop": true,
+"name": &"move_fly_00",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_move_fly_01")
+}],
+"loop": true,
+"name": &"move_fly_01",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("6_aim_charge")
+}],
+"loop": true,
+"name": &"aim_charge",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("7_dash_start_00")
+}],
+"loop": true,
+"name": &"dash_start_00",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("8_dash_start_01")
+}],
+"loop": true,
+"name": &"dash_start_01",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_dash_loop_00")
+}],
+"loop": true,
+"name": &"dash_loop_00",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("10_dash_loop_01_attack")
+}],
+"loop": true,
+"name": &"dash_loop_01_attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("11_dash_end")
+}],
+"loop": true,
+"name": &"dash_end",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("12_hit_reaction")
+}],
+"loop": true,
+"name": &"hit_reaction",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("13_death")
+}],
+"loop": true,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("14_revive_spawn")
+}],
+"loop": true,
+"name": &"revive_spawn",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("15_victory")
+}],
+"loop": true,
+"name": &"victory",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("16_character_selected")
+}],
+"loop": true,
+"name": &"character_selected",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("17_character_unlocked")
+}],
+"loop": true,
+"name": &"character_unlocked",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("18_wall_bottom")
+}],
+"loop": true,
+"name": &"wall_bottom",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("19_wall_top")
+}],
+"loop": true,
+"name": &"wall_top",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("20_wall_left")
+}],
+"loop": true,
+"name": &"wall_left",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("21_wall_right")
+}],
+"loop": true,
+"name": &"wall_right",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("31_storefront_welcome")
+}],
+"loop": true,
+"name": &"storefront_welcome",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("32_storefront_blink")
+}],
+"loop": true,
+"name": &"storefront_blink",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("33_storefront_flourish")
+}],
+"loop": true,
+"name": &"storefront_flourish",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("34_storefront_settle")
+}],
+"loop": true,
+"name": &"storefront_settle",
+"speed": 5.0
+}]
+
 [node name="IlyraVisual" type="Node2D"]
-script = ExtResource("56_ilyra_visual")
-design_size = 978.9775
-preview_center = Vector2(0, -138.5112)
+script = ExtResource("1_script")
+menu_video = ExtResource("90_video")
+design_size = 627.0
 heading_frequency = 6.8
 heading_damping = 0.7
 settle_frequency = 4.0
-squash_amount = 0.8
+squash_amount = 0.7
 bounce_amount = 1.0
 aim_lean = 0.3
+
+[node name="Aura" type="Node2D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("24_aura")
+mote_textures = Array[Texture2D]([ExtResource("25_orn_sparkle_small"), ExtResource("26_orn_crown_shard_l"), ExtResource("27_orn_sparkle_large"), ExtResource("28_orn_crown_center"), ExtResource("29_orn_sparkle_twin"), ExtResource("30_orn_crown_shard_r")])
+mote_count = 14
+orbit_radius = Vector2(410, 300)
+drift_height = 34.0
+orbit_seconds = 8.0
+mote_scale = Vector2(0.4, 0.85)
+tint = Color(0.66, 0.9, 1, 0.8)
+centre_offset = Vector2(0, -60)
+dash_stretch = 0.7
 
 [node name="MotionRoot" type="Node2D" parent="."]
 unique_name_in_owner = true
@@ -139,620 +308,34 @@ unique_name_in_owner = true
 [node name="DashParticles" type="GPUParticles2D" parent="MotionRoot"]
 unique_name_in_owner = true
 material = SubResource("CanvasItemMaterial_add")
-position = Vector2(0, 120)
+position = Vector2(0, 90)
 emitting = false
 amount = 10
 lifetime = 0.42
 visibility_rect = Rect2(-1200, -1200, 2400, 2400)
 local_coords = false
 process_material = SubResource("ParticleProcessMaterial_dash")
-texture = ExtResource("54_vfx_streak")
+texture = ExtResource("23_vfx_streak")
 
 [node name="TrailParticles" type="GPUParticles2D" parent="MotionRoot"]
 unique_name_in_owner = true
 material = SubResource("CanvasItemMaterial_add")
-position = Vector2(0, 50)
+position = Vector2(0, 40)
 emitting = false
 amount = 18
 lifetime = 0.66
 visibility_rect = Rect2(-1200, -1200, 2400, 2400)
 local_coords = false
 process_material = SubResource("ParticleProcessMaterial_trail")
-texture = ExtResource("53_vfx_star")
-
-
-[node name="AttackParticles" type="GPUParticles2D" parent="MotionRoot"]
-unique_name_in_owner = true
-material = SubResource("CanvasItemMaterial_add")
-position = Vector2(0, -160)
-emitting = false
-one_shot = true
-explosiveness = 0.9
-amount = 8
-lifetime = 0.5
-visibility_rect = Rect2(-1200, -1200, 2400, 2400)
-local_coords = false
-process_material = SubResource("ParticleProcessMaterial_burst")
-texture = ExtResource("55_vfx_petal")
+texture = ExtResource("22_vfx_star")
 
 [node name="Body" type="Node2D" parent="MotionRoot"]
 unique_name_in_owner = true
 
-[node name="Torso" type="Node2D" parent="MotionRoot/Body"]
+[node name="PoseSprite" type="AnimatedSprite2D" parent="MotionRoot/Body"]
 unique_name_in_owner = true
-position = Vector2(0, 20)
-script = ExtResource("1_ribbon_chain")
-texture = ExtResource("2_torso")
-spine = PackedVector2Array(81, 306, 81, 166, 81, 92, 81, 20)
-cell_size = 30
-mesh_z_index = 24
-phase_offset = 5.67
-
-[node name="HairBack" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(0, -535)
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/HairBack"]
-z_index = 5
-offset = Vector2(0.5, 117)
-texture = ExtResource("3_hair_back")
-
-[node name="BraidL" type="Node2D" parent="MotionRoot/Body/Torso/HairBack"]
-unique_name_in_owner = true
-position = Vector2(92, 85)
-script = ExtResource("1_ribbon_chain")
-texture = ExtResource("4_braid_l")
-spine = PackedVector2Array(56, 16, 56, 98, 56, 181, 56, 264, 56, 346)
-cell_size = 40
-mesh_z_index = 7
-phase_offset = 0.89
-
-[node name="BraidR" type="Node2D" parent="MotionRoot/Body/Torso/HairBack"]
-unique_name_in_owner = true
-position = Vector2(-92, 85)
-script = ExtResource("1_ribbon_chain")
-texture = ExtResource("5_braid_r")
-spine = PackedVector2Array(55, 16, 55, 98, 55, 181, 55, 264, 55, 346)
-cell_size = 40
-mesh_z_index = 7
-phase_offset = 0.95
-
-[node name="Sash1" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(-102, -58)
-rotation = 0.2269
-script = ExtResource("1_ribbon_chain")
-texture = ExtResource("6_sash_1")
-spine = PackedVector2Array(42, 14, 42, 90, 42, 167, 42, 244, 42, 320)
-cell_size = 38
-mesh_z_index = 10
-phase_offset = 5.75
-
-[node name="Sash2" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(-64, -58)
-rotation = 0.1222
-script = ExtResource("1_ribbon_chain")
-texture = ExtResource("7_sash_2")
-spine = PackedVector2Array(37, 14, 37, 76, 37, 137, 37, 198, 37, 260)
-cell_size = 38
-mesh_z_index = 11
-phase_offset = 5.76
-
-[node name="Sash3" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(64, -58)
-rotation = -0.1222
-script = ExtResource("1_ribbon_chain")
-texture = ExtResource("8_sash_3")
-spine = PackedVector2Array(42, 14, 42, 84, 42, 154, 42, 224, 42, 294)
-cell_size = 38
-mesh_z_index = 12
-phase_offset = 5.77
-
-[node name="Sash4" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(102, -58)
-rotation = -0.2269
-script = ExtResource("1_ribbon_chain")
-texture = ExtResource("9_sash_4")
-spine = PackedVector2Array(51, 14, 51, 92, 51, 170, 51, 248, 51, 326)
-cell_size = 38
-mesh_z_index = 13
-phase_offset = 5.78
-
-[node name="LegL" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(42, 0)
-rotation = -0.0227
-script = ExtResource("1_ribbon_chain")
-texture = ExtResource("10_leg_l")
-spine = PackedVector2Array(35, 28, 35, 125, 35, 174, 35, 244)
-cell_size = 30
-mesh_z_index = 14
-phase_offset = 5.15
-
-[node name="BootL" type="Node2D" parent="MotionRoot/Body/Torso/LegL"]
-unique_name_in_owner = true
-position = Vector2(0.0982, 216.0578)
-rotation = 0.0576
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/LegL/BootL"]
-z_index = 15
-offset = Vector2(0, 46)
-texture = ExtResource("11_boot_l")
-
-[node name="LegR" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(-42, 0)
-rotation = 0.0227
-script = ExtResource("1_ribbon_chain")
-texture = ExtResource("12_leg_r")
-spine = PackedVector2Array(35, 28, 35, 125, 35, 174, 35, 244)
-cell_size = 30
-mesh_z_index = 14
-phase_offset = 5.21
-
-[node name="BootR" type="Node2D" parent="MotionRoot/Body/Torso/LegR"]
-unique_name_in_owner = true
-position = Vector2(-0.1436, 214.0584)
-rotation = -0.0576
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/LegR/BootR"]
-z_index = 15
-offset = Vector2(0, 46)
-texture = ExtResource("13_boot_r")
-
-[node name="SkirtPanel1" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(-118, -70)
-rotation = 0.1396
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/SkirtPanel1"]
-z_index = 21
-offset = Vector2(0, 134)
-texture = ExtResource("14_skirt_panel_1")
-
-[node name="SkirtPanel2" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(-72, -70)
-rotation = 0.0873
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/SkirtPanel2"]
-z_index = 22
-offset = Vector2(0, 134)
-texture = ExtResource("15_skirt_panel_2")
-
-[node name="ArmLl" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(68, -175)
-rotation = -1.1537
-script = ExtResource("1_ribbon_chain")
-texture = ExtResource("16_arm_ll")
-spine = PackedVector2Array(37, 27, 37, 125, 37, 224, 37, 261)
-cell_size = 30
-mesh_z_index = 23
-phase_offset = 0.03
-
-[node name="HandCupL" type="Node2D" parent="MotionRoot/Body/Torso/ArmLl"]
-unique_name_in_owner = true
-position = Vector2(-0.1538, 234.1388)
-rotation = 0.1065
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmLl/HandCupL"]
-visible = false
-z_index = 46
-offset = Vector2(0, 40)
-texture = ExtResource("17_hand_cup_l")
-
-[node name="HandOpenL" type="Node2D" parent="MotionRoot/Body/Torso/ArmLl"]
-unique_name_in_owner = true
-position = Vector2(-0.1538, 234.1388)
-rotation = 0.1065
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmLl/HandOpenL"]
-z_index = 46
-offset = Vector2(0, 40)
-texture = ExtResource("18_hand_open_l")
-
-[node name="ArmLr" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(-68, -175)
-rotation = 1.1537
-script = ExtResource("1_ribbon_chain")
-texture = ExtResource("19_arm_lr")
-spine = PackedVector2Array(37, 27, 37, 125, 37, 224, 37, 261)
-cell_size = 30
-mesh_z_index = 23
-phase_offset = 0.09
-
-[node name="HandCupR" type="Node2D" parent="MotionRoot/Body/Torso/ArmLr"]
-unique_name_in_owner = true
-position = Vector2(0.1538, 234.1388)
-rotation = -0.1065
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmLr/HandCupR"]
-visible = false
-z_index = 46
-offset = Vector2(0.5, 40)
-texture = ExtResource("20_hand_cup_r")
-
-[node name="HandOpenR" type="Node2D" parent="MotionRoot/Body/Torso/ArmLr"]
-unique_name_in_owner = true
-position = Vector2(0.1538, 234.1388)
-rotation = -0.1065
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmLr/HandOpenR"]
-z_index = 46
-offset = Vector2(0.5, 40)
-texture = ExtResource("21_hand_open_r")
-
-[node name="ArmUl" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(72, -245)
-rotation = -1.4678
-script = ExtResource("1_ribbon_chain")
-texture = ExtResource("22_arm_ul")
-spine = PackedVector2Array(42, 29, 42, 113, 42, 224, 42, 252)
-cell_size = 30
-mesh_z_index = 23
-phase_offset = 0.12
-
-[node name="HandGripL" type="Node2D" parent="MotionRoot/Body/Torso/ArmUl"]
-unique_name_in_owner = true
-position = Vector2(-0.0582, 223.1883)
-rotation = 0.2461
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmUl/HandGripL"]
-z_index = 46
-offset = Vector2(0, 40)
-texture = ExtResource("23_hand_grip_l")
-
-[node name="FanHandle" type="Node2D" parent="MotionRoot/Body/Torso/ArmUl/HandGripL"]
-unique_name_in_owner = true
-position = Vector2(76.2118, 10.5716)
-rotation = 1.2217
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmUl/HandGripL/FanHandle"]
-z_index = 66
-offset = Vector2(0, 44)
-texture = ExtResource("24_fan_handle")
-
-[node name="FanMembrane" type="Node2D" parent="MotionRoot/Body/Torso/ArmUl/HandGripL/FanHandle"]
-unique_name_in_owner = true
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmUl/HandGripL/FanHandle/FanMembrane"]
-z_index = 65
-offset = Vector2(0, -63)
-texture = ExtResource("25_fan_membrane")
-
-[node name="FanMembraneLit" type="Node2D" parent="MotionRoot/Body/Torso/ArmUl/HandGripL/FanHandle"]
-unique_name_in_owner = true
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmUl/HandGripL/FanHandle/FanMembraneLit"]
-visible = false
-z_index = 65
-offset = Vector2(0, -63)
-texture = ExtResource("26_fan_membrane_lit")
-
-[node name="FanRibA" type="Node2D" parent="MotionRoot/Body/Torso/ArmUl/HandGripL/FanHandle"]
-unique_name_in_owner = true
-rotation = -0.9774
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmUl/HandGripL/FanHandle/FanRibA"]
-z_index = 67
-offset = Vector2(0, -66)
-texture = ExtResource("27_fan_rib_a")
-
-[node name="FanRibB" type="Node2D" parent="MotionRoot/Body/Torso/ArmUl/HandGripL/FanHandle"]
-unique_name_in_owner = true
-rotation = -0.4887
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmUl/HandGripL/FanHandle/FanRibB"]
-z_index = 67
-offset = Vector2(0, -66)
-texture = ExtResource("28_fan_rib_b")
-
-[node name="FanRibC" type="Node2D" parent="MotionRoot/Body/Torso/ArmUl/HandGripL/FanHandle"]
-unique_name_in_owner = true
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmUl/HandGripL/FanHandle/FanRibC"]
-z_index = 67
-offset = Vector2(0.5, -66)
-texture = ExtResource("29_fan_rib_c")
-
-[node name="FanRibD" type="Node2D" parent="MotionRoot/Body/Torso/ArmUl/HandGripL/FanHandle"]
-unique_name_in_owner = true
-rotation = 0.4887
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmUl/HandGripL/FanHandle/FanRibD"]
-z_index = 67
-offset = Vector2(0.5, -66)
-texture = ExtResource("30_fan_rib_d")
-
-[node name="FanRibE" type="Node2D" parent="MotionRoot/Body/Torso/ArmUl/HandGripL/FanHandle"]
-unique_name_in_owner = true
-rotation = 0.9774
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmUl/HandGripL/FanHandle/FanRibE"]
-z_index = 67
-offset = Vector2(0, -66)
-texture = ExtResource("31_fan_rib_e")
-
-[node name="VfxFanArc" type="Node2D" parent="MotionRoot/Body/Torso/ArmUl/HandGripL/FanHandle"]
-unique_name_in_owner = true
-position = Vector2(-330, 92)
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmUl/HandGripL/FanHandle/VfxFanArc"]
-visible = false
-z_index = 90
-texture = ExtResource("32_vfx_fan_arc")
-
-[node name="ArmUr" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(-72, -245)
-rotation = 1.4678
-script = ExtResource("1_ribbon_chain")
-texture = ExtResource("33_arm_ur")
-spine = PackedVector2Array(42, 29, 42, 113, 42, 224, 42, 252)
-cell_size = 30
-mesh_z_index = 23
-phase_offset = 0.18
-
-[node name="HandGripR" type="Node2D" parent="MotionRoot/Body/Torso/ArmUr"]
-unique_name_in_owner = true
-position = Vector2(0.161, 222.1936)
-rotation = -0.2461
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmUr/HandGripR"]
-z_index = 46
-offset = Vector2(0.5, 40)
-texture = ExtResource("34_hand_grip_r")
-
-[node name="SkirtPanel3" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(-28, -70)
-rotation = 0.0349
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/SkirtPanel3"]
-z_index = 23
-offset = Vector2(0, 144)
-texture = ExtResource("35_skirt_panel_3")
-
-[node name="SkirtPanel4" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(28, -70)
-rotation = -0.0349
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/SkirtPanel4"]
-z_index = 24
-offset = Vector2(0, 134)
-texture = ExtResource("36_skirt_panel_4")
-
-[node name="SkirtPanel5" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(72, -70)
-rotation = -0.0873
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/SkirtPanel5"]
-z_index = 25
-offset = Vector2(0, 134)
-texture = ExtResource("37_skirt_panel_5")
-
-[node name="SkirtPanel6" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(118, -70)
-rotation = -0.1396
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/SkirtPanel6"]
-z_index = 26
-offset = Vector2(0, 134)
-texture = ExtResource("38_skirt_panel_6")
-
-[node name="HeartGlow" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(0, -198)
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/HeartGlow"]
-z_index = 31
-texture = ExtResource("39_heart_glow")
-
-[node name="HeartCore" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(0, -198)
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/HeartCore"]
-z_index = 32
-texture = ExtResource("40_heart_core")
-
-[node name="VfxBloom" type="Node2D" parent="MotionRoot/Body/Torso/HeartCore"]
-unique_name_in_owner = true
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/HeartCore/VfxBloom"]
-visible = false
-z_index = 90
-offset = Vector2(0.5, 0.5)
-texture = ExtResource("41_vfx_bloom")
-
-[node name="VfxRing" type="Node2D" parent="MotionRoot/Body/Torso/HeartCore"]
-unique_name_in_owner = true
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/HeartCore/VfxRing"]
-visible = false
-z_index = 90
-texture = ExtResource("42_vfx_ring")
-
-[node name="ShoulderOrnamentL" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(74, -250)
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ShoulderOrnamentL"]
-z_index = 44
-offset = Vector2(0.5, 0)
-texture = ExtResource("43_shoulder_ornament_l")
-
-[node name="ShoulderOrnamentR" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(-74, -250)
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ShoulderOrnamentR"]
-z_index = 44
-offset = Vector2(0.5, 0)
-texture = ExtResource("44_shoulder_ornament_r")
-
-[node name="HeadBlink" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(0, -305)
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/HeadBlink"]
-visible = false
-z_index = 50
-offset = Vector2(0, -105)
-texture = ExtResource("45_head_blink")
-
-[node name="HeadFocused" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(0, -305)
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/HeadFocused"]
-visible = false
-z_index = 50
-offset = Vector2(0, -105)
-texture = ExtResource("46_head_focused")
-
-[node name="HeadJoy" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(0, -305)
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/HeadJoy"]
-visible = false
-z_index = 50
-offset = Vector2(0, -105)
-texture = ExtResource("47_head_joy")
-
-[node name="HeadNeutral" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(0, -305)
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/HeadNeutral"]
-z_index = 50
-offset = Vector2(0, -105)
-texture = ExtResource("48_head_neutral")
-
-[node name="CrownShardL" type="Node2D" parent="MotionRoot/Body/Torso/HeadNeutral"]
-unique_name_in_owner = true
-position = Vector2(80, -235)
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/HeadNeutral/CrownShardL"]
-z_index = 56
-texture = ExtResource("49_crown_shard_l")
-
-[node name="CrownShardR" type="Node2D" parent="MotionRoot/Body/Torso/HeadNeutral"]
-unique_name_in_owner = true
-position = Vector2(-80, -235)
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/HeadNeutral/CrownShardR"]
-z_index = 56
-texture = ExtResource("50_crown_shard_r")
-
-[node name="CrownStar" type="Node2D" parent="MotionRoot/Body/Torso/HeadNeutral"]
-unique_name_in_owner = true
-position = Vector2(0, -270)
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/HeadNeutral/CrownStar"]
-z_index = 56
-texture = ExtResource("51_crown_star")
-
-[node name="HeadPain" type="Node2D" parent="MotionRoot/Body/Torso"]
-unique_name_in_owner = true
-position = Vector2(0, -305)
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/HeadPain"]
-visible = false
-z_index = 50
-offset = Vector2(0, -105)
-texture = ExtResource("52_head_pain")
-
-[node name="FanHandleR" type="Node2D" parent="MotionRoot/Body/Torso/ArmUr/HandGripR"]
-unique_name_in_owner = true
-position = Vector2(-76.5538, 11.5113)
-rotation = -1.2217
-scale = Vector2(-1, 1)
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmUr/HandGripR/FanHandleR"]
-z_index = 66
-offset = Vector2(0, 44)
-texture = ExtResource("24_fan_handle")
-
-[node name="FanMembraneR" type="Node2D" parent="MotionRoot/Body/Torso/ArmUr/HandGripR/FanHandleR"]
-unique_name_in_owner = true
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmUr/HandGripR/FanHandleR/FanMembraneR"]
-z_index = 65
-offset = Vector2(0, -63)
-texture = ExtResource("25_fan_membrane")
-
-[node name="FanMembraneLitR" type="Node2D" parent="MotionRoot/Body/Torso/ArmUr/HandGripR/FanHandleR"]
-unique_name_in_owner = true
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmUr/HandGripR/FanHandleR/FanMembraneLitR"]
-visible = false
-z_index = 65
-offset = Vector2(0, -63)
-texture = ExtResource("26_fan_membrane_lit")
-
-[node name="FanRibAR" type="Node2D" parent="MotionRoot/Body/Torso/ArmUr/HandGripR/FanHandleR"]
-unique_name_in_owner = true
-rotation = -0.9774
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmUr/HandGripR/FanHandleR/FanRibAR"]
-z_index = 67
-offset = Vector2(0, -66)
-texture = ExtResource("27_fan_rib_a")
-
-[node name="FanRibBR" type="Node2D" parent="MotionRoot/Body/Torso/ArmUr/HandGripR/FanHandleR"]
-unique_name_in_owner = true
-rotation = -0.4887
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmUr/HandGripR/FanHandleR/FanRibBR"]
-z_index = 67
-offset = Vector2(0, -66)
-texture = ExtResource("28_fan_rib_b")
-
-[node name="FanRibCR" type="Node2D" parent="MotionRoot/Body/Torso/ArmUr/HandGripR/FanHandleR"]
-unique_name_in_owner = true
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmUr/HandGripR/FanHandleR/FanRibCR"]
-z_index = 67
-offset = Vector2(0.5, -66)
-texture = ExtResource("29_fan_rib_c")
-
-[node name="FanRibDR" type="Node2D" parent="MotionRoot/Body/Torso/ArmUr/HandGripR/FanHandleR"]
-unique_name_in_owner = true
-rotation = 0.4887
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmUr/HandGripR/FanHandleR/FanRibDR"]
-z_index = 67
-offset = Vector2(0.5, -66)
-texture = ExtResource("30_fan_rib_d")
-
-[node name="FanRibER" type="Node2D" parent="MotionRoot/Body/Torso/ArmUr/HandGripR/FanHandleR"]
-unique_name_in_owner = true
-rotation = 0.9774
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmUr/HandGripR/FanHandleR/FanRibER"]
-z_index = 67
-offset = Vector2(0, -66)
-texture = ExtResource("31_fan_rib_e")
-
-[node name="VfxFanArcR" type="Node2D" parent="MotionRoot/Body/Torso/ArmUr/HandGripR/FanHandleR"]
-unique_name_in_owner = true
-position = Vector2(-330, 92)
-
-[node name="Sprite" type="Sprite2D" parent="MotionRoot/Body/Torso/ArmUr/HandGripR/FanHandleR/VfxFanArcR"]
-visible = false
-z_index = 90
-texture = ExtResource("32_vfx_fan_arc")
+sprite_frames = SubResource("SpriteFrames_poses")
+animation = &"idle_hover"
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 unique_name_in_owner = true

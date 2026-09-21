@@ -109,7 +109,7 @@ windows and presentation constants that coordinate multiple systems.
   (`score / score_per_rift_point`, integer division); SaveManager adds both once.
 - **No permanent power** (ADR-0013): a run starts at the no-bonus baseline — 3 Soul Fragments, base
   invulnerability, no starting mutation, every blade, speed, XP, pickup and attraction multiplier 1.0,
-  combo grace `COMBO_TIMEOUT`. Run-only power is the eight mutations.
+  combo grace `COMBO_TIMEOUT`. Run-only power is the seven mutations plus Soul Vessel drops.
 - **Upgrades never pause** (owner decision 2026-09-15, [mutations.md](mutations.md)): level-ups bank
   silently; the bottom `UpgradeTray` slides up only at a calm moment —
   a wave start, a boss beaten (after the victory beat) or a field clear — when the Wisp rests with no

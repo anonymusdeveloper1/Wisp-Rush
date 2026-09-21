@@ -56,17 +56,6 @@ func set_reduced_motion(enabled: bool) -> void:
 		_visual.set_reduced_motion(enabled)
 
 
-## Plays the selected flourish (a card comes into focus, a character is equipped).
-func play_selected() -> void:
-	if _visual != null and not _reduced_motion:
-		_visual.play_character_selected()
-
-
-## Plays the stronger unlock flourish after a purchase.
-func play_unlocked() -> void:
-	if _visual != null and not _reduced_motion:
-		_visual.play_character_unlocked()
-
 
 ## The live rig, exposed for animation tests.
 func get_visual() -> PlayableCharacterVisual:

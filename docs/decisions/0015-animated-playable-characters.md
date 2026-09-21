@@ -1,5 +1,12 @@
 # ADR-0015: Animated playable characters are presentation-only rigs on the Wisp controller
 
+> **Narrowed 2026-09-20 (GDD §14 #34).** The presentation-only character
+> architecture in this ADR still stands — it is what every character, rigged or not, plugs into.
+> What changed is how a character's *art* is authored: new characters are whole-frame sprites
+> ([character_sprite_frames.md](../guides/character_sprite_frames.md)), not bone rigs. Veyra,
+> Rook, Morrow and Noxen keep their rigs; the Ilyra and Bram rigs described in the addendum were
+> retired, and the name Ilyra now belongs to the whole-frame sprite character.
+
 > **Status:** Accepted · **Date:** 2026-09-17 · **Deciders:** owner (three playable characters with
 > smooth animation, "they are not just wisps but characters") + Codex (Veyra prototype) + Claude Code
 > (completion) · **Relates to:** [ADR-0005](0005-visual-redesign-v1.md) (generated art pipeline),

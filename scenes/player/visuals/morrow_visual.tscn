@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3]
+[gd_scene load_steps=22 format=3]
 
 [ext_resource type="Script" path="res://scenes/player/visuals/morrow_visual.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/playable/morrow/cloak_body.png" id="2_cloak"]
@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/characters/playable/morrow/rune_fragment.png" id="11_fragment"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/playable/morrow/cloth_wisp.png" id="12_wisp"]
 [ext_resource type="Script" path="res://scenes/player/visuals/ribbon_chain.gd" id="13_ribbon"]
+[ext_resource type="Script" path="res://scenes/player/visuals/character_aura.gd" id="14_aura"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_add"]
 blend_mode = 1
@@ -76,6 +77,17 @@ heading_damping = 0.85
 settle_frequency = 2.0
 squash_amount = 0.55
 bounce_amount = 0.7
+
+[node name="Aura" type="Node2D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("14_aura")
+mote_texture = ExtResource("11_fragment")
+mote_count = 6
+orbit_radius = Vector2(300, 215)
+orbit_seconds = 7.5
+mote_scale = Vector2(0.22, 0.44)
+tint = Color(0.3, 0.95, 0.9, 0.65)
+centre_offset = Vector2(0, -25)
 
 [node name="MotionRoot" type="Node2D" parent="."]
 unique_name_in_owner = true

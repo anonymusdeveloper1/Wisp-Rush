@@ -5,7 +5,7 @@ extends Resource
 ## Horizontal design coordinate baseline used to scale movement and distances.
 @export_range(1.0, 4096.0, 1.0) var design_width: float = 1080.0
 ## Wisp dash speed in pixels per second at [member design_width].
-@export_range(100.0, 10000.0, 10.0) var dash_speed: float = 3960.0
+@export_range(100.0, 10000.0, 10.0) var dash_speed: float = 3168.0
 ## Intentional release-to-motion anticipation in seconds.
 @export_range(0.0, 0.25, 0.001) var windup_duration: float = 0.065
 ## Wall-impact animation lock in seconds.
@@ -26,8 +26,10 @@ extends Resource
 @export_range(0.0, 96.0, 1.0) var blade_bonus: float = 14.0
 ## Reform duration in seconds before the first input becomes available.
 @export_range(0.0, 1.0, 0.01) var spawn_duration: float = 0.42
-## Starting and maximum Soul Fragments before run upgrades.
-@export_range(1, 20, 1) var maximum_health: int = 3
+## Soul Fragments a run starts with. One: a run is lost on the first contact until a Soul Vessel
+## is found, and there is no revive. Collected vessels raise it with no cap
+## ([method WispPlayer.increase_maximum_health]), so this is a starting value, not a ceiling.
+@export_range(1, 20, 1) var maximum_health: int = 1
 ## Non-lethal hurt reaction duration in seconds.
 @export_range(0.05, 1.0, 0.01) var hurt_duration: float = 0.22
 ## Post-contact invulnerability duration in seconds.

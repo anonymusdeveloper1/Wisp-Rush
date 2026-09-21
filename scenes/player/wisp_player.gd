@@ -1395,7 +1395,16 @@ func _get_character_visual_state() -> StringName:
 				else PlayableCharacterVisual.IDLE_HOVER
 			)
 		State.AIMING:
-			return PlayableCharacterVisual.AIM_CHARGE
+			# Owner decision 2026-09-19: holding the aim arrow must not change the character at all.
+			# The equipped character keeps doing exactly what it was doing — resting against its wall,
+			# or drifting along it — so the arrow is the only thing that appears. Nothing in the run
+			# asks for AIM_CHARGE any more; the state itself stays in the vocabulary for the rigs,
+			# the menus and the visual QA boards.
+			return (
+				PlayableCharacterVisual.MOVE_FLY
+				if _edge_drift_speed > 0.0
+				else PlayableCharacterVisual.IDLE_HOVER
+			)
 		State.WINDUP:
 			return PlayableCharacterVisual.DASH_START
 		State.DASHING:

@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3]
+[gd_scene load_steps=22 format=3]
 
 [ext_resource type="Script" path="res://scenes/player/visuals/rook_visual.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/playable/rook/shadow_body.png" id="2_shadow"]
@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/characters/playable/rook/tail_fin.png" id="11_fin"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/playable/rook/dash_streak.png" id="12_streak"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/playable/rook/wing_dust.png" id="13_dust"]
+[ext_resource type="Script" path="res://scenes/player/visuals/character_aura.gd" id="14_aura"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_add"]
 blend_mode = 1
@@ -69,6 +70,17 @@ color_ramp = SubResource("GradientTexture_streak")
 script = ExtResource("1_script")
 design_size = 640.0
 preview_center = Vector2(8, 64)
+
+[node name="Aura" type="Node2D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("14_aura")
+mote_texture = ExtResource("13_dust")
+mote_count = 7
+orbit_radius = Vector2(400, 260)
+orbit_seconds = 9.5
+mote_scale = Vector2(0.24, 0.5)
+tint = Color(0.93, 0.45, 1, 0.6)
+centre_offset = Vector2(0, -20)
 
 [node name="MotionRoot" type="Node2D" parent="."]
 unique_name_in_owner = true

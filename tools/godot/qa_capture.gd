@@ -5,7 +5,7 @@ extends SceneTree
 ## Usage (normally driven by tools/qa_matrix.sh):
 ##   WISP_ISOLATED_SAVE=1 Godot --path . --resolution 390x844 \
 ##     --script res://tools/godot/qa_capture.gd -- <screen> <out.png>
-## Screens: home, shop_wisps, shop_dashes, shop_arenas, shop_no_ads, rifts, rifts_locked, daily,
+## Screens: home, shop_wisps, shop_arenas, shop_no_ads, rifts, rifts_locked, daily,
 ## trials, stats, settings, results, game, pause, upgrade, tutorial, and endless_<skin_id> (an
 ## Endless run on that arena skin, with its animated scenery).
 
@@ -83,7 +83,7 @@ func _build(screen: String) -> int:
 		"settings":
 			_add_screen("res://scenes/screens/settings_screen.tscn")
 			return 20
-		"shop_wisps", "shop_dashes", "shop_arenas", "shop_no_ads":
+		"shop_wisps", "shop_arenas", "shop_no_ads":
 			var shop := _add_screen("res://scenes/screens/shop_screen.tscn") as ShopScreen
 			shop.setup(snapshot, StringName(screen.trim_prefix("shop_")))
 			return 20
@@ -162,8 +162,8 @@ func _sample_snapshot() -> Dictionary:
 		&"bosses_defeated": 2,
 		&"play_time_seconds": 5480.0,
 		&"rift_points": 1320,
-		&"owned_forms": ["void", "ash", "venom"],
-		&"equipped_form": "venom",
+		&"owned_forms": ["void", "eclipse", "ilyra"],
+		&"equipped_form": "ilyra",
 		# A Mythic arena equipped, so shop_arenas shows a card with the scenery grade and glow.
 		&"owned_arena_skins": ["astral_observatory", "aurora_throne"],
 		&"equipped_arena_skin": "aurora_throne",

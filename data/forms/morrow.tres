@@ -1,8 +1,9 @@
-[gd_resource type="Resource" script_class="FormData" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="FormData" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/form_data.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/playable/morrow/preview.png" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/player/visuals/morrow_visual.tscn" id="3"]
+[ext_resource type="Resource" path="res://data/characters/dash_effects/morrow.tres" id="4"]
 
 [resource]
 script = ExtResource("1")
@@ -12,4 +13,5 @@ description = "The Runebound — calm hands and patient runes."
 price = 0
 texture = ExtResource("2")
 visual_scene = ExtResource("3")
+dash_effect = ExtResource("4")
 tint = Color(0.3, 0.95, 0.9, 1)

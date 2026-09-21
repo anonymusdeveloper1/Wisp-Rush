@@ -5,7 +5,7 @@ extends Resource
 ## Every entry is cosmetic only - collision, stats and controls never change with the character.
 
 ## Number of catalog entries; the Statistics screen counts collected characters against it.
-const REQUIRED_FORM_COUNT: int = 11
+const REQUIRED_FORM_COUNT: int = 8
 
 ## Form `.tres` paths in intended collection-screen order.
 @export var form_paths: PackedStringArray = PackedStringArray()

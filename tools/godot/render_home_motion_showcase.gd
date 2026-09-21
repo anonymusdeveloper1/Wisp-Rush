@@ -22,5 +22,5 @@ func _build() -> void:
 		&"selected_rift": "ember_hollow",
 		&"rift_levels": {"ember_hollow": 2},
 		&"settings": {&"reduced_motion": false},
-	}, FORMS.get_form(&"frost"))
+	}, FORMS.get_form(&"ilyra"))
 	root.add_child(home)

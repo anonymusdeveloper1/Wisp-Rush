@@ -15,11 +15,16 @@
    (theme type variations, `Palette`), `concept_art/wisp_rush_redesign_v1/STYLE_GUIDE.md` (art/UX
    authority) and its six-screen board, plus [ADR-0005](docs/decisions/0005-visual-redesign-v1.md)
    (redesign, generated art pipeline) and [ADR-0006](docs/decisions/0006-inset-playfield-and-larger-sprites.md)
-   (inset playfield, sprite/hitbox scale). **Adding or changing a playable character?** Read
-   [docs/guides/character_rig_recipe.md](docs/guides/character_rig_recipe.md) first (layers, Bone2D
-   chains and skinned Polygon2D ribbons, `ChainSpring`, the runtime state machine, the QA loop and
-   the mistakes already made), then [docs/systems/playable_character_visuals.md](docs/systems/playable_character_visuals.md)
-   and [ADR-0015](docs/decisions/0015-animated-playable-characters.md).
+   (inset playfield, sprite/hitbox scale). **Adding or changing a playable character?** New characters are
+   **whole-frame sprites, not bone rigs** (owner, 2026-09-20) — read
+   [docs/guides/character_sprite_frames.md](docs/guides/character_sprite_frames.md) first: the
+   generation contract (every state and its frame count, the storefront set, wall poses, ornaments,
+   canvas and anchor rules, what the engine animates for you, the size budget). For the existing
+   rigged characters, [docs/guides/character_rig_recipe.md](docs/guides/character_rig_recipe.md)
+   (layers, Bone2D chains and skinned Polygon2D ribbons, `ChainSpring`, the runtime state machine,
+   the QA loop and the mistakes already made). Then
+   [docs/systems/playable_character_visuals.md](docs/systems/playable_character_visuals.md) and
+   [ADR-0015](docs/decisions/0015-animated-playable-characters.md).
 5c. **Making a devlog video (TikTok / YouTube Shorts)?** [docs/marketing/devlog_video_recipe.md](docs/marketing/devlog_video_recipe.md)
    (owner-approved recipe: rules, structures, Palmier Pro blueprint, QA), [docs/marketing/devlog_hooks.md](docs/marketing/devlog_hooks.md)
    (the hook library every episode picks from), [tools/video/README.md](tools/video/README.md)
@@ -70,6 +75,7 @@
 | Regenerate runtime art (never hand-edit `assets/art/`) | `python3 tools/art/extract_redesign.py` → `tools/validate.sh` |
 | Style UI | use theme type variations (`docs/systems/ui_design_system.md`) and `Palette`; no per-node StyleBoxFlat/colour overrides |
 | Build + deploy the Android debug APK (device over USB) | `JAVA_HOME=$(/usr/libexec/java_home) "$GODOT" --headless --path . --export-debug "Android" build/android/wisp_rush_debug.apk` then `~/Library/Android/sdk/platform-tools/adb install -r -t build/android/wisp_rush_debug.apk` and `adb shell monkey -p com.cognitix.wisprush -c android.intent.category.LAUNCHER 1` (the activity is `GodotAppLauncher` and is **not exported**, so `am start -n` is denied) |
+| Same, **on Windows** (this checkout at `D:\Wisp Rush`) | `GODOT_PATH=/d/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64.exe` for every `tools/*.sh`; export with `JAVA_HOME="C:/Program Files/Android/Android Studio/jbr" "$GODOT" --headless --path . --export-debug "Android" build/android/wisp_rush_debug.apk`, then `"$LOCALAPPDATA/Android/Sdk/platform-tools/adb.exe" install -r -t build/android/wisp_rush_debug.apk` and the same `monkey` launch. Read the device log with `adb logcat -d -s godot` |
 | Screenshot of what the game renders | `tools/screenshot.sh [res://scene.tscn] [frames] [size]` → `logs/screenshot.png` |
 | Run the game (window) | `"$GODOT" --path .` |
 | Devlog video (capture, voice, graphics, sounds; edit in Palmier Pro) | [tools/video/README.md](tools/video/README.md), recipe [docs/marketing/devlog_video_recipe.md](docs/marketing/devlog_video_recipe.md) |
@@ -135,6 +141,14 @@ unique_name_in_owner = true
 ```
 
 - Leave out `uid="uid://…"` attributes on new entries — Godot fills them in on the next save/import.
+- **`.tscn` and `.tres` have no comments.** A `#` line inside a `[node]` block is not ignored:
+  the parser stops reading properties there, so everything below it is silently dropped and
+  the node loads with defaults. Put the explanation in the script instead.
+- **`ext_resource` ids must start with a number** (`14_aura`, not `aura`). Godot writes them that
+  way and its text loader relies on it: a purely alphabetic id parses inconsistently and shows up
+  as `Parse Error` on an unrelated line of the *same* file, or on another scene entirely.
+- `load_steps` is `ext_resource` + `sub_resource` + 1. Too high is harmless (several scenes here
+  carry an inflated one); never leave it too low.
 - `parent="."` = child of root; deeper nodes use a path relative to root (`parent="Body/Arm"`).
 - `id` values of `ext_resource` only need to be unique inside the file.
 - After any hand edit: `tools/validate.sh`. When the change is structural, also re-save the scene

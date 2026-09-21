@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="MenuVideoData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/menu_video_data.gd" id="1_script"]
+[ext_resource type="VideoStreamTheora" path="res://assets/art/characters/playable/verdant_shade/verdant_shade_menu.ogv" id="2_stream"]
+
+[resource]
+script = ExtResource("1_script")
+stream = ExtResource("2_stream")
+side = 473.4
+offset = Vector2(-0.1, -4.6)
+alpha_floor = 0.075
+alpha_ceiling = 0.937
+loop_seconds = 3.333

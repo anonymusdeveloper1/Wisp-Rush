@@ -426,8 +426,6 @@ func _apply_equipped_visual() -> void:
 		_applied_visual_form_id = _equipped_form.form_id
 		_character_preview.visible = animated
 		_wisp_preview.self_modulate.a = 0.0 if animated else 1.0
-		if animated:
-			_character_preview.play_selected.call_deferred()
 
 
 ## Sizes PLAY's glow and light sweep and the Rift portal icon to their buttons.

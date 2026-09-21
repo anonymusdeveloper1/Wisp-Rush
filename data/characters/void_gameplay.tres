@@ -1,0 +1,222 @@
+[gd_resource type="SpriteFrames" load_steps=30 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/void/void_run.png" id="1_run"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_000"]
+atlas = ExtResource("1_run")
+region = Rect2(8, 8, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_001"]
+atlas = ExtResource("1_run")
+region = Rect2(408, 8, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_002"]
+atlas = ExtResource("1_run")
+region = Rect2(808, 8, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_003"]
+atlas = ExtResource("1_run")
+region = Rect2(1208, 8, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_004"]
+atlas = ExtResource("1_run")
+region = Rect2(8, 408, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_005"]
+atlas = ExtResource("1_run")
+region = Rect2(408, 408, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_006"]
+atlas = ExtResource("1_run")
+region = Rect2(808, 408, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_007"]
+atlas = ExtResource("1_run")
+region = Rect2(1208, 408, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_008"]
+atlas = ExtResource("1_run")
+region = Rect2(1608, 408, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_009"]
+atlas = ExtResource("1_run")
+region = Rect2(2008, 408, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_010"]
+atlas = ExtResource("1_run")
+region = Rect2(2408, 408, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_011"]
+atlas = ExtResource("1_run")
+region = Rect2(2808, 408, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_012"]
+atlas = ExtResource("1_run")
+region = Rect2(8, 808, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_013"]
+atlas = ExtResource("1_run")
+region = Rect2(408, 808, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_014"]
+atlas = ExtResource("1_run")
+region = Rect2(808, 808, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_015"]
+atlas = ExtResource("1_run")
+region = Rect2(1208, 808, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_016"]
+atlas = ExtResource("1_run")
+region = Rect2(1608, 808, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_017"]
+atlas = ExtResource("1_run")
+region = Rect2(2008, 808, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_018"]
+atlas = ExtResource("1_run")
+region = Rect2(2408, 808, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_019"]
+atlas = ExtResource("1_run")
+region = Rect2(2808, 808, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_020"]
+atlas = ExtResource("1_run")
+region = Rect2(8, 1208, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_021"]
+atlas = ExtResource("1_run")
+region = Rect2(408, 1208, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_022"]
+atlas = ExtResource("1_run")
+region = Rect2(808, 1208, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_023"]
+atlas = ExtResource("1_run")
+region = Rect2(1208, 1208, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_024"]
+atlas = ExtResource("1_run")
+region = Rect2(1608, 1208, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_025"]
+atlas = ExtResource("1_run")
+region = Rect2(2008, 1208, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_026"]
+atlas = ExtResource("1_run")
+region = Rect2(2408, 1208, 384, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run_027"]
+atlas = ExtResource("1_run")
+region = Rect2(2808, 1208, 384, 384)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_000")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_001")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_002")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_003")
+}],
+"loop": true,
+"name": &"dash_loop",
+"speed": 12.5
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_004")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_005")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_006")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_007")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_008")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_009")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_010")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_011")
+}],
+"loop": true,
+"name": &"wall_bottom",
+"speed": 6.7
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_012")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_013")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_014")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_015")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_016")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_017")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_018")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_019")
+}],
+"loop": true,
+"name": &"wall_top",
+"speed": 6.7
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_020")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_021")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_022")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_023")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_024")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_025")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_026")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_run_027")
+}],
+"loop": true,
+"name": &"wall_left",
+"speed": 6.7
+}]

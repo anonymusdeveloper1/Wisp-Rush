@@ -27,7 +27,8 @@
 - ✅ Resource-driven threat budget and 20 validated formation templates
 - ✅ Shard Wraith and Bone Mote behaviours
 - ✅ Split crystal, spike bloom and blade-ring hazards
-- ✅ XP curve, upgrade selection and all eight functional mutations
+- ✅ XP curve, upgrade selection and the functional mutations (eight; SOUL VESSEL became a world
+  drop on 2026-09-19, leaving seven cards)
 - ✅ Complete scoring, Soul Shard drops and run statistics
 
 ## Milestone 3 — Reaper and progression (complete)
@@ -188,7 +189,7 @@
 > [ADR-0015](decisions/0015-animated-playable-characters.md). System:
 > [playable_character_visuals.md](systems/playable_character_visuals.md).
 
-- ✅ Layer art for all five characters extracted from the generated sheets (`make_rig_source.py` →
+- ✅ Layer art for all six production characters extracted from the generated sheets (`make_rig_source.py` →
       `extract_playable_characters.py`; versioned source packs keep v1 output byte-identical)
 - ✅ Shared presentation-only rig: 13 states in a runtime AnimationTree, heading spring, travel-axis
       squash, interrupts, particle rules, `ChainSpring` follow-through, skinned `RibbonChain` ribbons
@@ -197,13 +198,31 @@
       selected and unlock flourishes; live hero on Home
 - ✅ Verified: `playable_character_visual` (states, smoothness, menus, GameWorld), `form_catalog`,
       lineup/motion/showcase fixtures reviewed frame by frame
+- ⛔ **Retired 2026-09-20** (GDD §14 #34): the Ilyra and Bram rigs are gone and the roster is cut
+  to seven. New characters are whole-frame sprites — `docs/guides/character_sprite_frames.md`.
+- ✅ **Animation set cut to five 2026-09-20** (GDD §14 #36): a drawn character is the dash (which is
+      also the attack), three wall loops and one storefront idle. The windup, landing, drift, hit,
+      death, spawn, victory and both menu reactions are carried by the controller instead. 120 frames
+      on three sheets → 40 on two; ~107 MB → ~30 MB of texture per character
+- ✅ **Menu videos 2026-09-21** ([ADR-0016](decisions/0016-menu-videos-for-character-storefronts.md), GDD §14 #37):
+      Shade (magenta key) and Ilyra (green key, her ready stance) play AI-generated clips on Home and
+      the Shop card through `CharacterMenuVideo`; `tools/art/extract_menu_video.py` keys, loops, packs
+      and encodes them with Godot's Movie Maker
+- ✅ **No bounce when a character is picked, bought or equipped** (owner, 2026-09-21; GDD §14 #38)
+- ⬜ Before a third menu video: play only the focused Shop card's clip (two neighbouring cards can
+      decode at once today)
+- ⬜ Re-cut Ilyra onto the sheet packer: she is the last character drawn from loose PNGs, so her
+      `SpriteFrames` still holds every retired painting as a separate texture
 - ✅ Owner-approved v2 designs and implementation handoff: Mythic Ilyra, then Legendary Bram
       (`concept_art/wisp_rush_playable_characters_v2/`, GDD §14 #32)
 - ✅ Ilyra (Mythic) implemented and verified through her completion gate: 28 clean layers, all 13
       states, targeted tests, Reduced Motion, Shop/Home/GameWorld screenshots, real run
 - ✅ Bram (Legendary) implemented after Ilyra's gate; combined regression (25 pass / 10 pre-existing
       stale), `qa_matrix shop_wisps` 5/5 and the preview benchmark (11 cold 234 ms, warm ~8 ms) run
-- ⬜ Owner: approve the look and motion of the five characters, then set their prices (all 0 RP now),
+- ✅ Noxen, the Veilflame (Legendary) basic rig implemented from the approved blue/cyan concept:
+      twelve moving groups, two skinned root ribbons, flame-horn dash spear, contact slice,
+      storefront flourish, catalog/save/dash-effect integration (2026-09-20; GDD §14 #33)
+- ⬜ Owner: approve the look and motion of the six production rigs, then set their prices (all 0 RP now),
       including whether Legendary and Mythic should cost more than the rest
 - ⬜ Device pass: readability at gameplay size, particle cost and feel on the phone
 - ⬜ Optional: mipmaps for the character layers (import-setting decision)
@@ -232,6 +251,9 @@
 ## Backlog
 | Item | Notes |
 |---|---|
+| Fix the Void pack's canvas overrun at source | `concept_art/void_wisp_sprite_v1/` draws the character larger than its 512 canvas in 21 of 108 frames, so the crystal above its head is severed by the border. `extract_playable_characters.py` removes the severed fragments on intake (2026-09-20 DEVLOG), but the frames should be composed to fit so the crystal survives |
+| Fix the Verdant Shade pack's frame cut at source | `concept_art/verdant_shade_sprite_v1/build_sprite_pack.py` cuts each frame with an offset that catches a sliver of the neighbouring phase-atlas cell — 39 of 108 frames carry a severed band above the character. `extract_playable_characters.py` strips it on the way in (2026-09-20 DEVLOG), but the pack should be corrected so the next whole-frame character does not inherit the same cut |
+| Ornament / VFX textures for Verdant Shade | She has no loose pieces of her own, so her rig emits no particles and her wake is the painted flames plus the procedural dash signature. Borrowing another character's VFX was deliberately declined (2026-09-20 DEVLOG). A small set — a leaf, an ember, a dash streak — would let her carry a trail like the other characters |
 | Evaluate a dedicated test framework | Raw headless SceneTree checks are sufficient today; add an ADR only if suite growth warrants a dependency |
 | Desktop distribution export | mobile release is primary; desktop remains a debug target |
 | Clean art re-export: baked checkerboard (logo, Void form, Reaper) and clipped Reaper cells | Title logo, Void form and all eight Reaper PNGs have a grey checkerboard painted into their semi-transparent halos, and several Reaper cells (e.g. scythe strike) clip the art at the 444 px cell edge; the master sheet has the same cuts, so this needs a clean re-export from the art source. |

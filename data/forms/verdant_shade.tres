@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="FormData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/form_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/verdant_shade/verdant_shade_portrait.png" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/player/visuals/verdant_shade_visual.tscn" id="3"]
+[ext_resource type="Resource" path="res://data/characters/dash_effects/verdant_shade.tres" id="4"]
+
+[resource]
+script = ExtResource("1")
+form_id = &"verdant_shade"
+display_name = "SHADE"
+description = "The Verdant Shade — a hooded ember in a coat of leaves."
+price = 0
+texture = ExtResource("2")
+visual_scene = ExtResource("3")
+dash_effect = ExtResource("4")
+tint = Color(0.36, 0.88, 0.42, 1)
+tier = 0

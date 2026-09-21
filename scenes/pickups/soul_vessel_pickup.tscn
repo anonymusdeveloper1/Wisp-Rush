@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/pickups/soul_vessel_pickup.gd" id="1_pickup"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/mutations/07_soul_vessel.png" id="2_vessel"]
+
+[node name="SoulVesselPickup" type="Node2D" groups=["pickups"]]
+z_index = 6
+script = ExtResource("1_pickup")
+source_frame_size = 444.0
+
+[node name="Sprite" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+texture = ExtResource("2_vessel")

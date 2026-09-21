@@ -12,7 +12,10 @@ const HOME_SCENE: PackedScene = preload("res://scenes/screens/home_screen.tscn")
 const SHOP_SCENE: PackedScene = preload("res://scenes/screens/shop_screen.tscn")
 const ENDLESS_CATALOG: EndlessCatalog = preload("res://data/endless/default_endless_catalog.tres")
 const CATALOG: FormCatalog = preload("res://data/forms/default_catalog.tres")
-const RIGGED: Array[StringName] = [&"veyra", &"rook", &"morrow", &"ilyra", &"bram"]
+const RIGGED: Array[StringName] = [
+	&"void", &"eclipse", &"veyra", &"rook", &"morrow", &"ilyra", &"noxen",
+	&"verdant_shade",
+]
 const ARENA := Rect2(140.0, 420.0, 800.0, 1100.0)
 ## Largest believable change in one 1/60 s frame (scaled by the real frame time); more is a snap.
 const MAX_HEADING_STEP: float = 1.45
@@ -37,7 +40,8 @@ func _run() -> void:
 		await _check_controller_flow(form)
 	await _check_reduced_motion(CATALOG.get_form(&"morrow"))
 	await _check_reduced_motion(CATALOG.get_form(&"ilyra"))
-	await _check_reduced_motion(CATALOG.get_form(&"bram"))
+	await _check_reduced_motion(CATALOG.get_form(&"noxen"))
+	await _check_reduced_motion(CATALOG.get_form(&"noxen"))
 	await _check_home(CATALOG.get_form(&"rook"))
 	await _check_shop()
 	for form_id: StringName in RIGGED:
@@ -70,8 +74,14 @@ func _check_rig_contract(form: FormData) -> void:
 	var particles: int = 0
 	for node: Node in visual.find_children("*", "GPUParticles2D", true, false):
 		particles += (node as GPUParticles2D).amount
-	if particles == 0 or particles > PARTICLE_BUDGET:
-		_fail("%s: %d particles is outside the 1..%d budget" % [id, particles, PARTICLE_BUDGET])
+	# A whole-frame character paints its own trail into the frames, so emitting nothing is right for
+	# it; a layered rig has to emit something or it leaves no wake at all. Either way the ceiling is
+	# the same, because a chained dash must not flood the frame.
+	var painted: bool = not visual.find_children("*", "AnimatedSprite2D", true, false).is_empty()
+	if particles > PARTICLE_BUDGET or (particles == 0 and not painted):
+		_fail("%s: %d particles is outside the %s..%d budget" % [
+			id, particles, "0" if painted else "1", PARTICLE_BUDGET,
+		])
 	for node: Node in visual.find_children("*", "RibbonChain", true, false):
 		_check_ribbon(id, node as RibbonChain)
 	# Standing heading follows the wall: floor upright, ceiling inverted, side walls sideways.
@@ -173,6 +183,9 @@ func _check_controller_flow(form: FormData) -> void:
 	player.request_dash(Vector2.DOWN)
 	await _frames(probe, 45)
 	_expect_standing(id, visual, "landing on the floor")
+	# A run starts on one Soul Fragment, so a hit would be fatal: stock up first, because this test
+	# is about the hurt and victory poses rather than about the health economy.
+	player.increase_maximum_health(3, 3)
 	player.take_hazard_damage(Vector2(ARENA.end.x - 60.0, ARENA.get_center().y))
 	await _frames(probe, 4)
 	_expect(id, visual, [PlayableCharacterVisual.HIT_REACTION], "hazard hit")
@@ -262,11 +275,28 @@ func _check_shop() -> void:
 	await process_frame
 	if (shop.get_node(^"%WispsTab") as Button).text != "CHARACTERS":
 		_fail("the Shop's first tab is not labelled CHARACTERS")
-	for form: FormData in CATALOG.load_forms():
+	# Since 2026-09-20 only the focused card and its neighbours are live; every other card shows
+	# its still portrait, because a whole-frame character's menu sheet is far too expensive to hold
+	# once per card (docs/guides/character_sprite_frames.md §9c). The equipped character is the one
+	# the Shop opens on, so it must be alive; the far end of the roster must not be.
+	var forms: Array[FormData] = CATALOG.load_forms()
+	var focused: PlayableCharacterPreview = _card_preview(shop, &"void")
+	if focused == null or focused.get_visual() == null:
+		_fail("the focused Shop card is not animated")
+	var live: int = 0
+	for form: FormData in forms:
 		var preview: PlayableCharacterPreview = _card_preview(shop, form.form_id)
-		if preview == null or preview.get_visual() == null:
-			_fail("Shop card %s is not animated" % form.form_id)
-	# Main re-reads the save after a purchase: the bought character celebrates.
+		if preview != null and preview.get_visual() != null:
+			live += 1
+		elif shop.find_child("Card_%s" % form.form_id, true, false) == null:
+			_fail("Shop card %s was never built" % form.form_id)
+	var allowed: int = ShopScreen.LIVE_CARD_RADIUS * 2 + 1
+	if live > allowed:
+		_fail("%d Shop cards are live at once; at most %d may be" % [live, allowed])
+	if live == forms.size():
+		_fail("every Shop card is live; the lazy card window is not doing anything")
+	# Main re-reads the save after a purchase. Owner, 2026-09-21: no bounce when a character is
+	# picked, bought or equipped - the card keeps its rest instead of hopping.
 	var bought: Dictionary = snapshot.duplicate(true)
 	bought[&"owned_forms"] = ["void", "veyra", "rook"]
 	bought[&"equipped_form"] = "rook"
@@ -277,9 +307,9 @@ func _check_shop() -> void:
 	var rook_state: StringName = &""
 	if rook != null:
 		rook_state = rook.get_visual().get_current_visual_state()
-	if rook_state != PlayableCharacterVisual.CHARACTER_UNLOCKED:
-		_fail("buying Rook did not play his unlock flourish")
-	# ...and an equip plays the selected flourish.
+	if rook_state in [PlayableCharacterVisual.CHARACTER_SELECTED, PlayableCharacterVisual.CHARACTER_UNLOCKED]:
+		_fail("buying Rook played the %s bounce" % rook_state)
+	# ...and an equip does not either.
 	var equipped: Dictionary = bought.duplicate(true)
 	equipped[&"equipped_form"] = "veyra"
 	shop.setup(equipped, ShopScreen.TAB_WISPS)
@@ -289,8 +319,8 @@ func _check_shop() -> void:
 	var veyra_state: StringName = &""
 	if veyra != null:
 		veyra_state = veyra.get_visual().get_current_visual_state()
-	if veyra_state != PlayableCharacterVisual.CHARACTER_SELECTED:
-		_fail("equipping Veyra did not play her selected flourish")
+	if veyra_state in [PlayableCharacterVisual.CHARACTER_SELECTED, PlayableCharacterVisual.CHARACTER_UNLOCKED]:
+		_fail("equipping Veyra played the %s bounce" % veyra_state)
 	shop.queue_free()
 	await process_frame
 
@@ -340,7 +370,7 @@ func _card_preview(shop: ShopScreen, form_id: StringName) -> PlayableCharacterPr
 	var card: Node = shop.find_child("Card_%s" % form_id, true, false)
 	if card == null:
 		return null
-	return card.find_child("Portrait", true, false) as PlayableCharacterPreview
+	return card.find_child("LivePortrait", true, false) as PlayableCharacterPreview
 
 
 ## Local transforms of every rig part, for the Reduced Motion stillness check.

@@ -1,0 +1,31 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/player/visuals/void_visual.gd" id="1_script"]
+
+[node name="VoidVisual" type="Node2D"]
+script = ExtResource("1_script")
+gameplay_frames = "res://data/characters/void_gameplay.tres"
+menu_frames = "res://data/characters/void_menu.tres"
+menu_idle_animation = &"storefront_idle"
+design_size = 384.0
+heading_frequency = 7.2
+heading_damping = 0.72
+settle_frequency = 4.2
+squash_amount = 0.35
+bounce_amount = 0.0
+aim_lean = 0.0
+
+[node name="MotionRoot" type="Node2D" parent="."]
+unique_name_in_owner = true
+
+[node name="Body" type="Node2D" parent="MotionRoot"]
+unique_name_in_owner = true
+
+[node name="PoseSprite" type="AnimatedSprite2D" parent="MotionRoot/Body"]
+unique_name_in_owner = true
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+
+[node name="AnimationTree" type="AnimationTree" parent="."]
+unique_name_in_owner = true

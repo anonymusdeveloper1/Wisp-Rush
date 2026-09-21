@@ -206,9 +206,20 @@ func _on_loading_finished(resources: Dictionary) -> void:
 
 ## Data the catalogs `load()` by path on every lookup (Rifts with their art, Wisp forms with their
 ## portraits): loaded behind the boot screen and kept referenced, so those lookups hit the cache.
+##
+## The equipped character's menu frames ride along. A whole-frame character's menu sheet is a few
+## thousand pixels square, and loading it the moment Home first drew one cost ~700 ms on the phone;
+## behind the loading bar nobody sees it. Only the *equipped* one is warmed — warming the whole
+## roster would hold every character's sheet at once, which is the bill the Shop's lazy cards were
+## built to avoid.
 func _kept_paths() -> PackedStringArray:
 	var paths := PackedStringArray(RIFT_CATALOG.rift_paths)
 	paths.append_array(FORM_CATALOG.form_paths)
+	var equipped: FormData = FORM_CATALOG.get_form(
+		StringName(str(_save_manager.get_snapshot()[&"equipped_form"]))
+	)
+	if equipped != null and not equipped.menu_frames_path.is_empty():
+		paths.append(equipped.menu_frames_path)
 	return paths
 
 

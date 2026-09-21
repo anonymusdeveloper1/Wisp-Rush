@@ -2,11 +2,14 @@ extends SceneTree
 ## Validates the character catalog: every entry, prices, the Eclipse gate, rigs, tiers and save ids.
 
 const CATALOG: FormCatalog = preload("res://data/forms/default_catalog.tres")
-const RIGGED: Array[StringName] = [&"veyra", &"rook", &"morrow", &"ilyra", &"bram"]
+const RIGGED: Array[StringName] = [
+	&"void", &"eclipse", &"veyra", &"rook", &"morrow", &"ilyra", &"noxen",
+	&"verdant_shade",
+]
 ## Characters that carry a collectible tier; everything else must stay STANDARD.
 const TIERS: Dictionary[StringName, FormData.Tier] = {
 	&"ilyra": FormData.Tier.MYTHIC,
-	&"bram": FormData.Tier.LEGENDARY,
+	&"noxen": FormData.Tier.LEGENDARY,
 }
 
 
@@ -18,7 +21,8 @@ func _init() -> void:
 		for failure: String in validation:
 			push_error("form_catalog: %s" % failure)
 	var forms: Array[FormData] = CATALOG.load_forms()
-	var expected_prices: Array[int] = [0, 250, 500, 800, 1200, 2000, 0, 0, 0, 0, 0]
+	# Void free, Eclipse boss-gated at 2000, then every rigged/sprite character at 0.
+	var expected_prices: Array[int] = [0, 2000, 0, 0, 0, 0, 0, 0]
 	if forms.size() != expected_prices.size():
 		failures += 1
 		push_error("form_catalog: expected %d characters, got %d" % [
@@ -29,7 +33,7 @@ func _init() -> void:
 			if forms[index].price != expected_prices[index]:
 				failures += 1
 				push_error("form_catalog: unexpected price for %s" % forms[index].form_id)
-		if not forms[5].requires_boss_victory:
+		if not forms[1].requires_boss_victory:
 			failures += 1
 			push_error("form_catalog: Eclipse did not require a boss victory")
 	if CATALOG.get_form(&"invalid").form_id != &"void":

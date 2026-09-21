@@ -7,7 +7,7 @@
 
 **Main scene:** `res://scenes/main/main.tscn` · **Features:** `4.7, Forward Plus`
 
-**Counts:** 41 scenes · 99 scripts · 155 resources · 2 shaders · 412 asset files
+**Counts:** 45 scenes · 110 scripts · 171 resources · 3 shaders · 421 asset files
 
 ## Autoloads
 
@@ -60,19 +60,23 @@ _None._
 | `res://scenes/enemies/slag_hulk.tscn` | `SlagHulk` (Node2D) | `res://scenes/enemies/bone_mote.gd` | 4 | — | `enemies` |
 | `res://scenes/enemies/soul_wisp.tscn` | `SoulWisp` (Node2D) | `res://scenes/enemies/soul_wisp.gd` | 4 | — | `enemies` |
 | `res://scenes/enemies/warden.tscn` | `Warden` (Node2D) | `res://scenes/enemies/warden.gd` | 4 | — | `enemies` |
-| `res://scenes/gameplay/game_world.tscn` | `GameWorld` (Control) | `res://scenes/gameplay/game_world.gd` | 75 | `res://assets/ui/theme/ornaments/crest_bottom.tscn`, `res://assets/ui/theme/ornaments/crest_top.tscn`, `res://scenes/gameplay/upgrade_tray.tscn`, `res://scenes/player/wisp_player.tscn` | — |
+| `res://scenes/gameplay/game_world.tscn` | `GameWorld` (Control) | `res://scenes/gameplay/game_world.gd` | 71 | `res://assets/ui/theme/ornaments/crest_bottom.tscn`, `res://assets/ui/theme/ornaments/crest_top.tscn`, `res://scenes/gameplay/upgrade_tray.tscn`, `res://scenes/player/wisp_player.tscn` | — |
 | `res://scenes/gameplay/upgrade_tray.tscn` | `UpgradeTray` (Control) | `res://scenes/gameplay/upgrade_tray.gd` | 26 | — | — |
 | `res://scenes/hazards/blade_ring.tscn` | `BladeRing` (Node2D) | `res://scenes/hazards/blade_ring.gd` | 4 | — | `hazards` |
 | `res://scenes/hazards/spike_bloom.tscn` | `SpikeBloom` (Node2D) | `res://scenes/hazards/spike_bloom.gd` | 4 | — | `hazards` |
 | `res://scenes/hazards/split_void_crystal.tscn` | `SplitVoidCrystal` (Node2D) | `res://scenes/hazards/split_void_crystal.gd` | 4 | — | `hazards` |
 | `res://scenes/main/main.tscn` | `Main` (Node) | `res://scenes/main/main.gd` | 1 | — | — |
 | `res://scenes/pickups/soul_shard_pickup.tscn` | `SoulShardPickup` (Node2D) | `res://scenes/pickups/soul_shard_pickup.gd` | 2 | — | `pickups` |
-| `res://scenes/player/visuals/bram_visual.tscn` | `BramVisual` (Node2D) | `res://scenes/player/visuals/bram_visual.gd` | 31 | — | — |
-| `res://scenes/player/visuals/ilyra_visual.tscn` | `IlyraVisual` (Node2D) | `res://scenes/player/visuals/ilyra_visual.gd` | 115 | — | — |
-| `res://scenes/player/visuals/morrow_visual.tscn` | `MorrowVisual` (Node2D) | `res://scenes/player/visuals/morrow_visual.gd` | 25 | — | — |
+| `res://scenes/pickups/soul_vessel_pickup.tscn` | `SoulVesselPickup` (Node2D) | `res://scenes/pickups/soul_vessel_pickup.gd` | 2 | — | `pickups` |
+| `res://scenes/player/visuals/eclipse_visual.tscn` | `EclipseVisual` (Node2D) | `res://scenes/player/visuals/eclipse_visual.gd` | 6 | — | — |
+| `res://scenes/player/visuals/ilyra_visual.tscn` | `IlyraVisual` (Node2D) | `res://scenes/player/visuals/ilyra_visual.gd` | 9 | — | — |
+| `res://scenes/player/visuals/morrow_visual.tscn` | `MorrowVisual` (Node2D) | `res://scenes/player/visuals/morrow_visual.gd` | 26 | — | — |
+| `res://scenes/player/visuals/noxen_visual.tscn` | `NoxenVisual` (Node2D) | `res://scenes/player/visuals/noxen_visual.gd` | 30 | — | — |
 | `res://scenes/player/visuals/playable_character_visual.tscn` | `PlayableCharacterVisual` (Node2D) | `res://scenes/player/visuals/playable_character_visual.gd` | 5 | — | — |
-| `res://scenes/player/visuals/rook_visual.tscn` | `RookVisual` (Node2D) | `res://scenes/player/visuals/rook_visual.gd` | 29 | — | — |
-| `res://scenes/player/visuals/veyra_visual.tscn` | `VeyraVisual` (Node2D) | `res://scenes/player/visuals/veyra_visual.gd` | 20 | — | — |
+| `res://scenes/player/visuals/rook_visual.tscn` | `RookVisual` (Node2D) | `res://scenes/player/visuals/rook_visual.gd` | 30 | — | — |
+| `res://scenes/player/visuals/verdant_shade_visual.tscn` | `VerdantShadeVisual` (Node2D) | `res://scenes/player/visuals/verdant_shade_visual.gd` | 6 | — | — |
+| `res://scenes/player/visuals/veyra_visual.tscn` | `VeyraVisual` (Node2D) | `res://scenes/player/visuals/veyra_visual.gd` | 21 | — | — |
+| `res://scenes/player/visuals/void_visual.tscn` | `VoidVisual` (Node2D) | `res://scenes/player/visuals/void_visual.gd` | 6 | — | — |
 | `res://scenes/player/wisp_player.tscn` | `WispPlayer` (CharacterBody2D) | `res://scenes/player/wisp_player.gd` | 11 | — | — |
 | `res://scenes/screens/daily_screen.tscn` | `DailyScreen` (Control) | `res://scenes/screens/daily_screen.gd` | 36 | `res://assets/ui/theme/ornaments/banner_top.tscn`, `res://assets/ui/theme/ornaments/crest_bottom.tscn`, `res://assets/ui/theme/ornaments/crest_top.tscn` | — |
 | `res://scenes/screens/home_screen.tscn` | `HomeScreen` (Control) | `res://scenes/screens/home_screen.gd` | 53 | — | — |
@@ -80,7 +84,7 @@ _None._
 | `res://scenes/screens/results_screen.tscn` | `ResultsScreen` (Control) | `res://scenes/screens/results_screen.gd` | 88 | `res://assets/ui/theme/ornaments/amber_top.tscn`, `res://assets/ui/theme/ornaments/banner_top.tscn`, `res://assets/ui/theme/ornaments/card_top.tscn` | — |
 | `res://scenes/screens/rift_map_screen.tscn` | `RiftMapScreen` (Control) | `res://scenes/screens/rift_map_screen.gd` | 19 | `res://assets/ui/theme/ornaments/banner_top.tscn` | — |
 | `res://scenes/screens/settings_screen.tscn` | `SettingsScreen` (Control) | `res://scenes/screens/settings_screen.gd` | 78 | `res://assets/ui/theme/ornaments/banner_top.tscn`, `res://assets/ui/theme/ornaments/card_top.tscn` | — |
-| `res://scenes/screens/shop_screen.tscn` | `ShopScreen` (Control) | `res://scenes/screens/shop_screen.gd` | 43 | `res://assets/ui/theme/ornaments/banner_top.tscn`, `res://assets/ui/theme/ornaments/crest_bottom.tscn`, `res://assets/ui/theme/ornaments/crest_top.tscn` | — |
+| `res://scenes/screens/shop_screen.tscn` | `ShopScreen` (Control) | `res://scenes/screens/shop_screen.gd` | 57 | `res://assets/ui/theme/ornaments/banner_top.tscn`, `res://assets/ui/theme/ornaments/crest_bottom.tscn`, `res://assets/ui/theme/ornaments/crest_top.tscn` | — |
 | `res://scenes/screens/statistics_screen.tscn` | `StatisticsScreen` (Control) | `res://scenes/screens/statistics_screen.gd` | 19 | `res://assets/ui/theme/ornaments/banner_top.tscn` | — |
 | `res://scenes/screens/trials_screen.tscn` | `TrialsScreen` (Control) | `res://scenes/screens/trials_screen.gd` | 17 | `res://assets/ui/theme/ornaments/banner_top.tscn` | — |
 | `res://scenes/tutorial/tutorial_screen.tscn` | `TutorialScreen` (Control) | `res://scenes/tutorial/tutorial_screen.gd` | 27 | `res://assets/ui/theme/ornaments/crest_top.tscn` | — |
@@ -106,8 +110,9 @@ _None._
 | `res://scenes/gameplay/aim_guide.gd` | `AimGuide` | `Node2D` | The ×N combo count shown just past the aim arrow while two or more enemies are lit. | — | — | `show_path`, `clear`, `is_showing`, `get_count`, `get_end_point`, `get_count_text` |
 | `res://scenes/gameplay/arena_ambience.gd` | `ArenaAmbience` | `Control` | Living scenery of Legendary and Mythic Endless skins: drives the scenery shader on the painted | — | — | `configure`, `set_active`, `is_animating`, `get_scenery_material`, `get_particles`, `get_image_rect`, `create_material` |
 | `res://scenes/gameplay/arena_rules.gd` | `ArenaRules` | `RefCounted` | The one seam GameWorld reads for everything an arena decides: backdrop, floor, rule twist, boss | — | — | `get_background`, `get_scenery`, `get_floor_polygon`, `get_rule_key`, `get_boss_wave_interval`, `get_level_waves`, `is_final_boss_wave`, `get_threat_multiplier`, `get_enemy_speed_scale`, `substitute_enemy`, `get_roster_name`, `get_boss_id`, `get_rift_id`, `get_skin_id` |
+| `res://scenes/gameplay/dash_effect_fx.gd` | `DashEffectFx` | `Node2D` | Draws the equipped character's dash signature: a ribbon along the travel line, a launch flash and | — | — | `clear`, `warm_up`, `play`, `get_ribbons`, `get_emitters` |
 | `res://scenes/gameplay/endless_arena_rules.gd` | `EndlessArenaRules` | `ArenaRules` | Arena rules for Endless and the daily run: the shared floor template under a skin, no rule | — | — | `get_background`, `get_scenery`, `get_floor_polygon`, `get_boss_wave_interval`, `get_threat_multiplier`, `get_enemy_speed_scale`, `substitute_enemy`, `get_roster_name`, `get_boss_id`, `get_skin_id`, `get_roster_rift`, `get_skin`, `get_tuning` |
-| `res://scenes/gameplay/game_world.gd` | `GameWorld` | `Control` | Coordinates one run: waves, combat, mutations, bosses, rewards and the run summary. | `home_requested`, `run_ended`, `restart_requested`, `dash_launched`, `dash_resolved`, `enemy_defeated`, `player_damaged`, `upgrade_chosen`, `rush_started`, `boss_defeated` | `run_seed`, `auto_pause_on_focus_loss`, `economy_tuning`, `feel_tuning` | `get_score`, `get_combo`, `get_highest_combo`, `get_total_kills`, `get_current_wave`, `get_rp_collected`, `get_rp_performance`, `get_multi_kill_dashes`, `get_bosses_defeated`, `is_rush_active`, `get_rush_meter`, `get_rush_remaining`, `get_rush_count`, `is_boss_active`, `add_experience`, `get_mutation_level`, `hold_start`, `is_start_held`, `warm_up_render`, `release_start`, `configure_run`, `get_arena_ambience`, `get_run_mode`, `get_rift_level`, `get_cycle`, `get_arena_rules`, `is_level_cleared`, `get_boss_wave_interval`, `get_arena_shrink`, `get_reward_multiplier`, `get_portal_positions`, `get_arena_polygon`, `get_landing_polygon`, `get_wall_splash_fx`, `get_arena_rect`, `debug_quiet_arena`, `debug_spawn_enemy`, `debug_live_enemy_count`, `debug_enemy_layer_count`, `debug_apply_rift_rules`, `is_scripted`, `arena_to_world`, `spawn_scripted_enemy`, `spawn_scripted_hazard`, `clear_scripted_arena`, `start_scripted_boss`, `is_boss_core_exposed`, `find_nearest_target`, `set_experience_enabled`, `set_experience_share`, `set_rush_enabled`, `set_rush_meter`, `refill_health`, `hit_player_at`, `place_player`, `set_player_input_enabled`, `cancel_player_aim`, `is_player_ready`, `is_player_dashing`, `get_player_position`, `demo_aim`, `demo_swipe`, `spawn_scripted_shard`, `sweep_shards`, `get_hud_rect`, `get_safe_margins`, `show_callout`, `request_upgrade_calm_moment`, `has_upgrade_calm_request`, `get_banked_upgrades`, `is_upgrade_tray_open`, `is_upgrade_tray_settled`, `get_upgrade_card_rect`, `choose_upgrade_card`, `set_upgrade_tray_lift`, `handle_back`, `add_trauma`, `get_trauma`, `get_shake_strength`, `is_run_meaningful` |
+| `res://scenes/gameplay/game_world.gd` | `GameWorld` | `Control` | Coordinates one run: waves, combat, mutations, bosses, rewards and the run summary. | `home_requested`, `run_ended`, `restart_requested`, `dash_launched`, `dash_resolved`, `enemy_defeated`, `player_damaged`, `upgrade_chosen`, `rush_started`, `boss_defeated` | `run_seed`, `auto_pause_on_focus_loss`, `economy_tuning`, `feel_tuning` | `get_score`, `get_combo`, `get_highest_combo`, `get_total_kills`, `get_current_wave`, `get_rp_collected`, `get_rp_performance`, `get_multi_kill_dashes`, `get_bosses_defeated`, `is_rush_active`, `get_rush_meter`, `get_rush_remaining`, `get_rush_count`, `is_boss_active`, `add_experience`, `get_mutation_level`, `hold_start`, `is_start_held`, `warm_up_render`, `release_start`, `configure_run`, `get_arena_ambience`, `get_run_mode`, `get_rift_level`, `get_cycle`, `get_arena_rules`, `is_level_cleared`, `get_boss_wave_interval`, `get_arena_shrink`, `get_reward_multiplier`, `get_portal_positions`, `get_arena_polygon`, `get_landing_polygon`, `get_wall_splash_fx`, `get_dash_effect_fx`, `get_arena_rect`, `debug_quiet_arena`, `debug_spawn_enemy`, `debug_live_enemy_count`, `debug_enemy_layer_count`, `debug_apply_rift_rules`, `is_scripted`, `arena_to_world`, `spawn_scripted_enemy`, `spawn_scripted_hazard`, `clear_scripted_arena`, `start_scripted_boss`, `is_boss_core_exposed`, `find_nearest_target`, `set_experience_enabled`, `set_experience_share`, `set_rush_enabled`, `set_rush_meter`, `refill_health`, `hit_player_at`, `place_player`, `set_player_input_enabled`, `cancel_player_aim`, `is_player_ready`, `is_player_dashing`, `get_player_position`, `demo_aim`, `demo_swipe`, `spawn_scripted_shard`, `sweep_shards`, `get_hud_rect`, `get_safe_margins`, `show_callout`, `request_upgrade_calm_moment`, `has_upgrade_calm_request`, `get_banked_upgrades`, `is_upgrade_tray_open`, `is_upgrade_tray_settled`, `get_upgrade_card_rect`, `choose_upgrade_card`, `set_upgrade_tray_lift`, `handle_back`, `add_trauma`, `get_trauma`, `get_shake_strength`, `is_run_meaningful` |
 | `res://scenes/gameplay/rift_arena_rules.gd` | `RiftArenaRules` | `ArenaRules` | Arena rules for one story level of a Rift: its art floor, rule twist, roster and boss. | — | — | `get_background`, `get_floor_polygon`, `get_rule_key`, `get_boss_wave_interval`, `get_level_waves`, `is_final_boss_wave`, `get_threat_multiplier`, `get_enemy_speed_scale`, `substitute_enemy`, `get_boss_id`, `get_rift_id` |
 | `res://scenes/gameplay/run_profile.gd` | `RunProfile` | `RefCounted` | Everything a run needs before it starts: mode, Rift and level or skin and pool, seed, daily | — | — | `story`, `endless`, `daily`, `tutorial`, `create_arena_rules`, `is_story`, `is_scripted`, `uses_endless_rules` |
 | `res://scenes/gameplay/upgrade_tray.gd` | `UpgradeTray` | `Control` | Compact bottom card tray offering three mutations while the run keeps going (no pause). | `choice_selected` | — | `present`, `dismiss`, `set_suspended`, `choose_index`, `is_open`, `is_settled`, `get_presented_choice_ids`, `get_card_rect`, `set_bottom_inset`, `set_timeout_share` |
@@ -117,16 +122,23 @@ _None._
 | `res://scenes/hazards/spike_bloom.gd` | `SpikeBloom` | `HazardActor` | Fixed bloom that alternates a harmless closed bud, an amber-rimmed warning and a dangerous | — | — | `get_dangerous_circles` |
 | `res://scenes/hazards/split_void_crystal.gd` | `SplitVoidCrystal` | `HazardActor` | Indestructible warned obstacle that truncates dash corridors through its narrow body. | — | — | `blocks_dash` |
 | `res://scenes/main/main.gd` | — | `Node` | Composition root: boot loading, navigation between screens, back handling and app lifecycle. | — | — | `is_navigating` |
-| `res://scenes/pickups/soul_shard_pickup.gd` | `SoulShardPickup` | `Node2D` | Rift Points pickup (a soul shard) collected by dash sweeps or short-range attraction to the Wisp. | `collected` | — | `configure`, `set_attraction_radius`, `sweep_to`, `is_sweeping`, `is_auto_collected`, `collect_now`, `try_dash_collect` |
-| `res://scenes/player/visuals/bram_visual.gd` | `BramVisual` | `PlayableCharacterVisual` | Bram, the Rift Knight: a compact armoured hero whose quality comes from weight, not from parts. | — | — | — |
+| `res://scenes/pickups/soul_shard_pickup.gd` | `SoulShardPickup` | `Node2D` | Rift Points pickup (a soul shard) collected by dash sweeps or short-range attraction to the Wisp. | `collected` | `source_frame_size` | `configure`, `set_attraction_radius`, `sweep_to`, `is_sweeping`, `is_auto_collected`, `collect_now`, `try_dash_collect` |
+| `res://scenes/pickups/soul_vessel_pickup.gd` | `SoulVesselPickup` | `SoulShardPickup` | A rare Soul Vessel on the floor: collecting it adds one Soul Fragment, with no cap. | — | — | — |
 | `res://scenes/player/visuals/chain_spring.gd` 🛠 | `ChainSpring` | `RefCounted` | Follow-through for a chain of pivots: tails, ribbons, scarves and bone segments. | — | — | `setup`, `step`, `impulse`, `reset`, `get_offset`, `get_joint_count` |
-| `res://scenes/player/visuals/ilyra_visual.gd` | `IlyraVisual` | `PlayableCharacterVisual` | Ilyra, the Astral Dancer: a Mythic rig built on skinned limbs rather than cut-out segments. | — | — | — |
+| `res://scenes/player/visuals/character_aura.gd` | `CharacterAura` | `Node2D` | Small lights that drift and orbit around a character, so it is never a still picture. | — | `mote_texture`, `mote_textures`, `mote_count`, `orbit_radius`, `drift_height`, `orbit_seconds`, `speed_jitter`, `mote_scale`, `tint`, `centre_offset`, `dash_stretch`, `mote_seed` | `step`, `set_still`, `get_mote_count` |
+| `res://scenes/player/visuals/character_menu_video.gd` | `CharacterMenuVideo` | `VideoStreamPlayer` | A character's menu video (ADR-0016), drawn in the square its [MenuVideoData] placed it in. | — | — | `create`, `dispose` |
+| `res://scenes/player/visuals/eclipse_visual.gd` | `EclipseVisual` | `WholeFrameCharacterVisual` | Eclipse: a whole-frame sprite character. | — | — | — |
+| `res://scenes/player/visuals/ilyra_visual.gd` | `IlyraVisual` | `PlayableCharacterVisual` | Ilyra: whole painted poses on a single [AnimatedSprite2D], from loose PNGs rather than a sheet. | — | `menu_video` | `set_preview_mode`, `set_reduced_motion`, `get_current_pose`, `is_menu_video_playing`, `get_menu_video_player`, `get_pose_transform`, `get_layer_bounds` |
 | `res://scenes/player/visuals/morrow_visual.gd` | `MorrowVisual` | `PlayableCharacterVisual` | Morrow, the Runebound: a calm hooded caster whose hands and runes float around him. | — | — | — |
-| `res://scenes/player/visuals/playable_character_preview.gd` | `PlayableCharacterPreview` | `Control` | Control-hosted live preview of a [FormData]: its animated rig, or its portrait on the shared rig. | — | `fill_ratio` | `set_form`, `set_reduced_motion`, `play_selected`, `play_unlocked`, `get_visual` |
+| `res://scenes/player/visuals/noxen_visual.gd` | `NoxenVisual` | `PlayableCharacterVisual` | Noxen, the Veilflame: a handless cloak-creature that turns its silhouette into the weapon. | — | — | — |
+| `res://scenes/player/visuals/playable_character_preview.gd` | `PlayableCharacterPreview` | `Control` | Control-hosted live preview of a [FormData]: its animated rig, or its portrait on the shared rig. | — | `fill_ratio` | `set_form`, `set_reduced_motion`, `get_visual` |
 | `res://scenes/player/visuals/playable_character_visual.gd` | `PlayableCharacterVisual` | `Node2D` | Shared presentation-only contract for an animated playable character. | `visual_state_changed` | `design_size`, `preview_center`, `squash_amount`, `bounce_amount`, `forward_rotation_offset`, `heading_frequency`, `heading_damping`, `settle_frequency`, `settle_damping`, `aim_lean`, `move_lean`, `trail_ratio_fast`, `trail_ratio_slow`, `portrait_texture` | `sync_controller`, `request_state`, `play_attack`, `play_character_selected`, `play_character_unlocked`, `set_preview_mode`, `set_reduced_motion`, `get_animation_states`, `get_current_visual_state`, `get_design_size`, `get_state_length`, `get_speed`, `get_landing`, `get_layer_bounds`, `get_standing_heading` |
 | `res://scenes/player/visuals/ribbon_chain.gd` 🛠 | `RibbonChain` | `Node2D` | A painted ribbon (tail, scarf) that bends smoothly: a skinned Polygon2D on its own Bone2D chain. | — | `texture`, `spine`, `cell_size`, `mesh_z_index`, `phase_offset` | `step`, `get_bones`, `get_mesh`, `get_tip_global_position` |
 | `res://scenes/player/visuals/rook_visual.gd` | `RookVisual` | `PlayableCharacterVisual` | Rook, the Bonewing: powerful wing beats at rest, a glide in flight, folded wings in a dash. | — | — | — |
+| `res://scenes/player/visuals/verdant_shade_visual.gd` | `VerdantShadeVisual` | `WholeFrameCharacterVisual` | Shade: a whole-frame sprite character. | — | — | — |
 | `res://scenes/player/visuals/veyra_visual.gd` | `VeyraVisual` | `PlayableCharacterVisual` | Veyra, the Last Wisp: soft hover, pulsing core, fluttering fins, floating halo and three tails. | — | — | — |
+| `res://scenes/player/visuals/void_visual.gd` | `VoidVisual` | `WholeFrameCharacterVisual` | Void, the default Wisp: a whole-frame sprite character. | — | — | — |
+| `res://scenes/player/visuals/whole_frame_character_visual.gd` | `WholeFrameCharacterVisual` | `PlayableCharacterVisual` | A whole-frame sprite character on one [AnimatedSprite2D]. | — | `gameplay_frames`, `menu_frames`, `menu_idle_animation`, `menu_video` | `set_preview_mode`, `set_reduced_motion`, `get_current_animation`, `is_menu_frame_set`, `is_menu_video_playing`, `get_menu_video_player`, `is_mirrored`, `get_layer_bounds` |
 | `res://scenes/player/wisp_player.gd` | `WispPlayer` | `CharacterBody2D` | Converts swipe, mouse and keyboard aim into an exact edge-to-edge Wisp dash. | `dash_started`, `dash_segment_swept`, `dash_redirected`, `aim_preview_changed`, `wall_impacted`, `focus_started`, `obstacle_impacted`, `health_changed`, `damaged`, `died` | `tuning`, `dash_damage` | `request_dash`, `teleport_dash_to`, `set_arena_polygon`, `get_dash_target`, `set_aim_arrow_enabled`, `is_aim_arrow_visible`, `get_aim_arrow_direction`, `set_aim_assist_enabled`, `is_aim_assist_enabled`, `set_aim_target_counter`, `is_aim_preview_active`, `get_dash_corridor_radius`, `get_aim_line_start_distance`, `get_assisted_direction`, `get_momentum`, `get_current_dash_speed`, `get_momentum_steps`, `get_momentum_visual_level`, `set_momentum_presentation`, `set_rush_speed_multiplier`, `get_rush_speed_multiplier`, `set_damage_immune`, `is_damage_immune`, `set_rush_visuals`, `has_buffered_swipe`, `redirect_dash`, `set_edge_drift`, `set_arena_rect`, `cancel_active_aim`, `set_input_enabled`, `is_input_enabled`, `preview_aim`, `perform_swipe`, `place_at_edge`, `get_collision_radius`, `get_current_health`, `get_maximum_health`, `set_run_combat_modifiers`, `set_cosmetic_form`, `set_reduced_motion`, `play_attack_visual`, `get_character_visual`, `get_blade_width_multiplier`, `get_dash_speed_multiplier`, `increase_maximum_health`, `heal`, `play_victory`, `is_vulnerable`, `take_contact_damage`, `take_hazard_damage`, `interrupt_dash_at` |
 | `res://scenes/screens/daily_screen.gd` | `DailyScreen` | `Control` | Offline daily-run screen: today's portal, arena and seed, best, three local goal rows and Play. | `play_daily_requested`, `back_requested` | — | `setup` |
 | `res://scenes/screens/home_ambience.gd` | `HomeAmbience` | `Control` | Living background for the Home screen: flickering braziers, pulsing runes, drifting mist and | — | — | `set_active`, `is_active`, `uv_to_local`, `get_cover_scale` |
@@ -136,7 +148,7 @@ _None._
 | `res://scenes/screens/results_screen.gd` | `ResultsScreen` | `Control` | End-of-run summary: a story victory or defeat, or a finished Endless or daily run. | `restart_requested`, `next_level_requested`, `enter_rift_requested`, `home_requested`, `wisps_requested` | — | `setup`, `get_primary_text`, `get_displayed_rp_total` |
 | `res://scenes/screens/rift_map_screen.gd` | `RiftMapScreen` | `Control` | Rift map: a portrait card carousel of the arena ladder, each card showing the Rift's own arena. | `back_requested`, `play_requested`, `tutorial_requested` | `catalog` | `setup`, `get_selected_rift_id`, `is_rift_unlocked` |
 | `res://scenes/screens/settings_screen.gd` | `SettingsScreen` | `Control` | Player settings: volumes, haptics, reduced motion, shake, about and reset. | `back_requested`, `progress_reset` | `allow_progress_reset` | `setup`, `handle_back`, `build_about_text` |
-| `res://scenes/screens/shop_screen.gd` | `ShopScreen` | `Control` | The Shop: the one place Rift Points are spent. Four tabs - CHARACTERS, DASHES, ARENAS, NO ADS. | `purchase_requested`, `equip_requested`, `store_purchase_requested`, `restore_requested`, `tab_changed`, `back_requested` | `form_catalog`, `dash_style_catalog`, `endless_catalog` | `setup`, `get_tab`, `get_selected_id`, `show_feedback` |
+| `res://scenes/screens/shop_screen.gd` | `ShopScreen` | `Control` | The Shop: the one place Rift Points are spent. Three tabs - CHARACTERS, ARENAS, NO ADS. | `purchase_requested`, `equip_requested`, `store_purchase_requested`, `restore_requested`, `tab_changed`, `back_requested` | `form_catalog`, `endless_catalog` | `setup`, `get_tab`, `get_selected_id`, `show_feedback`, `handle_back` |
 | `res://scenes/screens/statistics_screen.gd` | `StatisticsScreen` | `Control` | Lifetime statistics read from the persistent SaveManager snapshot. | `back_requested` | — | `setup`, `build_rows`, `format_play_time` |
 | `res://scenes/screens/trials_screen.gd` | `TrialsScreen` | `Control` | Trials: the three persistent goals the player is working on, and the ladder rank they feed. | `back_requested` | — | `setup` |
 | `res://scenes/tutorial/tutorial_director.gd` | `TutorialDirector` | `Node` | Runs the Tutorial screen's lessons in order: set up, ghost-hand demo, player try, success beat. | `lesson_started`, `caption_changed`, `lesson_passed`, `completion_started`, `completed` | — | `start`, `stop`, `get_lesson_index`, `get_lesson_count`, `get_phase` |
@@ -157,6 +169,8 @@ _None._
 | `res://scripts/resources/arena_scenery_zone.gd` | `ArenaSceneryZone` | `Resource` | One lit and/or moving region of an Endless skin's scenery mask (zone id = index + 1). | — | `zone_name`, `light_color`, `light_alt_color`, `light_strength`, `breathe`, `breathe_hz`, `flicker`, `flicker_hz`, `flare_interval`, `flare_boost`, `flare_rise`, `flare_fade`, `flare_is_flash`, `hue_cycle`, `hue_cycle_hz`, `color_shift`, `color_shift_cycles`, `color_shift_hz`, `twinkle`, `twinkle_hz`, `travel`, `travel_cycles`, `travel_hz`, `sweep_weight`, `warp_mode`, `warp_px`, `warp_hz`, `warp_cycles` | `has_light`, `validate` |
 | `res://scripts/resources/arena_skin_data.gd` | `ArenaSkinData` | `Resource` | One purchasable Endless background. A skin changes only what the arena looks like. | — | `skin_id`, `display_name`, `description`, `tier`, `background_path`, `thumbnail`, `price`, `accent`, `scenery`, `placeholder` | `load_background`, `get_tier_name`, `validate` |
 | `res://scripts/resources/boss_data.gd` | `BossData` | `Resource` | One boss variant: which atlas it wears, how tough it is, and its accent colour. | — | `boss_id`, `display_name`, `frames`, `tuning`, `tint`, `accent` | `validate` |
+| `res://scripts/resources/character_pose_sheet.gd` | `CharacterPoseSheet` | `Resource` | Where each painted pose of a whole-pose sprite character is drawn, so poses never jump or resize. | — | `pose_names`, `pose_offsets`, `pose_drifts`, `pose_scales`, `frame_size` | `has_pose`, `get_offset`, `get_scale`, `get_pose_names`, `get_residual_drift`, `get_anchor_spread`, `get_scale_spread`, `validate` |
+| `res://scripts/resources/dash_effect_data.gd` | `DashEffectData` | `Resource` | One character's dash signature: the shape, colour and weight of the streak its dash leaves. | — | `effect_id`, `signature`, `trail_tint`, `burst_tint`, `spark_tint`, `spark_count`, `ribbon_width`, `ribbon_seconds`, `arc_spread`, `burst_scale` | `is_reserved_tint`, `validate` |
 | `res://scripts/resources/dash_style_catalog.gd` | `DashStyleCatalog` | `Resource` | Ordered registry of the dash styles sold in the Shop's DASHES tab. | — | `styles` | `get_style`, `get_style_ids`, `validate` |
 | `res://scripts/resources/dash_style_data.gd` | `DashStyleData` | `Resource` | One purchasable dash style: it recolours the dash trail and the launch burst, nothing else. | — | `style_id`, `display_name`, `description`, `price`, `trail_tint`, `burst_tint`, `uses_form_tint` | `validate`, `is_reserved_tint` |
 | `res://scripts/resources/economy_tuning.gd` | `EconomyTuning` | `Resource` | Rift Points payouts that do not come from a pickup: the performance and level-clear bonuses. | — | `score_per_rift_point`, `level_clear_base`, `level_clear_per_level`, `repeat_clear_fraction`, `placeholder` | `get_performance_points`, `get_level_clear_bonus` |
@@ -164,17 +178,18 @@ _None._
 | `res://scripts/resources/endless_tuning.gd` | `EndlessTuning` | `Resource` | Boss cadence, per-cycle difficulty and the fixed daily pool for Endless rules. | — | `boss_wave_interval`, `threat_start`, `threat_per_cycle`, `threat_cap`, `refill_live_enemies`, `speed_scale_start`, `speed_scale_per_cycle`, `speed_scale_cap`, `daily_roster_rift_ids`, `daily_boss_ids` | `get_threat_multiplier`, `get_speed_scale` |
 | `res://scripts/resources/enemy_tuning.gd` | `EnemyTuning` | `Resource` | Shared data schema for an enemy's movement, collision, durability and rewards. | — | `design_width`, `movement_speed`, `turn_speed`, `collision_radius`, `sprite_diameter`, `maximum_health`, `score_reward`, `experience_reward`, `threat_cost`, `shard_drop_chance`, `telegraph_duration`, `dissolve_duration`, `action_interval`, `action_telegraph`, `action_duration`, `action_speed_multiplier`, `split_kind`, `split_count`, `split_scale`, `shield_arc_degrees`, `tether_length` | — |
 | `res://scripts/resources/form_catalog.gd` | `FormCatalog` | `Resource` | Ordered registry of the playable characters: six single-image Wisp forms and the rigged characters. | — | `form_paths` | `load_forms`, `validate`, `get_form` |
-| `res://scripts/resources/form_data.gd` | `FormData` | `Resource` | One playable character (a Wisp form or a rigged character): identity, price, art and feedback tint. | — | `form_id`, `display_name`, `description`, `price`, `requires_boss_victory`, `texture`, `visual_scene`, `tint`, `tier` | `get_tier_name`, `validate` |
+| `res://scripts/resources/form_data.gd` | `FormData` | `Resource` | One playable character (a Wisp form or a rigged character): identity, price, art and feedback tint. | — | `form_id`, `display_name`, `description`, `price`, `requires_boss_victory`, `texture`, `visual_scene`, `tint`, `dash_effect`, `tier`, `menu_frames_path` | `get_tier_name`, `validate` |
 | `res://scripts/resources/formation_catalog.gd` | `FormationCatalog` | `Resource` | Ordered Resource paths for the complete validated encounter-template catalog. | — | `formation_paths` | `load_formations`, `validate` |
 | `res://scripts/resources/formation_data.gd` | `FormationData` | `Resource` | Data-driven normalized enemy and optional hazard placement for one readable encounter. | — | `formation_id`, `minimum_wave`, `threat_cost`, `enemy_kinds`, `normalized_positions`, `hazard_kind`, `hazard_position`, `allow_mirror`, `allow_rotation` | `validate`, `get_transformed_positions`, `get_transformed_hazard_position` |
 | `res://scripts/resources/hazard_tuning.gd` | `HazardTuning` | `Resource` | Shared viewport scaling, collision and cycle values for one arena hazard type. | — | `design_width`, `sprite_diameter`, `blocking_radius`, `danger_radius`, `arrival_telegraph`, `safe_duration`, `pulse_duration`, `active_duration`, `rotation_speed`, `orbit_radius`, `blade_radius`, `threat_cost` | — |
+| `res://scripts/resources/menu_video_data.gd` | `MenuVideoData` | `Resource` | A character's menu performance as a pre-rendered video, placed where its sprite loop was drawn. | — | `stream`, `side`, `offset`, `alpha_floor`, `alpha_ceiling`, `loop_seconds` | `validate` |
 | `res://scripts/resources/mutation_data.gd` | `MutationData` | `Resource` | Data-driven identity, cap, icon and next-level presentation for one run mutation. | — | `mutation_id`, `display_name`, `description_template`, `max_level`, `base_value`, `value_per_level`, `icon` | `get_value_for_level`, `get_next_description` |
 | `res://scripts/resources/player_tuning.gd` | `PlayerTuning` | `Resource` | Data-driven starting values for Wisp gesture, dash, health, impact and focus behaviour. | — | `design_width`, `dash_speed`, `windup_duration`, `wall_impact_duration`, `focus_duration`, `focus_world_speed`, `minimum_swipe_distance`, `radius_viewport_ratio`, `minimum_radius`, `maximum_radius`, `blade_bonus`, `spawn_duration`, `maximum_health`, `hurt_duration`, `invulnerability_duration`, `death_duration`, `input_buffer_window`, `launch_burst_multiplier`, `launch_burst_decay`, `momentum_window`, `momentum_step`, `momentum_max`, `aim_assist_degrees`, `aim_assist_step_degrees` | — |
 | `res://scripts/resources/reaper_tuning.gd` | `ReaperTuning` | `Resource` | Data-driven health, timing, geometry and rewards for the recurring Reaper encounter. | — | `design_width`, `base_health`, `health_per_encounter`, `intro_duration`, `recovery_duration`, `warning_duration`, `sweep_duration`, `teleport_attack_duration`, `corridor_duration`, `exposed_duration`, `speedup_per_encounter`, `minimum_timing_multiplier`, `sprite_diameter`, `core_radius`, `sweep_radius`, `sweep_blade_radius`, `lane_radius`, `score_reward`, `rp_reward`, `experience_reward`, `victory_duration` | — |
 | `res://scripts/resources/rift_catalog.gd` | `RiftCatalog` | `Resource` | Ordered registry of the five playable Rifts, in Rift-map progression order. | — | `rift_paths` | `load_rifts`, `validate`, `get_rift` |
 | `res://scripts/resources/rift_data.gd` | `RiftData` | `Resource` | Data-driven identity, unlock requirement, backdrop and rule twist for one playable arena. | — | `rift_id`, `display_name`, `description`, `rule_summary`, `rule_key`, `background`, `floor_polygon`, `unlock_after_rift_id`, `unlock_after_level`, `accent`, `difficulty_tier`, `level_count`, `waves_per_level`, `level_one_threat`, `threat_per_level`, `enemy_speed_scale`, `enemy_substitutions`, `boss_id` | `is_unlocked`, `get_threat_multiplier`, `substitute_enemy`, `has_floor_polygon`, `get_total_waves`, `validate` |
 | `res://scripts/resources/run_feel_tuning.gd` | `RunFeelTuning` | `Resource` | Starting values for visible momentum, shard auto-collect, the slow-motion finisher and RUSH mode. | — | `trail_length_at_max`, `trail_alpha_at_max`, `speed_lines_at`, `dash_pitch_per_step`, `streak_glow_size`, `streak_glow_size_at_max`, `streak_glow_alpha`, `streak_glow_alpha_at_max`, `speed_line_count`, `speed_line_length`, `speed_line_alpha`, `sweep_seconds`, `reduced_motion_sweep_seconds`, `sweep_sound_cap`, `sweep_pitch_step`, `sweep_chime_interval`, `finisher_kills`, `finisher_time_scale`, `finisher_seconds`, `field_clear_cooldown`, `finisher_flash_alpha`, `finisher_trauma`, `finisher_pulse_pitch`, `meter_max`, `per_kill`, `per_extra_dash_kill`, `per_boss_hit`, `damage_drain`, `duration`, `warning_seconds`, `speed_multiplier`, `score_multiplier`, `blocks_damage`, `start_trauma`, `orb_flight_seconds`, `edge_glow_alpha`, `pulse_rate`, `warning_flicker_rate`, `end_sound_volume_db` | `momentum_level`, `get_kill_fill` |
-| `res://scripts/resources/run_progression_tuning.gd` | `RunProgressionTuning` | `Resource` | XP curve, mutation catalog and shared reward-effect values for one endless run. | — | `mutation_paths`, `base_xp_threshold`, `xp_growth`, `wide_reap_per_level`, `velocity_per_level`, `velocity_score_bonus`, `pulse_base_radius`, `pulse_radius_per_level`, `cold_wake_base_duration`, `cold_wake_duration_per_level`, `cold_wake_speed`, `gift_base_streak`, `gift_reduction_per_level`, `gift_minimum_streak`, `shard_attraction_radius`, `hunger_attraction_per_level`, `tray_time_scale`, `tray_timeout`, `tray_raise_share`, `tray_slide_seconds`, `calm_window_seconds`, `button_pulse_rate`, `button_pulse_amount` | — |
+| `res://scripts/resources/run_progression_tuning.gd` | `RunProgressionTuning` | `Resource` | XP curve, mutation catalog and shared reward-effect values for one endless run. | — | `mutation_paths`, `base_xp_threshold`, `xp_growth`, `wide_reap_per_level`, `velocity_per_level`, `velocity_score_bonus`, `pulse_base_radius`, `pulse_radius_per_level`, `cold_wake_base_duration`, `cold_wake_duration_per_level`, `cold_wake_speed`, `gift_base_streak`, `gift_reduction_per_level`, `gift_minimum_streak`, `soul_vessel_drop_chance`, `shard_attraction_radius`, `hunger_attraction_per_level`, `tray_time_scale`, `tray_timeout`, `tray_raise_share`, `tray_slide_seconds`, `calm_window_seconds`, `button_pulse_rate`, `button_pulse_amount` | — |
 | `res://scripts/resources/trial_catalog.gd` | `TrialCatalog` | `Resource` | The Trials ladder: tiers of three goals, cleared together to rank up. | — | `trial_paths` | `load_trials`, `get_tier_count`, `get_tier`, `validate` |
 | `res://scripts/resources/trial_data.gd` | `TrialData` | `Resource` | One persistent goal in the Trials ladder: what it measures, the target, and its Rift Points reward. | — | `trial_id`, `title`, `description`, `metric`, `target`, `reward_points`, `tier`, `cumulative` | `advance`, `is_complete`, `validate` |
 | `res://scripts/resources/tutorial_catalog.gd` | `TutorialCatalog` | `Resource` | The Tutorial screen's ordered lessons (easiest first), its arena skin and every timing. | — | `lessons`, `arena_skin_id`, `boss_health`, `retry_caption`, `hit_caption`, `complete_callout`, `complete_caption`, `demo_start_delay`, `press_seconds`, `drag_seconds`, `hold_seconds`, `release_seconds`, `redirect_drag_seconds`, `drag_length`, `drag_start_offset`, `swipe_gap_seconds`, `demo_hit_distance`, `demo_settle_seconds`, `demo_card_look_seconds`, `demo_card_index`, `demo_tray_wait_limit`, `hint_interval`, `hint_alpha`, `retry_seconds`, `refill_delay`, `success_seconds`, `complete_seconds`, `success_emphasis` | `validate` |
@@ -211,6 +226,26 @@ _None._
 | `res://data/bosses/reaper_ascended_tuning.tres` | `Resource` | `ReaperTuning` |
 | `res://data/bosses/the_fracture.tres` | `Resource` | `BossData` |
 | `res://data/bosses/the_fracture_tuning.tres` | `Resource` | `ReaperTuning` |
+| `res://data/characters/dash_effects/eclipse.tres` | `Resource` | `DashEffectData` |
+| `res://data/characters/dash_effects/ilyra.tres` | `Resource` | `DashEffectData` |
+| `res://data/characters/dash_effects/morrow.tres` | `Resource` | `DashEffectData` |
+| `res://data/characters/dash_effects/noxen.tres` | `Resource` | `DashEffectData` |
+| `res://data/characters/dash_effects/rook.tres` | `Resource` | `DashEffectData` |
+| `res://data/characters/dash_effects/verdant_shade.tres` | `Resource` | `DashEffectData` |
+| `res://data/characters/dash_effects/veyra.tres` | `Resource` | `DashEffectData` |
+| `res://data/characters/dash_effects/void.tres` | `Resource` | `DashEffectData` |
+| `res://data/characters/eclipse_frames.tres` | `Resource` | `CharacterPoseSheet` |
+| `res://data/characters/eclipse_gameplay.tres` | `SpriteFrames` | — |
+| `res://data/characters/eclipse_menu.tres` | `SpriteFrames` | — |
+| `res://data/characters/ilyra_menu_video.tres` | `Resource` | `MenuVideoData` |
+| `res://data/characters/ilyra_poses.tres` | `Resource` | `CharacterPoseSheet` |
+| `res://data/characters/verdant_shade_frames.tres` | `Resource` | `CharacterPoseSheet` |
+| `res://data/characters/verdant_shade_gameplay.tres` | `SpriteFrames` | — |
+| `res://data/characters/verdant_shade_menu.tres` | `SpriteFrames` | — |
+| `res://data/characters/verdant_shade_menu_video.tres` | `Resource` | `MenuVideoData` |
+| `res://data/characters/void_frames.tres` | `Resource` | `CharacterPoseSheet` |
+| `res://data/characters/void_gameplay.tres` | `SpriteFrames` | — |
+| `res://data/characters/void_menu.tres` | `SpriteFrames` | — |
 | `res://data/dash_styles/abyssal.tres` | `Resource` | `DashStyleData` |
 | `res://data/dash_styles/default_dash_style_catalog.tres` | `Resource` | `DashStyleCatalog` |
 | `res://data/dash_styles/moonsilver.tres` | `Resource` | `DashStyleData` |
@@ -280,16 +315,13 @@ _None._
 | `res://data/formations/18_bone_escort.tres` | `Resource` | `FormationData` |
 | `res://data/formations/19_heavy_convoy.tres` | `Resource` | `FormationData` |
 | `res://data/formations/20_mixed_corridor.tres` | `Resource` | `FormationData` |
-| `res://data/forms/ash.tres` | `Resource` | `FormData` |
-| `res://data/forms/bloodmoon.tres` | `Resource` | `FormData` |
-| `res://data/forms/bram.tres` | `Resource` | `FormData` |
 | `res://data/forms/default_catalog.tres` | `Resource` | `FormCatalog` |
 | `res://data/forms/eclipse.tres` | `Resource` | `FormData` |
-| `res://data/forms/frost.tres` | `Resource` | `FormData` |
 | `res://data/forms/ilyra.tres` | `Resource` | `FormData` |
 | `res://data/forms/morrow.tres` | `Resource` | `FormData` |
+| `res://data/forms/noxen.tres` | `Resource` | `FormData` |
 | `res://data/forms/rook.tres` | `Resource` | `FormData` |
-| `res://data/forms/venom.tres` | `Resource` | `FormData` |
+| `res://data/forms/verdant_shade.tres` | `Resource` | `FormData` |
 | `res://data/forms/veyra.tres` | `Resource` | `FormData` |
 | `res://data/forms/void.tres` | `Resource` | `FormData` |
 | `res://data/hazards/blade_ring.tres` | `Resource` | `HazardTuning` |
@@ -300,7 +332,6 @@ _None._
 | `res://data/mutations/reapers_gift.tres` | `Resource` | `MutationData` |
 | `res://data/mutations/soul_hunger.tres` | `Resource` | `MutationData` |
 | `res://data/mutations/soul_link.tres` | `Resource` | `MutationData` |
-| `res://data/mutations/soul_vessel.tres` | `Resource` | `MutationData` |
 | `res://data/mutations/void_velocity.tres` | `Resource` | `MutationData` |
 | `res://data/mutations/wide_reap.tres` | `Resource` | `MutationData` |
 | `res://data/player/default_player_tuning.tres` | `Resource` | `PlayerTuning` |
@@ -359,6 +390,7 @@ _None._
 |---|
 | `res://assets/shaders/arena_scenery.gdshader` |
 | `res://assets/shaders/arena_scenery_particles.gdshader` |
+| `res://assets/shaders/packed_alpha_video.gdshader` |
 
 ## Addons
 
@@ -366,7 +398,7 @@ _None._
 
 ## Assets
 
-`.gd` × 1 · `.gdshader` × 2 · `.json` × 2 · `.png` × 400 · `.py` × 1 · `.tres` × 1 · `.tscn` × 5
+`.gd` × 1 · `.gdshader` × 3 · `.json` × 2 · `.ogv` × 2 · `.png` × 406 · `.py` × 1 · `.tres` × 1 · `.tscn` × 5
 
 - `res://assets/art/branding/wisp_rush_app_icon_master.png`
 - `res://assets/art/branding/wisp_rush_app_icon_store.png`
@@ -421,10 +453,6 @@ _None._
 - `res://assets/art/characters/enemies/35_court_shade_idle_b.png`
 - `res://assets/art/characters/enemies/36_court_shade_dissolve.png`
 - `res://assets/art/characters/forms/01_void.png`
-- `res://assets/art/characters/forms/02_ash.png`
-- `res://assets/art/characters/forms/03_venom.png`
-- `res://assets/art/characters/forms/04_bloodmoon.png`
-- `res://assets/art/characters/forms/05_frost.png`
 - `res://assets/art/characters/forms/06_eclipse.png`
 - `res://assets/art/characters/hollow_choir/01_dormant.png`
 - `res://assets/art/characters/hollow_choir/02_awaken.png`
@@ -438,80 +466,68 @@ _None._
 - `res://assets/art/characters/hollow_choir/10_stagger.png`
 - `res://assets/art/characters/hollow_choir/11_shatter.png`
 - `res://assets/art/characters/hollow_choir/12_dissolve.png`
-- `res://assets/art/characters/playable/bram/arm_lower_left.png`
-- `res://assets/art/characters/playable/bram/arm_lower_right.png`
-- `res://assets/art/characters/playable/bram/arm_upper_left.png`
-- `res://assets/art/characters/playable/bram/arm_upper_right.png`
-- `res://assets/art/characters/playable/bram/blade.png`
-- `res://assets/art/characters/playable/bram/blade_arc.png`
-- `res://assets/art/characters/playable/bram/cape_left.png`
-- `res://assets/art/characters/playable/bram/cape_right.png`
-- `res://assets/art/characters/playable/bram/chest_core.png`
-- `res://assets/art/characters/playable/bram/dash_streak.png`
-- `res://assets/art/characters/playable/bram/helmet.png`
-- `res://assets/art/characters/playable/bram/leg_left.png`
-- `res://assets/art/characters/playable/bram/leg_right.png`
-- `res://assets/art/characters/playable/bram/preview.png`
-- `res://assets/art/characters/playable/bram/shield.png`
-- `res://assets/art/characters/playable/bram/torso.png`
-- `res://assets/art/characters/playable/bram/visor.png`
-- `res://assets/art/characters/playable/ilyra/arm_ll.png`
-- `res://assets/art/characters/playable/ilyra/arm_lr.png`
-- `res://assets/art/characters/playable/ilyra/arm_ul.png`
-- `res://assets/art/characters/playable/ilyra/arm_ur.png`
-- `res://assets/art/characters/playable/ilyra/boot_l.png`
-- `res://assets/art/characters/playable/ilyra/boot_r.png`
-- `res://assets/art/characters/playable/ilyra/braid_l.png`
-- `res://assets/art/characters/playable/ilyra/braid_r.png`
-- `res://assets/art/characters/playable/ilyra/crown_shard_l.png`
-- `res://assets/art/characters/playable/ilyra/crown_shard_r.png`
-- `res://assets/art/characters/playable/ilyra/crown_star.png`
-- `res://assets/art/characters/playable/ilyra/fan_handle.png`
-- `res://assets/art/characters/playable/ilyra/fan_membrane.png`
-- `res://assets/art/characters/playable/ilyra/fan_membrane_lit.png`
-- `res://assets/art/characters/playable/ilyra/fan_rib_a.png`
-- `res://assets/art/characters/playable/ilyra/fan_rib_b.png`
-- `res://assets/art/characters/playable/ilyra/fan_rib_c.png`
-- `res://assets/art/characters/playable/ilyra/fan_rib_d.png`
-- `res://assets/art/characters/playable/ilyra/fan_rib_e.png`
-- `res://assets/art/characters/playable/ilyra/hair_back.png`
-- `res://assets/art/characters/playable/ilyra/hand_cup_l.png`
-- `res://assets/art/characters/playable/ilyra/hand_cup_r.png`
-- `res://assets/art/characters/playable/ilyra/hand_grip_l.png`
-- `res://assets/art/characters/playable/ilyra/hand_grip_r.png`
-- `res://assets/art/characters/playable/ilyra/hand_open_l.png`
-- `res://assets/art/characters/playable/ilyra/hand_open_r.png`
-- `res://assets/art/characters/playable/ilyra/head_blink.png`
-- `res://assets/art/characters/playable/ilyra/head_focused.png`
-- `res://assets/art/characters/playable/ilyra/head_joy.png`
-- `res://assets/art/characters/playable/ilyra/head_neutral.png`
-- `res://assets/art/characters/playable/ilyra/head_pain.png`
-- `res://assets/art/characters/playable/ilyra/heart_core.png`
-- `res://assets/art/characters/playable/ilyra/heart_glow.png`
-- `res://assets/art/characters/playable/ilyra/leg_l.png`
-- `res://assets/art/characters/playable/ilyra/leg_r.png`
-- `res://assets/art/characters/playable/ilyra/manifest.json`
-- `res://assets/art/characters/playable/ilyra/preview.png`
-- `res://assets/art/characters/playable/ilyra/sash_1.png`
-- `res://assets/art/characters/playable/ilyra/sash_2.png`
-- `res://assets/art/characters/playable/ilyra/sash_3.png`
-- `res://assets/art/characters/playable/ilyra/sash_4.png`
-- `res://assets/art/characters/playable/ilyra/shoulder_ornament_l.png`
-- `res://assets/art/characters/playable/ilyra/shoulder_ornament_r.png`
-- `res://assets/art/characters/playable/ilyra/skirt_panel_1.png`
-- `res://assets/art/characters/playable/ilyra/skirt_panel_2.png`
-- `res://assets/art/characters/playable/ilyra/skirt_panel_3.png`
-- `res://assets/art/characters/playable/ilyra/skirt_panel_4.png`
-- `res://assets/art/characters/playable/ilyra/skirt_panel_5.png`
-- `res://assets/art/characters/playable/ilyra/skirt_panel_6.png`
-- `res://assets/art/characters/playable/ilyra/torso.png`
-- `res://assets/art/characters/playable/ilyra/vfx_bloom.png`
-- `res://assets/art/characters/playable/ilyra/vfx_fan_arc.png`
-- `res://assets/art/characters/playable/ilyra/vfx_mote.png`
-- `res://assets/art/characters/playable/ilyra/vfx_petal.png`
-- `res://assets/art/characters/playable/ilyra/vfx_ring.png`
-- `res://assets/art/characters/playable/ilyra/vfx_star.png`
-- `res://assets/art/characters/playable/ilyra/vfx_streak.png`
+- `res://assets/art/characters/playable/eclipse/eclipse_menu.png`
+- `res://assets/art/characters/playable/eclipse/eclipse_portrait.png`
+- `res://assets/art/characters/playable/eclipse/eclipse_run.png`
+- `res://assets/art/characters/playable/ilyra/aim_charge.png`
+- `res://assets/art/characters/playable/ilyra/character_selected.png`
+- `res://assets/art/characters/playable/ilyra/character_unlocked.png`
+- `res://assets/art/characters/playable/ilyra/dash_end.png`
+- `res://assets/art/characters/playable/ilyra/dash_loop_00.png`
+- `res://assets/art/characters/playable/ilyra/dash_loop_01_attack.png`
+- `res://assets/art/characters/playable/ilyra/dash_start_00.png`
+- `res://assets/art/characters/playable/ilyra/dash_start_01.png`
+- `res://assets/art/characters/playable/ilyra/death.png`
+- `res://assets/art/characters/playable/ilyra/hit_reaction.png`
+- `res://assets/art/characters/playable/ilyra/idle_blink.png`
+- `res://assets/art/characters/playable/ilyra/idle_hover.png`
+- `res://assets/art/characters/playable/ilyra/ilyra_menu.ogv`
+- `res://assets/art/characters/playable/ilyra/move_fly_00.png`
+- `res://assets/art/characters/playable/ilyra/move_fly_01.png`
+- `res://assets/art/characters/playable/ilyra/ornaments/chest_gem_glow.png`
+- `res://assets/art/characters/playable/ilyra/ornaments/crown_center.png`
+- `res://assets/art/characters/playable/ilyra/ornaments/crown_shard_l.png`
+- `res://assets/art/characters/playable/ilyra/ornaments/crown_shard_r.png`
+- `res://assets/art/characters/playable/ilyra/ornaments/slash_arc.png`
+- `res://assets/art/characters/playable/ilyra/ornaments/sparkle_large.png`
+- `res://assets/art/characters/playable/ilyra/ornaments/sparkle_small.png`
+- `res://assets/art/characters/playable/ilyra/ornaments/sparkle_twin.png`
+- `res://assets/art/characters/playable/ilyra/puppet/braid_a.png`
+- `res://assets/art/characters/playable/ilyra/puppet/braid_b.png`
+- `res://assets/art/characters/playable/ilyra/puppet/fan_open_a.png`
+- `res://assets/art/characters/playable/ilyra/puppet/fan_open_b.png`
+- `res://assets/art/characters/playable/ilyra/puppet/forearm_00.png`
+- `res://assets/art/characters/playable/ilyra/puppet/forearm_01.png`
+- `res://assets/art/characters/playable/ilyra/puppet/forearm_02.png`
+- `res://assets/art/characters/playable/ilyra/puppet/forearm_03.png`
+- `res://assets/art/characters/playable/ilyra/puppet/hand_grip_a.png`
+- `res://assets/art/characters/playable/ilyra/puppet/hand_grip_b.png`
+- `res://assets/art/characters/playable/ilyra/puppet/hand_relaxed_a.png`
+- `res://assets/art/characters/playable/ilyra/puppet/hand_relaxed_b.png`
+- `res://assets/art/characters/playable/ilyra/puppet/head.png`
+- `res://assets/art/characters/playable/ilyra/puppet/hip_flap_a.png`
+- `res://assets/art/characters/playable/ilyra/puppet/hip_flap_b.png`
+- `res://assets/art/characters/playable/ilyra/puppet/lower_leg_boot_a.png`
+- `res://assets/art/characters/playable/ilyra/puppet/lower_leg_boot_b.png`
+- `res://assets/art/characters/playable/ilyra/puppet/torso.png`
+- `res://assets/art/characters/playable/ilyra/puppet/underskirt.png`
+- `res://assets/art/characters/playable/ilyra/puppet/upper_arm_00.png`
+- `res://assets/art/characters/playable/ilyra/puppet/upper_arm_01.png`
+- `res://assets/art/characters/playable/ilyra/puppet/upper_arm_02.png`
+- `res://assets/art/characters/playable/ilyra/puppet/upper_arm_03.png`
+- `res://assets/art/characters/playable/ilyra/puppet/upper_leg_a.png`
+- `res://assets/art/characters/playable/ilyra/puppet/upper_leg_b.png`
+- `res://assets/art/characters/playable/ilyra/puppet/waist_armor.png`
+- `res://assets/art/characters/playable/ilyra/revive_spawn.png`
+- `res://assets/art/characters/playable/ilyra/storefront/storefront_blink.png`
+- `res://assets/art/characters/playable/ilyra/storefront/storefront_flourish.png`
+- `res://assets/art/characters/playable/ilyra/storefront/storefront_settle.png`
+- `res://assets/art/characters/playable/ilyra/storefront/storefront_welcome.png`
+- `res://assets/art/characters/playable/ilyra/victory.png`
+- `res://assets/art/characters/playable/ilyra/wall_bottom.png`
+- `res://assets/art/characters/playable/ilyra/wall_left.png`
+- `res://assets/art/characters/playable/ilyra/wall_right.png`
+- `res://assets/art/characters/playable/ilyra/wall_top.png`
 - `res://assets/art/characters/playable/morrow/cloak_body.png`
 - `res://assets/art/characters/playable/morrow/cloth_wisp.png`
 - `res://assets/art/characters/playable/morrow/front_flap.png`
@@ -524,6 +540,23 @@ _None._
 - `res://assets/art/characters/playable/morrow/rune_stone.png`
 - `res://assets/art/characters/playable/morrow/scarf_a.png`
 - `res://assets/art/characters/playable/morrow/scarf_b.png`
+- `res://assets/art/characters/playable/noxen/chest_core.png`
+- `res://assets/art/characters/playable/noxen/cloak_fin_l.png`
+- `res://assets/art/characters/playable/noxen/cloak_fin_r.png`
+- `res://assets/art/characters/playable/noxen/front_flap.png`
+- `res://assets/art/characters/playable/noxen/hood.png`
+- `res://assets/art/characters/playable/noxen/manifest.json`
+- `res://assets/art/characters/playable/noxen/mask.png`
+- `res://assets/art/characters/playable/noxen/preview.png`
+- `res://assets/art/characters/playable/noxen/rear_cloak.png`
+- `res://assets/art/characters/playable/noxen/root_ribbon_l.png`
+- `res://assets/art/characters/playable/noxen/root_ribbon_r.png`
+- `res://assets/art/characters/playable/noxen/shadow_tail.png`
+- `res://assets/art/characters/playable/noxen/veilflame_l.png`
+- `res://assets/art/characters/playable/noxen/veilflame_r.png`
+- `res://assets/art/characters/playable/noxen/vfx_mote.png`
+- `res://assets/art/characters/playable/noxen/vfx_shard.png`
+- `res://assets/art/characters/playable/noxen/vfx_streak.png`
 - `res://assets/art/characters/playable/rook/dash_streak.png`
 - `res://assets/art/characters/playable/rook/foot_left.png`
 - `res://assets/art/characters/playable/rook/foot_right.png`
@@ -537,6 +570,10 @@ _None._
 - `res://assets/art/characters/playable/rook/wing_dust.png`
 - `res://assets/art/characters/playable/rook/wing_frame_left.png`
 - `res://assets/art/characters/playable/rook/wing_frame_right.png`
+- `res://assets/art/characters/playable/verdant_shade/verdant_shade_menu.ogv`
+- `res://assets/art/characters/playable/verdant_shade/verdant_shade_menu.png`
+- `res://assets/art/characters/playable/verdant_shade/verdant_shade_portrait.png`
+- `res://assets/art/characters/playable/verdant_shade/verdant_shade_run.png`
 - `res://assets/art/characters/playable/veyra/core.png`
 - `res://assets/art/characters/playable/veyra/eyes.png`
 - `res://assets/art/characters/playable/veyra/halo_left.png`
@@ -549,6 +586,9 @@ _None._
 - `res://assets/art/characters/playable/veyra/tail_a.png`
 - `res://assets/art/characters/playable/veyra/tail_b.png`
 - `res://assets/art/characters/playable/veyra/tail_c.png`
+- `res://assets/art/characters/playable/void/void_menu.png`
+- `res://assets/art/characters/playable/void/void_portrait.png`
+- `res://assets/art/characters/playable/void/void_run.png`
 - `res://assets/art/characters/reaper/01_idle_a.png`
 - `res://assets/art/characters/reaper/02_idle_b.png`
 - `res://assets/art/characters/reaper/03_attack_windup.png`
@@ -739,6 +779,7 @@ _None._
 - `res://assets/art/vfx/13_victory_pulse.png`
 - `res://assets/shaders/arena_scenery.gdshader`
 - `res://assets/shaders/arena_scenery_particles.gdshader`
+- `res://assets/shaders/packed_alpha_video.gdshader`
 - `res://assets/ui/theme/ornaments/amber_top.tscn`
 - `res://assets/ui/theme/ornaments/banner_top.tscn`
 - `res://assets/ui/theme/ornaments/card_top.tscn`
@@ -759,16 +800,7 @@ _None._
 - `res://assets/ui/theme/textures/button_secondary_pressed.png`
 - `res://assets/ui/theme/textures/divider_line.png`
 - `res://assets/ui/theme/textures/grabber.png`
-- `res://assets/ui/theme/textures/grabber_disabled.png`
-- `res://assets/ui/theme/textures/grabber_highlight.png`
-- `res://assets/ui/theme/textures/ornament_amber_top.png`
-- `res://assets/ui/theme/textures/ornament_banner_top.png`
-- `res://assets/ui/theme/textures/ornament_card_top.png`
-- `res://assets/ui/theme/textures/ornament_crest_bottom.png`
-- `res://assets/ui/theme/textures/ornament_crest_top.png`
-- `res://assets/ui/theme/textures/ornament_diamond.png`
-- `res://assets/ui/theme/textures/panel_banner.png`
-- _…and 12 more (list capped at 400)._
+- _…and 21 more (list capped at 400)._
 
 ## Documentation index
 
@@ -813,6 +845,7 @@ _None._
 | decisions | [ADR-0013: Rift story levels, a cosmetic Endless mode and earned-only Rift Points](../decisions/0013-rift-story-levels-endless-mode-and-rift-points.md) |
 | decisions | [ADR-0014: Endless arenas share one canonical floor template](../decisions/0014-endless-arenas-share-one-floor-template.md) |
 | decisions | [ADR-0015: Animated playable characters are presentation-only rigs on the Wisp controller](../decisions/0015-animated-playable-characters.md) |
+| decisions | [ADR-0016: A character's menu performance may be a pre-rendered video](../decisions/0016-menu-videos-for-character-storefronts.md) |
 
 ## Documentation gaps
 

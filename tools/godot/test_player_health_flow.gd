@@ -28,6 +28,13 @@ func _run_check() -> void:
 	for child: Node in enemy_layer.get_children():
 		child.queue_free()
 	await process_frame
+	# A run now starts on a single Soul Fragment and death is final.
+	if player.get_maximum_health() != 1 or player.get_current_health() != 1:
+		failures += 1
+		push_error("player_health_flow: a run did not start on one Soul Fragment")
+	# The ladder below is about i-frames, death and the summary, so stock up to three the way two
+	# Soul Vessel drops would.
+	player.increase_maximum_health(2, 2)
 	var enemy := SOUL_WISP_SCENE.instantiate() as SoulWispEnemy
 	enemy.movement_enabled = false
 	enemy_layer.add_child(enemy)

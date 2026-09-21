@@ -181,6 +181,23 @@ ChallengeTracker, FormCatalog. The run: [core_run.md](core_run.md), [game_feel.m
 
 ## Known issues / TODO
 
+- **`tools/validate.sh` fails intermittently on a headless Windows run** with
+  `Initializing already initialized RID` / `Parameter "shader" is null` from
+  `loading_screen.gd` `_update_motion`. It is the dummy renderer racing the Ken Burns pan's
+  texture, not a project error — it clears on a re-run and never appears with a real window.
+  Seen twice on 2026-09-19. Re-run before investigating.
+
+- **The first boot after a cold `--import` logs `Parse Error` on a handful of resources** —
+  `home_screen.tscn` and two or three Rift `.tres` files, always on the line that resolves
+  `script = ExtResource(...)`. The loading screen requests every screen, Rift and form path through
+  `ResourceLoader.load_threaded_request` at once, and the worker threads fail to parse a few of them
+  while the script cache is still being built. **Not a data error:** every one of those resources
+  loads cleanly with a direct `load()`, and the same failures reproduce on a worktree built at HEAD,
+  so it predates any recent change. It clears on the next boot, when the import cache is warm.
+  Confirmed 2026-09-20 during the roster cut. Re-run `tools/validate.sh` before investigating; if it
+  ever stops clearing, the fix is to stagger the threaded requests rather than fire all of them in
+  one frame.
+
 - None known.
 
 ## Change history

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="DashEffectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/dash_effect_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+effect_id = &"veyra"
+signature = 5
+trail_tint = Color(0.4196, 0.898, 1, 1)
+burst_tint = Color(0.9098, 0.9882, 1, 1)
+spark_tint = Color(0.6078, 0.9333, 1, 1)
+spark_count = 12
+ribbon_width = 1.05
+ribbon_seconds = 0.26
+arc_spread = 0
+burst_scale = 1.05

@@ -12,7 +12,7 @@ inverting every pivot into a sprite offset, which is exactly the arithmetic a sc
 Re-run it whenever the pack changes; the per-character motion lives in ``<id>_visual.gd`` and is
 never touched here.
 
-    python3 tools/art/build_character_rig.py ilyra
+    python3 tools/art/build_character_rig.py noxen
 
 Requirements: Python 3.7+ and Pillow 9.5.
 """
@@ -32,10 +32,7 @@ RIBBON_SCRIPT = "res://scenes/player/visuals/ribbon_chain.gd"
 # Trailing cloth: a skinned mesh whose bones are driven passively by a ChainSpring. The value is the
 # mesh cell size in texture pixels — smaller bends more smoothly and costs vertices.
 RIBBONS: Dict[str, Dict[str, float]] = {
-	"ilyra": {
-		"braid_l": 40.0, "braid_r": 40.0,
-		"sash_1": 38.0, "sash_2": 38.0, "sash_3": 38.0, "sash_4": 38.0,
-	},
+	"noxen": {"root_ribbon_l": 34.0, "root_ribbon_r": 34.0},
 }
 # Limbs are skinned the same way, but their bones are *posed* by the rig script rather than sprung.
 # Any part carrying a `chain` in the manifest is one: a single painting that bends at real joints, so
@@ -43,45 +40,39 @@ RIBBONS: Dict[str, Dict[str, float]] = {
 LIMB_CELL_SIZE: float = 30.0
 # Textures that only ever feed a GPUParticles2D, so they get no node of their own.
 PARTICLE_ONLY: Dict[str, List[str]] = {
-	"ilyra": ["vfx_star", "vfx_mote", "vfx_petal", "vfx_streak"],
+	"noxen": ["vfx_mote", "vfx_streak", "vfx_shard"],
 }
 # Parts whose Sprite2D starts hidden; the rig script reveals them (expression swaps, effects).
 HIDDEN: Dict[str, List[str]] = {
-	"ilyra": [
-		"head_blink", "head_focused", "head_joy", "head_pain",
-		"hand_cup_l", "hand_cup_r", "fan_membrane_lit",
-		"vfx_fan_arc", "vfx_ring", "vfx_bloom",
-	],
 }
 # A sub-tree that exists once in the pack but twice on the character. The copy is mirrored in X and
 # re-parented, so Ilyra's two identical fans come from one authored mechanism.
 MIRRORED: Dict[str, List[Dict[str, str]]] = {
-	"ilyra": [{"root": "fan_handle", "parent": "hand_grip_r", "suffix": "R"}],
 }
 # Everything about the scene that is not the part hierarchy: the root's tuning exports and the two
 # particle emitters. Kept here so re-running the tool reproduces the whole scene, and so the only
 # hand-written file per character stays its `<id>_visual.gd`.
 RIG_ROOT: Dict[str, Dict[str, str]] = {
-	"ilyra": {
-		"class": "IlyraVisual",
-		"script": "res://scenes/player/visuals/ilyra_visual.gd",
+	"noxen": {
+		"class": "NoxenVisual",
+		"script": "res://scenes/player/visuals/noxen_visual.gd",
 		"exports": "\n".join([
-			"heading_frequency = 6.8",
-			"heading_damping = 0.7",
-			"settle_frequency = 4.0",
-			"squash_amount = 0.8",
-			"bounce_amount = 1.0",
-			"aim_lean = 0.3",
+			"heading_frequency = 7.4",
+			"heading_damping = 0.72",
+			"settle_frequency = 4.8",
+			"squash_amount = 0.9",
+			"bounce_amount = 0.75",
+			"aim_lean = 0.42",
 		]),
-		"trail_texture": "vfx_star.png",
-		"trail_amount": "18",
-		"trail_lifetime": "0.66",
+		"trail_texture": "vfx_mote.png",
+		"trail_amount": "14",
+		"trail_lifetime": "0.58",
 		"dash_texture": "vfx_streak.png",
-		"dash_amount": "10",
-		"dash_lifetime": "0.42",
-		"burst_texture": "vfx_petal.png",
+		"dash_amount": "12",
+		"dash_lifetime": "0.32",
+		"burst_texture": "vfx_shard.png",
 		"burst_amount": "8",
-		"burst_lifetime": "0.5",
+		"burst_lifetime": "0.46",
 	},
 }
 

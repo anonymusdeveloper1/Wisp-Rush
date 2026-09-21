@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_tuning")
-mutation_paths = PackedStringArray("res://data/mutations/wide_reap.tres", "res://data/mutations/soul_hunger.tres", "res://data/mutations/death_pulse.tres", "res://data/mutations/soul_link.tres", "res://data/mutations/cold_wake.tres", "res://data/mutations/void_velocity.tres", "res://data/mutations/soul_vessel.tres", "res://data/mutations/reapers_gift.tres")
+mutation_paths = PackedStringArray("res://data/mutations/wide_reap.tres", "res://data/mutations/soul_hunger.tres", "res://data/mutations/death_pulse.tres", "res://data/mutations/soul_link.tres", "res://data/mutations/cold_wake.tres", "res://data/mutations/void_velocity.tres", "res://data/mutations/reapers_gift.tres")
 base_xp_threshold = 30
 xp_growth = 1.32
 wide_reap_per_level = 0.27
@@ -18,6 +18,7 @@ cold_wake_speed = 0.55
 gift_base_streak = 33
 gift_reduction_per_level = 3
 gift_minimum_streak = 15
+soul_vessel_drop_chance = 0.012
 shard_attraction_radius = 150.0
 hunger_attraction_per_level = 35.0
 tray_time_scale = 0.3

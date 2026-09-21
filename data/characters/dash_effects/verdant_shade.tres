@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="DashEffectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/dash_effect_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+effect_id = &"verdant_shade"
+signature = 5
+trail_tint = Color(0.3608, 0.8784, 0.4157, 1)
+burst_tint = Color(0.7843, 1, 0.8118, 1)
+spark_tint = Color(0.549, 0.949, 0.6039, 1)
+spark_count = 14
+ribbon_width = 0.64
+ribbon_seconds = 0.26
+arc_spread = 0
+burst_scale = 0.95

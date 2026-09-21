@@ -31,6 +31,9 @@ extends Resource
 ## Lowest allowed Reaper's Gift kill streak.
 @export_range(5, 50, 1) var gift_minimum_streak: int = 15
 ## Base attraction radius for dropped Rift Points shard pickups in design-width pixels.
+## Chance, per enemy killed, that a Soul Vessel drops: the only way to gain a Soul Fragment
+## besides Reaper's Gift. Deliberately rare — a run starts on one fragment and death is final.
+@export_range(0.0, 1.0, 0.001) var soul_vessel_drop_chance: float = 0.012
 @export_range(40.0, 600.0, 1.0) var shard_attraction_radius: float = 150.0
 ## Added attraction radius per Soul Hunger level in design-width pixels.
 @export_range(0.0, 200.0, 1.0) var hunger_attraction_per_level: float = 35.0

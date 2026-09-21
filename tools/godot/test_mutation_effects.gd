@@ -24,7 +24,7 @@ func _run_checks() -> void:
 
 	# No permanent power (ADR-0013): with the Sanctum gone a run starts from the no-bonus baseline.
 	if (
-		player.get_maximum_health() != 3
+		player.get_maximum_health() != 1
 		or not is_equal_approx(player.get_blade_width_multiplier(), 1.0)
 		or not is_equal_approx(player.get_dash_speed_multiplier(), 1.0)
 		or not is_equal_approx(game._get_pickup_attraction_radius(), 150.0)
@@ -59,15 +59,18 @@ func _run_checks() -> void:
 		failures += 1
 		push_error("mutation_effects: Soul Hunger did not attract a live shard")
 
-	# Soul Vessel adds a fragment and Reaper's Gift restores the missing fragment.
+	# A run starts on one Soul Fragment and death is final, so a dropped Soul Vessel is the only way
+	# to raise the maximum — and it has no cap, three collected is four fragments.
+	for _vessel: int in 3:
+		game._spawn_soul_vessel(player.global_position)
+		await create_timer(0.1).timeout
+	if player.get_maximum_health() != 4 or player.get_current_health() != 4:
+		failures += 1
+		push_error("mutation_effects: Soul Vessel drops did not raise the maximum past three")
+	# Reaper's Gift still restores a missing fragment.
 	if not player.take_contact_damage(player.global_position):
 		failures += 1
 		push_error("mutation_effects: could not establish damaged health state")
-	progression._levels[&"soul_vessel"] = 1
-	game._on_mutation_applied(&"soul_vessel", 1)
-	if player.get_maximum_health() != 4 or player.get_current_health() != 3:
-		failures += 1
-		push_error("mutation_effects: Soul Vessel maximum-health change failed")
 	progression._levels[&"reapers_gift"] = 5
 	game._kill_streak = 18
 	game._try_reapers_gift()

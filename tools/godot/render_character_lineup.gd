@@ -39,6 +39,13 @@ func _ready() -> void:
 	background.size = Vector2(1080.0, DESIGN_HEIGHT)
 	add_child(background)
 	var forms: Array[FormData] = rigged_forms(CATALOG)
+	var requested := StringName(OS.get_environment("WISP_CHARACTER"))
+	if not requested.is_empty():
+		var focused: Array[FormData] = []
+		for form: FormData in forms:
+			if form.form_id == requested:
+				focused.append(form)
+		forms = focused
 	var fit: float = minf(1.0, DESIGN_HEIGHT / maxf(1.0, ROW_HEIGHT * float(forms.size())))
 	var row_height: float = ROW_HEIGHT * fit
 	var rig_height: float = RIG_HEIGHT * fit

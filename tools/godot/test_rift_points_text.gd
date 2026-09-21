@@ -92,8 +92,8 @@ func _check_live_screens() -> void:
 		&"bosses_defeated": 2,
 		&"play_time_seconds": 5480.0,
 		&"rift_points": 1320,
-		&"owned_forms": ["void", "ash"],
-		&"equipped_form": "ash",
+		&"owned_forms": ["void", "eclipse"],
+		&"equipped_form": "eclipse",
 		&"selected_rift": "obsidian_garden",
 		&"challenge_state": {},
 		&"daily_state": {&"completed_dates": [], &"best_scores": {}},
@@ -101,7 +101,7 @@ func _check_live_screens() -> void:
 	}
 	var configure: Dictionary = {
 		&"home": func(screen: Node) -> void:
-			screen.setup(snapshot, FORM_CATALOG.get_form(&"ash")),
+			screen.setup(snapshot, FORM_CATALOG.get_form(&"eclipse")),
 		&"shop": func(screen: Node) -> void: screen.setup(1320, false, false),
 		&"results": func(screen: Node) -> void: screen.setup({
 			&"score": 12840, &"best_score": 48210, &"rp_collected": 18, &"rp_performance": 32,
@@ -111,7 +111,7 @@ func _check_live_screens() -> void:
 			screen.setup("2026-09-15", ChallengeTracker.get_daily_seed("2026-09-15"), snapshot),
 		&"trials": func(screen: Node) -> void: screen.setup(8, {"t08_rp_collected_m": 31}),
 		&"statistics": func(screen: Node) -> void: screen.setup(snapshot),
-		&"forms": func(screen: Node) -> void: screen.setup(1320, ["void", "ash"], &"ash", 2),
+		&"forms": func(screen: Node) -> void: screen.setup(1320, ["void", "eclipse"], &"eclipse", 2),
 		&"settings": func(_screen: Node) -> void: pass,
 		&"game": func(_screen: Node) -> void: pass,
 	}

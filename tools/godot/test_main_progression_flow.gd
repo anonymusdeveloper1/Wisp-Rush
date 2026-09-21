@@ -51,13 +51,13 @@ func _run_check() -> void:
 		failures += 1
 		push_error("main_progression_flow: Forms did not open")
 	else:
-		forms.select_form(&"ash")
-		forms.purchase_requested.emit(&"ash")
+		forms.select_form(&"eclipse")
+		forms.purchase_requested.emit(&"eclipse")
 		await process_frame
-		forms.equip_requested.emit(&"ash")
+		forms.equip_requested.emit(&"eclipse")
 		await process_frame
 		var snapshot: Dictionary = save_manager.get_snapshot()
-		if "ash" not in snapshot[&"owned_forms"] or snapshot[&"equipped_form"] != "ash":
+		if "eclipse" not in snapshot[&"owned_forms"] or snapshot[&"equipped_form"] != "eclipse":
 			failures += 1
 			push_error("main_progression_flow: Ash did not purchase and equip persistently")
 		forms.back_requested.emit()
@@ -116,7 +116,7 @@ func _run_check() -> void:
 		var form_sprite := game.get_node_or_null(
 			"WorldContent/PlayerLayer/WispPlayer/FormSprite"
 		) as Sprite2D
-		if form_sprite == null or form_sprite.texture != CATALOG.get_form(&"ash").texture:
+		if form_sprite == null or form_sprite.texture != CATALOG.get_form(&"eclipse").texture:
 			failures += 1
 			push_error("main_progression_flow: equipped Ash form was not applied in gameplay")
 		rp_summary = {

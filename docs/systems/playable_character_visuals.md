@@ -1,40 +1,65 @@
 # System: Playable characters
 
-> **Status:** ✅ five rigs — Veyra, Rook and Morrow (2026-09-17), Ilyra and Bram (2026-09-18) ·
+> **Status:** ✅ four rigs — Veyra, Rook, Morrow (2026-09-17) and **Noxen** (2026-09-20) ·
+> ✅ **Shade**, **Void** and **Eclipse** are whole-frame characters (2026-09-20); they share
+> `WholeFrameCharacterVisual` ·
+> ✅ **the drawn set is five animations** (owner, 2026-09-20) — the dash, three wall loops and one
+> storefront idle; see [Animation vocabulary](#animation-vocabulary) ·
+> ✅ **Ilyra**, a whole-frame sprite character (2026-09-19 as `ilyra`, promoted and renamed
+> 2026-09-20) · **new characters are whole-frame sprites, not rigs** (GDD §14 #34) ·
+> the bone-rigged Ilyra and Bram were retired 2026-09-20 ·
 > owner approval, prices and device pass pending ·
-> **Last updated:** 2026-09-18 · **GDD section:** §6, §9, §11, §14 #31 ·
+> **Last updated:** 2026-09-20 · **GDD section:** §6, §9, §11, §14 #31–34 ·
 > **ADR:** [0015](../decisions/0015-animated-playable-characters.md) ·
-> **Adding a character?** [guides/character_rig_recipe.md](../guides/character_rig_recipe.md) — the
-> step-by-step recipe (layer extraction, bones and skinning, springs, states, QA, known mistakes)
+> **Adding a character?** [guides/character_sprite_frames.md](../guides/character_sprite_frames.md)
+> — the whole-frame generation contract (states and frame counts, storefront, wall poses, ornaments,
+> canvas/anchor rules, budget). New characters take this path.
+> **Maintaining a rigged one?** [guides/character_rig_recipe.md](../guides/character_rig_recipe.md)
+> — layer extraction, bones and skinning, springs, states, QA, known mistakes
 
 ## Purpose
 
 Animated, gameplay-neutral characters on the one Wisp controller. Veyra, the Last Wisp; Rook, the
-Bonewing; Morrow, the Runebound; Ilyra, the Astral Dancer; and Bram, the Rift Knight join the six
-single-image Wisp forms in the Shop's CHARACTERS tab. Collision, health, dash, scoring, controls and
-camera never change with the character — the tier on a card is a label, not a stat.
+Bonewing; Morrow, the Runebound; and Noxen, the Veilflame are bone rigs. Ilyra is a whole-pose
+sprite character, and **Void, Eclipse and Shade** are whole-frame characters on
+`WholeFrameCharacterVisual` — the pattern every new one follows. Since 2026-09-20 nothing in the
+CHARACTERS tab is a still image: Void and Eclipse were the last two single-image forms and both are
+animated now. Collision, health,
+dash, scoring, controls and camera never change with the character — the tier on a card is a label,
+not a stat.
 
 ## Files
 
 | Path | Role |
 |---|---|
-| `res://scenes/player/visuals/playable_character_visual.gd` / `.tscn` | Base: state vocabulary, runtime AnimationPlayer library, AnimationTree state machine, heading spring, particle rules. The scene is the single-image rig (`%FormImage`) Shop cards use for the six forms |
+| `res://scenes/player/visuals/playable_character_visual.gd` / `.tscn` | Base: state vocabulary, runtime AnimationPlayer library, AnimationTree state machine, heading spring, particle rules. The scene is the single-image rig (`%FormImage`) Shop cards use for the Wisp forms |
 | `res://scenes/player/visuals/chain_spring.gd` | `ChainSpring`: follow-through for tails, scarves, flaps and feet |
+| `res://scenes/player/visuals/character_aura.gd` | `CharacterAura`: lights that orbit and drift around a character. Optional `%Aura` node beside `%MotionRoot`; the base steps it and stills it for Reduced Motion |
 | `res://scenes/player/visuals/ribbon_chain.gd` | `RibbonChain` (`@tool`): skinned Polygon2D ribbon on its own Bone2D chain |
 | `res://scenes/player/visuals/playable_character_preview.gd` | `PlayableCharacterPreview`: Control host for Home and the Shop |
-| `res://scenes/player/visuals/veyra_visual.*` · `rook_visual.*` · `morrow_visual.*` · `ilyra_visual.*` · `bram_visual.*` | One rig per character |
+| `res://scenes/player/visuals/veyra_visual.*` · `rook_visual.*` · `morrow_visual.*` · `noxen_visual.*` | One bone rig per character |
+| `res://scenes/player/visuals/ilyra_visual.*` | Ilyra: one painted pose per state on a single `AnimatedSprite2D` instead of a bone rig |
+| `res://scenes/player/visuals/whole_frame_character_visual.gd` | `WholeFrameCharacterVisual`: everything a whole-frame character does — the two on-demand frame sets, the screen-space wall animations and the mirrored right wall, the menu rest, Reduced Motion, and `_target_animation()`, which resolves the whole thirteen-state vocabulary onto the five animations a drawn character has. A character subclasses it only to carry a `class_name`; the frame-set paths and `menu_idle_animation` are set per scene |
+| `res://scenes/player/visuals/eclipse_visual.*` | Eclipse as a whole-frame character (2026-09-20). Was a single image on the shared base rig |
+| `res://scenes/player/visuals/void_visual.*` | Void, the default Wisp, as a whole-frame character (2026-09-20). Was a single image on the shared base rig |
+| `res://scenes/player/visuals/verdant_shade_visual.*` | Verdant Shade: the first character built to the [whole-frame contract](../guides/character_sprite_frames.md) — real multi-frame animations on one `AnimatedSprite2D`, two frame sets, mirrored right wall |
+| `res://scenes/player/visuals/character_menu_video.gd` | `CharacterMenuVideo`: the one menu-video player every visual uses — packed-alpha shader, placement from `MenuVideoData`, pause while hidden, restart after its screen is re-attached |
+| `res://scripts/resources/menu_video_data.gd` · `res://data/characters/{verdant_shade,ilyra}_menu_video.tres` · `res://assets/shaders/packed_alpha_video.gdshader` | `MenuVideoData`: a menu performance as a packed-alpha Theora video (generated by `tools/art/extract_menu_video.py`), and the shader that puts colour and matte back together. Shade's Home and Shop card play it instead of `storefront_idle` ([ADR-0016](../decisions/0016-menu-videos-for-character-storefronts.md)) |
+| `res://scripts/resources/character_pose_sheet.gd` · `res://data/characters/ilyra_poses.tres` | `CharacterPoseSheet`: generated per-pose drawing offset and scale, so painted poses share one anchor and one apparent height |
 | `res://assets/art/characters/playable/<id>/` | Runtime layers (generated, never hand-edit; [ASSETS.md](../ASSETS.md)) |
-| `res://data/forms/veyra.tres` · `rook.tres` · `morrow.tres` · `ilyra.tres` · `bram.tres` | Identity, portrait, price 0, tint, `visual_scene`, `tier` |
-| `tools/art/make_rig_source.py` | Transparent rig sources from an approved reference sheet (Bram is keyed off near-black) |
+| `res://data/forms/veyra.tres` · `rook.tres` · `morrow.tres` · `ilyra.tres` · `noxen.tres` | Identity, portrait, price 0, tint, `visual_scene`, `tier` |
 | `tools/art/extract_playable_characters.py` | Two intake paths: `CHARACTERS` cuts fixed cells out of a sheet (v1/v2), and `PART_PACKS` ingests a per-file pack verbatim — its PNGs are copied byte for byte because the manifest's pivots are in each file's own pixel space |
 | `tools/art/build_character_rig.py` | Part-pack manifest → the rig scene: parent-relative transforms, pivot-to-offset inversion, `z_index` from draw order, mirrored sub-trees, and `design_size` / `preview_center` measured from the assembled silhouette |
 | `tools/godot/render_character_{lineup,motion,select_showcase,home_showcase,gameplay_showcase}.*` · `tools/art/motion_contact_sheet.py` | Visual QA ([How to test](#how-to-test)) |
-| `tools/godot/test_playable_character_visual.gd` | Rig contract, states, smoothness, menus, GameWorld |
+| `tools/godot/test_playable_character_visual.gd` | Rig contract, states, smoothness, menus, GameWorld (every character, Ilyra included) |
+| `tools/godot/test_{verdant_shade,void,eclipse}_visual.gd` · `render_whole_frame_states.*` (`WISP_CHARACTER=<id>`) | The whole-frame contract: the five animations at their promised counts/rates/loops, that none of the cut ones came back, state and wall mapping, the mirrored right wall, the menu rest, Reduced Motion and the frame-set split — plus a six-cell review board |
+| `tools/godot/test_ilyra_visual.gd` · `render_ilyra_poses.*` | What is specific to a sprite character: pose per state, cycle rates, the four wall poses, anchor and scale, Reduced Motion, menus, a live run — and a 21-cell review board |
 
 ## Scene / node structure
 
 ```text
 <Name>Visual (PlayableCharacterVisual subclass)
+├── %Aura (optional)       ← CharacterAura: drifting lights, outside the body motion
 ├── %MotionRoot            ← body motion from the AnimationTree
 │   ├── %TrailParticles / %DashParticles (optional GPUParticles2D, world space)
 │   └── %Body              ← parts, drawn in tree order
@@ -53,13 +78,16 @@ physics nodes; `WispPlayer/%CollisionShape` is the only footprint.
 |---|---|---|
 | `sync_controller(visual_height, alpha, state, direction, speed)` | method | Called by `WispPlayer` every frame: uniform size, fade, gameplay state, dash/drift/aim direction, 0..1 speed. |
 | `request_state(state)` | method | Loops play at once; one-shots fire once per request; `INTERRUPTS` (death, hit, spawn, dash end, dash start) cut in. |
-| `play_attack()` / `play_character_selected()` / `play_character_unlocked()` | method | Dash-kill accent (repeat kills extend it) and menu flourishes. |
+| `play_attack()` / `play_character_selected()` / `play_character_unlocked()` | method | Dash-kill accent (repeat kills extend it), and the pick and buy flourishes — which no menu plays since 2026-09-21 (owner: no bounce when a character is picked); they stay for the QA boards and the rig contract test. |
 | `set_preview_mode(on)` / `set_reduced_motion(on)` | method | Menu mode (upright, no trails) / Reduced Motion (poses and heading only). |
 | `get_animation_states()` · `get_current_visual_state()` · `get_state_length(state)` · `get_speed()` · `get_layer_bounds()` · `get_design_size()` | method | Tests, fixtures, rigs. |
 | `visual_state_changed(state)` | signal | A state started. |
 | `design_size` · `preview_center` · `squash_amount` · `bounce_amount` · heading / settle springs · `aim_lean` · `move_lean` · `trail_ratio_*` · `portrait_texture` | export | Per-rig tuning. |
 | `_update_secondary_motion(delta)` · `_on_state_started(state)` · `_apply_reduced_pose()` | virtual | What each rig overrides. |
-| `PlayableCharacterPreview.set_form(form, animate_portrait)` · `play_selected()` · `play_unlocked()` · `get_visual()` | method | Menu host; `animate_portrait` puts a single-image form on the base rig. |
+| `CharacterAura.step(delta, speed, direction)` · `set_still(on)` · `get_mote_count()` | method | The optional ring of lights; exports tune count, orbit, drift, scale, tint and how far a dash stretches it. |
+| `PlayableCharacterPreview.set_form(form, animate_portrait)` · `set_reduced_motion(on)` · `get_visual()` | method | Menu host; `animate_portrait` puts a single-image form on the base rig. `play_selected()` / `play_unlocked()` were removed 2026-09-21 with the bounce. |
+| `WholeFrameCharacterVisual.menu_video` · `IlyraVisual.menu_video` · `is_menu_video_playing()` · `get_menu_video_player()` | export / method | The character's `MenuVideoData`, played on Home and the Shop card through `CharacterMenuVideo`; tests and fixtures read the player ([ADR-0016](../decisions/0016-menu-videos-for-character-storefronts.md)). |
+| `CharacterMenuVideo.create(data)` · `dispose()` | static / method | Builds the shared menu-video player — packed-alpha shader, placement, loop, no taps; it pauses itself while hidden and restarts itself after its screen is re-attached. |
 | `ChainSpring.setup(joints, phase)` · `step(delta, time)` · `impulse(rad_per_s)` · `reset()` | method | Public fields tune stiffness, damping, lag, sway, `straighten`, `bias`, `max_offset`, `max_lag_rate`. |
 | `RibbonChain.texture` · `spine` · `cell_size` · `phase_offset` · `spring` · `step()` · `get_bones()` · `get_mesh()` | export / method | Skinned ribbon. |
 | `WispPlayer.set_cosmetic_form(texture, tint, visual_scene)` · `play_attack_visual()` · `get_character_visual()` | method | Controller side ([player_dash.md](player_dash.md)). |
@@ -70,7 +98,7 @@ physics nodes; `WispPlayer/%CollisionShape` is the only footprint.
 |---|---|---|
 | `idle_hover` | resting at an edge | 1.8 s bob and breathe loop |
 | `move_fly` | Frozen Choir edge drift | 0.7 s loop, lean into the slide |
-| `aim_charge` | finger held (the arrow is up) | 0.52 s pre-attack coil: the body winds back along its own axis, shivers and leans toward the aim |
+| `aim_charge` | **nothing in a run requests it since 2026-09-19** — holding the arrow must not change the character at all, so `WispPlayer` keeps asking for `idle_hover` (or `move_fly` on a drifting edge). The state stays in the vocabulary for the rigs, the menus and the QA boards; its coil is gone and it is the resting breath now |
 | `dash_start` | windup | 0.12 s deep coil, then the blade profile; heading turns to the dash |
 | `dash_loop` | dashing | 0.32 s dive: long and thin along the travel axis, leading edge first |
 | `dash_end` | wall or crystal impact | 0.17 s compress over the feet, push back up to a stand |
@@ -79,10 +107,43 @@ physics nodes; `WispPlayer/%CollisionShape` is the only footprint.
 | `death` | dead | 0.5 s flare and fold, heading held (inside the 0.55 s death fade) |
 | `revive_spawn` | spawning | 0.58 s pop-in from a squash |
 | `victory` | boss-victory pulse | 0.9 s bounce loop |
-| `character_selected` / `character_unlocked` | card focus or equip / purchase | 0.62 s hop / 0.9 s pop, twirl and flash |
+| `character_selected` / `character_unlocked` | **nothing since 2026-09-21** — the owner removed the bounce on pick, buy and equip; QA boards only | 0.62 s hop / 0.9 s pop, twirl and flash |
 
 Cross-fades are 0.075 s, 0.14 s into calm loops. Heading: dash spring 6.5 Hz (ζ 0.72); standing
 spring 4.2 Hz (ζ 0.86).
+
+### What a drawn character has — five animations
+
+The table above is what the **controller** speaks, and what a **bone rig** animates: the rigs build
+all thirteen procedurally, so a state costs them nothing. A **whole-frame character** is different —
+every state is drawn art and VRAM — and on **2026-09-20 the owner cut the drawn set to five**:
+
+| Animation | Frames | Plays for |
+|---|---:|---|
+| `dash_loop` | 4 | `dash_start`, `dash_loop` and `attack` — the dash *is* the attack, and one frame is the contact frame |
+| `wall_bottom` / `wall_top` / `wall_left` | 8 each | Everything else in a run. `wall_right` is `wall_left` mirrored |
+| `storefront_idle` | 12 | Every menu state, on Home and on a Shop card |
+
+`WholeFrameCharacterVisual._target_animation()` is the whole mapping. Nothing in the vocabulary is
+refused — a `death` request still travels the state machine, still locks out later states and still
+fades out; it just has no picture of its own. What each cut state looks like now is tabulated in
+[character_sprite_frames.md](../guides/character_sprite_frames.md) §3, and the frames are still in
+`concept_art/`, so restoring one is a row in the packer's `sheets` list and a re-pack.
+
+**A menu may play a video instead** ([ADR-0016](../decisions/0016-menu-videos-for-character-storefronts.md)).
+With `menu_video` set, Home and the Shop card play a pre-rendered clip in place of `storefront_idle`
+and hold no frame set at all. Reduced Motion falls back to the sprite loop's held first frame, a
+hidden card pauses the clip, and the clip restarts when its screen re-enters the tree, because a
+`VideoStreamPlayer` stops itself on leaving it and Main detaches the kept Home rather than freeing
+it. Shade is the first: her `FormData.menu_frames_path` is empty so the boot screen warms nothing.
+**Ilyra** is the second (2026-09-21): her ready-stance clip plays through the same
+`CharacterMenuVideo`, and while it does her pose sprite and ornament ring are hidden. Her
+`SpriteFrames` still holds every painting, because she is not on the packed sheets yet.
+
+Per character this is **40 frames on two sheets** (`<id>_run.png` 3200 × 1600, `<id>_menu.png`
+2784 × 928) instead of 120 on three — about 30 MB of texture instead of 107 MB, and roughly 30 MB
+for a Shop carousel instead of 330 MB. Ilyra follows the same rule from her loose PNGs; the four
+bone rigs are unaffected.
 
 **Standing on walls.** A resting character's up axis is the wall's inward normal
 (`get_standing_heading()`), so it stands on the floor, sideways on a side wall and hangs from the
@@ -96,12 +157,69 @@ forward, hands drop, tails gather).
 | Veyra (`design_size` 580) | flame body, additive core, eyes, 2 fins, 2 halo halves, 3 skinned tails | core pulse, blinks, fins knife back in a dive and flare forward to land, flare wide while aiming, halo floats and spreads, tails trail, straighten and whip | 32 cyan-violet soul sparks |
 | Rook (640, squash 1.0) | shadow body, skull, 2 wing frames on 2 membranes, 2 feet, 3 tail segments, crescent fin | strong beats at rest, wings cocked high while aiming, folded into a stoop in a dash, flared with the feet forward to land (he roosts under a ceiling), snap on a kill, flinch; body lifts on downstrokes; springy tail | 12 magenta wing dust + 6 bone-white dash streaks |
 | Morrow (520, squash 0.55, bounce 0.7, softer heading) | cloak, hood, mask, front flap, 2 hands, 3 runes, 2 skinned scarves | cloak breathing, mask tilt, hands on independent orbits (raised with the runes spun up while aiming, back in flight, forward on a kill and to meet the wall, raised to cheer), runes on a tilted ring that never crosses the mask, flap and scarves trail | 10 turquoise rune fragments + 6 dark cloth wisps |
-| **Ilyra** (979, squash 0.8) — Mythic, 51 parts from the v3 pack, seven of them skinned limbs | 5 registered head paintings, hair and 2 skinned braids, chest + hips, heart core and glow, 4 three-joint arms with 3 hand poses, 2 fans of 5 ribs and a membrane, 6 skirt panels, 4 skinned sashes, 3 crown pieces, 2 three-piece legs, 3 effect sprites | every arm is shoulder → elbow → wrist and the three ease at falling rates, so a gesture starts at the shoulder and arrives at the hand two frames later; hips counter-rotate against the chest; each fan opens and shuts by rotating five ribs about one rivet; knees and ankles fold on arrival and her free hands plant on the surface she lands against; a dash *is* an attack — the fans stay out as blades with an arc trailing each one, rather than folding shut; a kill is led by her free hands with the fans crossing a beat behind; she blinks on her own and swaps to focused, joyful or pained faces per state | 18 star motes + 10 dash streaks + an 8-petal kill burst |
+| **Ilyra** (979, squash 0.8) — Mythic, 51 parts from the v3 pack, seven of them skinned limbs | 5 registered head paintings, hair and 2 skinned braids, chest + hips, heart core and glow, 4 three-joint arms with 3 hand poses, 2 fans of 5 ribs and a membrane, 6 skirt panels, 4 skinned sashes, 3 crown pieces, 2 three-piece legs, 3 effect sprites | every arm is shoulder → elbow → wrist and the three ease at falling rates, so a gesture starts at the shoulder and arrives at the hand two frames later; hips counter-rotate against the chest; each fan opens and shuts by rotating five ribs about one rivet, with its shaft running straight through the closed fist between a rear palm and foreground curled fingers and the short gold handle visible below; knees and ankles fold on arrival and her free hands plant on the surface she lands against; a dash *is* an attack — the fans stay out as blades with an arc trailing each one, rather than folding shut; a kill is led by her free hands with the fans crossing a beat behind; she blinks on her own and swaps to focused, joyful or pained faces per state | 18 star motes + 10 dash streaks + an 8-petal kill burst |
 | **Bram** (400, squash 0.7, bounce 0.8) — Legendary, ~14 groups | helmet, visor, torso, chest core, 2 two-part arms, shield, blade, blade arc, 2 legs, 2 cape panels | a slow weight shift and a breathing visor and reactor carry the idle; aiming raises the shield and winds the blade back; the dive turns the shield onto the travel axis with the sword arm folded in behind it; a kill is one cut with a single narrow arc; landing compresses and splays both boots; a hit braces behind the shield; selected is a sword salute and unlocked a shield plant with a short flare | 10 soul motes + 6 dash streaks |
+| **Noxen** (1450, squash 0.9, bounce 0.75) — Legendary, 12 painted groups | rear cloak, hood, mask, chest core, 2 cloak fins, front flap, shadow tail, 2 flame horns, 2 skinned root-flame ribbons | cloak breathing; hood and mask lag; fins fold into a narrow dash spear then snap forward at contact; both flame horns lead the attack; ribbons trail, bend and whip; wall approach spreads the fins into a handless brace; core pulses through aim, dash, hit, death and menu flourishes | 14 cyan motes + 12 dash streaks + 8 shard burst |
+| 🧪 **Ilyra** (627, squash 0.7) — Mythic, **experimental**, 20 painted poses and no bones | no procedural motion of its own: the shared body motion plus a pose swap per state | 18 star motes + 10 dash streaks (Ilyra's effect textures, read-only) |
+
+## Ilyra — whole poses from loose PNGs
+
+The character the whole-frame direction came out of, and the only one still drawn from individual
+files rather than packed sheets: re-cutting her onto `WholeFrameCharacterVisual` and its packer is
+outstanding work. Every animation is a finished painting from `concept_art/ilyra_2_sprite_test/` on
+a single `AnimatedSprite2D` under `%MotionRoot`; there are no bones, ribbons or separate parts.
+Everything else is the shared base — same state machine, heading spring, alpha, squash, bounce,
+particle rules and collision contract (it holds none).
+
+- **Poses.** She follows the same five-animation rule as the sheet characters: `dash_loop` runs its
+  two paintings at 12 fps for the launch, the flight and the kill accent — the dash *is* the attack,
+  and `dash_loop_01_attack` is the contact painting — and every other state shows the wall she is
+  resting against. Her other paintings are still in the pack and in her `SpriteFrames`; nothing
+  reaches them, which is the memory reason to re-cut her.
+- **Standing on a wall.** The pack paints the four surfaces in *screen* space, so a resting live
+  character picks one from the inward `surface_normal` (up → `wall_bottom`, down → `wall_top`,
+  right → `wall_left`, left → `wall_right`) and the rig cancels the rotation the base applies to
+  stand on that wall instead of turning the painting twice. Menu previews never rest on anything
+  and keep `idle_hover`.
+- **Placement.** `CharacterPoseSheet` (`data/characters/ilyra_poses.tres`, generated with the art)
+  carries a drawing offset and a scale per pose. Measured answer for this pack: the framing is
+  already consistent — every pose is painted from one camera with the feet toward the bottom of the
+  canvas — so the offsets are all zero and only `wall_top`, which the pack paints at 0.84 inside
+  extra padding, is scaled (×1.19). Chasing each pose's silhouette box instead was tried and is
+  worse: that box moves with the pose, so following it lifts a crouch off the surface it crouches
+  on. Every pose's measured drift is written into the sheet so a review can see what is left.
+- **In a menu she plays her video** ([ADR-0016](../decisions/0016-menu-videos-for-character-storefronts.md)):
+  the owner-approved ready-stance clip through `CharacterMenuVideo`, with her pose sprite and
+  ornament ring hidden while it plays. Picking or buying her card plays nothing. Under Reduced
+  Motion Home and the Shop card hold `storefront_welcome` instead, a 600×724 canvas of its own
+  drawn at 627/724 so she stands the same height as in a run. `idle_hover.png`
+  is therefore only her portrait now. `storefront_blink` and `storefront_settle` are extracted and
+  **not used**: cycling four whole paintings swapped her entire silhouette four times a second and
+  read as a flip-book next to the bone rigs, whose parts move continuously.
+- **Why she is not a jointed puppet.** Building her menu body out of her detached parts — a real
+  Bone2D-style chain with solved arms, so nothing ever cuts — was tried and reverted on
+  2026-09-20 (DEVLOG). It moved smoothly and the geometry worked, but it could not match the
+  painted frames' finish, and the kit only ships one closed fist so both her hands had to be the
+  same drawing mirrored. The direction instead is **more registered frames**: see the intake
+  requirements in [ASSETS.md](../ASSETS.md) before commissioning any.
+- **Her own ornaments drift around her.** The shared [CharacterAura](#) carries six of her loose
+  pieces — two sparkle sizes, a sparkle pair and three crown shards — instead of one repeated
+  star, so the ring is made of her costume. It rides outside `%MotionRoot`, so it keeps turning
+  while she is idle, drifting along an edge or hanging off a wall.
+- **Reduced Motion** freezes the frame cycling, the menu loop and the aura, and stops the
+  particles, but keeps the state's pose and the wall it picks.
+
+**It won the test.** Shipped as `ilyra_2` on 2026-09-19 beside the bone-rigged Ilyra, it was
+promoted on 2026-09-20: the rig was retired, the sprite took the `ilyra` id and the ILYRA name, and
+whole frames became how every new character is built (GDD §14 #34,
+[character_sprite_frames.md](../guides/character_sprite_frames.md)). It still costs 0 RP pending the
+owner's prices, and its frame set is still the sparse experimental one — most states are a single
+painting, which is why she reads as a still illustration in play. Replacing that with registered
+loops is the next art job.
 
 ## Rules & behaviour
 
-- `FormData.visual_scene` is optional; the six Wisp forms keep the single-image path in a run. The
+- `FormData.visual_scene` is optional; Void and Eclipse keep the single-image path in a run. The
   HUD portrait is `FormData.texture` for every character.
 - `FormData.tier` (`STANDARD` / `LEGENDARY` / `MYTHIC`) is presentation only: the Shop prints it on
   the focused card above the description (`%TierLabel`, `CaptionLabel` variation, amber for Legendary
@@ -111,7 +229,7 @@ forward, hands drop, tails gather).
 - Only the uniform base size is mirrored from the controller; rigs play their own squash, breathing
   and death, so nothing is doubled.
 - `GameWorld` calls `play_attack_visual()` only for dash-event kills (`damage_event_id > 0`).
-- One live rig in a run; the Shop builds one preview per CHARACTERS card (nine) and only for that tab.
+- One live rig in a run; the Shop builds one preview per CHARACTERS card and only for that tab.
 - Animation libraries and the state machine are built once per motion-strength pair and shared by
   every rig (they hold no playback state), and `FormCatalog` keeps loaded characters for the session
   (~18 MB of layers and portraits) so a tab switch never reloads art.
@@ -119,21 +237,31 @@ forward, hands drop, tails gather).
   the character cards in the tree while another tab is shown. Reduced Motion reaches the equipped rig
   mid-run too, because `WispPlayer.set_reduced_motion()` forwards the pause menu's change.
 - A dash kill on the fatal frame cannot cut the death animation short.
-- Menus: a card that comes into focus or gets equipped plays `character_selected`; a purchase plays
-  `character_unlocked` (the Shop compares the old and new save snapshot). Reduced Motion stills menu
+- Menus: picking, buying or equipping a card plays nothing — no hop, no pop (owner, 2026-09-21). The
+  card keeps its idle, or its video. Reduced Motion stills menu
   previews too.
 
 ## How to test
 
 - `tools/run_tests.sh playable_character_visual` — all states, no collision, ≤ 40 particles, ribbon
   weights, silhouette vs `design_size`, the real controller through spawn/dash/kill/redirect/landing/
-  hit/victory/death with a per-frame snap check, Reduced Motion, Home, Shop flourishes, GameWorld.
-- `tools/run_tests.sh form_catalog` — eleven characters, prices, rigs, tiers, save ids.
+  hit/victory/death with a per-frame snap check, Reduced Motion, Home, that buying and equipping in the Shop no longer bounce, GameWorld;
+  Ilyra additionally checks the shaft-through-palm grip and palm/shaft/finger depth order.
+- `tools/run_tests.sh ilyra` — the sprite experiment: a pose per state, the cycle rates, all four
+  wall poses drawn screen-upright, the generated sheet against what the runtime applies, no anchor
+  or size jump over a live run, Reduced Motion, Home, the Shop card and a production GameWorld.
+- `tools/run_tests.sh form_catalog` — seven characters, prices, rigs, tiers, save ids.
 - Rebuilding a part-pack rig: `python3 tools/art/extract_playable_characters.py <id>` then
   `python3 tools/art/build_character_rig.py <id>`. The scene is generated — hand edits to
   `<id>_visual.tscn` are lost on the next run; per-character motion lives in `<id>_visual.gd`.
+- `tools/screenshot.sh res://tools/godot/render_ilyra_poses.tscn 220 540x960` — all 23 Ilyra
+  cells (every gameplay painting, both frames of every cycle, all four walls and the four
+  storefront frames) held on one board.
+- Rebuilding the sprite pack: `python3 tools/art/extract_playable_characters.py ilyra` copies the
+  approved PNGs byte for byte and rewrites `data/characters/ilyra_poses.tres`.
 - `tools/screenshot.sh res://tools/godot/render_character_lineup.tscn 90 540x960` — reference vs rig
-  (`WISP_LINEUP_POSE=attack|hit|aim|victory`); prints `[Lineup]` bounds for sizing.
+  (`WISP_LINEUP_POSE=attack|hit|aim|victory`; optional `WISP_CHARACTER=<id>` filters to one row);
+  prints `[Lineup]` bounds for sizing.
 - Motion frames: the command in `render_character_motion.gd`, then
   `python3 tools/art/motion_contact_sheet.py <id>` → `logs/motion/<id>_*.png`.
 - `WISP_CHARACTER=<id> tools/screenshot.sh res://tools/godot/render_character_{select,home,gameplay}_showcase.tscn`.
@@ -141,12 +269,17 @@ forward, hands drop, tails gather).
   a live state caption: same command as the motion frames plus `WISP_MOTION_CLIP=1
   WISP_MOTION_SCALE=0.25 --quit-after 860`, then encode the frames with ffmpeg at 60 fps.
 - Cost: `"$GODOT" --headless --path . --script res://tools/godot/bench_character_previews.gd` —
-  nine previews build in ~133 ms cold and ~8 ms warm, and animating them costs under 0.1 ms/frame
-  (measured 2026-09-17 on the owner's Mac).
+  all 13 previews build in 422 ms cold and ~7 ms warm; headless animation stayed at the 6.9 ms/frame
+  empty-loop baseline (measured 2026-09-20 on the owner's Windows PC).
 
 ## Known issues / TODO
 
-- Owner approval of the look and motion, then prices (all five cost 0 RP for the review).
+- 🧪 **Ilyra awaits the owner's verdict.** Open points: several paintings clip a boot toe or a
+  crown tip at the canvas edge (`victory` and `wall_left` most visibly) because the pack framed them
+  tight; the blink is an independently drawn pose rather than the idle with closed eyes, so it
+  shifts the figure ~13 px; and at gameplay size a whole painting has far less readable silhouette
+  motion than a bone rig. None of it blocks the test.
+- Owner approval of the look and motion, then prices (all six production rigs cost 0 RP for review).
 - Ilyra's torso, four arms and two legs are skinned meshes, not cutouts: cut segments opened a seam
   at every joint swung past the angle their painted caps were drawn for. Anything with an elbow,
   knee or waist should be skinned; see [the recipe](../guides/character_rig_recipe.md) §2.
@@ -167,6 +300,13 @@ forward, hands drop, tails gather).
 
 | Date | Change |
 |---|---|
+| 2026-09-21 | **No bounce when a character is picked** (owner): the Shop no longer hops the focused card, pops a bought one or hops an equipped one, and Home no longer hops a newly equipped hero. `PlayableCharacterPreview.play_selected` / `play_unlocked` removed; `character_selected` / `character_unlocked` stay in the vocabulary for the QA boards. The Shop tests assert neither plays |
+| 2026-09-21 | **Ilyra's menu video**: the owner's ready-stance take on green, through the new shared `CharacterMenuVideo` (Shade's playback moved onto it). Her aura is hidden while it plays; Reduced Motion holds her welcome painting |
+| 2026-09-21 | **Menu videos** (ADR-0016): `MenuVideoData`, `packed_alpha_video.gdshader` and `tools/art/extract_menu_video.py`; Shade's Home and Shop card play her generated clip. Fixed the same day: the clip stood still after every return to Home (the kept Home is detached, and a `VideoStreamPlayer` stops on leaving the tree) — it now restarts on re-entry, with a regression check |
+| 2026-09-20 | **The drawn set cut to five animations** (owner): `dash_loop`, three wall loops and `storefront_idle`. The windup, landing, attack, drift, hit, death, spawn, victory, gameplay idle and both storefront reactions are gone as art and are carried by the controller instead — the arrow is the windup, the wall loop is the landing, the blink and edge reset are the hit, the alpha dissolve is the death. `WholeFrameCharacterVisual._target_animation()` maps the full vocabulary onto the five; Ilyra follows the same rule from her loose PNGs. 120 frames on three sheets → 40 on two, ~107 MB → ~30 MB of texture per character |
+| 2026-09-20 | **Noxen, the Veilflame**: handless Legendary cut-out rig from a twelve-part blue/cyan source pack; two skinned root ribbons, independently sprung flame horns, fins that fold into a dash spear and flare into the contact cut, free-for-review catalog entry and Blade Arc dash signature |
+| 2026-09-19 | 🧪 **Ilyra**: the same character as one painted pose per state on an `AnimatedSprite2D`, added beside the rigged Ilyra to compare the two approaches. New `POSE_PACKS` intake in the extractor, `CharacterPoseSheet` placement data, screen-space wall poses, a dedicated test and a 21-cell review board. Experimental — 0 RP, no GDD or ADR entry |
+| 2026-09-19 | Ilyra fan-grip pass: each shaft runs on the fist's vertical axis, disappears between a rear palm and foreground curled fingers, and visibly protrudes below the fist; the character test enforces placement, axis, protrusion and depth order |
 | 2026-09-18 | Ilyra's limbs moved to **skinned meshes**: torso, four arms and two legs are each one painting over a three-bone chain, so elbows, knees and the waist bend the paint instead of rotating cutouts over each other and the joint seams are gone. Hands, boots, head, skirt and sashes re-parent onto the bone that carries them |
 | 2026-09-18 | Ilyra rebuilt on the v3 part pack (separated parts + a pivot manifest): real shoulder/elbow/wrist chains on all four arms, a twisting waist, fans that fold rib by rib, bending knees, wall-grip landings, hands-first kills with a petal burst, and five registered faces with self-timed blinks. `build_character_rig.py` generates the scene from the manifest |
 | 2026-09-18 | Ilyra (Mythic) and Bram (Legendary) rigs; `FormData.tier` and the Shop tier badge; `tools/art/make_rig_source.py`; versioned source packs and mask polygons in the extractor, whose component labelling now uses scipy (v1 output byte-identical); the lineup fixture scales to the roster |

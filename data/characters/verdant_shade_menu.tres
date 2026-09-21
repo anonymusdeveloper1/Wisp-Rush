@@ -1,0 +1,95 @@
+[gd_resource type="SpriteFrames" load_steps=14 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/verdant_shade/verdant_shade_menu.png" id="1_menu"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_000"]
+atlas = ExtResource("1_menu")
+region = Rect2(8, 8, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_001"]
+atlas = ExtResource("1_menu")
+region = Rect2(472, 8, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_002"]
+atlas = ExtResource("1_menu")
+region = Rect2(936, 8, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_003"]
+atlas = ExtResource("1_menu")
+region = Rect2(1400, 8, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_004"]
+atlas = ExtResource("1_menu")
+region = Rect2(1864, 8, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_005"]
+atlas = ExtResource("1_menu")
+region = Rect2(2328, 8, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_006"]
+atlas = ExtResource("1_menu")
+region = Rect2(8, 472, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_007"]
+atlas = ExtResource("1_menu")
+region = Rect2(472, 472, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_008"]
+atlas = ExtResource("1_menu")
+region = Rect2(936, 472, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_009"]
+atlas = ExtResource("1_menu")
+region = Rect2(1400, 472, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_010"]
+atlas = ExtResource("1_menu")
+region = Rect2(1864, 472, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_011"]
+atlas = ExtResource("1_menu")
+region = Rect2(2328, 472, 448, 448)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_000")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_001")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_002")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_003")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_004")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_005")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_006")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_007")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_008")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_009")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_010")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_011")
+}],
+"loop": true,
+"name": &"storefront_idle",
+"speed": 8.4
+}]

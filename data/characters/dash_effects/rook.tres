@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="DashEffectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/dash_effect_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+effect_id = &"rook"
+signature = 3
+trail_tint = Color(0.5608, 0.4824, 0.9098, 1)
+burst_tint = Color(0.9294, 0.902, 1, 1)
+spark_tint = Color(0.8471, 0.8118, 0.9412, 1)
+spark_count = 16
+ribbon_width = 0.7
+ribbon_seconds = 0.36
+arc_spread = 0
+burst_scale = 0.8

@@ -121,12 +121,6 @@ func _tour_menus() -> void:
 	for index: int in [1, 2]:
 		shop._carousel.select(index, true)
 		await _hold(0.8)
-	_step(&"shop_dashes")
-	shop._on_tab_pressed(ShopScreen.TAB_DASHES)
-	await _hold(1.0)
-	for index: int in [1, 2, 3]:
-		shop._carousel.select(index, true)
-		await _hold(0.7)
 	_step(&"shop_arenas")
 	shop._on_tab_pressed(ShopScreen.TAB_ARENAS)
 	await _hold(1.2)

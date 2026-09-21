@@ -1,25 +1,24 @@
 # System: Cosmetic forms (the character catalog)
 
-> **Status:** ✅ done · **Last updated:** 2026-09-17 · **GDD section:** §6, §9, §11
+> **Status:** ✅ done · **Last updated:** 2026-09-20 · **GDD section:** §6, §9, §11
 >
 > **Changed 2026-09-15 ([spec 04](../specs/story_and_endless/04_shop.md)):** the Forms screen is retired;
 > forms are bought and equipped in the Shop ([shop.md](shop.md)). `FormData` and `FormCatalog` stay.
-> **Changed 2026-09-18:** the catalog holds eleven characters — the six Wisp forms plus the animated
-> Veyra, Rook and Morrow ([playable_character_visuals.md](playable_character_visuals.md)) — and the
-> Shop tab is CHARACTERS.
+> **Changed 2026-09-20:** the catalog holds seven characters — two Wisp forms, four production
+> rigs, and Ilyra, the whole-frame sprite character. The Shop tab is CHARACTERS.
 
 ## Purpose
 
-Let players preview, purchase and equip every character (six single-image Wisp forms and three
-animated characters) using earned Rift Points while keeping every gameplay value identical.
+Let players preview, purchase and equip every character using earned Rift Points while keeping
+every gameplay value identical.
 
 ## Files
 
 | Path | Role |
 |---|---|
 | `res://scripts/resources/form_data.gd` | Character identity, price, requirement, portrait, tint and optional `visual_scene` rig |
-| `res://scripts/resources/form_catalog.gd` | Ordered eleven-character registry (`REQUIRED_FORM_COUNT`) and validation |
-| `res://data/forms/*.tres` | Void, Ash, Venom, Bloodmoon, Frost, Eclipse, Veyra, Rook and Morrow |
+| `res://scripts/resources/form_catalog.gd` | Ordered thirteen-character registry (`REQUIRED_FORM_COUNT`) and validation |
+| `res://data/forms/*.tres` | Void and Eclipse (Wisp forms), Veyra, Rook, Morrow and Noxen (rigs), and Ilyra (whole-frame sprite) — seven, since the 2026-09-20 cut |
 | `res://scenes/screens/shop_screen.tscn` / `.gd` | CHARACTERS tab: the animated card carousel, buy/equip ([shop.md](shop.md)) |
 | `res://scripts/components/focus_carousel.gd` / `page_dots.gd` | Shared card picker + page indicator ([ui_design_system.md](ui_design_system.md)) |
 
@@ -38,9 +37,9 @@ No screen of its own since 2026-09-15: characters are cards in the Shop's CHARAC
 ## Data & tuning
 
 Prices are in Rift Points and follow the GDD: Void free; Ash 250 RP; Venom 500 RP; Bloodmoon 800 RP;
-Frost 1,200 RP; Eclipse 2,000 RP plus the first boss victory; Veyra, Rook and Morrow 0 RP while the
-owner reviews them (GDD §14 #31). Each Resource has a portrait texture and a presentation tint; the
-three characters also name their rig scene.
+Frost 1,200 RP; Eclipse 2,000 RP plus the first boss victory; every newer character is 0 RP while
+the owner reviews it (GDD §14 #31–33). Each resource has a portrait texture and a presentation
+tint; animated characters also name their visual scene.
 
 ## Dependencies
 
@@ -54,8 +53,8 @@ and tint; the Shop animates every card ([playable_character_visuals.md](playable
   button. Swipe or tap a side card to browse; tapping the focused card does what the main button does.
 - Each card: name, the character alive over a halo in its tint (dimmed when not owned), and a state
   row — EQUIPPED / OWNED / BOSS / price (`250 RP`), always with an icon. Rigged characters play their
-  own idle; single-image forms idle on the shared rig; focus and equip play a selected flourish, a
-  purchase an unlock flourish.
+  own idle; single-image forms idle on the shared rig; Shade and Ilyra play a menu video (ADR-0016).
+  Focus, equip and purchase play nothing — no bounce (owner, 2026-09-21).
 - `%ActionButton`: the Shop's five states (`BUY  •  250 RP`, `NEED 50 RP`, `BEAT A BOSS FIRST`, EQUIP,
   EQUIPPED); buying equips.
 - The carousel opens on the equipped form and follows it until the player picks one.
@@ -68,7 +67,7 @@ and tint; the Shop animates every card ([playable_character_visuals.md](playable
 
 ## How to test
 
-- Tap the hero on Home (or CHARACTERS on Results) to open the Shop's CHARACTERS tab. Verify all eleven
+- Tap the hero on Home (or CHARACTERS on Results) to open the Shop's CHARACTERS tab. Verify all thirteen
   cards animate, locked cards preview, purchases are rejected/accepted and the equip persists.
 - `tools/run_tests.sh form_catalog` and `playable_character_visual`.
 - Headless screen tests still target the retired Forms screen and are stale (owner cleans them up).
@@ -82,6 +81,7 @@ and tint; the Shop animates every card ([playable_character_visuals.md](playable
 
 | Date | Change |
 |---|---|
+| 2026-09-20 | Thirteen characters: Noxen, the Veilflame added as a free-for-review Legendary rig |
 | 2026-09-18 | Eleven characters: Ilyra (Mythic) and Bram (Legendary) added with `FormData.tier`, shown as a badge on the focused card |
 | 2026-09-17 | Nine characters (Veyra, Rook, Morrow added, `visual_scene`); tab renamed CHARACTERS; animated cards |
 | 2026-09-15 | Forms screen retired; forms live in the Shop's WISPS tab (spec 04) |

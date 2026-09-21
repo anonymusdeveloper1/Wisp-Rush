@@ -5,7 +5,7 @@
 > the change. This file holds **meaning and intent**; the exhaustive, auto-generated inventory of
 > what exists is [generated/PROJECT_MAP.md](generated/PROJECT_MAP.md).
 
-_Last updated: 2026-09-18 · by: Claude Code (Opus 5)_
+_Last updated: 2026-09-19 · by: Claude Code (Opus 5)_
 
 ## 1. Identity
 
@@ -24,15 +24,20 @@ _Last updated: 2026-09-18 · by: Claude Code (Opus 5)_
 - **Phase:** M10 (story Rifts, Endless, Rift Points Shop), M11 (RUSH) and M12 (Tutorial) built 2026-09-15,
   implementation only; runs on the owner's Android phone from a debug APK.
 - **Works:** Loading → Tutorial (first launch) → animated Home → Rift story or Endless runs (five Rifts, twists, bosses;
-  30 arena skins) → Results with a Rift Points breakdown; Rift Map, Trials, Daily, four-tab RP Shop (No Ads disabled);
-  eleven characters, five of them animated rigs — Ilyra rebuilt on skinned limbs 2026-09-19; save v8;
-  synthesized audio; Reduced Motion; simulation follows the screen's refresh rate; Android back.
-  35 headless test scripts (`tools/run_tests.sh`), ten stale since M10.
+  30 arena skins) → Results with a Rift Points breakdown; Rift Map, Trials, Daily, three-tab RP Shop (No Ads disabled);
+  **eight characters** — Void and Eclipse, four rigs (Veyra, Rook, Morrow, Noxen), **Ilyra** and
+  **Verdant Shade**, the first built whole-frame end to end (2026-09-20); save v8;
+  synthesized audio; Reduced Motion; simulation follows the
+  screen's refresh rate; Android back.
+  Shade's and Ilyra's menus play AI-generated videos (ADR-0016). 40 headless test scripts
+  (`tools/run_tests.sh`), ten stale since M10.
 - **Direction:** [ADR-0013](decisions/0013-rift-story-levels-endless-mode-and-rift-points.md) /
   [ADR-0014](decisions/0014-endless-arenas-share-one-floor-template.md), built from
   [specs/story_and_endless/](specs/story_and_endless/README.md) (specs 01–05 done).
-- **Next:** owner review of Ilyra's motion, then Bram onto skinned limbs; prices for all five (still 0);
-  then the device pass (RP pacing, Endless difficulty, RUSH frequency, tutorial) and M9/M6 ([ROADMAP.md](ROADMAP.md)).
+- **Next:** owner review on the phone of Shade's and Ilyra's menu videos (ADR-0016) and of runs with the
+  five-animation set (GDD §14 #36); re-cut Ilyra onto the sheet packer; focused-card-only video playback
+  before a third clip; prices for every character (still 0); then the device pass and M9/M6
+  ([ROADMAP.md](ROADMAP.md)).
 
 Keep this section ≤ 10 lines. Details belong in ROADMAP.md and DEVLOG.md.
 
@@ -73,6 +78,7 @@ Keep this section ≤ 10 lines. Details belong in ROADMAP.md and DEVLOG.md.
     ├── art/           Python art pipeline: redesign/Endless extraction, and the playable-character
     │                  chain (make_rig_source → extract_playable_characters → build_character_rig)
     │                  — ADR-0005, ADR-0014, ADR-0015, docs/guides/character_rig_recipe.md
+    │                  and docs/guides/character_sprite_frames.md (whole-frame characters)
     ├── video/         Devlog video helpers (Kokoro TTS, graphics, Palmier motion)
     └── mcp/           Pinned Godot MCP server (npm; node_modules git-ignored) — ADR-0002
 ```
@@ -142,8 +148,8 @@ Hand-maintained tables that give **meaning** to what the project map lists. Keep
 | Run progression | ✅ done | [mutations.md](systems/mutations.md) | `res://scripts/components/run_progression.gd` |
 | Reaper boss | ✅ done | [reaper_boss.md](systems/reaper_boss.md) | `res://scenes/bosses/reaper_boss.tscn` |
 | Save manager | ✅ done | [save_manager.md](systems/save_manager.md) | `res://scripts/autoload/save_manager.gd` |
-| Cosmetic forms | ✅ done · eleven characters in the Shop's CHARACTERS tab | [forms.md](systems/forms.md) | `res://data/forms/default_catalog.tres` |
-| Playable characters | ✅ five animated rigs; Ilyra (Mythic) and Bram (Legendary) added 2026-09-18 · owner approval, prices and device pass pending | [playable_character_visuals.md](systems/playable_character_visuals.md) | `res://scenes/player/visuals/playable_character_visual.gd` |
+| Cosmetic forms | ✅ done · eight characters in the Shop's CHARACTERS tab (cut to seven then Verdant Shade added, 2026-09-20) | [forms.md](systems/forms.md) | `res://data/forms/default_catalog.tres` |
+| Playable characters | ✅ four rigs (Veyra, Rook, Morrow, Noxen) + **Ilyra**, a whole-frame sprite character. Roster cut to seven 2026-09-20; new characters are whole-frame sprites, not rigs, and a drawn character is **five animations** — dash, three wall loops, one storefront idle ([character_sprite_frames.md](guides/character_sprite_frames.md), GDD §14 #36); Shade's and Ilyra's menus play pre-rendered videos ([ADR-0016](decisions/0016-menu-videos-for-character-storefronts.md)); no bounce on pick, buy or equip (#38) · owner approval, prices and device pass pending | [playable_character_visuals.md](systems/playable_character_visuals.md) | `res://scenes/player/visuals/playable_character_visual.gd` |
 | Daily/challenges | ✅ done | [challenges.md](systems/challenges.md) | `res://scripts/utils/challenge_tracker.gd` |
 | Audio | ✅ done | [audio.md](systems/audio.md) | `res://scripts/autoload/audio_service.gd` |
 | Game feel & lifecycle | ✅ done · simulation rate follows the display (`FramePacing`) | [game_feel.md](systems/game_feel.md) | `res://scenes/gameplay/game_world.gd` |
@@ -152,7 +158,7 @@ Hand-maintained tables that give **meaning** to what the project map lists. Keep
 | UI design system | ✅ done | [ui_design_system.md](systems/ui_design_system.md) | `res://assets/ui/theme/wisp_theme.tres` |
 | Rifts | ✅ done · one level per run (spec 02, ADR-0013) · device pass pending | [rifts.md](systems/rifts.md) | `res://scenes/screens/rift_map_screen.tscn` |
 | Endless mode | ✅ 30 arena skins, animated Legendary/Mythic scenery (specs 03, 05) · device pass pending | [endless_mode.md](systems/endless_mode.md) | `res://data/endless/default_endless_catalog.tres` |
-| Shop & Rift Points | ✅ Rift Points (spec 01), four-tab Shop and dash styles (spec 04) | [shop.md](systems/shop.md) | `res://scenes/screens/shop_screen.tscn` |
+| Shop & Rift Points | ✅ Rift Points (spec 01), three-tab Shop (DASHES removed 2026-09-19) | [shop.md](systems/shop.md) | `res://scenes/screens/shop_screen.tscn` |
 | Trials and depth milestones | ✅ done | [meta_progression.md](systems/meta_progression.md) | `res://scenes/screens/trials_screen.tscn` |
 | Monetisation | 🔄 plumbing only | [monetisation.md](systems/monetisation.md) | `res://scripts/autoload/monetisation_service.gd` |
 
@@ -163,10 +169,15 @@ Only entry points, levels and major reusable prefabs — the map lists every sce
 |---|---|---|
 | `res://scenes/main/main.tscn` | Composition root: Loading, Tutorial, Home, Shop, Rift Map, Daily, Trials, Statistics, Settings, GameWorld or Results; back routing | Game flow |
 | `res://scenes/screens/home_screen.tscn` | Home: top bar (Rift Points, best), tappable live hero character (→ Shop CHARACTERS) over a living background between Trials/Daily and Shop/Remove Ads columns, ENDLESS (once open) + animated PLAY + Rifts under it | Game flow |
-| `res://scenes/screens/shop_screen.tscn` | The only place RP is spent: tabs CHARACTERS (animated cards), DASHES, ARENAS (card carousels, buy/equip) and NO ADS (Remove Ads + Restore, disabled until billing exists, no RP; ADR-0012, ADR-0013) | Shop / Monetisation |
+| `res://scenes/screens/shop_screen.tscn` | The only place RP is spent: tabs CHARACTERS (animated cards), ARENAS (card carousels, buy/equip) and NO ADS (Remove Ads + Restore, disabled until billing exists, no RP; ADR-0012, ADR-0013) | Shop / Monetisation |
 | `res://scenes/gameplay/game_world.tscn` | Responsive playable arena and run-local coordinator | Core run |
 | `res://scenes/player/wisp_player.tscn` | Aiming, dash, health and death player prefab; hosts the equipped character's rig | Player dash / health |
-| `res://scenes/player/visuals/{veyra,rook,morrow,ilyra,bram}_visual.tscn` | The five animated character rigs on the shared `PlayableCharacterVisual` base (ADR-0015) | Playable characters |
+| `res://scenes/player/visuals/{veyra,rook,morrow,noxen}_visual.tscn` | The four remaining animated character rigs on the shared `PlayableCharacterVisual` base (ADR-0015) | Playable characters |
+| `res://scenes/player/visuals/ilyra_visual.tscn` | Ilyra: a whole-frame sprite character — one painted pose per state on an `AnimatedSprite2D`. The path every new character takes ([character_sprite_frames.md](guides/character_sprite_frames.md)) | Playable characters |
+| `res://scenes/player/visuals/whole_frame_character_visual.gd` | `WholeFrameCharacterVisual`: the shared behaviour of every whole-frame character — two on-demand frame sets, screen-space walls, mirrored right wall, menu rest, and the map from the thirteen-state vocabulary onto the five drawn animations (owner, 2026-09-20) | Playable characters |
+| `res://scenes/player/visuals/eclipse_visual.tscn` | Eclipse as a whole-frame character (2026-09-20) | Playable characters |
+| `res://scenes/player/visuals/void_visual.tscn` | Void, the default Wisp, as a whole-frame character (2026-09-20) | Playable characters |
+| `res://scenes/player/visuals/verdant_shade_visual.tscn` | Verdant Shade: the first character built to the whole-frame contract end to end — the five drawn animations (dash, three wall loops, storefront idle), two frame sets so a Shop card never holds the run sheet, mirrored right wall | Playable characters |
 | `res://scenes/enemies/soul_wisp.tscn` | One-hit steering enemy prefab | Enemies |
 | `res://scenes/enemies/shard_wraith.tscn` | Two-hit angular dart enemy prefab | Enemies |
 | `res://scenes/enemies/bone_mote.tscn` | Three-hit predictive charge enemy prefab | Enemies |
@@ -174,6 +185,8 @@ Only entry points, levels and major reusable prefabs — the map lists every sce
 | `res://scenes/hazards/spike_bloom.tscn` | Cycled area-danger prefab | Arena hazards |
 | `res://scenes/hazards/blade_ring.tscn` | Rotating blade-tip danger prefab | Arena hazards |
 | `res://scenes/pickups/soul_shard_pickup.tscn` | Rift Points shard drop and attraction prefab (keeps the shard file name) | Run progression |
+| `res://scenes/gameplay/dash_effect_fx.tscn`-less `dash_effect_fx.gd` | `DashEffectFx`: the pool that draws a dash signature (Line2D ribbons + CPUParticles2D sparks), a sibling of `EffectsLayer` beside `VfxPool` | Player dash |
+| `res://scenes/pickups/soul_vessel_pickup.tscn` | Rare Soul Fragment drop: +1 maximum, filled, no cap. A `SoulShardPickup` subclass, so it attracts and sweeps identically | Player health |
 | `res://scenes/gameplay/upgrade_tray.tscn` | Bottom three-card upgrade tray shown at calm moments over the slowed, live run (no pause) | Run progression |
 | `res://scenes/tutorial/tutorial_screen.tscn` | Tutorial screen: scripted placeholder arena, ghost-hand lessons, step counter, SKIP confirm (first launch; replay from the Rift Map) | Tutorial |
 | `res://scenes/screens/results_screen.tscn` | Score, run statistics, Rift Points breakdown (collected, performance, rewards, total, balance) and navigation | Game flow |
@@ -227,12 +240,15 @@ Only entry points, levels and major reusable prefabs — the map lists every sce
 | `FormationCatalog` | `res://scripts/resources/formation_catalog.gd` | `res://data/waves/default_catalog.tres` | Ordered complete formation registry |
 | `WaveTuning` | `res://scripts/resources/wave_tuning.gd` | `res://data/waves/default_wave_tuning.tres` | Wave duration, budget and spawn cadence |
 | `HazardTuning` | `res://scripts/resources/hazard_tuning.gd` | `res://data/hazards/*.tres` | Hazard scale, collision and cycle timing |
-| `MutationData` | `res://scripts/resources/mutation_data.gd` | `res://data/mutations/*.tres` | Mutation identity, cap, value, copy and icon |
+| `MutationData` | `res://scripts/resources/mutation_data.gd` | `res://data/mutations/*.tres` (7) | Mutation identity, cap, value, copy and icon. SOUL VESSEL left the tray on 2026-09-19 and is the Soul Vessel pickup instead |
 | `RunProgressionTuning` | `res://scripts/resources/run_progression_tuning.gd` | `res://data/progression/default_run_progression.tres` | XP curve, shared mutation-effect tuning and the upgrade offer (tray slow motion, timeout, slide, calm window, indicator pulse) |
 | `ReaperTuning` | `res://scripts/resources/reaper_tuning.gd` | `res://data/bosses/default_reaper.tres`, `res://data/bosses/*_tuning.tres` | Reaper health, phase timings, attack geometry and rewards (one per boss variant) |
 | `BossData` | `res://scripts/resources/boss_data.gd` | `res://data/bosses/{reaper,reaper_ascended,hollow_choir,the_fracture,cinder_maw}.tres` | One boss variant on the shared `ReaperBoss` machine: atlas, toughness, accent; referenced by `RiftData.boss_id` ([ADR-0010](decisions/0010-data-driven-boss-variants.md)) |
-| `FormData` | `res://scripts/resources/form_data.gd` | `res://data/forms/*.tres` (9) | Character identity, price, requirement, portrait, tint and optional `visual_scene` rig |
-| `FormCatalog` | `res://scripts/resources/form_catalog.gd` | `res://data/forms/default_catalog.tres` | Ordered eleven-character registry (`REQUIRED_FORM_COUNT`) and validation |
+| `FormData` | `res://scripts/resources/form_data.gd` | `res://data/forms/*.tres` (13) | Character identity, price, requirement, portrait, tint and optional `visual_scene` rig |
+| `MenuVideoData` | `res://scripts/resources/menu_video_data.gd` | `res://data/characters/{verdant_shade,ilyra}_menu_video.tres` (generated) | A character's menu performance as a pre-rendered packed-alpha Theora video: stream, the square it is drawn in, and the measured matte floor/ceiling ([ADR-0016](decisions/0016-menu-videos-for-character-storefronts.md)) |
+| `CharacterPoseSheet` | `res://scripts/resources/character_pose_sheet.gd` | `res://data/characters/ilyra_poses.tres`, `verdant_shade_frames.tres` (generated) | Per-pose drawing offset and scale for a whole-pose sprite character, plus the silhouette drift each one was measured at, so painted poses share one anchor and one apparent height |
+| `FormCatalog` | `res://scripts/resources/form_catalog.gd` | `res://data/forms/default_catalog.tres` | Ordered thirteen-character registry (`REQUIRED_FORM_COUNT`) and validation |
+| `DashEffectData` | `res://scripts/resources/dash_effect_data.gd` | `res://data/characters/dash_effects/*.tres` (13) | One character's dash signature: shape (six `Signature` values), tints, spark count, ribbon width and life, and how far it turns the shared launch burst down. Cosmetic only; validated against the reserved hues |
 | `DashStyleData` | `res://scripts/resources/dash_style_data.gd` | `res://data/dash_styles/*.tres` | Dash style: id, name, price, `trail_tint`, `burst_tint`, `uses_form_tint`; reserved-hue check |
 | `DashStyleCatalog` | `res://scripts/resources/dash_style_catalog.gd` | `res://data/dash_styles/default_dash_style_catalog.tres` | Ordered dash styles (SOUL free default), lookup, save ids, validation |
 | `RiftData` | `res://scripts/resources/rift_data.gd` | `res://data/rifts/*.tres` | Arena identity, backdrop, unlock gate and rule twist |
@@ -260,6 +276,10 @@ Only entry points, levels and major reusable prefabs — the map lists every sce
 | Frame-time benchmark (crowded run) | `Godot --headless --path . --script res://tools/godot/bench_stress.gd` |
 | Regenerate runtime art from the redesign sheets | `python3 tools/art/extract_redesign.py`, then `tools/validate.sh` |
 | Regenerate the playable-character layers (and print their ribbon spines) | `python3 tools/art/extract_playable_characters.py [veyra rook morrow]`, then `tools/validate.sh` |
+| Regenerate Noxen from the detached source sheet | `python3 concept_art/noxen_v1/extract_parts.py`, `python3 tools/art/extract_playable_characters.py noxen`, `python3 tools/art/build_character_rig.py noxen`, then `tools/validate.sh` |
+| Regenerate Ilyra's sprite pack and its placement sheet | `python3 tools/art/extract_playable_characters.py ilyra`, then `tools/validate.sh` |
+| Turn a generated storefront video into the game's looping, transparent menu video (loop seam, per-character magenta or green key, label mask, packed alpha, Theora via Godot's Movie Maker) | `GODOT_PATH=<editor binary> python tools/art/extract_menu_video.py [id]` → `assets/art/characters/playable/<id>/<id>_menu.ogv` + `data/characters/<id>_menu_video.tres`; QA in `logs/menu_video/`. Opens a window for a few seconds ([ADR-0016](decisions/0016-menu-videos-for-character-storefronts.md)) |
+| Repack a whole-frame character's sheets and regenerate its `SpriteFrames` | `python3 tools/art/extract_playable_characters.py <id>` (`verdant_shade`, `void`, `eclipse`), then `tools/validate.sh` |
 | Character visual QA: reference vs rig, motion frames, Shop/Home/gameplay shots | `tools/godot/render_character_{lineup,motion,select_showcase,home_showcase,gameplay_showcase}.*` + `python3 tools/art/motion_contact_sheet.py <id>` ([playable_character_visuals.md](systems/playable_character_visuals.md)) |
 | What live character previews cost to build and run | `Godot --headless --path . --script res://tools/godot/bench_character_previews.gd` |
 | Rebuild the UI Theme | steps in [ui_design_system.md](systems/ui_design_system.md) |
@@ -367,8 +387,9 @@ Newest first, one per work session:
 | Term | Meaning |
 |---|---|
 | Wisp | The player's small purple spirit; source art filenames retain the older `riftling` label |
-| Character | What the player equips: one of six single-image Wisp forms or one of the three animated characters (Veyra, Rook, Morrow). Cosmetic only. Code and save keep the older "form" names (`FormData`, `owned_forms`, the Shop's `wisps` tab id) |
-| Soul Fragment | One unit of player health; a normal run starts with three |
+| Soul Vessel | The rare floor drop that adds one Soul Fragment. Named after the upgrade card it replaced |
+| Character | What the player equips: one of two single-image Wisp forms (Void, Eclipse), four rigs, or a whole-frame sprite character (Ilyra, Verdant Shade). Cosmetic only. Code and save keep the older "form" names (`FormData`, `owned_forms`, the Shop's `wisps` tab id) |
+| Soul Fragment | One unit of player health; a run starts with **one** and gains more only from Soul Vessel drops. Death is final |
 | Soul Shard | The old name of the currency, renamed Rift Points on 2026-09-15 (ADR-0013, spec 01). Only file and class names keep it: `soul_shard_pickup.*` / `SoulShardPickup` and the `02_soul_shards` icon are the Rift Points pickup and icon. Never player-facing; unrelated to the Shard Wraith enemy |
 | Rift Points (RP) | The only currency: earned only by playing, spent only on cosmetics, never bought. Text: `1,250 RP` after numbers, "Rift Points" in sentences (`RiftPoints`) |
 | Performance bonus | Rift Points a run pays from its score: `score / EconomyTuning.score_per_rift_point` (`rp_performance`) |

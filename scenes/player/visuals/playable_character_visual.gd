@@ -14,6 +14,13 @@ extends Node2D
 ## Emitted when the AnimationTree starts a new state (tests and debug overlays).
 signal visual_state_changed(state_name: StringName)
 
+## Preloaded rather than reached through its global class name only: every rig scene depends on
+## this base, and the Loading screen streams several of them at once, so the loader has to know
+## about the aura script before it compiles this one.
+const CHARACTER_AURA_SCRIPT: GDScript = preload(
+	"res://scenes/player/visuals/character_aura.gd"
+)
+
 const IDLE_HOVER: StringName = &"idle_hover"
 const MOVE_FLY: StringName = &"move_fly"
 const AIM_CHARGE: StringName = &"aim_charge"
@@ -151,6 +158,9 @@ var _animation_lengths: Dictionary[StringName, float] = {}
 var _playback: AnimationNodeStateMachinePlayback
 
 @onready var _motion_root: Node2D = %MotionRoot
+## Optional ring of drifting lights around the character. It is a sibling of [code]%MotionRoot[/code]
+## rather than a child, so the body's squash and dash heading never drag it around.
+@onready var _aura := get_node_or_null(^"%Aura") as CharacterAura
 ## Optional movement trail and dash-only accent; a rig may have either, both or neither.
 @onready var _trail_particles := get_node_or_null(^"%TrailParticles") as GPUParticles2D
 @onready var _dash_particles := get_node_or_null(^"%DashParticles") as GPUParticles2D
@@ -188,6 +198,8 @@ func _process(delta: float) -> void:
 	var speed_target: float = 0.0 if _preview_mode else clampf(movement_amount, 0.0, 1.0)
 	_speed = lerpf(_speed, speed_target, 1.0 - exp(-10.0 * delta))
 	_update_heading(delta)
+	if _aura != null:
+		_aura.step(delta, _speed, movement_direction)
 	_update_secondary_motion(delta)
 
 
@@ -253,13 +265,15 @@ func play_attack() -> void:
 	_play_one_shot(ATTACK)
 
 
-## Plays the selection flourish used by Home and the Shop preview.
+## Plays the selection flourish, a short hop. Nothing in a menu calls it since 2026-09-21 (owner:
+## no bounce when a character is picked); it stays for the QA boards and the rig contract test.
 func play_character_selected() -> void:
 	_desired_state = IDLE_HOVER
 	_play_one_shot(CHARACTER_SELECTED)
 
 
-## Plays the stronger flourish shown when the character is bought.
+## Plays the stronger unlock flourish, a pop and twirl. Like [method play_character_selected], no
+## menu calls it since 2026-09-21; it stays for the QA boards and the rig contract test.
 func play_character_unlocked() -> void:
 	_desired_state = IDLE_HOVER
 	_play_one_shot(CHARACTER_UNLOCKED)
@@ -284,6 +298,8 @@ func set_reduced_motion(enabled: bool) -> void:
 	if not is_node_ready():
 		return
 	_animation_tree.active = not enabled and is_visible_in_tree()
+	if _aura != null:
+		_aura.set_still(enabled)
 	if enabled:
 		_reset_motion_root()
 		_apply_reduced_pose()
@@ -320,13 +336,17 @@ func get_landing() -> float:
 	return landing
 
 
-## Rig-space box around every drawn layer in the current pose; sizing tests and fixtures compare it
-## with [member design_size] and [member preview_center].
+## Rig-space box around every drawn layer in the current pose, excluding the optional aura; sizing
+## tests and fixtures compare it with [member design_size] and [member preview_center].
 func get_layer_bounds() -> Rect2:
 	var bounds := Rect2()
 	var first: bool = true
 	var to_rig: Transform2D = get_global_transform().affine_inverse()
 	for node: Node in find_children("*", "Node2D", true, false):
+		# The aura floats outside the character: counting its lights would inflate every rig's
+		# measured silhouette past its `design_size`.
+		if _aura != null and (node == _aura or _aura.is_ancestor_of(node)):
+			continue
 		var corners := PackedVector2Array()
 		if node is Sprite2D and (node as Sprite2D).texture != null:
 			var rect: Rect2 = (node as Sprite2D).get_rect()
@@ -583,17 +603,16 @@ func _body_keys(state_name: StringName) -> Dictionary[StringName, Array]:
 				&"rotation": [[0.0, -0.03], [0.35, 0.03], [0.7, -0.03]],
 			}
 		AIM_CHARGE:
-			# Pre-attack: the body coils back along its own axis and shivers, ready to be released.
+			# Holding the aim arrow used to coil the whole body back and shiver. The owner found that
+			# unnatural (2026-09-19): a character that is standing on a wall should keep standing on
+			# it, so aiming now just carries the resting breath on. Each rig may still gesture with
+			# its own limbs in `_update_secondary_motion`.
 			return {
-				&"position": [
-					[0.0, Vector2(0, 6)], [0.18, Vector2(0, 13)], [0.34, Vector2(0, 10)],
-					[0.52, Vector2(0, 6)],
-				],
+				&"position": [[0.0, Vector2(0, 0)], [0.26, Vector2(0, -3)], [0.52, Vector2(0, 0)]],
 				&"scale": [
-					[0.0, Vector2(1.07, 0.93)], [0.18, Vector2(1.16, 0.85)],
-					[0.34, Vector2(1.12, 0.89)], [0.52, Vector2(1.07, 0.93)],
+					[0.0, Vector2(1.0, 1.0)], [0.26, Vector2(0.994, 1.008)],
+					[0.52, Vector2(1.0, 1.0)],
 				],
-				&"rotation": [[0.0, -0.02], [0.18, 0.025], [0.34, -0.015], [0.52, -0.02]],
 			}
 		DASH_START:
 			# Deep coil, then the body snaps into the blade profile it cuts with.
@@ -722,4 +741,3 @@ func _add_track(animation: Animation, path: NodePath, keys: Array) -> void:
 	animation.value_track_set_update_mode(track, Animation.UPDATE_CONTINUOUS)
 	for key: Array in keys:
 		animation.track_insert_key(track, key[0] as float, key[1])
-

@@ -7,7 +7,6 @@
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/crest_bottom.tscn" id="5_crest_bottom"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/system/02_soul_shards.png" id="6_rp"]
 [ext_resource type="Resource" path="res://data/forms/default_catalog.tres" id="7_forms"]
-[ext_resource type="Resource" path="res://data/dash_styles/default_dash_style_catalog.tres" id="8_dashes"]
 [ext_resource type="Resource" path="res://data/endless/default_endless_catalog.tres" id="9_endless"]
 [ext_resource type="Script" path="res://scripts/components/focus_carousel.gd" id="10_carousel"]
 [ext_resource type="Script" path="res://scripts/components/page_dots.gd" id="11_dots"]
@@ -21,7 +20,6 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 form_catalog = ExtResource("7_forms")
-dash_style_catalog = ExtResource("8_dashes")
 endless_catalog = ExtResource("9_endless")
 
 [node name="Background" type="TextureRect" parent="."]
@@ -128,15 +126,6 @@ toggle_mode = true
 button_pressed = true
 text = "CHARACTERS"
 
-[node name="DashesTab" type="Button" parent="SafeMargin/Content/TabBar/TabRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 88)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_type_variation = &"NavButton"
-toggle_mode = true
-text = "DASHES"
-
 [node name="ArenasTab" type="Button" parent="SafeMargin/Content/TabBar/TabRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 88)
@@ -197,6 +186,19 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"CaptionLabel"
 horizontal_alignment = 1
+
+[node name="ArenaPage" type="ScrollContainer" parent="SafeMargin/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ArenaList" type="VBoxContainer" parent="SafeMargin/Content/ArenaPage"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 14
 
 [node name="NoAdsPage" type="VBoxContainer" parent="SafeMargin/Content"]
 unique_name_in_owner = true
@@ -317,6 +319,108 @@ theme_type_variation = &"SecondaryButton"
 text = "BACK"
 
 [node name="ActionButton" type="Button" parent="SafeMargin/Content/Footer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_type_variation = &"PrimaryButton"
+text = "EQUIPPED"
+
+[node name="ArenaPeek" type="Control" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PeekArt" type="TextureRect" parent="ArenaPeek"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="PeekScrim" type="ColorRect" parent="ArenaPeek"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.03, 0.04, 0.07, 0.55)
+
+[node name="PeekPanel" type="PanelContainer" parent="ArenaPeek"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -520.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_type_variation = &"PanelPlate"
+
+[node name="PeekMargin" type="MarginContainer" parent="ArenaPeek/PeekPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 44
+theme_override_constants/margin_top = 34
+theme_override_constants/margin_right = 44
+theme_override_constants/margin_bottom = 40
+
+[node name="PeekColumn" type="VBoxContainer" parent="ArenaPeek/PeekPanel/PeekMargin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="PeekName" type="Label" parent="ArenaPeek/PeekPanel/PeekMargin/PeekColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+text = "ASTRAL OBSERVATORY"
+horizontal_alignment = 1
+
+[node name="PeekTier" type="Label" parent="ArenaPeek/PeekPanel/PeekMargin/PeekColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+text = "SIMPLE"
+horizontal_alignment = 1
+
+[node name="PeekDescription" type="Label" parent="ArenaPeek/PeekPanel/PeekMargin/PeekColumn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+autowrap_mode = 3
+horizontal_alignment = 1
+
+[node name="PeekRequirement" type="Label" parent="ArenaPeek/PeekPanel/PeekMargin/PeekColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"CaptionLabel"
+text = "EQUIPPED"
+horizontal_alignment = 1
+
+[node name="PeekButtons" type="HBoxContainer" parent="ArenaPeek/PeekPanel/PeekMargin/PeekColumn"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="PeekBack" type="Button" parent="ArenaPeek/PeekPanel/PeekMargin/PeekColumn/PeekButtons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"SecondaryButton"
+text = "BACK"
+
+[node name="PeekAction" type="Button" parent="ArenaPeek/PeekPanel/PeekMargin/PeekColumn/PeekButtons"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3

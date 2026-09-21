@@ -4,6 +4,1036 @@
 > [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) §7.6. Keep entries short — details belong in the docs
 > they changed.
 
+## 2026-09-21 — Ilyra's menu video, and no bounce when a character is picked
+- **Who:** Claude Code (Opus 5)
+- **Owner requests:** a Lumina prompt for Ilyra that the generator accepts (two versions were refused
+  with *"The input text may contain sensitive information"*, code 23003); her idle as an attacking
+  pose; the upper hands of take 1 fixed; then "implement it now" for take 2; and mid-task, "remove
+  that bounce animation each character has when it's picked".
+- **The prompt:** Seedance reports text and image refusals separately, so code 23003 was the words.
+  "arms" (weapons) and "crystals" (drug slang) sat in both refused prompts and in none that passed;
+  the working prompt never describes her body and says "upper hands / lower hands" and "three small
+  gems" instead. The reference is her in-game `aim_charge.png`, the only uncut combat-ready
+  painting. Take 1's "flick them" made the upper hands snap the fans every ~0.6 s with speed-trail
+  arcs; "hold the open fans high and steady" fixed it in take 2.
+- **Did:** `extract_menu_video.py` takes a per-pack key colour — `keyness` / `despill` helpers,
+  green for Ilyra (0.0 % of her solid pixels greenish, 6.5 % magenta-ish), magenta for Shade, whose
+  output was checked unchanged against the shipped video (0.42 either way) — and a per-pack rig
+  scale for placement. Ilyra's loop is frames 0–71 cut at the frame closest to frame 0, seam 3.36
+  against a 3.28 median step. The playback moved into a shared `CharacterMenuVideo`
+  (packed-alpha shader, pause while hidden, restart after re-attach) used by both
+  `WholeFrameCharacterVisual` and `IlyraVisual`; her pose sprite and ornament ring hide while it
+  plays. The pick, buy and equip flourishes are gone: the Shop no longer hops the focused card or
+  pops a bought one, Home no longer hops a newly equipped hero, and `PlayableCharacterPreview` lost
+  `play_selected` / `play_unlocked`. The states stay in the vocabulary for the QA boards.
+- **Files/systems:** `tools/art/extract_menu_video.py`, `scenes/player/visuals/character_menu_video.gd`
+  (new), `scenes/player/visuals/{whole_frame_character_visual,ilyra_visual,playable_character_visual,playable_character_preview}.gd`,
+  `scenes/player/visuals/ilyra_visual.tscn`, `scenes/screens/{shop,home}_screen.gd`,
+  `data/characters/ilyra_menu_video.tres`, `assets/art/characters/playable/ilyra/ilyra_menu.ogv`,
+  `concept_art/ilyra_storefront_video_v1/`, `tools/godot/test_{ilyra,verdant_shade,playable_character}_visual.gd`,
+  ADR-0016 addendum, GDD §14 #37 and #38 (no bounce; #31's flourishes superseded),
+  `docs/{PROJECT_CONTEXT,ASSETS,ROADMAP}.md`, `docs/systems/{playable_character_visuals,shop,forms}.md`
+  (API table, vocabulary, rules and test notes), `docs/marketing/devlog_characters_episodes.md`
+  (the "buy → unlock flourish" shot no longer exists).
+- **Verified:** Ilyra's stream decodes to 72 frames at 24 fps, matte floor 0.071, ceiling 0.937;
+  her Shop card rendered and read back clean. `tools/validate.sh` → `VALIDATE: OK`.
+  `tools/run_tests.sh _visual` → 5 passed, 0 failed — Ilyra now checks her video's placement, pause,
+  re-attach and Reduced Motion fallback, and both Shop tests assert that buying or equipping no
+  longer bounces. Full suite → `TESTS: 30 passed, 10 failed`, the same ten by name as the baseline.
+  APK built with both videos, then installed and launched on the Galaxy S24 at the owner's request
+  (21:26): boot OK at 120 Hz, Home ready, no errors in `adb logcat -s godot`.
+- **Follow-ups:** owner looks at Ilyra's Home (with her equipped) and Shop card on the phone, and
+  confirms picking and equipping no longer bounce. Her `SpriteFrames` still
+  holds every painting even while the video plays — the re-cut onto the sheet packer would fix it.
+  With two videos in the game, two Shop cards can decode at once if they are neighbours; limit
+  playback to the focused card before a third lands.
+
+## 2026-09-21 — Ilyra's video brief and a clean front-facing image
+- **Who:** Claude Code (Opus 5)
+- **Owner request:** "write the prompt for ilyra and give me from game files a clean front facing image".
+- **Did:** chose her front-facing `idle_hover` pose and found its right boot cut flat by the game
+  file's canvas edge — the painting is a 627 px quarter of `pose_sheets/01_core_states.png` and the
+  boot runs 14 px past the quarter line. Rebuilt it from the game file's own cleaned pixels plus the
+  boot's own tip from the sheet (the neighbouring pose starts 10 px lower). Measured the key colour
+  instead of reusing Shade's: magenta would start eating 5.3 % of her (lavender skin, violet fan
+  tips), blue 27.8 % (fans), green 0.0 % — so her reference is on `#00FF00`. Wrote the brief, which
+  leans hardest on what video models break: exactly four arms, hands, and fans that stay open.
+- **Files:** `concept_art/ilyra_storefront_video_v1/` (`VIDEO_PROMPT.md`, two 1024² references,
+  `ilyra_front_clean.png`), `docs/ASSETS.md`.
+- **Verified:** boot tip inspected at 3x; no piece of the neighbouring pose in the result (one piece
+  on the bottom row, the boot's own). Prompt lengths: full 2,370 (under Kling's 2,500), short 845,
+  negative 797.
+- **Follow-ups:** before her take can play, `extract_menu_video.py` needs a green-key mode, and
+  Ilyra — still on `IlyraVisual` — needs menu-video playback or the re-cut onto
+  `WholeFrameCharacterVisual`. The game's `idle_hover.png` still has the cut boot; worth repacking
+  from the sheet when she is re-cut.
+
+## 2026-09-21 — Shade's menu video, and the Home bug it caused
+- **Who:** Claude Code (Opus 5)
+- **Owner request:** add the generated Shade video (`2026-09-21_14-58-50_Lumina.mp4`) to the game
+  and remove any watermark; then, mid-task, "there is a bug in the home screen sometimes the
+  animation doesn't go off".
+- **Did:** built the menu-video path of ADR-0016. `tools/art/extract_menu_video.py` cuts the loop at
+  frame 80 (the one closest to frame 0) and cross-fades 8 frames across the seam, keys the magenta
+  (unmix, despill, colour decontamination, 0.2 matte choke), forces the generator's "AI" label
+  corner transparent, packs premultiplied colour | matte, encodes Ogg Theora, then decodes its own
+  output and writes `MenuVideoData` with the measured matte floor/ceiling. `WholeFrameCharacterVisual`
+  plays it on Home and the Shop card through `packed_alpha_video.gdshader`; Reduced Motion falls back
+  to the sprite loop; a hidden card pauses; Shade's form no longer warms a menu sheet.
+- **Three things went wrong on the way, each now guarded:** (1) Windows ffmpeg wrote broken Theora —
+  its own decoder rejected 91 % of the packets and Godot drew macroblocks; Godot's docs name exactly
+  this, so the encode moved to Godot's own Movie Maker in a throwaway project. (2) Movie Maker stamped
+  the stream at 60 fps (1.33 s instead of 3.33 s) until `--fixed-fps` was passed; the tool now fails
+  on a frame-rate or frame-count mismatch. (3) It recorded one extra frame at the end, a hold at the
+  loop point; the encoder now quits on the frame that shows the last image. Also a float32 mean that
+  read the background as (140, 0, 140) instead of (243, 0, 245).
+- **The Home bug:** Main keeps one Home and *detaches* it on leaving; a `VideoStreamPlayer` stops
+  itself on leaving the tree and never restarts, and Home only rebuilds the hero when the equipped
+  character changes — so Shade's video stood still after every trip to another screen. Reproduced by
+  a probe that detached and re-attached every character: only Shade stuck, the seven others kept
+  moving. Fixed by restarting the clip when it re-enters the tree; the regression check was confirmed
+  to fail with the fix disabled.
+- **Files/systems:** `tools/art/extract_menu_video.py`, `scripts/resources/menu_video_data.gd`,
+  `assets/shaders/packed_alpha_video.gdshader`, `scenes/player/visuals/whole_frame_character_visual.gd`,
+  `scenes/player/visuals/verdant_shade_visual.tscn`, `data/forms/verdant_shade.tres`,
+  `scripts/resources/form_data.gd`, `data/characters/verdant_shade_menu_video.tres`,
+  `assets/art/characters/playable/verdant_shade/verdant_shade_menu.ogv`,
+  `concept_art/verdant_shade_storefront_video_v1/source/`, `tools/godot/test_verdant_shade_visual.gd`,
+  ADR-0016, GDD §14 #37, `docs/{PROJECT_CONTEXT,ASSETS}.md`, the system doc and the frames guide.
+- **Verified:** decoded stream is 80 frames at 24 fps (3.33 s), round-trip error 0.42/255, decoded
+  seam 1.22 against a 1.66 median step, background matte mean 0.03/255. Shop card rendered and read
+  back: clean edges, no box, no label. `tools/validate.sh` → `VALIDATE: OK` (109 scripts).
+  `tools/run_tests.sh _visual` → 5 passed, 0 failed. Full suite: `TESTS: 30 passed, 10 failed`. The fixed APK was
+  installed and launched on the Galaxy S24 at the owner's request (15:46): boot OK at 120 Hz, Home
+  ready, no errors in `adb logcat -s godot`. An earlier attempt was held back while the phone was on
+  an Instagram call; nothing on it was touched and the two phone screenshots taken were deleted.
+- **Follow-ups:** owner looks at Shade's Home and Shop card on the phone, including a trip to another
+  screen and back (the case the bug hid in). Before a second character gets a video,
+  play only the focused Shop card's clip. Check the generator's terms on commercial use and label
+  removal, and the store's AI-content disclosure, before release.
+
+## 2026-09-21 — On the phone, and a video brief for Shade's storefront idle
+- **Who:** Claude Code (Opus 5)
+- **Did:** exported the debug APK with the five-animation set and installed it on the owner's
+  Galaxy S24 (`SM-S921B`) over USB; it boots clean (`physics=120 Hz`, Loading 0.77 s, Home ready,
+  no errors in `adb logcat -s godot`). The owner then proposed replacing the storefront idle with
+  a pre-made video. Recommended it for **Home and the Shop only**, on Godot's documented limits:
+  Ogg Theora is the only core codec, decoding is on the CPU (≤ 720p / 30 fps on mobile), there is
+  no alpha, and a loop stays seamless only with *Video Delay Compensation* at 0. Wrote the
+  image-to-video brief for Shade and built its reference image.
+- **Transparency without alpha:** no image-to-video model exports it, so the model paints Shade on
+  flat magenta and the pipeline removes it. Green is out (Shade is green), black and white collide
+  with the hood and the mask. The reference goes in *already on magenta*, because most models keep
+  the input's background — a stronger lever than prompt text.
+- **Files:** `concept_art/verdant_shade_storefront_video_v1/` (`VIDEO_PROMPT.md`, two 1024²
+  references from `idle_hover_00.png`, the 512 original of the owner's 384 portrait), `docs/ASSETS.md`.
+- **Verified:** device boot log read back; references inspected. Prompt lengths measured: full
+  2,465 characters (under Kling's 2,500), short 801, negative 667.
+- **Follow-ups:** owner generates 3–4 takes and drops the MP4s in `source/`. Then: magenta key with
+  despill cross-checked against an AI matte, colour|alpha packed side by side, Theora encode, a
+  recombining shader, video on the focused Shop card and the Home hero only, portrait for Reduced
+  Motion. An ADR is due when that playback lands — it is a new media type and pipeline.
+
+## 2026-09-20 — A drawn character is five animations
+
+- **Who:** Claude Code (Opus 5)
+- **Owner decision:** "the game shall have idle animation which is going to be displayed in the shop
+  and as well in the home screen, the dash state, all wall animations — and the dash and the attack
+  are the same … the others shall be removed", then, on the detail: holding the phone to aim shows
+  only the arrow; releasing plays the dash, which is the same animation as the attack; landing shows
+  the wall animation whichever wall it is; and there is **no death or spawn animation** — a killed
+  character "just blinks like it was before and his position gets reset". GDD §14 #36.
+- **Did:** cut the drawn set from sixteen animations to **five** — `dash_loop` (one frame of which is
+  the contact), `wall_bottom` / `wall_top` / `wall_left` (`wall_right` mirrored) and one
+  `storefront_idle`. `WholeFrameCharacterVisual._target_animation()` now resolves the whole
+  thirteen-state controller vocabulary onto those five: dash states show the dash, everything else
+  shows the wall, a menu always shows the storefront rest, and `aim_charge` still holds whatever is
+  playing. Nothing in the vocabulary is refused — a `death` request still travels the state machine,
+  locks out later states and fades out; it just has no picture of its own. Ilyra follows the same
+  rule from her loose PNGs. **The four bone rigs are untouched** and still animate all thirteen,
+  because generating them costs nothing.
+- **What the cut states look like now:** the arrow is the windup; the wall loop arriving is the
+  landing; the dash's own contact frame is the attack; the controller's invulnerability blink and
+  reform-at-a-safe-edge are the hit; the 0.55 s alpha dissolve is the death; a run simply starts with
+  the character on its wall. The gameplay `idle_hover` was provably dead already — `_has_surface` was
+  true from the first `sync_controller`, so a live character is always on a wall — and the menu sheet
+  carried a second copy of it that only one of the two idles ever used.
+- **Cost:** 120 frames on three sheets → **40 on two**. `<id>_run.png` 3200×1600 (28 frames) and
+  `<id>_menu.png` 2784×928 (12); the reaction sheet is gone. About **30 MB of texture per character
+  instead of 107 MB**, and ~30 MB for a Shop carousel instead of 330 MB. The packer's `sheets` list
+  is the whole cut — every removed frame is still in `concept_art/`, so restoring one is a name in
+  that list and a re-pack, not a re-commission.
+- **Files/systems:** `scenes/player/visuals/{whole_frame_character_visual,ilyra_visual}.gd`,
+  `scenes/player/visuals/{void,eclipse,verdant_shade}_visual.tscn` (`menu_idle_animation`),
+  `tools/art/extract_playable_characters.py` (two-sheet layout), regenerated
+  `assets/art/characters/playable/{void,eclipse,verdant_shade}/` and
+  `data/characters/*_{gameplay,menu,frames}.tres`,
+  `tools/godot/test_{verdant_shade,void,eclipse,ilyra}_visual.gd`,
+  `tools/godot/render_{whole_frame_states,ilyra_poses}.gd`,
+  `docs/guides/character_sprite_frames.md` (the order form, rewritten to five),
+  `docs/systems/playable_character_visuals.md`, `docs/{GDD,PROJECT_CONTEXT,ROADMAP,ASSETS}.md`,
+  `docs/systems/shop.md`.
+- **Verified:** `tools/validate.sh` → `VALIDATE: OK` (108 scripts, clean import and boot).
+  `tools/run_tests.sh _visual` → **5 passed, 0 failed**, including the reduced contract (the five
+  animations at their counts/rates/loops, and a new `CUT_ANIMATIONS` check that none of the eleven
+  crept back onto a sheet), state and wall mapping, the mirrored right wall, the menu rest, Reduced
+  Motion and the frame-set split. Both review boards rendered and read back: the six-cell whole-frame
+  board (Shade) and the seven-cell Ilyra board — every cell reaches its animation, every wall upright,
+  `wall_right` correctly mirrored. Full suite: `tools/run_tests.sh` → **30 passed, 10 failed**, the same ten by name that failed before this
+  change (all stale since M10 — `forms_screen.tscn`, `configure_run_profile`, `purchase_form`);
+  none of them touch characters or animations.
+  One test fix worth noting: the three whole-frame tests drove `request_state` directly, so a finished
+  `dash_start` one-shot fell back to the idle instead of the dash and Eclipse lost the race; they now
+  drive `sync_controller`, which is how the controller actually talks to a rig.
+- **Follow-ups for the owner:**
+  - **Watch a run.** The cut is reversible per animation, but it is the run's *feel* that decides it —
+    particularly the missing landing beat on every dash and the missing death.
+  - **The bone rigs now differ from the drawn characters.** Veyra, Rook, Morrow and Noxen still play
+    death, victory, hit, spawn and the aim lean; Void, Eclipse, Shade and Ilyra do not. Either re-cut
+    the rigs to match or accept that a run reads differently per character.
+  - **Menus moved to `storefront_idle`.** With one idle surviving, the menus now show the authored
+    storefront loop rather than the gameplay idle you were comparing it against on 2026-09-20. One
+    export flip and a re-pack if you preferred the other.
+  - **The wall loops are now 60% of a character's art.** That is the right place to spend it — they
+    are what a player looks at — but a weak wall loop is now a weak character.
+  - Re-cut Ilyra onto the sheet packer: she is the last character drawn from loose PNGs, so her
+    `SpriteFrames` still holds every retired painting as its own texture.
+  - Prices are still 0 RP for every character except Eclipse.
+
+## 2026-09-20 — Devlogs #5–#8, and the move from Palmier to Remotion
+- **Who:** Claude Code (Opus 5)
+- **Owner request:** "you are a professional video editor using remotion, create the next devlogs" —
+  analyse the project, the agent docs, the hook library and the DEVLOG, propose topics, then build
+  the four chosen ones (#5, #6, #7, #8) one at a time.
+- **Why the tool changed, and what did not.** Palmier Pro is macOS-only and its MCP server, the
+  `video/` workspace and the Kokoro models all live on the owner's Mac; this checkout is Windows.
+  Remotion runs here on what is already installed (Node 24, ffmpeg 8). **Only the assembly tool
+  moved.** Every editorial rule in [devlog_video_recipe.md](marketing/devlog_video_recipe.md)
+  survives unchanged — hooks, story structures, safe numbers, the visual-event→game-sound map,
+  TikTok safe zones, caption style, QA and loudness. §6's element cookbook is now React components
+  rather than hand-typed keyframe rows, which is why episodes #6–#8 cost a fraction of #5.
+- **The pipeline** (`tools/video/remotion`): `src/style` holds the palette (from
+  `devlog_graphics.py`, so it matches the earlier episodes and the game's own UI), the three fonts
+  via `@remotion/google-fonts`, and the house pop/slam/draw-on curves. `src/components` is the
+  cookbook: roster wall, parts scatter and grid, a two-bone IK diagram, the registration A/B,
+  spectrum bars, numbers board, step cards, captions, footage and game SFX. Each episode is a beat
+  map of frame numbers taken straight from Kokoro's `lines.json`/`srt`, so a visual lands on its
+  spoken word. New helpers: `srt_to_ts.py` (the browser cannot read an SRT at render time),
+  `master_export.sh` (Remotion mixes at the voice's own ~−17.7 LUFS; every export needs the R128
+  pass) and `contact_sheet.sh` (how an agent watches a render back on this machine).
+- **Episodes, all drafts awaiting review.** #5 "I deleted six characters" (47.1 s) · #6 "I built
+  it, it worked, and I deleted it" (49.2 s) · #7 "Zero sound files" (43.7 s) · #8 "858 megabytes
+  for a shop screen" (52.7 s). Hooks rotate H6/H1/H8/H5 across four different §3.1 treatments, two
+  of which are new and are now registered in the recipe: **roster wall strike-out** and **counter
+  slam**.
+- **Facts were re-derived from the repo, not copied from the briefs.** Ilyra's rig is **55** parts
+  (the 56th file is `preview.png`), matching the DEVLOG's "55-part pack" — the first voice take
+  said 56 and was re-recorded. The roster is **8**, not the 9 in the 2026-09-20 brief. The audio
+  ids are **19** effects plus 8 pitched slice steps, from `audio_synth.gd`'s 22 minus the three
+  music layers. `find assets` for wav/ogg/mp3 returns **0**, so #7's hook is true. The 695→261 ms
+  measurement is **Home**, not the Shop; the newer brief conflates them and the script says home
+  screen.
+- **Nothing on screen is a mock-up.** Footage is the real `render_devlog_tour` capture; the retired
+  portraits and the 55 rig parts came out of `git show HEAD:`; the registration demo plays Verdant
+  Shade's twelve real `idle_hover` frames sliced from the packed atlas by its own `.tres` regions;
+  #7's bars are the true spectrum of the game's exported WAVs and its counting beat plays
+  `slice_step1..5`. The one synthetic element — the drift on the right of the registration panel —
+  is labelled on screen as added.
+- **Files:** `tools/video/remotion/` (34 source files), `tools/video/{srt_to_ts.py,
+  master_export.sh,contact_sheet.sh}`, `tools/video/README.md`,
+  `docs/marketing/devlog_video_recipe.md` (§1 rule, §6 pointer, two new treatments),
+  `docs/marketing/devlog_hooks.md` (§6 log rows 05–08). Exports and the voice/graphics workspace
+  are under the git-ignored `video/`.
+- **Verified:** all four export 1080×1920 / 60 fps / H.264 + AAC 48 kHz, under 60 s, at **−14.4
+  LUFS** with true peak −2.1 to −2.9 dBTP. `npx tsc --noEmit` clean. Every episode was watched back
+  as a contact sheet and fixed on what that showed — the buried "55", a dead 4 s hold in the parts
+  cloud, two captions sitting on artwork, a chin gag that did not read, and `visualizeAudio`
+  needing a power-of-two sample count plus a dB scale before the bars stopped being a cliff.
+- **Follow-ups for the owner:** watch the four and say which hooks land; the EP01–EP04 exports are
+  not on this machine, so the port matches the written spec but the *feel* of the approved EP02 has
+  not been checked against the real cut. The three previously-planned episodes lost their numbers to
+  this batch and are now listed as unshot topics; "They land on their feet" is superseded outright,
+  because the pre-attack coil it is about was removed on 2026-09-19.
+
+## 2026-09-20 — Eclipse Wisp celestial-corona redesign and sprite sheet
+- **Who:** Codex
+- **Owner request:** change Eclipse's form while keeping it a Wisp, then create a detailed sprite
+  sheet with smooth neighboring frames like the new Void pack.
+- **Did:** redesigned Eclipse from an upright purple flame into a compact handless celestial Wisp:
+  glossy obsidian face-core, opposing violet/gold broken-eclipse crescents, three lower flame ribbons
+  and a close moon-bead orbit. Generated an identity atlas and four animation-phase atlases, then
+  built the complete 108-frame contract without cross-fades. The dash points down canvas +Y and uses
+  its gold crescent as the contact edge; storefront flourish briefly aligns both crescents into a
+  full eclipse ring. Added labelled/transparent sheets, JSON timing/QA data and four loop GIFs.
+- **Files/systems:** `concept_art/eclipse_wisp_sprite_v1/`, `docs/ASSETS.md`; source art only. The
+  current runtime Eclipse form, catalog, save and gameplay files remain unchanged pending review.
+- **Verified:** builder QA reports 108/108 unique frames, exact counts, 512² gameplay/wall canvases,
+  724² storefront canvases, clean transparent RGB and alpha-box registration within 0.5 px. Removed
+  two clipped top-edge atlas fragments with a narrow deterministic rule and re-inspected the death
+  frames plus the complete 3072 × 4096 review sheet. `tools/validate.sh` → `VALIDATE: OK` (105
+  scripts checked, clean import and boot).
+- **Follow-ups:** owner reviews the redesign and motion; revise source poses if needed, then integrate
+  only approved art through the deterministic whole-frame intake.
+
+## 2026-09-20 — Void Wisp smooth whole-frame sprite sheet
+- **Who:** Codex
+- **Owner request:** redesign the Void and Eclipse Wisps as animated whole-frame sheets, starting
+  with Void and making every neighbouring frame differ only slightly so playback stays smooth.
+- **Did:** kept Void's handless soul-flame silhouette, black face core, cyan/white/cobalt palette,
+  forehead star, crescent plume, diamond and comet wisps; generated an identity atlas plus four
+  animation-phase atlases. `concept_art/void_wisp_sprite_v1/build_sprite_pack.py` turns the distinct
+  drawings into the exact 108-frame contract without cross-fades, using only sub-pixel timing
+  changes inside each phase. Added the transparent sheet, labelled review sheet, exact JSON row map
+  and GIF previews for idle, movement, top-wall and storefront loops.
+- **Files/systems:** `concept_art/void_wisp_sprite_v1/`, `docs/ASSETS.md`; source art only. Eclipse
+  and runtime character/catalog/save/gameplay files were deliberately left untouched for owner
+  review of Void first.
+- **Verified:** builder QA reports 108/108 unique frames, exact per-state counts, 512² gameplay/wall
+  canvases, 724² storefront canvases, clean transparent RGB and alpha-box registration within
+  0.5 px. Labelled 3072 × 4096 review sheet inspected state by state. `tools/validate.sh` →
+  `VALIDATE: OK` (105 scripts checked, clean import and boot).
+- **Follow-ups:** owner reviews Void's look and motion; revise this pack if needed, then build the
+  Eclipse pack to the same contract and only integrate approved art through the deterministic
+  playable-character intake.
+
+## 2026-09-20 — Verdant Shade whole-frame sprite sheet
+- **Who:** Codex
+- **Owner request:** turn the approved green hooded creature into a classic one-row-per-state sprite
+  sheet with the exact requested animation counts, including menu reactions and no `aim_charge`.
+- **Did:** generated a transparent identity atlas plus four 4 × 4 phase atlases so every move has
+  separately drawn changes to flame shapes, cloak-leaf overlap, eyes and root-ribbon curves—not
+  repeated stills with transforms. `concept_art/verdant_shade_sprite_v1/build_sprite_pack.py`
+  preserves the fixed cell registration, adds crisp in-phase timing without cross-fades and builds 108 unique
+  frames: 54 requested gameplay frames, 24 wall frames and 30 storefront frames. `wall_right` is
+  mirrored from `wall_left` at runtime.
+- **Files/systems:** `concept_art/verdant_shade_sprite_v1/` only; source art and review sheet, no
+  runtime character, catalog, save or gameplay integration.
+- **Verified:** sprite QA checks 108 files, exact state counts, 512² gameplay/wall canvases, 724²
+  storefront canvases, clean transparent RGB, unique frames, visible-content registration within
+  one pixel, and a 3072 × 4096 row sheet. `tools/validate.sh` → `VALIDATE: OK`. Full tests remain
+  24 pass / 13 unrelated failures from the pre-existing in-progress catalog/screen/rig edits.
+- **Follow-ups:** owner reviews the art/motion first; after approval, add the sheet packer/runtime
+  resource split and lazy Shop cards required by `docs/guides/character_sprite_frames.md` §9c.
+
+## 2026-09-20 — Noxen, the Veilflame: basic production rig
+- **Who:** Codex
+- **Owner request:** implement the last blue concept as a new handless creature, name it, and give it
+  a Morrow/Rook-style rig in reviewable steps so Claude can continue the polish.
+- **Named:** **Noxen, the Veilflame** (`noxen`). ASSUMPTION pending owner review: Legendary tier,
+  0 RP. Like every character, he is presentation-only and keeps the shared collision, controls,
+  dash, damage and scoring.
+- **Art/pipeline:** generated a transparent twelve-part source sheet and neutral assembly, then added
+  `concept_art/noxen_v1/extract_parts.py`. It deterministically produces the per-part pivot manifest;
+  the shared extractor copies it into `assets/art/characters/playable/noxen/`, derives the portrait,
+  and the rig builder generates `noxen_visual.tscn`. Edge-connected leaks from neighbouring sheet
+  cells are removed without deleting detached flame sparks.
+- **Rig/motion:** 12 painted groups: cloak, hood, mask, core, two fins, front flap, shadow tail, two
+  independently sprung flame horns and two skinned root-flame `RibbonChain`s. All 13 shared states,
+  Reduced Motion and menu flourishes work. The dash narrows into a flame-first spear with the root
+  ribbons trailing; contact flares the fins into the cut and throws an eight-shard burst; landing
+  spreads the fins into a handless wall brace.
+- **Integration:** thirteenth catalog/save character; cyan Blade Arc `DashEffectData`; live Home and
+  Shop previews; form/tier/count tests and benchmark lists updated. The lineup fixture can now filter
+  to one row with `WISP_CHARACTER=<id>` for close review.
+- **Looked at:** transparent part contact sheet, Shop, Home, production gameplay, and filtered
+  reference/idle/dash/attack boards. The final idle is cohesive and the dash clearly leads with both
+  flame horns; it does not read as a humanoid with missing hands.
+- **Verified:** `tools/validate.sh` → `VALIDATE: OK`; targeted `form_catalog` and
+  `playable_character_visual` tests pass; full suite 27 pass / the same 10 documented stale M10
+  failures; all 13 preview benchmark 422 ms cold / ~7 ms warm with no measurable headless per-frame
+  cost above the 6.9 ms baseline.
+- **Handoff:** `concept_art/noxen_v1/CLAUDE_HANDOFF.md` records the exact regeneration chain and the
+  remaining one-step-at-a-time motion/contact-sheet, four-wall and phone review. Owner still decides
+  final name approval, tier, price, motion sign-off and generated-art licence.
+
+## 2026-09-20 — Session wrap: the roster was halved, then hand-animated
+- **Who:** Claude Code (Opus 5)
+- **The spine of the session**, for anyone reading back: bone rigs were abandoned in favour of
+  hand-drawn frame animation, the roster was cut from thirteen to seven, and the last two still
+  images in the game — Void and Eclipse — were rebuilt as 108-frame characters. Nothing in the
+  CHARACTERS tab is a static picture any more.
+- **In order, with its own entry below each:** Ilyra 2's jointed menu puppet built and reverted ·
+  the whole-frame generation contract written · the roster cut and Ilyra 2 promoted to Ilyra ·
+  Shade added as the first whole-frame character · her atlas bleed, loop rate and Shop hitch fixed ·
+  the stray fragments traced to her source art · the run HUD decluttered · the dash slowed 20% ·
+  the equipped character's menu sheet warmed behind the boot screen · the arena Shop turned into a
+  gallery · Void and Eclipse rebuilt · the menus pointed at the gameplay idle as an owner test.
+- **Three findings worth carrying forward**, because each cost real time to learn:
+  1. **Registration beats drawing quality.** Twelve frames drawn on the same anchor pixel read as
+     motion; four beautiful frames that are not registered read as a flip-book. This is now the
+     first rule in the commissioning brief.
+  2. **The same visible symptom had two different causes.** A sliver of another frame stuck to the
+     character was atlas bleed in one pack (fixed with an 8 px gutter) and clipped source art in
+     another (the character drawn larger than its own canvas). Both cleanups are opt-in per pack,
+     because each would have damaged the other's art — the clipped-fragment rule would have eaten
+     Eclipse's moon beads, and the stray rule would have amputated Void's flame plumes.
+  3. **A Shop card is a live character, and VRAM does not care what a texture cost on disk.**
+     Thirteen live cards at the recommended frame budget came to 858 MB. Lazy cards and the
+     menu/gameplay frame split are what make a whole-frame roster affordable at all.
+- **Marketing:** [devlog_video_brief_2026_09_20.md](marketing/devlog_video_brief_2026_09_20.md) —
+  what films well, the stills that already exist, the numbers that are safe to put on screen and
+  the claims that are not.
+- **State at the end:** `tools/validate.sh` → OK; the whole-frame character tests, the catalog test
+  and the shared rig test all pass; the full suite sits at 30 passed / 10 failed, the ten being the
+  documented M10-stale ones. Built and installed on the owner's Galaxy S24, clean boot, no errors.
+  Nothing committed.
+
+## 2026-09-20 — Owner test: menus rest on the gameplay idle, not the storefront performance
+- **Who:** Claude Code (Opus 5)
+- **Owner, explicitly a test:** "in store front in all character replace the animations as idle
+  animations that are in the game". Home and the Shop card now rest on each character's **gameplay**
+  `idle_hover` instead of its authored `storefront_idle`.
+- **How, without breaking the memory split.** The obvious route — a menu loading the gameplay frame
+  set — would have put the run sheets in every menu, which is the one thing the split exists to
+  prevent. Instead the packer copies `idle_hover` onto the **menu** sheet as well, so a card resting
+  on the gameplay idle costs exactly what it did before and a run still never loads the menu sheet.
+  It is the single deliberate overlap between the two sets, and the tests now allow that one name
+  and keep asserting the rest are exclusive.
+- **The menu cell shrank 512 → 448.** 42 frames at 512 would have been 3168 × 4224, over the 4096
+  texture floor — the intake's own size guard caught it rather than shipping a sheet half the
+  devices cannot sample. `MENU_SCALE` follows at 384/448 so the character is still drawn at its
+  in-run height. Sheets are 2784 × 3712, comfortably inside.
+- **Reversible in one line per character:** `menu_idle_animation` is an export on
+  `WholeFrameCharacterVisual`, set per scene. Point it back at `storefront_idle` and the authored
+  performance returns; the frames are all still there.
+- **Verified:** `tools/validate.sh` → OK; `test_void_visual`, `test_eclipse_visual` and
+  `test_verdant_shade_visual` all pass; all three Shop cards captured and compared side by side.
+- **What it looks like:** Void and Eclipse read almost identically either way — they are wisps, so
+  the idle and the storefront pose are the same silhouette. Shade is the real comparison: her
+  gameplay idle is a tighter, more compact figure than her storefront spread. That is the judgement
+  call to make on a device.
+
+## 2026-09-20 — Eclipse rebuilt as a whole-frame character; no still images left
+- **Who:** Claude Code (Opus 5)
+- **Did:** Eclipse is an animated whole-frame character now, on the same shared
+  `WholeFrameCharacterVisual` as Void and Shade. `form_id`, name, description, **price 2000**, the
+  **boss-victory gate**, tint, dash effect and catalog position are all unchanged — no migration,
+  no second entry. With Void done earlier today, **nothing in the CHARACTERS tab is a still image
+  any more**: the two single-image Wisp forms were the last ones.
+- **Its pack is the cleanest of the three.** Registered to 0.5 px, RGB zeroed under alpha 0, and
+  **not one of the 108 frames reaches a border** — so neither intake cleanup is enabled for it.
+  That matters: `strip_clipped`, which Void needs, would have eaten Eclipse's orbiting moon beads,
+  which are detached by design. Both cleanups being per pack rather than global is what makes three
+  packs with three different defect profiles share one intake.
+- **Checked every Eclipse-specific item from the brief**, on the 17-cell board and a live run: the
+  circular celestial-corona silhouette survives, it still reads as a handless Wisp, violet and gold
+  crescents stay distinct, the gold crescent leads on the dash contact frame, `death` collapses into
+  the cracked core, `revive_spawn` reforms in order, the storefront flourish forms the full eclipse
+  ring, and the moon beads show no jitter and no clipped fragments.
+- **Files:** `tools/art/extract_playable_characters.py` (`eclipse` pack),
+  `scenes/player/visuals/eclipse_visual.{gd,tscn}`, `data/forms/eclipse.tres`,
+  `data/characters/eclipse_{gameplay,menu,frames}.tres`,
+  `assets/art/characters/playable/eclipse/`, `tools/godot/test_eclipse_visual.gd`, and the two
+  roster test lists.
+- **Verified:** `tools/validate.sh` → OK; `test_eclipse_visual` and `test_form_catalog` pass; the
+  board reached 17/17 animations with none missing; Home, Shop card and a live run inspected.
+
+## 2026-09-20 — Void rebuilt as a whole-frame character
+- **Who:** Claude Code (Opus 5)
+- **Did:** the default Wisp is an animated whole-frame character now instead of a single image on the
+  shared base rig. Same `form_id`, name, description, price 0, tint, dash effect and catalog
+  position — no save migration, no second entry.
+- **Extracted `WholeFrameCharacterVisual` first.** Void would have been a second copy of Shade's
+  ~250 lines, and Eclipse a third. The behaviour moved to a shared base; `VoidVisual` and
+  `VerdantShadeVisual` are now four-line subclasses that exist only to carry a `class_name`, and
+  each scene sets its own two frame-set paths. Shade's test still passes unchanged.
+- **The stray-stripper was unconditional, and that was a bug waiting to happen.** It was written for
+  a defect in Shade's pack; run against Void it would have amputated the flame plumes
+  (−2,476 px on `move_fly_00`). It is opt-in per pack now, and Void does not use it.
+- **Void's pack has its own, different defect.** 21 of its 108 frames draw the character larger than
+  the 512 canvas, so the crystal above its head is severed by the border — a flat-cut sliver that
+  floated over the wisp in a run. Confirmed by measurement (`dash_loop_02`: 194 px on the top row)
+  and by looking at the gameplay render. The pixels are gone and cannot be recovered on intake, so
+  `strip_clipped` removes the severed fragments: ~90k px across 14 states, and a missing crystal
+  reads better than a guillotined one. **The pack should be fixed at source** — logged in the
+  ROADMAP backlog.
+- **The rule took three passes to get right,** which is worth recording. "Touches the frame edge"
+  missed it, because the pack re-centres each silhouette after cutting and a severed piece lands a
+  few pixels short of the border. "Wholly above the body" was Shade's rule and would have taken
+  legitimate floating orbs. What works is "detached **and** hugging the border", with the margin a
+  share of the frame; `move_fly_00` keeps its 105 px orb and loses its 2,336 px severed piece.
+- **Loops play at the authored rate.** `loop_fps_scale` is 1.0 for Void — Shade's 1.4 is a phone
+  compromise for her own pack and is not inherited by default.
+- **Files:** `tools/art/extract_playable_characters.py` (`void` pack, opt-in cleanups,
+  `strip_clipped_fragments`), `scenes/player/visuals/whole_frame_character_visual.gd`,
+  `void_visual.{gd,tscn}`, `verdant_shade_visual.{gd,tscn}`, `data/forms/void.tres`,
+  `tools/godot/test_void_visual.gd`, `render_whole_frame_states.*` (the Shade-specific board is now
+  generic, driven by `WISP_CHARACTER`), and the two roster test lists.
+- **Verified by looking, not only by logs:** the 17-cell state board (every animation reached, none
+  missing, right wall mirrored, no severed fragments left), a live run, Home and the Shop card.
+- **Eclipse was not touched.**
+
+## 2026-09-20 — ARENAS becomes a gallery, not a card carousel
+- **Who:** Claude Code (Opus 5)
+- **Owner:** the arena layout should not be "like these cards"; asked for research and options, then
+  picked the grid-plus-full-bleed-peek option.
+- **What was wrong**, from rendering the tab rather than assuming: thirty arenas one at a time
+  behind **thirty dots**, each shown as a 282×502 thumbnail inside an ornate card frame on a purple
+  background — a picture of a picture. The part you are actually buying, the floor you dash around,
+  was a grey rectangle in the middle. A card is a *collectible* signifier; it fits a character,
+  which is a thing you own, and miscasts an arena, which is a place you enter.
+- **Research:** the [Game UI Database](https://gameuidatabase.com/) files these as different screen
+  families — *Change Skin or Accessory* is the card/carousel pattern, while environments sit under
+  *Stage/Level Select*, *Level Select: World Map* and *Area Map*. The tab was using the first for
+  content belonging to the others.
+- **Built:** a scrolling gallery of three portrait tiles across, grouped under tier headings that
+  carry an owned/total count, each tile the arena's own thumbnail with its name and
+  `EQUIPPED` / `OWNED` / price, unowned art dimmed. Tapping a tile opens the **peek**: the full
+  background edge to edge over a scrim with the name, tier, description and the same buy/equip
+  button. `handle_back` closes the peek first, so Android back steps out one level at a time.
+- **Two things the renders caught that reasoning did not.** Landscape tiles cropped every arena to
+  its empty floor — the one part they all share — so the tiles are portrait at the thumbnails' own
+  282×502 shape. And the `CardButton` frame's bottom trim sat exactly where the price goes, which is
+  what made the tiles flat, which is the better design anyway.
+- **Dead code removed, because this change orphaned it:** `_add_arena_visual`, `_fill_arena_visuals`,
+  `_arena_filled`, `_arena_centre`, the per-frame fill in `_process` and the `ArenaSkinData` branch
+  of `_build_card`. Arenas no longer pass through the carousel at all.
+- **Files:** `scenes/screens/shop_screen.{tscn,gd}`, `tools/godot/render_arena_tab.*` (new fixture,
+  `WISP_ARENA_PEEK=<skin_id>` captures the second level).
+- **Verified:** `tools/validate.sh` → OK; both Shop tabs re-rendered and inspected — CHARACTERS keeps
+  its carousel, ARENAS is the gallery; the peek captured on `dragon_skull_throne`.
+- **Not changed:** the purchase and equip flow. The peek drives the same `_on_action_pressed`, so
+  gating, pricing and the snapshot diff are untouched.
+
+## 2026-09-20 — Warm the equipped character's menu sheet behind the boot screen
+- **Who:** Claude Code (Opus 5)
+- **Owner report:** opening Home stalls now that Verdant Shade is equipped.
+- **Cause:** a whole-frame character's menu `SpriteFrames` is a 3,168 px square, and whichever screen
+  drew her first paid for it. Shrinking the cell earlier only moved the stall from the Shop to Home.
+- **Did:** `FormData.menu_frames_path` — deliberately a **path**, not a resource reference, because a
+  reference would pull the sheet in with the form itself including during a run, which is exactly
+  what the menu/gameplay split exists to avoid. `Main._kept_paths()` appends it for the **equipped**
+  character only, so the boot screen's threaded loader fetches it behind the bar. Warming the whole
+  roster would hold every character's sheet at once, which is the bill the Shop's lazy cards were
+  built to avoid.
+- **Measured on the phone, same device and save:**
+  `switch HomeScreen | build 695.1 ms · worst frame 752.4 ms` → **`build 260.8 ms · worst frame
+  293.7 ms`**, and the loading screen's resource count went 23 → 24, which is the sheet arriving
+  where it should.
+- **Not claiming it is gone.** Home still builds in ~261 ms against ~37 ms before this character
+  existed. The remainder is Home building the live preview itself plus the first GPU upload of the
+  sheet, which a CPU-side `load()` does not force. The next lever, if it is worth one, is drawing it
+  once off-screen during the boot screen.
+- **The path is written in two places** — the form warms it, the rig loads it — so
+  `test_verdant_shade_visual` now asserts they match.
+- **Files:** `scripts/resources/form_data.gd`, `data/forms/verdant_shade.tres`,
+  `scenes/main/main.gd`, `tools/godot/test_verdant_shade_visual.gd`.
+- **Verified:** `tools/validate.sh` → OK; `test_verdant_shade_visual` and `test_form_catalog` pass;
+  built, installed and measured on the device.
+
+## 2026-09-20 — Dash slowed another 20%
+- **Who:** Claude Code (Opus 5)
+- **Did (owner):** "in the gameplay screen when the character dashes slow the dash down for 20%".
+  `PlayerTuning.dash_speed` 3,960 → **3,168 px/s** in `data/player/default_player_tuning.tres` and
+  the schema default, the same pair the −10 % pass on 2026-09-15 changed.
+- **Why one number was enough.** Everything that modifies the dash is a *fraction of* it — the
+  launch burst, `momentum_step` / `momentum_max`, the mutation multiplier and RUSH all multiply on
+  top — so they scale with the base and keep their relative feel. Nothing in the data or the tests
+  hard-codes an absolute dash speed; the tests assert the multiplier, not the px/s.
+- **What it costs in feel:** a 1080 px cruise crossing goes from ~273 ms to ~341 ms. Fixed times
+  around it are unchanged (windup 0.065 s, wall impact 0.14 s, focus 0.32 s), so the pause at each
+  wall now reads as a slightly smaller share of the loop.
+- **Verified:** `tools/validate.sh` → OK, `test_movement` and `test_mutation_effects` pass.
+- **Docs:** [player_dash.md](systems/player_dash.md) tuning line.
+
+## 2026-09-20 — The stray fragments were in the source art; run HUD decluttered
+- **Who:** Claude Code (Opus 5)
+- **Owner report, with a phone screenshot:** a fragment of another animation still floats above the
+  character's head in a run and in the Shop, the boss banner eats the top of the arena, and the run
+  header is crowded.
+- **The fragments are in the source pack, not the packing.** The gutter fix earlier today was right
+  but it was fixing the wrong thing. Measured `wall_bottom_00.png` directly: content in rows 22–95,
+  then a gap, then the character from row 125. The pack's frames are cut out of phase atlases and
+  the cut takes a sliver of the neighbouring cell with it — a band of flame tips, severed flat.
+  **39 of 108 frames** carry one.
+- **Fixed in the intake, narrowly.** `strip_floating_strays` drops any connected piece lying wholly
+  above the top of the largest piece. Tried and rejected first: "remove anything touching a frame
+  edge" — it misses the real cases (the strays sit just *below* the edge) and 17 frames legitimately
+  run off the canvas. The rule as shipped keeps the leaves this character scatters in `death` and
+  `revive_spawn`, which is why it is phrased around the body rather than around the edge.
+  152,810 source pixels removed across 8 states; `wall_bottom` alone was 62,298.
+- **Verified by measurement, not eye:** at most 16 pixels of alpha ≤ 10 (4% opacity) survive above
+  the body in any `wall_bottom` cell, and the re-rendered state board shows a clean silhouette.
+- **The drift assertion was the wrong proxy** once the strays were gone: removing them changed the
+  silhouette boxes and the blanket budget failed on a dissolving `death`. It now measures spread
+  *within each looping animation* — where drift would actually read as jitter — instead of across
+  the whole pack.
+- **Run HUD, on owner request:** the character portrait ring is gone from the header (the character
+  is already on screen a few hundred pixels below it), the boss readout is a line rather than a
+  framed plate — **76 px tall, was 170** — and RUSH moved from the header stack to the bottom edge
+  where the thumb already is. The header stack tightened by ~14 px on top of that. Net: the header
+  now ends well clear of the playfield.
+- **Files:** `tools/art/extract_playable_characters.py` (`strip_floating_strays`),
+  `scenes/gameplay/game_world.{tscn,gd}` (HUD), `tools/godot/test_verdant_shade_visual.gd`.
+- **Verified:** `tools/validate.sh` → OK; `test_verdant_shade_visual` passes; boss line and RUSH
+  positions measured live in a real `GameWorld`.
+- **Follow-up for the art pack:** `concept_art/verdant_shade_sprite_v1/build_sprite_pack.py` is
+  cutting its frames with an offset that catches the neighbouring atlas cell. The intake now cleans
+  up after it, but the pack should be fixed at source so the next character does not inherit it.
+- **Not done, and it is an owner call:** "more room for the arena". The playfield size comes from
+  `ARENA_FLOOR_UV` on the backdrop, and widening it scales `_player_radius` with it, which changes
+  dash distances and enemy spacing — a gameplay change, not a layout one. The HUD decluttering
+  above reveals more of the arena without touching the balance.
+
+## 2026-09-20 — Verdant Shade, after the phone: atlas bleed, loop rate, Shop hitch
+- **Who:** Claude Code (Opus 5)
+- **Owner report from the phone:** "the cutouts are not perfect, sometimes the current playing
+  animation frames has cutout from another", the first Shop open hitches, and the frames "are not
+  that smooth, maybe make them loop faster".
+- **The cutouts were a real packing bug, and mine.** The first sheets put cells edge to edge, and
+  measurement confirmed the worst case: **0 px of transparent margin** — the art reached the cell
+  boundary on some frames. The canvas texture filter samples half a texel outside an `AtlasTexture`
+  region, so it was pulling pixels from the neighbouring frame and sticking them on the current one.
+  Fixed by giving every cell an **8 px transparent gutter** (`CELL_PADDING`), verified by asserting
+  the gutters contain zero art pixels. The character's silhouette renders clean now.
+- **Loops play 1.4× faster** (`loop_fps_scale` in the pack spec): idle and the walls go 6.7 → 9.4
+  fps, the storefront idle 6 → 8.4. One-shots are deliberately **not** scaled, because their rates
+  are matched to `STATE_LENGTHS` and speeding them up would end them before their state does.
+  This is a compromise, not a fix: a 12-frame loop is simply few frames, and the honest answer is
+  more frames per loop. Recorded for the next art pass.
+- **The Shop hitch was the menu sheet.** The first wake of a card uploaded a 3552 px square, and the
+  device log showed `switch ShopScreen | build 524.4 ms`. The menu cell is 512 now rather than 576 —
+  she draws at ~520 px on a card, so it is still about 1:1 — which takes the sheet to 3168² and
+  about a fifth off the upload. Gutters cost a little back, hence 3168 rather than 3072.
+- **Files:** `tools/art/extract_playable_characters.py` (`CELL_PADDING`, `loop_fps_scale`, padded
+  packing), `scenes/player/visuals/verdant_shade_visual.gd` (`MENU_SCALE` 384/512),
+  `tools/godot/test_verdant_shade_visual.gd` (asserts the scaled loop rates), `docs/ASSETS.md`.
+- **Verified:** `tools/validate.sh` → OK, `test_verdant_shade_visual` passes, full suite
+  **28 passed / 10 failed** (the ten documented M10-stale ones), Shop card re-rendered at full
+  resolution and inspected for edge slivers — none. Rebuilt, installed and launched on the phone:
+  clean boot, no errors.
+- **Still open:** whether 1.4× reads better to the owner than the authored rate, and the sharpness
+  trade at a 512 menu cell on a 1440p screen. Both are looks-at-it decisions.
+
+## 2026-09-20 — Verdant Shade: the first character built whole-frame end to end
+- **Who:** Claude Code (Opus 5)
+- **Did:** added **Verdant Shade** (`verdant_shade`) as a playable whole-frame sprite character, to
+  the contract written earlier today. No bone rig, no puppet: 16 real multi-frame animations on one
+  `AnimatedSprite2D`. Roster is eight.
+- **The art pack arrived exactly to spec**, which is worth recording because it is the first time:
+  108 frames, 78 gameplay/wall at 512² and 30 storefront at 724², straight alpha with RGB zeroed
+  under alpha 0, and a **content-box centre spread of 0.5 px across the whole pack**. Registration
+  was the thing the contract said would decide it, and it needed no correction at all.
+- **New intake, `SHEET_PACKS`.** Individual frames in, packed atlas sheets plus ready-made
+  `SpriteFrames` out. Three sheets, chosen by the 4096 px texture floor and by what has to be
+  resident together: `run` 2304×3456 (34 frames), `react` 3072×2304 (44), `menu` 3456×3456 (30),
+  plus a standalone 384² portrait so a HUD icon never drags a whole sheet into memory. Cells are
+  384 (gameplay) and 576 (menu) — smaller than delivered, because the character draws at ~230 px in
+  a run and ~520 px on a card.
+- **Two frame sets, never both.** `verdant_shade_gameplay.tres` and `verdant_shade_menu.tres` are
+  loaded on demand, so a run never holds the storefront sheet and a menu never holds the run and
+  react sheets. Verified by probe: a gameplay instance reports the gameplay set, a Shop card the
+  menu set, and switching swaps rather than accumulates.
+- **Lazy Shop cards, which §9c said had to land before this character.** Only the focused card and
+  its neighbours are live; every other card shows its still portrait. Measured: **2 live previews
+  across 8 cards** where it used to be 8 of 8. Two things fell out of it and were fixed — a
+  single-image Wisp form must still count as live (it idles on the shared base rig), and a card
+  that has just been bought or equipped has to be woken so it can play its flourish.
+- **Decisions made, all recorded as placeholders in GDD §14 #35:** `STANDARD` tier and 0 RP, and
+  the display name, all pending owner sign-off. Green `SOUL_FLARE` dash signature; its three tints
+  were checked and sit 92–94° from the nearest reserved telegraph hue, against a 25° minimum.
+- **`idle_hover` is only the pre-landing read.** A resting character is always against a wall, and
+  the rig picks the nearest wall by alignment (the arena is a rounded polygon, so normals are rarely
+  cardinal). The 12 idle frames therefore show during the spawn and as the portrait source.
+- **Files:** `tools/art/extract_playable_characters.py` (`SHEET_PACKS`, `ingest_sheet_pack`,
+  `_write_sprite_frames`), `scenes/player/visuals/verdant_shade_visual.{gd,tscn}`,
+  `scenes/screens/shop_screen.gd` (lazy cards), `data/forms/{verdant_shade,default_catalog}.tres`,
+  `data/characters/dash_effects/verdant_shade.tres`, `scripts/autoload/save_manager.gd`,
+  `scripts/resources/form_catalog.gd`, `tools/godot/test_verdant_shade_visual.gd`,
+  `render_verdant_shade_states.*`, and the two roster tests.
+- **Verified by looking, not just by logs:** the 17-cell state board (every animation reached, none
+  missing, right wall confirmed mirrored, `wall_top` hooks visible), the Shop card, Home, and a live
+  run. A probe proved the wall counter-rotation exact — `body.global_rotation` is 0° on all four
+  surfaces, so the screen-space frames stay upright to the player.
+- **Follow-up, not invented:** she has **no separate ornament or VFX textures**, so her rig emits no
+  particles; her wake is the painted flames plus the procedural dash signature. Borrowing another
+  character's VFX was explicitly declined. Worth commissioning a small ornament set for her.
+
+## 2026-09-20 — Roster cut to seven; Ilyra 2 promoted to Ilyra
+- **Who:** Claude Code (Opus 5)
+- **Owner decision:** sprite sheets beat rigs — *"they are more complex and require more thinking
+  while sheet you just need to place them"*. Remove the bone-rigged Ilyra and Bram, keep the sprite
+  Ilyra 2 under the name Ilyra, keep only the first and last Wisp forms. Recorded as GDD §14 #34.
+- **Roster, thirteen → seven:** Void, Eclipse, Veyra, Rook, Morrow, Ilyra, Noxen. Retired: Ash,
+  Venom, Bloodmoon, Frost (Wisp forms), Bram and the bone-rigged Ilyra. The four surviving rigs stay
+  until they are re-cut as frames; the owner named only Ilyra and Bram, so nothing else was touched.
+- **The promotion is a real rename, not an alias.** `ilyra_2` → `ilyra` across the form, the dash
+  effect, the pose sheet, the visual scene and script (`Ilyra2Visual` → `IlyraVisual`), the art
+  folder, the QA board and the test. The two dash effects were byte-identical, so the rig's
+  `ilyra.tres` was simply kept.
+- **Saves migrate without losing anything.** `RETIRED_FORM_IDS` maps `ilyra_2` → `ilyra`, mirroring
+  the arena-skin mechanism that already existed, so anyone who owned the experiment owns Ilyra.
+  Retired ids need no entry: `_sanitize_cosmetic` already drops an unknown id and falls the equipped
+  slot back to Void.
+- **Her particle textures changed.** They pointed at the rig's `vfx_star.png` / `vfx_streak.png`,
+  which the deletion took with it. She uses her own previously-unused ornaments now —
+  `sparkle_small.png` for the trail, `slash_arc.png` for the dash — which is better anyway: the
+  pieces are hers rather than borrowed.
+- **Also removed as a consequence:** `tools/art/make_rig_source.py` (both its characters were
+  retired and Noxen ships as a per-file pack, so its table was empty), the Ilyra entries in
+  `build_character_rig.py`, the Bram cell table in the extractor, `render_ilyra_grip_review.*`, and
+  the four retired Wisp portraits. `REQUIRED_FORM_COUNT` 13 → 7.
+- **A pre-existing bug found and cleared, not caused by this.** After the mass deletions the first
+  boot logged `Parse Error` on `home_screen.tscn` and three Rift resources, always on a
+  `script = ExtResource(...)` line. Every one of them loads fine with a direct `load()`, so it is
+  the loading screen's threaded loader, not the data. Confirmed by building a worktree at HEAD and
+  running it: **identical errors with none of these changes**. It only appears on the first boot
+  after a cold `--import` and clears on the next run. Recorded in
+  [game_flow.md](systems/game_flow.md) beside the other intermittent headless failure.
+- **Files:** `data/forms/*`, `data/characters/*`, `scripts/autoload/save_manager.gd`,
+  `scripts/resources/form_catalog.gd`, `scenes/player/visuals/ilyra_visual.*`,
+  `scenes/debug/theme_gallery.gd`, the art tools, nine test scripts, and the docs below.
+- **Docs:** GDD §14 #34 and the character row, PROJECT_CONTEXT status/registries,
+  [forms.md](systems/forms.md), [playable_character_visuals.md](systems/playable_character_visuals.md)
+  (the experiment section now records that it won), [ASSETS.md](ASSETS.md), and
+  [character_rig_recipe.md](guides/character_rig_recipe.md), which is now marked maintenance-only.
+- **Verified:** `tools/validate.sh` → OK; `test_form_catalog`, `test_ilyra_visual` pass; Shop card
+  renders as ILYRA/MYTHIC with seven carousel dots.
+- **Next:** the two engine changes in [character_sprite_frames.md](guides/character_sprite_frames.md)
+  §9c before more frame art lands, then Ilyra's registered frame set.
+
+## 2026-09-20 — The whole-frame character contract, and two numbers that change the plan
+- **Who:** Claude Code (Opus 5)
+- **Owner decision:** playable characters are whole-frame sprites, not bone rigs. Owner generates
+  the frames; this session wrote what has to be generated.
+- **Did:** [docs/guides/character_sprite_frames.md](guides/character_sprite_frames.md) — the
+  generation contract. Every state with its frame count and fps derived from `STATE_LENGTHS`, the
+  storefront set, wall poses, ornaments, what the engine already animates (so it is not drawn
+  twice), what is procedural and needs no art at all, naming, sheet layout, and the budget. Linked
+  from AGENTS.md §1 read order, the system doc header and the PROJECT_CONTEXT repo map.
+- **Two measurements that changed the recommendation, both of which were assumptions until checked:**
+  - **The character draws at ~230 px, not 627.** The playfield is inset, so `_player_radius` clamps
+    at its 70 maximum and the rig draws `radius × 3.35` ≈ 235 design px. Confirmed on a real 1080 ×
+    1920 gameplay render. Ilyra 2's 627 px pack is a 2.7× downscale of pixels nobody sees, so the
+    contract delivers 512 and packs 384 — 38% of the pixels, no visible loss.
+  - **The Shop, not the download, is the constraint.** `ShopScreen._build_cards()` instantiates
+    *every* character card at once and each holds its whole `SpriteFrames`. A texture costs its full
+    uncompressed size in VRAM whatever it cost on disk, so thirteen live cards at the recommended
+    frame budget is 858 MB. Two engine changes are needed **before** seven characters of art exist:
+    split each character's frames into a menu resource and a gameplay resource, and build cards
+    lazily. Written up as §9c; not implemented yet.
+- **Sheet layout:** owner asked for one sheet per character. It does not fit — 98 cells at 627 px is
+  7524 × 8151 and Vulkan only guarantees 4096². Three sheets per character at 384 px cells
+  (`_run`, `_react`, `_menu`), one row per animation with a ragged right edge, and the split is
+  exactly the load split §9c needs anyway. Frames are still generated individually and packed by
+  `extract_playable_characters.py`: no image model makes 78 consistent frames in one canvas, a bad
+  frame should be re-rollable alone, and packing is where the anchor gets measured instead of trusted.
+- **Verified:** project map regenerated and clean; no code changed.
+- **Next:** the two engine changes in §9c, then the packer, then the first character's frames.
+
+## 2026-09-20 — Ilyra 2's jointed menu puppet: built, then reverted by the owner
+- **Who:** Claude Code (Opus 5)
+- **Context:** the open question from the entry below — she holds still where Morrow moves. Built
+  the jointed menu body the parts were extracted for, then the owner stopped it mid-review:
+  *"codex will generate the frame posses you will implement"*. Everything below is reverted; the
+  menus are back to the held `storefront_welcome` painting. Written down so nobody builds it twice.
+- **What was built and worked.** `Ilyra2MenuPuppet`, a 12-joint Node2D chain generated from the
+  extracted parts by `tools/art/build_ilyra_2_puppet.py`, swapped in for the painting whenever the
+  rig is in preview mode, every joint on its own sine so no two frames matched. It rendered
+  correctly on both the Shop card and Home.
+- **Four things it cost, all worth knowing:**
+  - **Hand-authored joint angles do not converge.** Three rounds of eyeballed shoulder/elbow/wrist
+    angles put her fists behind her head. What fixed it in one pass was authoring the *wrist
+    position* — the one thing readable off the painting — and solving the two angles from the
+    limbs' own measured lengths. Author endpoints, solve joints.
+  - **Measure before laying out.** The first table was eyeballed and put her chin on her waist. The
+    fix was to measure every part's pixel size and hang each from a landmark taken as a fraction of
+    figure height from `storefront_welcome.png`.
+  - **She has two arms, not four.** `upper_arm_02/03` + `hand_relaxed_*` are a *relaxed alternate*
+    for the same pair, not a second pair. Building all four made her a four-armed idol.
+  - **The kit ships one closed fist.** `hand_grip_b` is an open hand despite the name; her left fist
+    had to be `hand_grip_a` mirrored. Now recorded in [ASSETS.md](ASSETS.md).
+- **Also fixed, and it was a real bug:** a Shop card is configured *before* it is added to the tree,
+  so `set_preview_mode` landed ahead of `_ready` and anything that touched a child node was silently
+  dropped. Harmless for the painted rig (`_ready` re-settles the pose anyway), which is why it had
+  never shown; it is a trap for any future rig that owns child state.
+- **Files:** reverted `scenes/player/visuals/ilyra_2_visual.{gd,tscn}`; deleted
+  `ilyra_2_menu_puppet.{gd,tscn}`, `tools/art/build_ilyra_2_puppet.py`,
+  `tools/godot/render_ilyra_2_puppet.*`. **Kept** the extracted parts under
+  `assets/art/characters/playable/ilyra_2/puppet/` and their `PUPPET_PACKS` intake — nothing loads
+  them, and they are the material if part-level motion is ever revisited. Say the word to delete.
+- **Docs:** [ASSETS.md](ASSETS.md) gains the puppet pack row, the fist gap, and
+  **"Commissioning an animation loop as whole frames"** — the registration rules any new frame set
+  must meet (one canvas, one anchor pixel, small deltas, ≥12 frames, closed loop). That section is
+  the brief for the frames Codex is generating next.
+- **Verified:** `tools/validate.sh` → OK, `test_ilyra_2_visual` passes, and the re-rendered Shop card
+  shows the painted frame again.
+- **Next:** implement Codex's frame set against the rules in that ASSETS.md section.
+
+## 2026-09-19 — Ilyra 2's menu idle stops flip-booking
+- **Who:** Claude Code (Opus 5)
+- **Owner report from the phone:** the game runs fine, but her Home and Shop animation "is not
+  smooth" next to the other characters.
+- **Diagnosed by looking, as asked.** Captured 130 frames of the Shop card for Morrow and for Ilyra 2
+  and tiled every eighth frame side by side (`logs/menu/<id>/`). Morrow is *one* drawing whose parts
+  move — hood tilts, hands orbit, runes drift, cloak hem breathes — so his silhouette is stable and
+  the motion is continuous. Ilyra 2 was cutting between four *different* whole paintings, so her
+  arms, fans and silhouette all jumped at each swap and nothing moved in between. That is a
+  flip-book, and no amount of timing fixes it.
+- **Did:** her menu rest is one painting held steady now (`MENU_REST`), not a four-frame loop. The
+  motion comes from the shared body breath and her drifting ornament ring, which is the same read
+  Morrow has. The flourish stays as a reaction to a pick or a purchase, where a cut is intended.
+- **Files/systems:** `scenes/player/visuals/ilyra_2_visual.gd`, `tools/godot/test_ilyra_2_visual.gd`
+  (now asserts the rest pose is *held*, not cycled), `tools/godot/render_ilyra_2_poses.gd`.
+- **Verified:** `tools/validate.sh` → OK, `test_ilyra_2_visual` passes, and the re-captured strip
+  shows no silhouette jump.
+- **Still open, and it needs a decision.** The cut is gone but she is now a still illustration with
+  sparkles, where Morrow is a moving character. Matching him means giving her a real rig. The art
+  for it exists and is good: `concept_art/ilyra_2_sprite_test/detached_parts/` holds a 30-part
+  puppet — head, armoured torso, four upper arms, four forearms, six hands, waist, hip flaps, two
+  thighs, two boots, underskirt — drawn to one scale with **gold joint caps at every shoulder, elbow
+  and wrist**, which is exactly the design that stops cutouts gapping (the seam problem that forced
+  Ilyra v1 onto skinned meshes). Two caveats found while checking: the parts correspond to **no**
+  existing pose — template-matching them against `storefront_settle.png` scores 0.18–0.27 against
+  0.6–0.7 for a real match — so every joint has to be placed by hand, and `waist_armor` already has
+  the skirt panels painted in, so the seven separate `skirt_panel` pieces would double up unless the
+  waist is used bare. That is the "add an animated character" job in
+  [the recipe](guides/character_rig_recipe.md), not a tweak.
+
+## 2026-09-19 — Ilyra 2 performs in the menus and carries her own ornaments
+- **Who:** Claude Code (Opus 5)
+- **Did (owner request, from the reference sheet):** Codex had already cut the sheet into a 46-part
+  puppet kit plus a four-frame storefront loop under
+  `concept_art/ilyra_2_sprite_test/detached_parts/`, so this brought the useful half of it into the
+  game through the deterministic pipeline rather than re-cutting anything.
+  - **Her ornaments drift around her.** `CharacterAura` takes several pictures now instead of one,
+    so her ring is six of her own loose pieces — two sparkle sizes, a sparkle pair and three crown
+    shards — rather than a repeated generic star. Fourteen of them, on a wider orbit, sized to read
+    at gameplay scale. The ring sits outside `%MotionRoot`, so it keeps turning while she is idle,
+    drifting along an edge and hanging off a wall, exactly as asked.
+  - **She performs in the menus.** Home and the Shop card play her own welcome → blink → settle
+    loop, and **picking or buying her card throws the fan flourish** — the attack in the storefront.
+    Those frames are a 600×724 canvas of their own, drawn at 627/724 so she stands the same height
+    as she does in a run.
+  - Two pipeline intakes for it: `ORNAMENT_PACKS` (which also zeroes the RGB under alpha 0 the QC
+    found on all 46 parts, so `fix_alpha_border` has nothing stale to bleed) and `FRAME_PACKS`.
+- **Two things the kit got wrong, corrected on the way in:** `dash_slash.png` is a pair of small
+  sparkles and `sparkle_pair.png` is the big slash arc — the names are swapped, so the intake renames
+  them rather than carrying the mistake into the game.
+- **A consequence worth stating:** with the storefront loop owning menus and the wall poses owning a
+  live character's rest, `idle_hover.png` is no longer reachable as a *pose* — it is her portrait
+  and nothing else — and `idle_blink.png` is superseded by `storefront_blink`. The blink machinery
+  she had is gone rather than left dead.
+- **Files/systems:** `scenes/player/visuals/character_aura.gd` (+`mote_textures`),
+  `ilyra_2_visual.{gd,tscn}`, `tools/art/extract_playable_characters.py`,
+  `assets/art/characters/playable/ilyra_2/{ornaments,storefront}/`,
+  `tools/godot/{test_ilyra_2_visual,render_ilyra_2_poses}.gd`, ASSETS.md, the playable-character
+  system doc.
+- **Verified:** `tools/validate.sh` → OK; `test_ilyra_2_visual` passes with new coverage for the menu
+  loop, the flourish on both menu events, the menu scale, and Reduced Motion holding one menu frame.
+  Re-rendered the pose board: **23 of 23 cells** reach their painting, storefront frames included.
+- **Caught by a probe, not by eye:** the ring silently rendered *nothing* for a while because I put a
+  `#` comment inside the `.tscn` node block. A `.tscn` has no comments — the parser stops reading
+  properties at that line and the node loads with defaults, so `mote_textures`, `mote_count` and
+  everything below it were dropped. A one-line probe printing each mote's texture found it; the Home
+  screenshot had not, because the background has its own floating lights. Recorded in AGENTS.md §5
+  beside the `ext_resource` id rule.
+- **Follow-ups:** at gameplay size the ring reads as a faint shimmer rather than as ornaments —
+  proportionally correct, but it wants a look on the phone before the sizes are signed off. The
+  36 puppet parts (head, torso, four arms, hands, legs, fans, braids, skirt panels) are extracted
+  and unused: they are the material for a fully rigged Ilyra 2, which is a much bigger job than this
+  and should be its own decision.
+
+## 2026-09-19 — Per-character dash signatures, and the build on the phone
+- **Who:** Claude Code (Opus 5)
+- **On the phone first, as asked:** exported the Android debug APK from Windows (`JAVA_HOME` =
+  Android Studio's JBR 21, Godot 4.7.2 at `D:/Godot_v4.7.2-stable_win64.exe/`), installed and
+  launched it on the connected Galaxy S24. Clean boot, no errors: Vulkan **Forward Mobile** on a
+  Samsung Xclipse 940, `physics=120 Hz` (FramePacing matched the panel), audio synthesised in
+  1.33 s, Home up in 1.30 s. Morrow's new aura motes are visible drifting around him on Home. The
+  Windows recipe is worth recording — AGENTS.md §4 only has the macOS one.
+- **Did:** each of the twelve characters now has its own dash *effect*, not a purchasable recolour.
+  `DashEffectData` carries a `Signature` (RIBBON, BLADE_ARC, TWIN_ARC, DUST_WAKE, RUNE_WAKE,
+  SOUL_FLARE), three tints, a spark count and ribbon numbers; `DashEffectFx` draws it from six
+  `Line2D` ribbons and three `CPUParticles2D` emitters, all on `VfxPool`'s one shared additive
+  material. No new art, no shader. Bram cuts once, long and thin; Ilyra and Ilyra 2 lay two bowed
+  ribbons, one per fan, and turn the shared launch flash down to 0.45 so it does not stack; Rook
+  sheds a broad dust fan; Morrow's sparks lag and tumble; Veyra and the Wisp forms flare radially.
+- **Designed against a survey, not a guess.** Six parallel readers mapped the dash path end to end
+  and a completeness critic then audited the result *and* the code I had already landed. It caught
+  five real defects, which is why they are not in this commit: a `Line2D` ignores `default_color`
+  once it has a gradient, so **every ribbon was rendering white** and the whole per-character point
+  was being dropped; nine separate `CanvasItemMaterial`s were breaking 2D batching; `z_index = 3`
+  drew the signature over every pooled trail instead of at the VFX pool's absolute 0; the effect
+  only played on wall impact, so a four-redirect chain left one streak covering the final leg; and
+  `setup(_vfx)` injected a pool that was never read.
+- **Files/systems:** `scripts/resources/dash_effect_data.gd`, `scenes/gameplay/dash_effect_fx.gd`,
+  `data/characters/dash_effects/*.tres` (12), `scripts/resources/form_data.gd` (+`dash_effect`,
+  validated), `data/forms/*.tres` (12 linked), `scenes/gameplay/game_world.gd`,
+  `tools/godot/test_dash_effects.gd` (new), player_dash / shop / forms system docs,
+  PROJECT_CONTEXT §5.2 and §5.8.
+- **Verified:** `tools/validate.sh` → OK. `test_dash_effects` covers the gap the critic named — that
+  the feature could ship inert — by asserting every character *has* an effect whose id matches, that
+  its tints clear the reserved hues, that the pool is a sibling of `EffectsLayer` at absolute z 0 on
+  one shared material, that a dash driven through the real controller leaves a ribbon **in that
+  character's colour**, that a twin-arc character draws two and others one, that a redirected leg
+  gets its own ribbon, and that Reduced Motion throws no sparks but still draws. Rendered Ilyra 2's
+  twin arc and Bram's blade arc in a live arena; they read as two different weapons.
+- **Decisions taken while the owner was away** (all reversible, all recorded here): `DashStyleData`
+  stays as the fallback rather than being retired (no save change); a redirect gets the same
+  signature as a launch rather than a cheaper variant; one recipe with twelve tunings rather than
+  twelve bespoke systems; Ilyra and Veyra get non-particle signatures because their rigs have 4 and
+  8 particles of headroom; the reserved-hue rule is enforced on the new field only. That rule
+  immediately caught Ash and Eclipse — both amber characters — so Ash's dash is pale ash rather than
+  flame, which suits the name better anyway.
+- **Follow-ups:** the ribbon is authored and reviewed on Forward Plus (desktop) but the phone runs
+  Forward Mobile, and nothing in `project.godot` pins either — worth a look on device before the
+  look is signed off. The existing streak glow, RUSH aura and pooled trails still play at full under
+  Reduced Motion (only the new signature and the speed lines are gated); changing that is a call on
+  shipped feel, not a quiet correction.
+
+## 2026-09-19 — Holding the aim arrow no longer changes the character at all
+- **Who:** Claude Code (Opus 5)
+- **Did:** The first attempt at this only flattened the shared body coil inside `aim_charge`, which
+  missed the point — the controller still *asked* for a different state the moment the arrow went
+  up, so the character still swapped pose, ran its rig's aim gesture and leaned toward the aim.
+  `WispPlayer._get_character_visual_state()` now answers `idle_hover` (or `move_fly` on a drifting
+  edge) while `State.AIMING`, so holding a finger down changes nothing: the character keeps resting
+  against its wall and the arrow is the only thing that appears. `AIM_CHARGE` stays in the
+  vocabulary — the rigs, the menus and the QA boards still reach it — but nothing in a run does.
+- **Files/systems:** `scenes/player/wisp_player.gd`, playable-character and player-dash system docs.
+- **Verified:** Re-ran the motion fixture, which performs a real press-and-hold: every frame of the
+  aim now logs `state=AIMING visual=idle_hover` with `heading=-0.000` unchanged across the
+  WAITING_AT_EDGE → AIMING transition, and `aim_charge` never appears in the run at all.
+  `tools/validate.sh` → OK; `test_ilyra_2_visual`, `test_playable_character_visual`, `test_movement`,
+  `test_gameplay_slice` and `test_game_flow` pass.
+- **Also fixed:** every file edited through Python this session had been rewritten with CRLF, which
+  `.gitattributes` forbids (`* text=auto eol=lf`). All 46 are back to LF, and the pose-sheet writer
+  in `extract_playable_characters.py` now passes `newline="
+"` so a Windows run cannot reintroduce
+  it.
+
+## 2026-09-19 — No more aim coil, and every character carries a ring of lights
+- **Who:** Claude Code (Opus 5)
+- **Did (owner request):**
+  - **The pre-attack coil is gone.** Holding the aim arrow used to wind the whole body back along
+    its own axis, shiver and squash it to 1.16/0.85; the owner found it unnatural. `aim_charge` is
+    the resting breath now, so a character standing on a wall keeps standing on it and only leans
+    toward the aim. Wall and landing animations are untouched. Each rig's own limb gestures while
+    aiming (Rook's wings, Morrow's runes, Ilyra's fans) still play — say the word and those go too.
+  - **`CharacterAura`**: a reusable ring of lights built in code, no new art. Each mote runs its own
+    ellipse at its own speed and phase, dips behind the body on the far half of the orbit and passes
+    in front on the near half, and stretches along the travel axis during a dash. It hangs beside
+    `%MotionRoot` rather than inside it, so the body's squash and dash heading never drag it around,
+    and `PlayableCharacterVisual` steps it, stills it for Reduced Motion and leaves it out of
+    `get_layer_bounds()` so no rig's `design_size` contract moves.
+  - Wired to **Ilyra 2** (12 star motes — she is a painted pose with no limbs of her own, so the
+    ring is what keeps her alive between swaps), **Veyra** (7 soul sparks), **Rook** (7 wing dust),
+    **Morrow** (6 rune fragments) and **Bram** (6 pale streaks), each in its own colour.
+- **Files/systems:** `scenes/player/visuals/character_aura.gd` (new),
+  `playable_character_visual.gd`, `{veyra,rook,morrow,bram,ilyra_2}_visual.tscn`,
+  `tools/godot/test_ilyra_2_visual.gd`, AGENTS.md §5, the playable-character system doc.
+- **Verified:** `tools/validate.sh` → `VALIDATE: OK`; `test_playable_character_visual` and
+  `test_ilyra_2_visual` pass, the latter now also checking that the aura has motes, sits outside
+  `%MotionRoot`, drifts, and stops dead for Reduced Motion. Rendered Home, the arena and the
+  six-character lineup.
+- **Cost a while, worth writing down:** adding the aura broke the boot with `Parse Error` on
+  *unrelated* lines of *other* scenes, and the victim changed between runs. The cause was the
+  `ext_resource` ids I generated (`aura_rook`): Godot always writes `<number>_<name>` and its text
+  loader depends on that prefix. Renumbering them fixed it. Now in AGENTS.md §5.
+- **Follow-ups:** The rigged **Ilyra** has no aura — her scene is generated by
+  `build_character_rig.py` (a hand edit would be lost) and has uncommitted work on it, so adding
+  hers means teaching the generator. The Shop's CHARACTERS tab now builds up to 38 extra mote
+  sprites across its cards; `bench_character_previews.gd` has not been re-run since.
+
+## 2026-09-19 — One life, Soul Vessel drops, and the DASHES tab removed
+- **Who:** Claude Code (Opus 5)
+- **Did (owner request):**
+  - **Shop is three tabs.** DASHES is gone — a dash is going to belong to its character, not be a
+    separate purchase. The tab, its cards, the animated trail/burst preview and the Shop's whole
+    dash-style path are removed; the `DashStyleData` system, the save fields and the run-time trail
+    tint stay untouched underneath, so nothing about how a dash looks in play changed yet.
+  - **A run starts on one Soul Fragment and death is final.** `maximum_health` 3 → 1. There was
+    never a revive to remove: `MonetisationService.PLACEMENT_REVIVE` is plumbing with no UI and
+    stays that way until the rewarded-ad flow is built.
+  - **SOUL VESSEL left the upgrade tray and became a rare floor drop.** A killed enemy has a
+    `soul_vessel_drop_chance` (0.012) of dropping a `SoulVesselPickup`: +1 maximum fragment, filled,
+    **with no cap** — three collected is four fragments. It is a `SoulShardPickup` subclass, so it
+    attracts, sweeps and expires exactly like a Rift Points shard and a wave change never strands
+    one. The tray is seven cards now; a card capped at three levels could not express an uncapped
+    count, which is why the effect moved rather than being duplicated.
+- **Files/systems:** `scenes/screens/shop_screen.{gd,tscn}`, `scenes/pickups/soul_vessel_pickup.{gd,tscn}`,
+  `scenes/pickups/soul_shard_pickup.gd` (its canvas size is an export now, so a pickup drawn on a
+  444 px icon is the same size on screen), `scenes/gameplay/game_world.gd`,
+  `scripts/resources/{player_tuning,run_progression_tuning}.gd`, `scripts/components/run_progression.gd`,
+  `data/player/default_player_tuning.tres`, `data/progression/default_run_progression.tres`,
+  **deleted** `data/mutations/soul_vessel.tres`, `tools/godot/{render_devlog_tour,qa_capture}.gd`,
+  GDD §5.3, shop / mutations / player_health system docs, PROJECT_CONTEXT §5.2/§5.8/glossary.
+- **Verified:** `tools/validate.sh` → `VALIDATE: OK`. Rendered the Shop: three tabs (CHARACTERS,
+  ARENAS, NO ADS) laid out correctly. Four tests assumed the old three-fragment start and were
+  fixed rather than weakened — `test_movement`, `test_playable_character_visual` and
+  `test_ilyra_2_visual` now stock fragments before the beats that need a *survivable* hit (they test
+  input buffering and hurt poses, not the health economy), and `test_player_health_flow` asserts the
+  new one-fragment start before climbing to three for its i-frame/death/summary ladder.
+  `test_mutation_effects` now drops three real Soul Vessels and checks the maximum passes three.
+- **Follow-ups:** **Per-character dash effects are not built yet** — this change only removed the
+  tab. Proposed next: a `DashEffect` resource per character driving GPUParticles2D shape/gradient,
+  an optional Line2D slash ribbon, character afterimages and an optional `.gdshader` pass, authored
+  in Godot with no new art. `soul_vessel_drop_chance = 0.012` (~1 per 83 kills) is a first guess and
+  needs a device pass together with the one-life difficulty; the vessel reuses the old upgrade icon
+  and the shard chime pitched down, so it could use art and a sound of its own.
+
+## 2026-09-19 — Ilyra 2 integrated as an experimental sprite character
+- **Who:** Claude Code (Opus 5)
+- **Did:** Wired Codex's reviewed `ilyra_2` pack into the game **beside** the rigged Ilyra, which is
+  untouched. One painting per state on a single `AnimatedSprite2D` under `%MotionRoot`; the shared
+  base still owns the state machine, heading, alpha, squash, bounce and the no-collision contract.
+  Extended the art pipeline with a `POSE_PACKS` intake that copies the 20 approved PNGs **byte for
+  byte** and measures each silhouette into a generated `CharacterPoseSheet`. The dash is the attack
+  (the contact accent holds `dash_loop_01_attack`); the four wall paintings are picked from the
+  inward `surface_normal` and the base's wall rotation is cancelled again for them, eased so a
+  ceiling landing does not spin the picture in one frame; Reduced Motion freezes cycling, blinking
+  and particles but keeps the pose and the wall. Registered as form `ilyra_2` / `ILYRA 2`, Mythic,
+  0 RP, catalog 11 → 12, obtainable only through the normal free Shop flow (no save was mutated).
+- **Inspected the pack first (all 20 usable):** correct four-arm anatomy, clean straight alpha, one
+  identity, all 627×627. Defects found and accepted: eight paintings clip a boot toe or crown tip at
+  the canvas edge (`victory` worst, 143 px of the crown), and `wall_top` is drawn at 0.84 inside
+  extra padding — corrected with a per-pose ×1.19.
+- **Anchoring, measured not assumed:** head template matching across the pack put every pose within
+  ±5 % of one scale except `wall_top`. Centring each pose's opaque bounding box was tried, rendered
+  as pair overlays, and **rejected** — that box moves with the pose, so it lifted the crouches off
+  their footing. The pack is framed from one camera, so all offsets are zero; each pose's measured
+  drift is recorded in the sheet for review.
+- **Files/systems:** `scenes/player/visuals/ilyra_2_visual.{gd,tscn}`,
+  `scripts/resources/character_pose_sheet.gd`, `data/characters/ilyra_2_poses.tres`,
+  `data/forms/ilyra_2.tres` + catalog, `FormCatalog.REQUIRED_FORM_COUNT`,
+  `SaveManagerService.VALID_FORM_IDS`, `tools/art/extract_playable_characters.py`,
+  `tools/godot/test_ilyra_2_visual.gd`, `tools/godot/render_ilyra_2_poses.{gd,tscn}`,
+  `assets/art/characters/playable/ilyra_2/`, playable-character system doc, rig recipe §1c,
+  ASSETS.md, PROJECT_CONTEXT §2/§5.1/§5.2/§5.8/§6.
+- **Verified:** `tools/validate.sh` → `VALIDATE: OK`. `tools/run_tests.sh` → **26 passed, 10 failed**;
+  all ten failures are the pre-existing M10-stale tests (missing `forms_screen.tscn`,
+  `purchase_form`, `configure_run_profile`, an `is_unlocked()` signature) and none touch this change
+  — `test_ilyra_2_visual`, `test_playable_character_visual` (she is in its `RIGGED` list now) and
+  `test_form_catalog` all pass. Rendered and read the 21-cell pose board
+  (`render_ilyra_2_poses.tscn`), the gameplay showcase and the six `motion_contact_sheet` windows:
+  the dash-as-attack sequence, both wall landings and the flourishes all read correctly.
+- **Follow-ups:** Owner verdict — keep, promote to production art (then GDD/ADR, a price and the
+  clipped crowns and boot toes re-generated) or delete. **Not verified on a phone: no device was
+  attached to this machine** (`adb devices` empty), so readability at gameplay size is still open —
+  the desktop capture already suggests a painted figure loses detail at ~150 px. The Godot MCP
+  server could not be used either: `.mcp.json` holds macOS paths, so the game was driven through the
+  Windows Godot binary directly instead.
+
+## 2026-09-19 — Ilyra 2 whole-pose sprite experiment
+- **Who:** Codex (GPT-5)
+- **Did:** Left the existing procedural/skinned Ilyra untouched and generated a separate source-only
+  Ilyra 2 experiment: five transparent 2×2 pose sheets covering all thirteen visual states, a
+  four-frame dash-as-attack sequence, four distinct screen-oriented arena-surface holds, reactions
+  and menu flourishes. Split them into twenty equal-canvas sprites, removed neighboring-cell edge
+  debris, regenerated the bottom hold with its missing fourth arm and the ceiling hold with complete
+  padded fists, and wrote the state manifest, final prompt set and ready-to-paste Claude integration
+  brief. No catalog, save, scene, script or runtime asset was added.
+- **Files/systems:** `concept_art/ilyra_2_sprite_test/`; `docs/ASSETS.md`; generated project map.
+- **Verified:** 20/20 proposed final PNGs are 627×627 RGBA with alpha extrema 0–255; reviewed the
+  complete final contact sheet and individual dash/top/left/bottom poses; 99 scripts parsed with
+  0 failures; generated project map current; `git diff --check` clean. `tools/validate.sh` cannot
+  run on this Windows host because WSL has no `/bin/bash`; its script-parse/map checks were run
+  directly instead.
+- **Follow-ups:** Owner reviews the pose board. If approved, give Claude
+  `concept_art/ilyra_2_sprite_test/CLAUDE_IMPLEMENTATION_PROMPT.md`; integration must preserve the
+  current Ilyra and normalise each pose's opaque bounds around one stable collision-centre anchor.
+
 ## 2026-09-18 — Ilyra v3.1 continuous skinned-source replacement
 - **Who:** Codex (GPT-5)
 - **Did:** Followed Claude's superseding `ART_REQUEST_SKINNED.md` contract for Ilyra only. Replaced

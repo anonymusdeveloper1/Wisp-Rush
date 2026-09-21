@@ -74,6 +74,10 @@ const HAZARD_SCENES: Dictionary = {
 }
 ## The Rift Points pickup; its scene keeps the soul shard name (the art is a shard).
 const RP_PICKUP_SCENE: PackedScene = preload("res://scenes/pickups/soul_shard_pickup.tscn")
+## The rare Soul Fragment pickup.
+const VESSEL_PICKUP_SCENE: PackedScene = preload(
+	"res://scenes/pickups/soul_vessel_pickup.tscn"
+)
 const REAPER_SCENE: PackedScene = preload("res://scenes/bosses/reaper_boss.tscn")
 ## Boss variants keyed by boss id (`RiftData.boss_id`, Endless pools); every pick resolves to one.
 const BOSS_VARIANTS: Dictionary = {
@@ -136,16 +140,22 @@ const REDIRECT_HAPTIC_AMPLITUDE: float = 0.4
 ## Design pixels the backdrop extends past the viewport so shake never reveals its edges.
 const BACKGROUND_OVERSCAN: float = 16.0
 ## HUD geometry in design pixels (1080-wide canvas), measured from the safe-area insets.
-const HUD_RING_SIZE: float = 144.0
+## Header metrics. Owner decision 2026-09-20: the run header was eating the top of the arena, so
+## the character portrait ring is gone (the character is already on screen, a few hundred pixels
+## below it), the boss readout is a line rather than a framed plate, and RUSH moved to the bottom
+## edge where the thumb already is. What is left of the header is the score, the run readouts and
+## the two buttons, and it ends well clear of the playfield.
+const HUD_STATS_HEIGHT: float = 108.0
 const HUD_PAUSE_SIZE: float = 112.0
 const HUD_PLATE_TOP: float = 22.0
-const HUD_WAVE_TOP: float = 150.0
-const HUD_XP_TOP: float = 192.0
-const HUD_LEVEL_TOP: float = 214.0
+const HUD_WAVE_TOP: float = 136.0
+const HUD_XP_TOP: float = 176.0
+const HUD_LEVEL_TOP: float = 198.0
 ## RUSH row (label + slim bar) under the soul level; the boss panel and callouts sit below it.
-const HUD_RUSH_TOP: float = 252.0
 const HUD_RUSH_HEIGHT: float = 32.0
-const HUD_BOSS_TOP: float = 296.0
+## How far above the bottom safe edge the RUSH meter sits.
+const HUD_RUSH_BOTTOM_GAP: float = 26.0
+const HUD_BOSS_TOP: float = 240.0
 const HUD_CALLOUT_TOP: float = 474.0
 const HUD_FOCUS_TOP: float = 564.0
 ## UPGRADE button (tappable, shown while a level-up is banked): size and gap under the pause button.
@@ -241,6 +251,10 @@ var _daily_date_key: String = ""
 var _vfx: VfxPool
 ## Splash played where the Wisp hits a wall.
 var _wall_splash: WallSplashFx
+## The equipped character's dash signature, and the pool that draws it. Null for a character
+## that has none, which then keeps the shared dash-style trail alone.
+var _dash_effect: DashEffectData
+var _dash_effect_fx: DashEffectFx
 ## Aim preview path line and ×N count, fed by `WispPlayer.aim_preview_changed`.
 var _aim_guide: AimGuide
 ## Whether any enemy may still be lit by the aim preview, so clearing walks the layer only once.
@@ -302,7 +316,6 @@ var _rush_edge_glow: TextureRect
 @onready var _rift_points_count: Label = %RiftPointsCount
 @onready var _score_label: Label = %ScoreLabel
 @onready var _score_plate: PanelContainer = %ScorePlate
-@onready var _form_portrait: TextureRect = %FormPortrait
 @onready var _wave_label: Label = %WaveLabel
 @onready var _xp_bar: ProgressBar = %XPBar
 @onready var _run_level_label: Label = %RunLevelLabel
@@ -314,7 +327,7 @@ var _rush_edge_glow: TextureRect
 @onready var _combo_label: Label = %ComboLabel
 @onready var _focus_label: Label = %FocusLabel
 @onready var _instruction_label: Label = %InstructionLabel
-@onready var _boss_hud: PanelContainer = %BossHud
+@onready var _boss_hud: VBoxContainer = %BossHud
 @onready var _boss_warning: Label = %BossWarning
 @onready var _boss_bar: ProgressBar = %BossBar
 @onready var _boss_phase_label: Label = %BossPhaseLabel
@@ -379,6 +392,10 @@ func _ready() -> void:
 	# transient per-effect nodes (such as Death Pulse), and code counts on that.
 	_effects_layer.add_sibling(_wall_splash)
 	_wall_splash.setup(_vfx)
+	_dash_effect_fx = DashEffectFx.new()
+	_dash_effect_fx.name = "DashEffectFx"
+	# Another persistent pool, so a sibling of EffectsLayer for the same reason.
+	_effects_layer.add_sibling(_dash_effect_fx)
 	_aim_guide = AimGuide.new()
 	_aim_guide.name = "AimGuide"
 	# Under enemies and hazards (lit rings and crystals read on top of the line), above the floor.
@@ -404,7 +421,6 @@ func _ready() -> void:
 			_cosmetic_form.tint,
 			_cosmetic_form.visual_scene,
 		)
-		_form_portrait.texture = _cosmetic_form.texture
 	_apply_arena()
 	_update_player_mutation_stats()
 	_player.set_momentum_presentation(feel_tuning, _get_dash_trail_tint())
@@ -577,6 +593,8 @@ func warm_up_render() -> void:
 		_warm_nodes.append(enemy)
 	if _vfx != null:
 		_vfx.play(DASH_TRAIL_SHORT, centre, 0.0, Vector2.ONE, Vector2.ONE, 60.0)
+	if _dash_effect_fx != null:
+		_dash_effect_fx.warm_up(centre)
 
 
 ## Starts the held run: frees the warm-up nodes and runs the start `_ready` deferred. Main calls it
@@ -592,6 +610,8 @@ func release_start() -> void:
 	_warm_nodes.clear()
 	if _vfx != null:
 		_vfx.clear()
+	if _dash_effect_fx != null:
+		_dash_effect_fx.clear()
 	if _start_pending:
 		_start_pending = false
 		_begin_run()
@@ -608,6 +628,8 @@ func configure_run(profile: RunProfile) -> void:
 	_scripted = profile.is_scripted()
 	_cosmetic_form = profile.form
 	_dash_style = profile.dash_style
+	# Keyed by the character, so no save field and no Shop purchase stands between the two.
+	_dash_effect = _cosmetic_form.dash_effect if _cosmetic_form != null else null
 	_daily_date_key = profile.daily_date_key
 	_arena_rules = profile.create_arena_rules()
 	_rift_level = maxi(1, profile.level) if profile.is_story() else 1
@@ -620,7 +642,6 @@ func configure_run(profile: RunProfile) -> void:
 			_cosmetic_form.tint,
 			_cosmetic_form.visual_scene,
 		)
-		_form_portrait.texture = _cosmetic_form.texture
 	if is_node_ready():
 		_player.set_momentum_presentation(feel_tuning, _get_dash_trail_tint())
 		_apply_arena()
@@ -834,6 +855,11 @@ func get_landing_polygon() -> PackedVector2Array:
 ## The wall splash effect node, for tests.
 func get_wall_splash_fx() -> WallSplashFx:
 	return _wall_splash
+
+
+## The dash-signature pool, exposed for the visual tests and QA fixtures.
+func get_dash_effect_fx() -> DashEffectFx:
+	return _dash_effect_fx
 
 
 ## Live playfield rectangle, for tests and layout checks.
@@ -1177,14 +1203,15 @@ func _layout_for_viewport() -> void:
 
 
 func _layout_safe_hud() -> void:
-	# Header (board panel 2): form ring + lives/Rift Points top-left, score plate centred, pause
-	# top-right; wave, slim XP bar and soul level stacked under the plate; boss health below.
+	# Header: lives / Rift Points top-left, score plate centred, pause and upgrade top-right; wave,
+	# slim XP bar and soul level stacked under the plate; the boss line below that. RUSH is anchored
+	# to the bottom edge instead, so nothing in the header reaches down into the arena.
 	var margins: Vector4 = _get_safe_margins()
 	var top: float = margins.y
 	_health_row.offset_left = margins.x
 	_health_row.offset_top = top
-	_health_row.offset_right = margins.x + HUD_RING_SIZE + 190.0
-	_health_row.offset_bottom = top + HUD_RING_SIZE
+	_health_row.offset_right = margins.x + 260.0
+	_health_row.offset_bottom = top + HUD_STATS_HEIGHT
 	var plate_height: float = _score_plate.get_combined_minimum_size().y
 	_score_plate.offset_top = top + HUD_PLATE_TOP
 	_score_plate.offset_bottom = top + HUD_PLATE_TOP + plate_height
@@ -1194,8 +1221,9 @@ func _layout_safe_hud() -> void:
 	_xp_bar.offset_bottom = top + HUD_XP_TOP + 18.0
 	_run_level_label.offset_top = top + HUD_LEVEL_TOP
 	_run_level_label.offset_bottom = top + HUD_LEVEL_TOP + 34.0
-	_rush_row.offset_top = top + HUD_RUSH_TOP
-	_rush_row.offset_bottom = top + HUD_RUSH_TOP + HUD_RUSH_HEIGHT
+	# RUSH rides the bottom edge now, clear of the playfield and next to the thumb.
+	_rush_row.offset_top = -(margins.w + HUD_RUSH_BOTTOM_GAP + HUD_RUSH_HEIGHT)
+	_rush_row.offset_bottom = -(margins.w + HUD_RUSH_BOTTOM_GAP)
 	_boss_hud.offset_top = top + HUD_BOSS_TOP
 	_boss_hud.offset_bottom = top + HUD_BOSS_TOP + _boss_hud.get_combined_minimum_size().y
 	_combo_label.offset_top = top + HUD_CALLOUT_TOP
@@ -1850,6 +1878,18 @@ func _on_viewport_size_changed() -> void:
 func _on_player_dash_started(direction: Vector2, dash_id: int) -> void:
 	# Keep playing: a swipe on the arena sends the cards away and the level stays banked.
 	_close_upgrade_tray(&"swipe")
+	if _redirect_pending:
+		# A redirect ends one leg and starts the next without ever touching a wall, so the leg that
+		# just finished is drawn here — otherwise a chained dash would leave only its last streak.
+		_dash_effect_fx.play(
+			_dash_effect,
+			_dash_origin,
+			_player.global_position,
+			_player.get_collision_radius(),
+			_player.get_momentum_visual_level(),
+			_arena_rect.size.x,
+			_reduced_motion,
+		)
 	_dash_origin = _player.global_position
 	_dash_direction = direction.normalized() if not direction.is_zero_approx() else Vector2.RIGHT
 	# Each chain momentum step raises the dash a little (GDD §5.6).
@@ -2310,6 +2350,8 @@ func _on_enemy_killed(
 	_combo_label.visible = _combo >= 2
 	if _random.randf() <= enemy.get_shard_drop_chance():
 		_spawn_rp_pickup(world_position)
+	if _random.randf() < _run_progression.tuning.soul_vessel_drop_chance:
+		_spawn_soul_vessel(world_position)
 	_try_reapers_gift()
 	_try_soul_link(enemy, world_position, damage_event_id)
 	enemy_defeated.emit(world_position, dash_kill_index)
@@ -2366,6 +2408,24 @@ func _spawn_rp_pickup(world_position: Vector2) -> void:
 	pickup.position = world_position
 	pickup.collected.connect(_on_rp_pickup_collected.bind(pickup))
 	_pickup_layer.add_child(pickup)
+
+
+## Drops a Soul Vessel: the only Soul Fragment a run can find on the floor.
+func _spawn_soul_vessel(world_position: Vector2) -> void:
+	var pickup := VESSEL_PICKUP_SCENE.instantiate() as SoulVesselPickup
+	pickup.configure(_player, _get_pickup_attraction_radius(), _arena_rect.size.x)
+	pickup.position = world_position
+	pickup.collected.connect(_on_soul_vessel_collected.bind(pickup))
+	_pickup_layer.add_child(pickup)
+
+
+## A collected Soul Vessel raises the maximum by one and fills it; there is no cap.
+func _on_soul_vessel_collected(_amount: int, pickup: SoulVesselPickup) -> void:
+	_player.increase_maximum_health(1, 1)
+	if not is_instance_valid(pickup) or not pickup.is_auto_collected():
+		# A deeper chime than a Rift Points shard, so a fragment never sounds like currency.
+		SoundFx.play(&"shard_pickup", 0.62)
+	_show_callout("SOUL VESSEL")
 
 
 func _on_rp_pickup_collected(amount: int, pickup: SoulShardPickup) -> void:
@@ -2586,8 +2646,6 @@ func _pulse_upgrade_button(delta: float) -> void:
 
 func _on_mutation_applied(mutation_id: StringName, mutation_level: int) -> void:
 	_refresh_upgrade_button()
-	if mutation_id == &"soul_vessel":
-		_player.increase_maximum_health(1, 1)
 	_update_player_mutation_stats()
 	_update_pickup_attraction()
 	var mutation: MutationData = _run_progression.get_mutation(mutation_id)
@@ -2953,15 +3011,19 @@ func _get_form_tint() -> Color:
 	return _cosmetic_form.tint if _cosmetic_form != null else Palette.SOUL_CYAN
 
 
-## Launch burst tint: the equipped dash style's, or the form tint for SOUL.
+## Launch burst tint: the character's own dash signature, else the dash style, else the form.
 func _get_dash_burst_tint() -> Color:
+	if _dash_effect != null:
+		return _dash_effect.burst_tint
 	if _dash_style == null or _dash_style.uses_form_tint:
 		return _get_form_tint()
 	return _dash_style.burst_tint
 
 
-## Long trail tint: the equipped dash style's, or the form tint for SOUL.
+## Long trail tint: the character's own dash signature, else the dash style, else the form.
 func _get_dash_trail_tint() -> Color:
+	if _dash_effect != null:
+		return _dash_effect.trail_tint
 	if _dash_style == null or _dash_style.uses_form_tint:
 		return _get_form_tint()
 	return _dash_style.trail_tint
@@ -2986,6 +3048,12 @@ func _play_dash_trail(long_trail_end: Variant = null) -> void:
 		)
 		return
 	var base_scale: float = radius * 4.2 / VFX_SOURCE_SIZE
+	if _dash_effect != null:
+		# A character whose own signature carries the launch turns the shared burst down (or off)
+		# rather than stacking a second flash on top of it.
+		if _dash_effect.burst_scale <= 0.01:
+			return
+		base_scale *= _dash_effect.burst_scale
 	_vfx.play(
 		DASH_TRAIL_SHORT,
 		_dash_origin + _dash_direction * radius * 1.4 * length,
@@ -2999,6 +3067,17 @@ func _play_dash_trail(long_trail_end: Variant = null) -> void:
 
 func _play_impact_feedback(world_position: Vector2, inward_normal: Vector2, dash_kills: int) -> void:
 	var radius: float = _player.get_collision_radius()
+	# The signature is drawn on arrival, when both ends of the leg are known. Momentum is its
+	# only intensity knob, so a chain grows it and RUSH pins it without a branch of its own.
+	_dash_effect_fx.play(
+		_dash_effect,
+		_dash_origin,
+		world_position,
+		radius,
+		_player.get_momentum_visual_level(),
+		_arena_rect.size.x,
+		_reduced_motion,
+	)
 	var tint: Color = _get_form_tint()
 	SoundFx.play(&"wall_impact", 1.0 + minf(0.25, float(dash_kills) * 0.05))
 	if _dash_origin.distance_to(world_position) >= _arena_rect.size.y * 0.45:

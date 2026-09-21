@@ -44,7 +44,7 @@ func _run_checks() -> void:
 		&"rp_collected": 35,
 		&"rp_performance": 3,
 	})
-	if not manager.purchase_form(&"ash", 250) or not manager.equip_form(&"ash"):
+	if not manager.purchase_form(&"eclipse", 250) or not manager.equip_form(&"eclipse"):
 		failures += 1
 		push_error("save_manager: purchase/equip transaction failed")
 	var saved: Dictionary = manager.get_snapshot()
@@ -52,7 +52,7 @@ func _run_checks() -> void:
 		saved[&"best_score"] != 1200
 		or saved[&"highest_wave"] != 6
 		or saved[&"bosses_defeated"] != 1
-		or saved[&"equipped_form"] != "ash"
+		or saved[&"equipped_form"] != "eclipse"
 		# 400 granted + 35 collected + 3 performance - 250 for Ash, each counted exactly once.
 		or saved[&"rift_points"] != 188
 	):
@@ -62,7 +62,7 @@ func _run_checks() -> void:
 	var reloaded := SAVE_SCRIPT.new() as SaveManagerService
 	reloaded.configure_storage_paths(save_path, temp_path, backup_path)
 	root.add_child(reloaded)
-	if reloaded.get_snapshot()[&"equipped_form"] != "ash":
+	if reloaded.get_snapshot()[&"equipped_form"] != "eclipse":
 		failures += 1
 		push_error("save_manager: disk round trip failed")
 
@@ -84,8 +84,8 @@ func _run_checks() -> void:
 		"high_score": 777,
 		"currency": 320,
 		"tutorial_seen": true,
-		"unlocked_forms": ["void", "venom", "invalid"],
-		"selected_form": "venom",
+		"unlocked_forms": ["void", "veyra", "invalid"],
+		"selected_form": "veyra",
 		"highest_wave": -9,
 	}))
 	legacy.close()
@@ -102,7 +102,7 @@ func _run_checks() -> void:
 		or migrated_data[&"best_score"] != 777
 		or migrated_data[&"rift_points"] != 320
 		or migrated_data[&"highest_wave"] != 1
-		or migrated_data[&"equipped_form"] != "venom"
+		or migrated_data[&"equipped_form"] != "veyra"
 		or not migrated_data[&"tutorial_completed"]
 	):
 		failures += 1
@@ -167,8 +167,8 @@ func _check_v6_migration() -> int:
 		# keen_edge 1..2 = 200 + 320, soul_reserve 1 = 1500; unknown ids refund nothing and a level
 		# above a node's cap refunds only up to the cap (first_gift caps at 1 = 900).
 		"sanctum_levels": {"keen_edge": 2, "soul_reserve": 1, "not_a_node": 4, "first_gift": 7},
-		"owned_forms": ["void", "ash"],
-		"equipped_form": "ash",
+		"owned_forms": ["void", "eclipse"],
+		"equipped_form": "eclipse",
 		"trial_rank": 8,
 		"trial_progress": {"t08_soul_shards_m": 31, "t01_wave": 4},
 		"challenge_state": {date_key: {"progress": {"shard_seeker": 5}, "claimed": ["shard_seeker"]}},
@@ -191,7 +191,7 @@ func _check_v6_migration() -> int:
 		or data.has(&"soul_shards")
 		or data.has(&"sanctum_levels")
 		or data[&"best_score"] != 9100
-		or data[&"equipped_form"] != "ash"
+		or data[&"equipped_form"] != "eclipse"
 		or not bool(data[&"ads_removed"])
 		or int(data[&"trial_rank"]) != 8
 		or int(progress.get("t08_rp_collected_m", -1)) != 31

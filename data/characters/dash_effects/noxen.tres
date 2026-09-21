@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="DashEffectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/dash_effect_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+effect_id = &"noxen"
+signature = 1
+trail_tint = Color(0.1647, 0.7059, 1, 1)
+burst_tint = Color(0.7608, 0.9725, 1, 1)
+spark_tint = Color(0.3569, 0.8667, 1, 1)
+spark_count = 12
+ribbon_width = 0.72
+ribbon_seconds = 0.3
+arc_spread = 0
+burst_scale = 0.75

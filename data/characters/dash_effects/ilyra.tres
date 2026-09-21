@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="DashEffectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/dash_effect_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+effect_id = &"ilyra"
+signature = 2
+trail_tint = Color(0.6588, 0.7765, 1, 1)
+burst_tint = Color(0.9098, 0.9451, 1, 1)
+spark_tint = Color(0.7765, 0.8588, 1, 1)
+spark_count = 8
+ribbon_width = 1.15
+ribbon_seconds = 0.3
+arc_spread = 0.95
+burst_scale = 0.45

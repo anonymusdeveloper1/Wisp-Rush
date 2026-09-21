@@ -106,7 +106,7 @@ func _add_slots() -> void:
 		elif i == 2:
 			b.disabled = true
 		row.add_child(b)
-	var forms := ["01_void.png", "02_ash.png", "03_venom.png"]
+	var forms := ["01_void.png", "06_eclipse.png"]
 	for i: int in 3:
 		var s := Button.new()
 		s.theme_type_variation = &"SlotButton"
@@ -151,7 +151,7 @@ func _add_cards() -> void:
 	var ring := _panel(&"PortraitRing")
 	ring.custom_minimum_size = Vector2(290, 290)
 	var portrait := TextureRect.new()
-	portrait.texture = load(FORM_DIR + "05_frost.png")
+	portrait.texture = load(FORM_DIR + "06_eclipse.png")
 	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	ring.add_child(portrait)

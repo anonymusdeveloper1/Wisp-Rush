@@ -69,7 +69,7 @@ func _run_checks() -> void:
 	var rows: Array[PackedStringArray] = StatisticsScreen.build_rows({
 		&"best_score": 1200,
 		&"play_time_seconds": 3725.0,
-		&"owned_forms": ["void", "ash"],
+		&"owned_forms": ["void", "eclipse"],
 	})
 	var values: Dictionary[String, String] = {}
 	for row: PackedStringArray in rows:

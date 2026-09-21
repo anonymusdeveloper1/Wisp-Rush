@@ -31,8 +31,22 @@ const TIER_NAMES: Array[String] = ["", "LEGENDARY", "MYTHIC"]
 @export var visual_scene: PackedScene
 ## Cosmetic feedback tint for aim, impact and surrounding UI.
 @export var tint: Color = Color.WHITE
+## This character's own dash signature: the shape and colour of the streak its dash leaves.
+## Optional — a character without one falls back to the shared dash-style trail.
+@export var dash_effect: DashEffectData
 ## Collectible tier shown on the focused Shop card; never read by gameplay.
 @export var tier: Tier = Tier.STANDARD
+
+## A whole-frame character's menu `SpriteFrames`, so the boot screen can warm it.
+##
+## Deliberately a **path** and not a resource reference: a reference here would pull the sheet
+## into memory with the form itself, including during a run, which is exactly what the
+## menu/gameplay split exists to avoid. The rig still loads it on demand; this only tells
+## `Main` to fetch it behind the loading bar for the character the player has equipped, so
+## opening Home does not stall on a 3,168 px sheet. Empty for a rig or a single-image form, and
+## for a character whose menus play a video (ADR-0016): there the sheet is only the Reduced Motion
+## fallback, so warming it would hold it for the whole session for nothing.
+@export_file("*.tres") var menu_frames_path: String = ""
 
 
 ## Player-facing tier label, empty for [constant Tier.STANDARD] so ordinary cards show no badge.
@@ -51,4 +65,7 @@ func validate() -> PackedStringArray:
 		failures.append("price is negative")
 	if texture == null:
 		failures.append("texture is missing")
+	if dash_effect != null:
+		for failure: String in dash_effect.validate():
+			failures.append(failure)
 	return failures

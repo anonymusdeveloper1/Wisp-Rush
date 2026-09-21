@@ -55,7 +55,7 @@ Suggested opening lines (`am_puck`; keep "Wisp Rush" out of a sentence's first w
 | The rule | "Same hitbox, same dash, same damage" over a run | gameplay footage + a marker circle on the Wisp |
 | How they are built | Layer sheet → parts fly apart → rig moves | `sheet` crops of `<id>_parts.png`, arrows |
 | Motion identity | One line each: Veyra's ribbons, Rook's wing beats, Morrow's runes | lineup + slow-motion cuts |
-| Pick one | The CHARACTERS tab swiping, buy → unlock flourish | `render_devlog_tour tour=menus` (Shop) |
+| Pick one | The CHARACTERS tab swiping, buy → the card turns EQUIPPED (the unlock flourish was removed 2026-09-21; Shade's and Ilyra's cards now play their menu videos) | `render_devlog_tour tour=menus` (Shop) |
 | Payoff + credit | Best dive of the three, AI credit pill | clip mode, AI pill (recipe §6) |
 | Question + follow | "WHICH ONE / WOULD YOU PLAY?" then the follow card | recipe §6 |
 

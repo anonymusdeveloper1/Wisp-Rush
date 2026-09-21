@@ -64,7 +64,7 @@ func _add_home(snapshot: Dictionary, form_id: StringName, phone_size: Vector2) -
 
 func _check_home() -> void:
 	# 390×844 phone aspect in the 1080-wide design space.
-	var home := _add_home(_home_snapshot(false), &"frost", Vector2(1080.0, 2337.0))
+	var home := _add_home(_home_snapshot(false), &"ilyra", Vector2(1080.0, 2337.0))
 	for frame: int in 3:
 		await process_frame
 
@@ -317,7 +317,7 @@ func _check_rift_map() -> void:
 
 func _check_forms() -> void:
 	var forms := FORMS_SCENE.instantiate() as FormsScreen
-	forms.setup(500, ["void", "ash"], &"ash", 0)
+	forms.setup(500, ["void", "eclipse"], &"eclipse", 0)
 	root.add_child(forms)
 	await process_frame
 	var carousel := forms.get_node("%Carousel") as FocusCarousel
@@ -328,15 +328,15 @@ func _check_forms() -> void:
 	forms.equip_requested.connect(func(form_id: StringName) -> void: equips.append(form_id))
 
 	var forms_list: Array[FormData] = FORM_CATALOG.load_forms()
-	var ash_index: int = forms_list.find(FORM_CATALOG.get_form(&"ash"))
-	var venom_index: int = forms_list.find(FORM_CATALOG.get_form(&"venom"))
+	var eclipse_index: int = forms_list.find(FORM_CATALOG.get_form(&"eclipse"))
+	var veyra_index: int = forms_list.find(FORM_CATALOG.get_form(&"veyra"))
 	if carousel.get_card_count() != forms_list.size():
 		_fail("forms carousel has %d cards, expected %d" % [carousel.get_card_count(), forms_list.size()])
-	if carousel.get_selected_index() != ash_index:
+	if carousel.get_selected_index() != eclipse_index:
 		_fail("forms carousel should open on the equipped form")
 
-	forms.select_form(&"venom")
-	if carousel.get_selected_index() != venom_index:
+	forms.select_form(&"veyra")
+	if carousel.get_selected_index() != veyra_index:
 		_fail("select_form should move the carousel to Venom")
 	carousel.select(forms_list.find(FORM_CATALOG.get_form(&"void")), false)
 	if forms.get_selected_form_id() != &"void" or action.text != "EQUIP" or action.disabled:
@@ -345,12 +345,12 @@ func _check_forms() -> void:
 	if equips != [&"void"]:
 		_fail("tapping the focused owned card should request equip, got %s" % equips)
 
-	carousel.select(venom_index, false)
-	carousel.activated.emit(venom_index)
-	if purchases != [&"venom"]:
+	carousel.select(veyra_index, false)
+	carousel.activated.emit(veyra_index)
+	if purchases != [&"veyra"]:
 		_fail("tapping the focused affordable card should request purchase, got %s" % purchases)
-	carousel.select(ash_index, false)
-	carousel.activated.emit(ash_index)
+	carousel.select(eclipse_index, false)
+	carousel.activated.emit(eclipse_index)
 	if equips.size() != 1:
 		_fail("tapping the already-equipped card must not request anything")
 	forms.queue_free()

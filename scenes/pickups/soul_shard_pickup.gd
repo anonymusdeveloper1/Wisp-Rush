@@ -8,10 +8,15 @@ extends Node2D
 ## Emitted once when the shard reaches or is swept by the player.
 signal collected(amount: int)
 
-const SOURCE_FRAME_SIZE: float = 362.0
 const COLLECT_RADIUS_DESIGN: float = 30.0
 const ATTRACTION_SPEED_DESIGN: float = 520.0
 const LIFETIME: float = 14.0
+## Drawn height of the pickup in design pixels.
+const DRAWN_SIZE: float = 96.0
+
+## Side of the sprite's own square canvas, so a pickup drawn on a different one is the same
+## size on screen (the Soul Vessel's icon is 444 px where the shard's art is 362).
+@export var source_frame_size: float = 362.0
 
 var _target: Node2D
 var _viewport_scale: float = 1.0
@@ -28,7 +33,7 @@ var _auto_collected: bool = false
 
 
 func _ready() -> void:
-	var final_scale: Vector2 = Vector2.ONE * (96.0 * _viewport_scale / SOURCE_FRAME_SIZE)
+	var final_scale: Vector2 = Vector2.ONE * (DRAWN_SIZE * _viewport_scale / source_frame_size)
 	_sprite.scale = final_scale
 	var appear_tween: Tween = create_tween()
 	_sprite.scale = Vector2.ZERO
@@ -66,7 +71,7 @@ func configure(target: Node2D, attraction_radius: float, viewport_width: float) 
 	_attraction_radius = maxf(0.0, attraction_radius)
 	_viewport_scale = maxf(0.1, viewport_width / 1080.0)
 	if is_node_ready():
-		_sprite.scale = Vector2.ONE * (96.0 * _viewport_scale / SOURCE_FRAME_SIZE)
+		_sprite.scale = Vector2.ONE * (DRAWN_SIZE * _viewport_scale / source_frame_size)
 
 
 ## Updates attraction distance after Soul Hunger changes level.

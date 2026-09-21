@@ -66,7 +66,10 @@ GameWorld
 
 ## Data & tuning
 
-All eight GDD mutations have supplied icons, concise next-value copy and sensible caps. XP threshold
+All seven tray mutations have supplied icons, concise next-value copy and sensible caps. (SOUL
+VESSEL was the eighth; since 2026-09-19 its effect is the Soul Vessel *pickup* instead — see
+[player_health.md](player_health.md) — because a card capped at three levels cannot express an
+uncapped fragment count.) XP threshold
 uses a rising Resource-defined curve (`base_xp_threshold` 30, `xp_growth` 1.32).
 `RunProgressionTuning` group **Upgrade offer** (starting values, tune on device): `tray_time_scale`
 0.3, `tray_timeout` 6.0 real s, `tray_slide_seconds` 0.22 real s, `calm_window_seconds` 4.0 game s,
@@ -111,7 +114,7 @@ GameWorld translates mutation levels into Wisp/enemy/hazard effects and owns run
 - Banked but unpicked levels are lost at run end; the summary's `run_level` counts only picked levels,
   so Results and Trials stay correct. Same rules in story Rift levels, Endless and the daily run.
 - RUSH never starts and finishers never play while the tray is up.
-- Wide Reap, Soul Hunger, Death Pulse, Soul Link, Cold Wake, Void Velocity, Soul Vessel and
+- Wide Reap, Soul Hunger, Death Pulse, Soul Link, Cold Wake, Void Velocity and
   Reaper's Gift all change live run behavior; nothing persists between runs — mutations are the only
   run power, and there is no permanent power (ADR-0013).
 - Rift Points remain separate from score and are reported by Results. Soul Hunger's copy reads
@@ -123,7 +126,7 @@ GameWorld translates mutation levels into Wisp/enemy/hazard effects and owns run
 ## How to test
 
 - Run `tools/godot/test_run_progression.gd` for threshold/choice rules and
-  `tools/godot/test_mutation_effects.gd` for all eight live effects.
+  `tools/godot/test_mutation_effects.gd` for all seven live effects and the Soul Vessel drop.
 - Manual (device, owner preference): bank two levels mid-combo (pill ×2, no interruption); stop at a
   wave start (cards slide up, world slow); tap one (next set slides in), swipe the arena on the second
   (tray away, pill ×1); wait out 6 s once; pause with the tray up; repeat with Reduced Motion.
@@ -151,5 +154,6 @@ GameWorld translates mutation levels into Wisp/enemy/hazard effects and owns run
 | 2026-09-15 | Banked level-ups, calm moments, bottom `UpgradeTray` with slow motion, swipe/timeout dismiss, UPGRADE READY pill; paused `UpgradeSelect` removed (owner decision, GDD §5.5) |
 | 2026-09-15 | Pickup auto-collect sweep (`sweep_to`, `collect_now`); Soul Hunger's mid-wave role noted (spec rush_and_feel) |
 | 2026-09-12 | Restyled to redesign v1 (ADR-0005) |
+| 2026-09-19 | SOUL VESSEL left the tray: it is a rare world pickup now, so the fragment count has no cap. Seven cards remain |
 | 2026-09-11 | Implemented XP, safe three-card choices, eight effects, drops and run statistics |
 | 2026-09-11 | Planned for Milestone 2 |

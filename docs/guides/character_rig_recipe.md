@@ -1,3 +1,8 @@
+> **Superseded for new characters, 2026-09-20.** Playable characters are whole-frame sprites
+> now — see [character_sprite_frames.md](character_sprite_frames.md). This recipe stays for the
+> four rigs still in the game (Veyra, Rook, Morrow, Noxen). Ilyra and Bram, which much of it was
+> written from, have been retired; their worked examples are still the clearest ones here.
+
 # How to build an animated playable character
 
 > **Recipe of record for adding a character to Wisp Rush.** What the system *is* lives in
@@ -98,6 +103,30 @@ python3 tools/art/build_character_rig.py <id>           # manifest -> <id>_visua
   per-character lives in `<id>_visual.gd`.
 - Check the rig against `assembly/<id>_assembly_reference.png` before animating: the lineup fixture
   prints bounds, and they should match the reference's proportions exactly.
+
+### 1c. Or not a rig at all: a whole-pose sprite pack
+
+A character can also be one finished painting per state instead of parts on bones — that is what
+Ilyra is (`scenes/player/visuals/ilyra_visual.*`). Add the pack to `POSE_PACKS` in
+`extract_playable_characters.py` and run it: the approved PNGs are copied byte for byte and each
+one's silhouette is measured into a `CharacterPoseSheet` the rig applies as a per-pose drawing
+offset and scale. Then skip sections 2 to 8 — there are no bones, ribbons or springs — and go
+straight to section 9.
+
+What it buys and what it costs, after building both for the same character: a pose pack is a day's
+work instead of a week's and the art is exactly what was approved, but the character can only ever
+show the poses that were painted, has no follow-through of its own, and reads as a flip-book rather
+than as motion at gameplay size. Two rules that are not obvious:
+
+- **Anchor on the canvas, not on the silhouette.** A pose pack is painted from one camera, so the
+  canvas centre already is the anchor. Centring each pose's opaque bounding box instead looks like
+  the right normalisation and is not: that box moves with the pose — a crouch lowers the head while
+  the feet stay put — so following it lifts a crouching character off the surface she crouches on.
+  Correct only what is measured to be wrong (Ilyra: one pose painted at 0.84 inside extra padding).
+- **Put the offset on the sprite, not on a node.** `AnimatedSprite2D.offset` is a drawing offset and
+  is outside the node transform, so the smoothness contract keeps measuring real motion rather than
+  the placement correction. A pose scale does have to go on the node, so ease it — a step of 0.19 in
+  one frame is most of the contract's per-frame budget.
 
 ## 2. Plan the rig
 
@@ -310,7 +339,7 @@ cannot tell you that a pose looks silly.
 | Character faces the previous dash while drifting | Controller passed a stale `_dash_direction` | Pass the actual drift heading |
 | A rune/part jumps once per revolution | Wrapping an angle that drives a rotation | Let the accumulator grow |
 | A resting pose never appears in game | It was keyed off `get_landing()`, which is a *dash* value — `WispPlayer` returns 0 the instant the dash ends | Drive anything that persists at rest from `surface_normal` (`1 - surface_normal.dot(UP)` is 0 on the floor, 1 on a wall), not from the approach to it |
-| A held prop floats beside the hand | The pack places the prop *near* the hand, and draws it over the fist | Seat it from the rig: solve the prop's local position so its grip end lands in the palm, and lift the holding hand's `z_index` above it |
+| A held prop floats beside the hand | The pack places the prop *near* the hand, draws the whole fist on one side of it, or lets the handle exit sideways | Align the shaft with the fist axis, solve it through the painted palm, leave the butt visible below, then draw the palm behind it and curled fingers in front |
 | One-frame eye/limb pop | A value forced to a new state instantly | Feed it through the same smoothing |
 | Tails whip differently at 30/60/120 fps | A per-frame cap instead of a rate | Express caps per second |
 | Slow-motion render came out 16× slow | `Engine.time_scale` **and** a raised physics rate | Godot already scales physics delta by time scale |
@@ -327,6 +356,7 @@ cannot tell you that a pose looks silly.
 ## 12. Checklist for a new character
 
 - [ ] Layer sheet generated, prompt recorded, contact sheet inspected, `ASSETS.md` row added
+      (a whole-pose sprite pack instead? [§1c](#1c-or-not-a-rig-at-all-a-whole-pose-sprite-pack))
 - [ ] Spines pasted into the rig scene; ribbon weights pass the test
 - [ ] `design_size` and `preview_center` match `get_layer_bounds()`; lineup looks like the reference
 - [ ] Secondary motion for idle, aim coil, dive tuck, landing brace, kill accent, hit, death

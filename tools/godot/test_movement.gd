@@ -406,6 +406,9 @@ func _start() -> void:
 	await create_timer(0.3).timeout
 	_game.debug_quiet_arena()
 	_player = _game.get_node("WorldContent/PlayerLayer/WispPlayer") as WispPlayer
+	# A run starts on one Soul Fragment, so contact damage is fatal. This file tests movement and
+	# input buffering through the hurt reaction, not the health economy, so it stocks up first.
+	_player.increase_maximum_health(4, 4)
 
 
 func _stop() -> void:

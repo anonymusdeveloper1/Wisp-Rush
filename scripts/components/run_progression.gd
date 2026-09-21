@@ -26,7 +26,7 @@ var _offered_ids: Array[StringName] = []
 func _ready() -> void:
 	assert(tuning != null, "RunProgression requires RunProgressionTuning")
 	_load_mutations()
-	assert(_mutations.size() == 8, "RunProgression requires all eight mutation Resources")
+	assert(_mutations.size() == 7, "RunProgression requires all seven mutation Resources")
 
 
 ## Resets XP and run-only mutation levels using a deterministic choice seed.
