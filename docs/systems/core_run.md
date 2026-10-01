@@ -139,6 +139,13 @@ windows and presentation constants that coordinate multiple systems.
   start. The arena rect is the zoomed-in floor from the start, so nothing is laid out twice. A run
   Main builds from its restart (Results' PLAY AGAIN, the pause menu's restart) has
   `play_arena_intro` off: the arena starts zoomed in and the waves start at once (owner, #70).
+- **Board HUD** (owner 2026-10-02, GDD §14 #71–#72, ADR-0024): when the arena scene `has_board_hud()`
+  (BOARD 01), `_apply_board_hud` moves the pause and UPGRADE buttons, the stats column, the XP bar,
+  the level label, the RUSH row and the boss HUD under a hidden holder (they keep being updated) and
+  `_update_board_hud` feeds their values to the board every frame; the board's pause emits
+  `hud_pause_pressed`. While upgrades are ready an `UpgradeGlow` lights the character, and `_input`
+  opens the cards on a tap that starts on him (within 2.4 × his radius, under the minimum swipe
+  distance and 450 ms).
 - Focus changes enemy and hazard simulation only, never input or UI speed.
 - Pause consumes input, freezes gameplay and always restores normal tree state on navigation; it
   hides an open upgrade tray and drops its slow motion, and Resume brings both back. Back/Escape

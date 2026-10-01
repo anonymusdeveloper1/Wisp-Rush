@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ArenaSkinData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/arena_skin_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/arenas/thumbnails/board_01_light.png" id="2_thumbnail"]
+
+[resource]
+script = ExtResource("1_script")
+skin_id = &"board_01_light"
+display_name = "BOARD 01 LIGHT"
+description = "The full-screen board with the lighter tan floor of the owner's reference."
+tier = 0
+background_path = "res://assets/art/environment/arenas/board_01_light.png"
+thumbnail = ExtResource("2_thumbnail")
+price = 0
+accent = Color(0.953, 0.659, 0.278, 1)
+floor_rect = Rect2(0.06695, 0.06699, 0.8661, 0.88278)
+visual_scene_path = "res://scenes/arenas/board_01_light.tscn"

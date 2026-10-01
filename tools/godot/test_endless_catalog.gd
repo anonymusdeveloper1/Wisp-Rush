@@ -30,6 +30,8 @@ const COLOSSUS_3D_MAX_GROWTH: float = 1.25
 ## The zoom test arena (owner, GDD §14 #69): it opens with a zoom, and once zoomed in its floor fills
 ## the screen under the HUD, so it is bigger than the Colossus 3D's on every screen.
 const ZOOM_ARENA_ID: StringName = &"zoom_arena_3d"
+## The board arenas (owner 2026-10-02, ADR-0024): they draw the run's HUD in their own frame.
+const BOARD_IDS: Array[StringName] = [&"board_01", &"board_01_light"]
 
 var _failures: int = 0
 
@@ -136,6 +138,8 @@ func _check_layered() -> void:
 		floors[skin.skin_id] = fitted
 		if visual.has_intro() != (skin.skin_id == ZOOM_ARENA_ID):
 			_fail("%s: has_intro() is %s" % [skin.skin_id, visual.has_intro()])
+		if visual.has_board_hud() != (skin.skin_id in BOARD_IDS):
+			_fail("%s: has_board_hud() is %s" % [skin.skin_id, visual.has_board_hud()])
 		if visual.has_intro():
 			var ended: Array[bool] = [false]
 			visual.intro_finished.connect(func() -> void: ended[0] = true, CONNECT_ONE_SHOT)

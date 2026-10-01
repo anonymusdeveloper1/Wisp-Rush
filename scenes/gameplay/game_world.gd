@@ -117,6 +117,10 @@ const REDIRECT_HAPTIC_AMPLITUDE: float = 0.4
 const BACKGROUND_OVERSCAN: float = 16.0
 ## Seconds the Wisp and the HUD take to fade in when an arena's opening shot ends.
 const INTRO_FADE_SECONDS: float = 0.35
+## On a board arena: how far from the character a tap still counts as tapping him (multiples of his
+## collision radius), and the longest press that counts as a tap (msec).
+const CHARACTER_TAP_REACH: float = 2.4
+const CHARACTER_TAP_MSEC: int = 450
 ## HUD geometry in design pixels (1080-wide canvas), measured from the safe-area insets.
 ## Header (owner decision 2026-09-24): pause, with UPGRADE under it, on the left; Rift Points with
 ## the icon on its right and the score under it, unframed, on the right; the soul level bar and
@@ -186,6 +190,19 @@ var play_arena_intro: bool = true
 ## The arena's opening shot is playing: the Wisp and the HUD are hidden, steering is off, a tap
 ## skips it, and the waves start when it ends.
 var _intro_playing: bool = false
+## The equipped arena is a board that draws the HUD in its frame (ADR-0024): GameWorld's own HUD bars
+## and buttons wait, hidden, under [member _hidden_hud]; they keep their values, which feed the board.
+var _board_hud: bool = false
+var _hidden_hud: Control
+## The HUD controls a board takes over, and the index each had under SafeHud.
+var _board_hud_controls: Array[Control] = []
+var _board_hud_indices: Array[int] = []
+var _hud_level: int = 1
+## The light on the character while upgrades are ready on a board; tap him to open them.
+var _upgrade_glow: UpgradeGlow
+## A press that began on the glowing character: where and when (msec); -1 when there is none.
+var _character_tap_start := Vector2.ZERO
+var _character_tap_msec: int = -1
 ## Throwaway nodes `warm_up_render()` draws once under the cover; freed on release.
 var _warm_nodes: Array[Node] = []
 ## Tutorial arena (`RunProfile.is_scripted`): no waves, no self-pause, the host owns back.
@@ -288,6 +305,8 @@ var _rush_edge_glow: TextureRect
 @onready var _effects_layer: Node2D = %EffectsLayer
 @onready var _player: WispPlayer = %WispPlayer
 @onready var _safe_hud: Control = %SafeHud
+@onready var _rift_points_icon: TextureRect = $HUD/SafeHud/StatsColumn/RiftPointsLine/RiftPointsIcon
+@onready var _boss_icon: TextureRect = $HUD/SafeHud/BossHud/TitleRow/ReaperIcon
 @onready var _wave_director: WaveDirector = %WaveDirector
 @onready var _run_progression: RunProgression = %RunProgression
 @onready var _world_shade: ColorRect = %WorldShade
@@ -427,6 +446,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if not get_tree().paused:
 		_update_shake(delta)
+	_update_board_hud()
 	if get_tree().paused or _run_over:
 		return
 	_update_enemy_targets()
@@ -678,8 +698,9 @@ func _apply_arena() -> void:
 	_apply_arena_difficulty()
 
 
-## Shows [param scene] (a layered or 3D arena, ADR-0021, ADR-0023) in place of the painted backdrop,
-## or the backdrop again when it is null. Keeps the one already shown when it is the same scene.
+## Shows [param scene] (a layered, 3D or board arena, ADR-0021, ADR-0023, ADR-0024) in place of the
+## painted backdrop, or the backdrop again when it is null. Keeps the one already shown when it is the
+## same scene. A board takes over the HUD ([method _apply_board_hud]).
 func _set_arena_visual(scene: PackedScene) -> void:
 	var wanted: String = scene.resource_path if scene != null else ""
 	if is_instance_valid(_arena_visual) and _arena_visual.scene_file_path == wanted:
@@ -700,7 +721,98 @@ func _set_arena_visual(scene: PackedScene) -> void:
 			_background.add_sibling(_arena_visual)
 			if not play_arena_intro:
 				_arena_visual.skip_intro()
+			_arena_visual.hud_pause_pressed.connect(_on_pause_button_pressed)
 	_background.visible = _arena_visual == null
+	_apply_board_hud(is_instance_valid(_arena_visual) and _arena_visual.has_board_hud())
+
+
+## A board arena draws the HUD in its frame (owner 2026-10-02, ADR-0024): GameWorld's own HUD bars and
+## buttons move under a hidden holder while [param on] (they keep being updated, and feed the board in
+## [method _update_board_hud]), and the light on the character shows when upgrades are ready.
+func _apply_board_hud(on: bool) -> void:
+	if on == _board_hud:
+		return
+	_board_hud = on
+	if _hidden_hud == null:
+		_hidden_hud = Control.new()
+		_hidden_hud.name = "BoardHiddenHud"
+		_hidden_hud.visible = false
+		_hidden_hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_hidden_hud.set_anchors_preset(Control.PRESET_FULL_RECT)
+		_safe_hud.add_child(_hidden_hud)
+		_board_hud_controls = [
+			_pause_button, _upgrade_button, _stats_column, _xp_bar, _run_level_label, _rush_row, _boss_hud,
+		]
+		for control: Control in _board_hud_controls:
+			_board_hud_indices.append(control.get_index())
+	for i: int in _board_hud_controls.size():
+		var control: Control = _board_hud_controls[i]
+		control.reparent(_hidden_hud if on else _safe_hud, false)
+		if not on:
+			_safe_hud.move_child(control, mini(_board_hud_indices[i], _safe_hud.get_child_count() - 1))
+	if on and _upgrade_glow == null:
+		_upgrade_glow = UpgradeGlow.new()
+		_upgrade_glow.name = "UpgradeGlow"
+		_upgrade_glow.visible = false
+		# Behind the character, in the same layer.
+		_player.add_sibling(_upgrade_glow)
+		_player.get_parent().move_child(_upgrade_glow, _player.get_index())
+	if _upgrade_glow != null:
+		_upgrade_glow.visible = false
+	_character_tap_msec = -1
+
+
+## Feeds the board arena its HUD values and places the light on the character.
+func _update_board_hud() -> void:
+	if not _board_hud or not is_instance_valid(_arena_visual):
+		return
+	var ready: bool = _upgrade_button.visible and not _run_over and not _upgrade_tray.is_open()
+	var upgrades: int = _run_progression.get_banked_levels() if ready else 0
+	_arena_visual.set_board_hud({
+		"score": _score_label.text,
+		"rift_points": _rift_points_count.text,
+		"rp_icon": _rift_points_icon.texture,
+		"level": _hud_level,
+		"soul": _xp_bar.value / maxf(_xp_bar.max_value, 1.0),
+		"rush": _rush_bar.value / maxf(_rush_bar.max_value, 1.0),
+		"boss": _boss_hud.visible,
+		"boss_health": _boss_bar.value / maxf(_boss_bar.max_value, 1.0),
+		"boss_icon": _boss_icon.texture,
+		"upgrades": upgrades,
+	})
+	if _upgrade_glow != null:
+		_upgrade_glow.visible = upgrades > 0 and _player.visible
+		_upgrade_glow.position = _player.position
+		_upgrade_glow.radius = _player.get_collision_radius()
+		_upgrade_glow.reduced_motion = _reduced_motion
+
+
+## On a board, tapping the glowing character opens the upgrades (owner 2026-10-02): a press that starts
+## on him and lifts within the dash's minimum swipe distance and [constant CHARACTER_TAP_MSEC]. The
+## press still reaches the Wisp (it may become an aim); the tap's release does not, and the aim is
+## dropped as the cards open.
+func _input(event: InputEvent) -> void:
+	if not _board_hud or _scripted or _intro_playing:
+		return
+	var button := event as InputEventMouseButton
+	if button == null or button.button_index != MOUSE_BUTTON_LEFT:
+		return
+	if button.pressed:
+		_character_tap_msec = -1
+		if _upgrade_glow != null and _upgrade_glow.visible and not get_tree().paused:
+			var reach: float = _player.get_collision_radius() * CHARACTER_TAP_REACH
+			if button.position.distance_to(_player.global_position) <= reach:
+				_character_tap_start = button.position
+				_character_tap_msec = Time.get_ticks_msec()
+		return
+	if _character_tap_msec < 0:
+		return
+	var held: int = Time.get_ticks_msec() - _character_tap_msec
+	var moved: float = button.position.distance_to(_character_tap_start)
+	_character_tap_msec = -1
+	if held <= CHARACTER_TAP_MSEC and moved < _player.tuning.minimum_swipe_distance:
+		get_viewport().set_input_as_handled()
+		_on_upgrade_button_pressed()
 
 
 ## Pushes the arena's difficulty for the current cycle into the wave director and live enemies.
@@ -2407,6 +2519,7 @@ func _on_experience_changed(current_xp: int, threshold: int, run_level: int) -> 
 	_xp_bar.max_value = maxf(1.0, float(threshold))
 	_xp_bar.value = float(current_xp)
 	_run_level_label.text = "SOUL LEVEL %d" % run_level
+	_hud_level = run_level
 
 
 ## A level-up never interrupts: it is banked silently until a calm moment offers the cards.
@@ -2722,7 +2835,8 @@ func _on_pause_button_pressed() -> void:
 
 func _on_resume_button_pressed() -> void:
 	_set_paused(false)
-	_pause_button.grab_focus()
+	if _pause_button.is_visible_in_tree():
+		_pause_button.grab_focus()
 
 
 func _on_home_button_pressed() -> void:

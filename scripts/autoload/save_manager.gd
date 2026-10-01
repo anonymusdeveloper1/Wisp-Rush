@@ -51,6 +51,8 @@ const VALID_ARENA_SKIN_IDS: Array[String] = [
 	"chained_colossus",
 	"chained_colossus_3d",
 	"zoom_arena_3d",
+	"board_01",
+	"board_01_light",
 ]
 ## Skin every save owns and unknown ids fall back to (`EndlessCatalog.default_skin_id`).
 const DEFAULT_ARENA_SKIN_ID: String = "quarry_titan"

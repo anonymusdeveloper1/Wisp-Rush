@@ -7,7 +7,7 @@
 
 **Main scene:** `res://scenes/main/main.tscn` · **Features:** `4.7, Forward Plus`
 
-**Counts:** 40 scenes · 111 scripts · 208 resources · 16 shaders · 367 asset files
+**Counts:** 42 scenes · 113 scripts · 210 resources · 16 shaders · 430 asset files
 
 ## Autoloads
 
@@ -48,6 +48,8 @@ _None._
 | `res://assets/ui/theme/ornaments/card_top.tscn` | `CardTopOrnament` (Control) | — | 2 | — | — |
 | `res://assets/ui/theme/ornaments/crest_bottom.tscn` | `CrestBottomOrnament` (Control) | — | 2 | — | — |
 | `res://assets/ui/theme/ornaments/crest_top.tscn` | `CrestTopOrnament` (Control) | — | 2 | — | — |
+| `res://scenes/arenas/board_01.tscn` | `Board01` (Control) | `res://scenes/arenas/board_arena_visual.gd` | 1 | — | — |
+| `res://scenes/arenas/board_01_light.tscn` | `Board01Light` (inherits res://scenes/arenas/board_01.tscn) | — | 1 | `res://scenes/arenas/board_01.tscn` | — |
 | `res://scenes/arenas/chained_colossus_3d.tscn` | `ChainedColossus3D` (Control) | `res://scenes/arenas/chained_colossus_3d.gd` | 9 | `res://assets/art/environment/arenas/chained_colossus_3d/chained_colossus.glb` | — |
 | `res://scenes/arenas/stitchwarden_vigil.tscn` | `StitchwardenVigil` (Control) | `res://scenes/arenas/stitchwarden_vigil.gd` | 27 | — | — |
 | `res://scenes/arenas/zoom_arena_3d.tscn` | `ZoomArena3D` (inherits res://scenes/arenas/chained_colossus_3d.tscn) | — | 1 | `res://scenes/arenas/chained_colossus_3d.tscn` | — |
@@ -93,7 +95,8 @@ _None._
 | Script | class_name | extends | Summary (`##` brief) | Signals | Exports | Public methods |
 |---|---|---|---|---|---|---|
 | `res://assets/ui/theme/tools/build_wisp_theme.gd` | — | `SceneTree` | Generates res://assets/ui/theme/wisp_theme.tres, the ornament scenes, the nearest-filtered texture wrappers and the pixel font from the pixel UI kit. | — | — | — |
-| `res://scenes/arenas/arena_visual.gd` | `ArenaVisual` | `Control` | An Endless arena drawn as a scene instead of one painting: layered sprites or a 3D model. | `intro_finished` | `backdrop_overscan` | `fit`, `get_floor_rect`, `get_drawn_floor_rect`, `has_intro`, `play_intro`, `skip_intro`, `set_focus_point`, `set_reduced_motion` |
+| `res://scenes/arenas/arena_visual.gd` | `ArenaVisual` | `Control` | An Endless arena drawn as a scene instead of one painting: layered sprites, a 3D model or a board. | `intro_finished`, `hud_pause_pressed` | `backdrop_overscan` | `fit`, `get_floor_rect`, `get_drawn_floor_rect`, `has_intro`, `play_intro`, `skip_intro`, `has_board_hud`, `set_board_hud`, `set_focus_point`, `set_reduced_motion` |
+| `res://scenes/arenas/board_arena_visual.gd` | `BoardArenaVisual` | `ArenaVisual` | A board arena: a full-screen pixel-art board whose frame holds the run's HUD (owner 2026-10-02, | — | `art_dir`, `light_floor`, `bottom_cap`, `lantern_frame_seconds`, `layout_seed`, `score_font_size`, `small_font_size`, `tag_font_size` | `fit`, `has_board_hud`, `set_board_hud` |
 | `res://scenes/arenas/chained_colossus_3d.gd` | — | `ModelArenaVisual` | CHAINED COLOSSUS 3D: the owner's model of a hooded stone colossus holding the arena board, | — | — | — |
 | `res://scenes/arenas/layered_arena_visual.gd` | `LayeredArenaVisual` | `ArenaVisual` | An Endless arena drawn as a scene of layers instead of one painting (ADR-0021). | — | `floor_texels`, `content_rect`, `head_top`, `head_clear`, `bottom_margin`, `side_margin`, `max_scale` | `fit`, `get_group_scale` |
 | `res://scenes/arenas/model_arena_visual.gd` | `ModelArenaVisual` | `ArenaVisual` | An Endless arena drawn live in 3D: a model holding the playable floor (ADR-0023). | — | `layout`, `floor_width_share`, `eye_clear`, `bottom_margin`, `fov_degrees`, `zoom_intro`, `intro_hold`, `intro_seconds`, `intro_fill`, `play_fills_screen`, `play_hud_clear`, `play_side_margin`, `play_bottom_margin`, `breath_period`, `breath_degrees`, `breath_rise` | `fit`, `get_drawn_floor_rect`, `has_intro`, `play_intro`, `skip_intro` |
@@ -111,6 +114,7 @@ _None._
 | `res://scenes/gameplay/game_world.gd` | `GameWorld` | `Control` | Coordinates one run: waves, combat, mutations, bosses, rewards and the run summary. | `home_requested`, `run_ended`, `restart_requested`, `dash_launched`, `dash_resolved`, `enemy_defeated`, `player_damaged`, `upgrade_chosen`, `rush_started`, `boss_defeated` | `run_seed`, `auto_pause_on_focus_loss`, `economy_tuning`, `feel_tuning` | `get_score`, `get_combo`, `get_highest_combo`, `get_total_kills`, `get_current_wave`, `get_rp_collected`, `get_rp_performance`, `get_multi_kill_dashes`, `get_bosses_defeated`, `is_rush_active`, `get_rush_meter`, `get_rush_remaining`, `get_rush_count`, `is_boss_active`, `add_experience`, `get_mutation_level`, `hold_start`, `is_start_held`, `warm_up_render`, `release_start`, `configure_run`, `get_arena_ambience`, `get_run_mode`, `get_cycle`, `get_arena_rules`, `get_boss_wave_interval`, `get_arena_polygon`, `get_landing_polygon`, `get_wall_splash_fx`, `get_dash_effect_fx`, `get_arena_rect`, `debug_quiet_arena`, `debug_spawn_enemy`, `debug_live_enemy_count`, `debug_enemy_layer_count`, `is_scripted`, `arena_to_world`, `spawn_scripted_enemy`, `spawn_scripted_hazard`, `clear_scripted_arena`, `start_scripted_boss`, `is_boss_core_exposed`, `find_nearest_target`, `set_experience_enabled`, `set_experience_share`, `set_rush_enabled`, `set_rush_meter`, `refill_health`, `hit_player_at`, `place_player`, `set_player_input_enabled`, `cancel_player_aim`, `is_player_ready`, `is_player_dashing`, `get_player_position`, `demo_aim`, `demo_swipe`, `spawn_scripted_shard`, `sweep_shards`, `get_hud_rect`, `get_safe_margins`, `show_callout`, `request_upgrade_calm_moment`, `has_upgrade_calm_request`, `get_banked_upgrades`, `is_upgrade_tray_open`, `is_upgrade_tray_settled`, `get_upgrade_card_rect`, `choose_upgrade_card`, `set_upgrade_tray_lift`, `handle_back`, `add_trauma`, `get_trauma`, `get_shake_strength`, `is_run_meaningful` |
 | `res://scenes/gameplay/run_profile.gd` | `RunProfile` | `RefCounted` | Everything a run needs before it starts: mode, skin and pool, seed, daily identity and cosmetics. | — | — | `endless`, `daily`, `tutorial`, `create_arena_rules`, `is_scripted`, `uses_endless_rules` |
 | `res://scenes/gameplay/strike_fx.gd` | `StrikeFx` | `Node2D` | Draws a short pixel-art strike where a dash lands a hit on an enemy or a boss (owner, 2026-09-28). | — | — | `play` |
+| `res://scenes/gameplay/upgrade_glow.gd` | `UpgradeGlow` | `Node2D` | The little light on the character while upgrades are ready on a board arena (owner 2026-10-02, | — | `radius_scale`, `pulse_seconds`, `rings` | — |
 | `res://scenes/gameplay/upgrade_tray.gd` | `UpgradeTray` | `Control` | Compact bottom card tray offering three mutations while the run keeps going (no pause). | `choice_selected` | — | `present`, `dismiss`, `set_suspended`, `choose_index`, `is_open`, `is_settled`, `get_presented_choice_ids`, `get_card_rect`, `set_bottom_inset`, `set_timeout_share` |
 | `res://scenes/gameplay/wall_splash_fx.gd` | `WallSplashFx` | `Node2D` | A splash where the Wisp hits a wall: droplets burst off the wall and a splat flattens against it. | — | — | `setup`, `play`, `get_last_origin`, `get_emitters`, `get_dust_emitters` |
 | `res://scenes/gameplay/wave_director.gd` | `WaveDirector` | `Node` | Deterministic endless-wave state machine that spends budget on authored formations. | `formation_requested`, `wave_started` | `tuning`, `catalog` | `start`, `advance`, `set_threat_multiplier`, `set_continuous`, `set_run_context`, `suspend_for_boss`, `resume_after_boss`, `get_current_wave`, `get_wave_progress`, `get_remaining_budget`, `get_difficulty_tier`, `is_suspended` |
@@ -320,6 +324,8 @@ _None._
 | `res://data/endless/rosters/obsidian_garden.tres` | `Resource` | `EndlessRoster` |
 | `res://data/endless/rosters/reapers_court.tres` | `Resource` | `EndlessRoster` |
 | `res://data/endless/rosters/shattered_rift.tres` | `Resource` | `EndlessRoster` |
+| `res://data/endless/skins/board_01.tres` | `Resource` | `ArenaSkinData` |
+| `res://data/endless/skins/board_01_light.tres` | `Resource` | `ArenaSkinData` |
 | `res://data/endless/skins/chained_colossus.tres` | `Resource` | `ArenaSkinData` |
 | `res://data/endless/skins/chained_colossus_3d.tres` | `Resource` | `ArenaSkinData` |
 | `res://data/endless/skins/quarry_titan.tres` | `Resource` | `ArenaSkinData` |
@@ -444,7 +450,7 @@ _None._
 
 ## Assets
 
-`.gd` × 1 · `.gdshader` × 16 · `.gdshaderinc` × 1 · `.glb` × 1 · `.jpg` × 3 · `.json` × 1 · `.png` × 275 · `.py` × 1 · `.pyc` × 1 · `.res` × 1 · `.tres` × 61 · `.tscn` × 5
+`.gd` × 1 · `.gdshader` × 16 · `.gdshaderinc` × 1 · `.glb` × 1 · `.jpg` × 3 · `.json` × 1 · `.png` × 338 · `.py` × 1 · `.pyc` × 1 · `.res` × 1 · `.tres` × 61 · `.tscn` × 5
 
 - `res://assets/art/branding/app_icon/adaptive_background_432.png`
 - `res://assets/art/branding/app_icon/adaptive_foreground_432.png`
@@ -563,6 +569,8 @@ _None._
 - `res://assets/art/characters/wisp/10_death_dissolve.png`
 - `res://assets/art/characters/wisp/11_reform.png`
 - `res://assets/art/characters/wisp/12_victory_pulse.png`
+- `res://assets/art/environment/arenas/board_01.png`
+- `res://assets/art/environment/arenas/board_01_light.png`
 - `res://assets/art/environment/arenas/chained_colossus.png`
 - `res://assets/art/environment/arenas/chained_colossus_3d/chained_colossus.glb`
 - `res://assets/art/environment/arenas/chained_colossus_3d/chained_colossus_Image_0.jpg`
@@ -592,6 +600,8 @@ _None._
 - `res://assets/art/environment/arenas/stitchwarden_vigil/wisp_3.png`
 - `res://assets/art/environment/arenas/stitchwarden_vigil/wisp_4.png`
 - `res://assets/art/environment/arenas/stitchwarden_vigil.png`
+- `res://assets/art/environment/arenas/thumbnails/board_01.png`
+- `res://assets/art/environment/arenas/thumbnails/board_01_light.png`
 - `res://assets/art/environment/arenas/thumbnails/chained_colossus.png`
 - `res://assets/art/environment/arenas/thumbnails/chained_colossus_3d.png`
 - `res://assets/art/environment/arenas/thumbnails/quarry_titan.png`
@@ -601,6 +611,65 @@ _None._
 - `res://assets/art/environment/arenas/thumbnails/zoom_arena_3d.png`
 - `res://assets/art/environment/arenas/wisp_bearer.png`
 - `res://assets/art/environment/arenas/zoom_arena_3d.png`
+- `res://assets/art/environment/boards/board_01/anim/lantern_glow_0.png`
+- `res://assets/art/environment/boards/board_01/anim/lantern_glow_1.png`
+- `res://assets/art/environment/boards/board_01/anim/lantern_glow_2.png`
+- `res://assets/art/environment/boards/board_01/anim/lantern_glow_3.png`
+- `res://assets/art/environment/boards/board_01/anim/lantern_lit_0.png`
+- `res://assets/art/environment/boards/board_01/anim/lantern_lit_1.png`
+- `res://assets/art/environment/boards/board_01/anim/lantern_lit_2.png`
+- `res://assets/art/environment/boards/board_01/anim/lantern_lit_3.png`
+- `res://assets/art/environment/boards/board_01/anim/lantern_off.png`
+- `res://assets/art/environment/boards/board_01/deco/chain_segment.png`
+- `res://assets/art/environment/boards/board_01/deco/cloth_tail_beam_a.png`
+- `res://assets/art/environment/boards/board_01/deco/cloth_tail_beam_b.png`
+- `res://assets/art/environment/boards/board_01/deco/cloth_tail_beam_c.png`
+- `res://assets/art/environment/boards/board_01/deco/cloth_wrap_post_a.png`
+- `res://assets/art/environment/boards/board_01/deco/cloth_wrap_post_b.png`
+- `res://assets/art/environment/boards/board_01/deco/cloth_wrap_post_c.png`
+- `res://assets/art/environment/boards/board_01/deco/moss_a.png`
+- `res://assets/art/environment/boards/board_01/deco/moss_b.png`
+- `res://assets/art/environment/boards/board_01/deco/moss_c.png`
+- `res://assets/art/environment/boards/board_01/deco/moss_d.png`
+- `res://assets/art/environment/boards/board_01/deco/moss_e.png`
+- `res://assets/art/environment/boards/board_01/deco/moss_f.png`
+- `res://assets/art/environment/boards/board_01/deco/rivet.png`
+- `res://assets/art/environment/boards/board_01/floor/floor_tile_a.png`
+- `res://assets/art/environment/boards/board_01/floor/floor_tile_a_light.png`
+- `res://assets/art/environment/boards/board_01/floor/floor_tile_b.png`
+- `res://assets/art/environment/boards/board_01/floor/floor_tile_c.png`
+- `res://assets/art/environment/boards/board_01/frame/beam_bottom_segment.png`
+- `res://assets/art/environment/boards/board_01/frame/beam_top_segment.png`
+- `res://assets/art/environment/boards/board_01/frame/cap_bottom_segment.png`
+- `res://assets/art/environment/boards/board_01/frame/cap_top_segment.png`
+- `res://assets/art/environment/boards/board_01/frame/corner_bottom_left.png`
+- `res://assets/art/environment/boards/board_01/frame/corner_bottom_right.png`
+- `res://assets/art/environment/boards/board_01/frame/corner_top_left.png`
+- `res://assets/art/environment/boards/board_01/frame/corner_top_right.png`
+- `res://assets/art/environment/boards/board_01/frame/post_left_segment.png`
+- `res://assets/art/environment/boards/board_01/frame/post_right_segment.png`
+- `res://assets/art/environment/boards/board_01/frame/rim_corner.png`
+- `res://assets/art/environment/boards/board_01/frame/rim_h.png`
+- `res://assets/art/environment/boards/board_01/frame/rim_v.png`
+- `res://assets/art/environment/boards/board_01/hud/boss_fill_segment.png`
+- `res://assets/art/environment/boards/board_01/hud/boss_plate.png`
+- `res://assets/art/environment/boards/board_01/hud/crest_center.png`
+- `res://assets/art/environment/boards/board_01/hud/pause_button_normal.png`
+- `res://assets/art/environment/boards/board_01/hud/pause_button_pressed.png`
+- `res://assets/art/environment/boards/board_01/hud/rp_plate.png`
+- `res://assets/art/environment/boards/board_01/hud/rush_fill_segment.png`
+- `res://assets/art/environment/boards/board_01/hud/rush_fill_top.png`
+- `res://assets/art/environment/boards/board_01/hud/rush_full_flare.png`
+- `res://assets/art/environment/boards/board_01/hud/rush_gauge_bottom.png`
+- `res://assets/art/environment/boards/board_01/hud/rush_gauge_segment.png`
+- `res://assets/art/environment/boards/board_01/hud/rush_gauge_top.png`
+- `res://assets/art/environment/boards/board_01/hud/score_plate.png`
+- `res://assets/art/environment/boards/board_01/hud/soul_fill_segment.png`
+- `res://assets/art/environment/boards/board_01/hud/soul_fill_top.png`
+- `res://assets/art/environment/boards/board_01/hud/soul_gauge_bottom.png`
+- `res://assets/art/environment/boards/board_01/hud/soul_gauge_segment.png`
+- `res://assets/art/environment/boards/board_01/hud/soul_gauge_top.png`
+- `res://assets/art/environment/boards/board_01/hud/upgrade_count_tag.png`
 - `res://assets/art/environment/home_background.png`
 - `res://assets/art/environment/menu_background.png`
 - `res://assets/art/environment/props/01_soul_shard.png`
@@ -783,36 +852,7 @@ _None._
 - `res://assets/ui/theme/textures/panel_default.png`
 - `res://assets/ui/theme/textures/panel_default.tres`
 - `res://assets/ui/theme/textures/plate_small.png`
-- `res://assets/ui/theme/textures/plate_small.tres`
-- `res://assets/ui/theme/textures/portrait_ring.png`
-- `res://assets/ui/theme/textures/portrait_ring.tres`
-- `res://assets/ui/theme/textures/progress_fill_boss.png`
-- `res://assets/ui/theme/textures/progress_fill_boss.tres`
-- `res://assets/ui/theme/textures/progress_fill_xp.png`
-- `res://assets/ui/theme/textures/progress_fill_xp.tres`
-- `res://assets/ui/theme/textures/progress_track.png`
-- `res://assets/ui/theme/textures/progress_track.tres`
-- `res://assets/ui/theme/textures/slices.json`
-- `res://assets/ui/theme/textures/slider_grabber_active.png`
-- `res://assets/ui/theme/textures/slider_grabber_active.tres`
-- `res://assets/ui/theme/textures/slider_grabber_disabled.png`
-- `res://assets/ui/theme/textures/slider_grabber_disabled.tres`
-- `res://assets/ui/theme/textures/slider_grabber_idle.png`
-- `res://assets/ui/theme/textures/slider_grabber_idle.tres`
-- `res://assets/ui/theme/textures/slot_disabled.png`
-- `res://assets/ui/theme/textures/slot_disabled.tres`
-- `res://assets/ui/theme/textures/slot_normal.png`
-- `res://assets/ui/theme/textures/slot_normal.tres`
-- `res://assets/ui/theme/textures/slot_selected.png`
-- `res://assets/ui/theme/textures/slot_selected.tres`
-- `res://assets/ui/theme/textures/tab_active.png`
-- `res://assets/ui/theme/textures/tab_active.tres`
-- `res://assets/ui/theme/textures/tab_normal.png`
-- `res://assets/ui/theme/textures/tab_normal.tres`
-- `res://assets/ui/theme/tools/__pycache__/build_theme_textures.cpython-314.pyc`
-- `res://assets/ui/theme/tools/build_theme_textures.py`
-- `res://assets/ui/theme/tools/build_wisp_theme.gd`
-- `res://assets/ui/theme/wisp_theme.tres`
+- _…and 30 more (list capped at 400)._
 
 ## Documentation index
 
@@ -866,6 +906,7 @@ _None._
 | decisions | [ADR-0021: Layered arenas](../decisions/0021-layered-arenas.md) |
 | decisions | [ADR-0022: Revise Stitchwarden's Vigil art and floor](../decisions/0022-vigil-art-and-floor-revision.md) |
 | decisions | [ADR-0023: 3D arenas](../decisions/0023-3d-arenas.md) |
+| decisions | [ADR-0024: Board arenas — a full-screen board with the HUD in its frame](../decisions/0024-board-arenas.md) |
 
 ## Documentation gaps
 

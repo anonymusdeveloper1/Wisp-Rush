@@ -1,13 +1,14 @@
 class_name ArenaVisual
 extends Control
-## An Endless arena drawn as a scene instead of one painting: layered sprites or a 3D model.
+## An Endless arena drawn as a scene instead of one painting: layered sprites, a 3D model or a board.
 ##
 ## GameWorld shows it in place of the painted backdrop when the equipped arena has one
-## ([member ArenaSkinData.visual_scene_path]; ADR-0021, ADR-0023). [method fit] lays it out for the
-## screen and returns the floor exactly as drawn, and GameWorld takes the walls, enemy placement and
-## dash collision from that rectangle, so play never leaves the drawn floor. Subclasses:
-## [LayeredArenaVisual] (sprites on a texel grid) and [ModelArenaVisual] (a 3D model). Pausable; the
-## arena stills its motion under Reduced Motion ([method set_reduced_motion]).
+## ([member ArenaSkinData.visual_scene_path]; ADR-0021, ADR-0023, ADR-0024). [method fit] lays it out
+## for the screen and returns the floor exactly as drawn, and GameWorld takes the walls, enemy
+## placement and dash collision from that rectangle, so play never leaves the drawn floor.
+## Subclasses: [LayeredArenaVisual] (sprites on a texel grid), [ModelArenaVisual] (a 3D model) and
+## [BoardArenaVisual] (a full-screen pixel-art board with the HUD built in). Pausable; the arena
+## stills its motion under Reduced Motion ([method set_reduced_motion]).
 ##
 ## An arena may have an opening shot before play ([method has_intro]): GameWorld then plays it with
 ## the Wisp and the HUD hidden and starts the run on [signal intro_finished] (the zoom of a 3D arena,
@@ -16,6 +17,8 @@ extends Control
 ## The opening shot has ended, played through or skipped; the floor is now drawn where [method fit]
 ## said.
 signal intro_finished
+## A board arena's own pause button was pressed ([method has_board_hud], ADR-0024).
+signal hud_pause_pressed
 
 ## Design pixels the backdrop reaches past the screen, so screen shake never shows its edge
 ## (GameWorld's BACKGROUND_OVERSCAN).
@@ -54,6 +57,20 @@ func play_intro() -> void:
 ## Ends the opening shot now, or before it starts (the player tapped, or the run skips it);
 ## [signal intro_finished] follows.
 func skip_intro() -> void:
+	pass
+
+
+## Whether the arena draws the run's HUD in itself (a board arena, ADR-0024): GameWorld then hides its
+## own HUD bars and buttons, feeds [method set_board_hud] each frame, and opens the upgrades when the
+## glowing character is tapped.
+func has_board_hud() -> bool:
+	return false
+
+
+## The run's HUD values for a board arena to show. Keys: `score` and `rift_points` (text), `rp_icon`
+## and `boss_icon` (Texture2D), `level` (int), `soul`, `rush` and `boss_health` (0..1), `boss`
+## (bool, a boss fight is on), `upgrades` (int, banked upgrades ready to open).
+func set_board_hud(_state: Dictionary) -> void:
 	pass
 
 

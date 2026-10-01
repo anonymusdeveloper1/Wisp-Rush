@@ -4,6 +4,43 @@
 > [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) §7.6. Keep entries short — details belong in the docs
 > they changed.
 
+## 2026-10-02 — The full-screen board in the game: BOARD 01
+- **Who:** Claude Code (Opus 5.5), working on while the owner was away
+- **Owner:** Codex built the board's pieces; "implement", then commit and push everything to GitHub
+  and update the docs; "work in a loop while I'm gone" (GDD §14 #72).
+- **Did:** ADR-0024. `BoardArenaVisual` builds the board at run time from the pieces
+  (`tools/art/make_board.py` copies Codex's 59 pieces, checked against its manifest, to
+  `assets/art/environment/boards/board_01/`): tiled floor with a few variant slabs, posts, beams,
+  corners, caps and the wall line, decorations, and the HUD in the frame (pause, boss plate or crest,
+  score, Rift Points, soul gauge with the level, RUSH gauge with its flare, four lanterns that glow for
+  upgrades, a count tag). `ArenaVisual` gained `has_board_hud()`, `set_board_hud()` and
+  `hud_pause_pressed`. GameWorld, on a board, moves its HUD bars and buttons under a hidden holder,
+  feeds the board each frame, shows `UpgradeGlow` on the character while upgrades are ready and opens
+  the cards on a tap that starts on him; the resume button only takes focus when the pause button is
+  visible. Slots BOARD 01 (mid-dark floor) and BOARD 01 LIGHT (the reference's lighter floor): scenes,
+  Shop stills, skins, catalog, save ids; `test_endless_catalog` checks which arenas draw the HUD.
+- **Claude's choices:** the two slots and their names, the other arenas keeping the floating HUD, every
+  value in ADR-0024's Consequences, and committing on the branch `feat/board-and-arenas-catch-up`
+  (CONVENTIONS §12) — first a catch-up commit of all the uncommitted work since df1956d, then this one;
+  Codex's local `.codex-remote-attachments/` was left out of git.
+- **Files/systems:** `scenes/arenas/{arena_visual,board_arena_visual}.gd`, `scenes/arenas/board_01*.tscn`,
+  `scenes/gameplay/{game_world.gd,upgrade_glow.gd}`, `tools/art/make_board.py`,
+  `assets/art/environment/{boards/board_01/,arenas/board_01*}`, `concept_art/arenas_v2/board_01*/`,
+  `data/endless/`, `scripts/autoload/save_manager.gd`, `tools/godot/test_endless_catalog.gd`; docs:
+  ADR-0024, GDD §4, §6, §14 #71–#72, core_run, endless_mode, arena_art §6, ASSETS, PROJECT_CONTEXT.
+- **Verified:** `validate.sh` OK (one earlier run printed FAILED with an empty error log and every step
+  clean, as before); `test_endless_catalog` (8 arenas) and `test_game_flow` pass. A render at
+  1080 × 2340 with sample values showed every HUD piece in its slot and the floor 936 × 1990. A scratch
+  run on BOARD 01: the board took over the HUD (the pause button under the hidden holder), the arena rect
+  was the board's floor, the light showed with upgrades banked and the cards closed, a tap on the
+  character opened them, and the board's pause paused the run. A bot run (`render_gameplay_clip.gd
+  skin=board_01`) showed the board with live score, gauges and the light; it also showed the light
+  staying after the run ended, fixed (no light once the run is over or the cards are open). APK built;
+  the phone was not connected, so it is not installed.
+- **Follow-ups:** install, and the owner's phone test: the board's look and sizes, which floor, the HUD
+  readability (the pixel font's 5 reads like an S at this size), tapping the character, the light. The
+  branch is pushed, not merged into `main`.
+
 ## 2026-10-02 — Portrait only; the full-screen board's Codex prompt
 - **Who:** Claude Code (Opus 5.5)
 - **Owner:** the game is played vertically only, never horizontally or in landscape (record it or make

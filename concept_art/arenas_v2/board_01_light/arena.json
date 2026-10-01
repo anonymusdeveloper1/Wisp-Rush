@@ -1,0 +1,14 @@
+{
+  "id": "board_01_light",
+  "display_name": "BOARD 01 LIGHT",
+  "description": "The full-screen board with the lighter tan floor of the owner's reference.",
+  "source": "source.png",
+  "source_note": "The Shop still of the board arena with the lighter floor tile (owner 2026-10-02, GDD §14 #71-#72, ADR-0024): res://scenes/arenas/board_01_light.tscn rendered by tools/godot/render_arena_still.gd at 941x1672 with no safe top and an empty HUD. A run shows the live board with the HUD in its frame. The pieces are Codex's, from concept_art/boards_v1/board_01/.",
+  "floor_rect_px": [
+    63,
+    112,
+    878,
+    1588
+  ],
+  "floor_rect_note": "The floor inside the frame as the scene drew it in the still (BoardArenaVisual.fit returns it: 62.7, 111.5 to 878.3, 1587.5), rounded to whole pixels, [left, top, right, bottom]."
+}
