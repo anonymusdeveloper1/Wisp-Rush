@@ -1,11 +1,14 @@
 class_name FormCatalog
 extends Resource
-## Ordered registry of the playable characters: six single-image Wisp forms and the rigged characters.
+## Ordered registry of the playable characters: the whole-frame and rigged characters.
 ##
 ## Every entry is cosmetic only - collision, stats and controls never change with the character.
 
 ## Number of catalog entries; the Statistics screen counts collected characters against it.
-const REQUIRED_FORM_COUNT: int = 8
+const REQUIRED_FORM_COUNT: int = 6
+## The character every save owns and equips first, and the fallback for an unknown id: Patchvile
+## (owner, 2026-09-25; Void held this until it was removed).
+const DEFAULT_FORM_ID: StringName = &"patchvile"
 
 ## Form `.tres` paths in intended collection-screen order.
 @export var form_paths: PackedStringArray = PackedStringArray()
@@ -28,7 +31,7 @@ func load_forms() -> Array[FormData]:
 	return _loaded.duplicate()
 
 
-## Returns count, duplicate, required-Void and per-resource authoring failures.
+## Returns count, duplicate, required-default and per-resource authoring failures.
 func validate() -> PackedStringArray:
 	var failures := PackedStringArray()
 	var forms: Array[FormData] = load_forms()
@@ -41,22 +44,22 @@ func validate() -> PackedStringArray:
 		seen_ids[form.form_id] = true
 		for failure: String in form.validate():
 			failures.append("%s: %s" % [form.form_id, failure])
-	if not seen_ids.has(&"void"):
-		failures.append("catalog requires the Void form")
+	if not seen_ids.has(DEFAULT_FORM_ID):
+		failures.append("catalog requires the default form %s" % DEFAULT_FORM_ID)
 	else:
 		for form: FormData in forms:
-			if form.form_id == &"void" and form.price != 0:
-				failures.append("Void must be free")
+			if form.form_id == DEFAULT_FORM_ID and form.price != 0:
+				failures.append("the default form %s must be free" % DEFAULT_FORM_ID)
 	return failures
 
 
-## Finds a form by persistent identifier, falling back to Void for corrupt input.
+## Finds a form by persistent identifier, falling back to the default form for corrupt input.
 func get_form(form_id: StringName) -> FormData:
 	var fallback: FormData
 	for form: FormData in load_forms():
-		if form.form_id == &"void":
+		if form.form_id == DEFAULT_FORM_ID:
 			fallback = form
 		if form.form_id == form_id:
 			return form
-	assert(fallback != null, "FormCatalog requires a Void fallback")
+	assert(fallback != null, "FormCatalog requires the default form as its fallback")
 	return fallback

@@ -2,9 +2,9 @@ class_name CharacterMenuVideo
 extends VideoStreamPlayer
 ## A character's menu video (ADR-0016), drawn in the square its [MenuVideoData] placed it in.
 ##
-## Shared by every visual that can perform a menu video — [WholeFrameCharacterVisual] and
-## [IlyraVisual] today. It owns the three things a [VideoStreamPlayer] does not do on its own for
-## this job:
+## Shared by every visual that can perform a menu video ([WholeFrameCharacterVisual]; no character
+## plays one since 2026-09-26). It owns the three things a [VideoStreamPlayer] does not do on its own
+## for this job:
 ##
 ## - it draws through the packed-alpha shader, since Theora carries no alpha;
 ## - it pauses while hidden: a Shop card on another tab keeps its character in the tree, and a

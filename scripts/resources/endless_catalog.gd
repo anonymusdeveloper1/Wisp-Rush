@@ -1,13 +1,16 @@
 class_name EndlessCatalog
 extends Resource
-## The Endless floor template, its arena skins, the default skin and Endless tuning (ADR-0014).
+## The Endless arenas' shared floor, the arenas themselves, the default one, Endless tuning and the
+## enemy mixes and bosses Endless waves draw from.
+##
+## Every arena is painted to one contract (docs/guides/arena_art.md, ADR-0017): one canvas, the
+## floor in the same place, so the floor lives here once and an arena can never change play.
 
-## Native size of every arena background; the floor template's UV space is this canvas.
+## Native size of every arena background; `floor_rect` and `floor_polygon` are UV of this canvas.
+## 941x1672 is the Quarry Titan as delivered - the contract's safe zone without its bleed. The
+## contract canvas is 1080x2400; when the arena is re-delivered at that size, this and the floor
+## move with it (the guide has the conversion).
 const BACKGROUND_SIZE := Vector2i(941, 1672)
-## Art-side source of `floor_polygon`; read only by `validate()` when it is present (not exported).
-const TEMPLATE_JSON_PATH: String = "res://concept_art/wisp_rush_endless_v1/floor_template.json"
-## Largest per-coordinate difference allowed between `floor_polygon` and the template JSON.
-const TEMPLATE_TOLERANCE: float = 1e-4
 ## Background pixels the painted rim may sit beyond the template (`rim_tolerance_px` of the
 ## template JSON). Scenery light, motion and particles must stay this far outside the floor.
 const RIM_TOLERANCE_PX: float = 48.0
@@ -16,7 +19,11 @@ const MASK_FLOOR_TOLERANCE: float = 6.0 / 255.0
 ## Mask texels between floor samples checked by `validate(true)`.
 const MASK_SAMPLE_STEP: int = 6
 
-## The one playable floor every skin shares, in background UV space (`polygon_uv` of the template).
+## The rectangle formations, hazards and the playfield's scale are laid out over, in background UV
+## (the role `GameWorld.ARENA_FLOOR_UV` plays for the neutral arena). For a rectangular floor it is
+## the floor.
+@export var floor_rect: Rect2 = Rect2(0.0, 0.0, 1.0, 1.0)
+## The walls: the painted floor every arena shares, in background UV space.
 @export var floor_polygon: PackedVector2Array = PackedVector2Array()
 ## Every arena skin, in Shop order.
 @export var skins: Array[ArenaSkinData] = []
@@ -24,6 +31,8 @@ const MASK_SAMPLE_STEP: int = 6
 @export var default_skin_id: StringName = &""
 ## Boss cadence, per-cycle difficulty and the daily pool.
 @export var tuning: EndlessTuning
+## Enemy mixes Endless waves draw from, in pick order; each brings its boss to the boss pool.
+@export var rosters: Array[EndlessRoster] = []
 
 
 ## The skin with `skin_id`, or the default when the id is unknown.
@@ -39,6 +48,31 @@ func get_skin(skin_id: StringName) -> ArenaSkinData:
 	if fallback == null and not skins.is_empty():
 		fallback = skins[0]
 	return fallback
+
+
+## Every enemy mix, in pick order.
+func get_rosters() -> Array[EndlessRoster]:
+	return rosters.duplicate()
+
+
+## The mixes with these ids, in the given order; unknown ids are skipped.
+func get_rosters_by_id(roster_ids: Array[StringName]) -> Array[EndlessRoster]:
+	var found: Array[EndlessRoster] = []
+	for roster_id: StringName in roster_ids:
+		for roster: EndlessRoster in rosters:
+			if roster != null and roster.roster_id == roster_id:
+				found.append(roster)
+				break
+	return found
+
+
+## Bosses Endless may send: every mix's boss, in pick order, no repeats.
+func get_boss_ids() -> Array[StringName]:
+	var ids: Array[StringName] = []
+	for roster: EndlessRoster in rosters:
+		if roster != null and roster.boss_id not in ids:
+			ids.append(roster.boss_id)
+	return ids
 
 
 ## Deterministic skin for a YYYY-MM-DD date from every non-placeholder skin, ignoring ownership;
@@ -116,8 +150,8 @@ func validate_scenery(scenery: ArenaSceneryData, check_mask: bool = true) -> Pac
 	return failures
 
 
-## Returns template, id, default-skin (present and free), background-size, placeholder, scenery
-## (tier, mask, keep-out) and tuning authoring failures. `check_backgrounds` loads every full-size
+## Returns floor, id, default-skin (present and free), background-size, placeholder, scenery
+## (tier, mask, keep-out), roster and tuning authoring failures. `check_backgrounds` loads every full-size
 ## background and scenery mask: pass false where that memory matters (no runtime code calls this).
 func validate(check_backgrounds: bool = true) -> PackedStringArray:
 	var failures := PackedStringArray()
@@ -127,7 +161,8 @@ func validate(check_backgrounds: bool = true) -> PackedStringArray:
 		if point.x < 0.0 or point.x > 1.0 or point.y < 0.0 or point.y > 1.0:
 			failures.append("floor polygon point %s is outside UV space" % point)
 			break
-	failures.append_array(_validate_template())
+	if not Rect2(0.0, 0.0, 1.0, 1.0).encloses(floor_rect) or floor_rect.has_area() == false:
+		failures.append("floor rect %s is not inside UV space" % floor_rect)
 	if tuning == null:
 		failures.append("tuning is missing")
 	if skins.is_empty():
@@ -145,6 +180,20 @@ func validate(check_backgrounds: bool = true) -> PackedStringArray:
 		if skin.scenery != null:
 			for failure: String in validate_scenery(skin.scenery, check_backgrounds):
 				failures.append("%s: %s" % [skin.skin_id, failure])
+	var roster_ids: Dictionary[StringName, bool] = {}
+	for roster: EndlessRoster in rosters:
+		if roster == null:
+			failures.append("catalog has an empty roster slot")
+			continue
+		if roster_ids.has(roster.roster_id):
+			failures.append("duplicate roster id %s" % roster.roster_id)
+		roster_ids[roster.roster_id] = true
+		for failure: String in roster.validate():
+			failures.append("%s: %s" % [roster.roster_id, failure])
+	if tuning != null:
+		for roster_id: StringName in tuning.daily_roster_ids:
+			if not roster_ids.has(roster_id):
+				failures.append("daily roster %s is not in the catalog" % roster_id)
 	if not seen.has(default_skin_id):
 		failures.append("default skin %s is not in the catalog" % default_skin_id)
 	elif get_skin(default_skin_id).price != 0:
@@ -180,27 +229,3 @@ func _validate_mask_floor(mask: Texture2D) -> PackedStringArray:
 				return failures
 	return failures
 
-
-func _validate_template() -> PackedStringArray:
-	var failures := PackedStringArray()
-	if not FileAccess.file_exists(TEMPLATE_JSON_PATH):
-		return failures
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(TEMPLATE_JSON_PATH))
-	if not parsed is Dictionary or not (parsed as Dictionary).get("polygon_uv") is Array:
-		failures.append("floor template JSON has no polygon_uv")
-		return failures
-	var points: Array = (parsed as Dictionary)["polygon_uv"] as Array
-	if points.size() != floor_polygon.size():
-		failures.append("floor polygon has %d points, the template %d" % [
-			floor_polygon.size(), points.size(),
-		])
-		return failures
-	for index: int in points.size():
-		var pair: Array = points[index] as Array
-		var expected := Vector2(float(pair[0]), float(pair[1]))
-		if (
-			absf(floor_polygon[index].x - expected.x) > TEMPLATE_TOLERANCE
-			or absf(floor_polygon[index].y - expected.y) > TEMPLATE_TOLERANCE
-		):
-			failures.append("floor polygon point %d differs from the template" % index)
-	return failures

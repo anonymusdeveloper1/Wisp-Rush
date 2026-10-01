@@ -75,7 +75,7 @@ func _run() -> void:
 	_game = GAME_WORLD_SCENE.instantiate() as GameWorld
 	_game.run_seed = 29
 	_game.auto_pause_on_focus_loss = false
-	_game.configure_run(RunProfile.tutorial(ENDLESS_CATALOG, skin, FORM_CATALOG.get_form(&"void")))
+	_game.configure_run(RunProfile.tutorial(ENDLESS_CATALOG, skin, FORM_CATALOG.get_form(FormCatalog.DEFAULT_FORM_ID)))
 	root.add_child(_game)
 	_player = _game._player
 	_game.set_experience_enabled(false)

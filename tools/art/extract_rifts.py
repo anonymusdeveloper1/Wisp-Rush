@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Slice the Rifts v1 concept pack into runtime art under assets/art/.
+"""Slice the enemy and boss sheets of the Rifts v1 concept pack into runtime art under assets/art/.
 
-Companion to extract_redesign.py (ADR-0005): the Rifts pack (Milestone 8) ships clean 4x3 sheets
-with real alpha and backgrounds already at the arena's native 941x1672, so it needs cell cropping
-and occupancy normalisation only - no checkerboard matting or component segmentation.
+Companion to extract_redesign.py (ADR-0005): the pack (Milestone 8) ships clean 4x3 sheets with real
+alpha, so it needs cell cropping and occupancy normalisation only - no checkerboard matting or
+component segmentation. The pack's four Rift backdrops and its props sheet were removed with the
+story Rifts (2026-09-25); the enemies and bosses it holds are the Endless enemy mixes' own.
 
 Run from the repo root:  python3 tools/art/extract_rifts.py
 Then re-import:          tools/validate.sh
@@ -13,45 +14,13 @@ Never hand-edit the outputs; change this file and re-run.
 import os
 import sys
 
-from PIL import Image, ImageEnhance, ImageFilter
+from PIL import Image
 
 SRC = "concept_art/wisp_rush_rifts_v1/assets"
 OUT = "assets/art"
 
-# The painted stone floor in texture UV space (GameWorld.ARENA_FLOOR_UV, ADR-0006).
-FLOOR_UV = (0.145, 0.255, 0.145 + 0.700, 0.255 + 0.515)
-
-# Backgrounds are already 941x1672 RGB. `floor_dim` multiplies brightness inside the playfield so
-# the Wisp stays the brightest small object (STYLE_GUIDE first rule); `sat` rescales saturation so
-# an arena never competes with the magenta/amber information colours.
-BACKGROUNDS = [
-    ("01_rift_shattered.png", "shattered_background.png", 1.00, 0.72),
-    ("02_rift_ember_hollow.png", "ember_hollow_background.png", 1.00, 0.92),
-    ("03_rift_frozen_choir.png", "frozen_choir_background.png", 0.52, 0.80),
-    ("04_rift_reapers_court.png", "reapers_court_background.png", 1.00, 1.00),
-]
-
 # sheet -> (out dir, canvas, target content height, [(name, [cell indices sharing one scale])])
 SHEETS = [
-    (
-        "05_rift_props_sheet.png", "environment/props", 362, 270,
-        [
-            ("10_void_portal_entrance.png", [0]),
-            ("10_void_portal_entrance_active.png", [1]),
-            ("11_void_portal_exit.png", [2]),
-            ("11_void_portal_exit_active.png", [3]),
-            ("12_obsidian_pillar.png", [4]),
-            ("12_obsidian_pillar_cracked.png", [5]),
-            ("13_floor_warning.png", [6]),
-            ("13_floor_warning_active.png", [7]),
-            ("14_floor_crumble.png", [8]),
-            ("15_obsidian_rubble.png", [9]),
-            ("16_rune_tile.png", [10]),
-            ("16_rune_tile_lit.png", [11]),
-        ],
-        # State pairs share a scale so switching state never pops the sprite.
-        [[0, 1], [2, 3], [4, 5], [6, 7], [8], [9], [10, 11]],
-    ),
     (
         "06_new_enemies_sheet.png", "characters/enemies", 362, 260,
         [
@@ -172,33 +141,6 @@ def normalise(cell, scale, canvas):
     return out
 
 
-def feathered_floor_mask(size):
-    """Soft mask covering the playfield rectangle, feathered so the edit has no visible seam."""
-    width, height = size
-    mask = Image.new("L", size, 0)
-    box = (
-        int(FLOOR_UV[0] * width), int(FLOOR_UV[1] * height),
-        int(FLOOR_UV[2] * width), int(FLOOR_UV[3] * height),
-    )
-    mask.paste(255, box)
-    return mask.filter(ImageFilter.GaussianBlur(min(width, height) * 0.06))
-
-
-def write_backgrounds(report):
-    target = os.path.join(OUT, "environment", "rifts")
-    os.makedirs(target, exist_ok=True)
-    for source_name, out_name, floor_dim, sat in BACKGROUNDS:
-        img = Image.open(os.path.join(SRC, source_name)).convert("RGB")
-        if sat != 1.0:
-            img = ImageEnhance.Color(img).enhance(sat)
-        if floor_dim != 1.0:
-            dimmed = ImageEnhance.Brightness(img).enhance(floor_dim)
-            img = Image.composite(dimmed, img, feathered_floor_mask(img.size))
-        img.save(os.path.join(target, out_name))
-        report.append("%s -> environment/rifts/%s  %dx%d  sat=%.2f floor_dim=%.2f"
-                      % (source_name, out_name, img.width, img.height, sat, floor_dim))
-
-
 def write_sheets(report):
     for sheet_name, out_dir, canvas, target_h, items, scale_groups in SHEETS:
         sheet = Image.open(os.path.join(SRC, sheet_name)).convert("RGBA")
@@ -236,7 +178,6 @@ def main():
         sys.stderr.write("missing source pack: %s\n" % SRC)
         return 1
     report = []
-    write_backgrounds(report)
     write_sheets(report)
     os.makedirs("logs/rifts", exist_ok=True)
     with open("logs/rifts/extract_report.txt", "w") as handle:

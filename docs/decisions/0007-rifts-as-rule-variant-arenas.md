@@ -1,6 +1,6 @@
 # ADR-0007: Rifts are rule-variant arenas, not reskins
 
-> **Status:** Accepted; the lifetime-best-wave unlock gate is superseded by
+> **Status:** **Rifts removed 2026-09-25** (GDD §14 #48): kept as history; Accepted; the lifetime-best-wave unlock gate is superseded by
 > [ADR-0013](0013-rift-story-levels-endless-mode-and-rift-points.md) (level-1 clears open the next Rift) ·
 > **Date:** 2026-09-12 · **Deciders:** owner (requested arenas + a map UI) + Claude Code
 

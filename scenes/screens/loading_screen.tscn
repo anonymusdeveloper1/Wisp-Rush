@@ -79,7 +79,7 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 2
 theme_type_variation = &"TitleLabel"
-theme_override_font_sizes/font_size = 64
+theme_override_font_sizes/font_size = 66
 text = "ENDLESS"
 horizontal_alignment = 1
 
@@ -88,7 +88,7 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 2
 theme_type_variation = &"CaptionLabel"
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 33
 text = "ASTRAL OBSERVATORY"
 horizontal_alignment = 1
 

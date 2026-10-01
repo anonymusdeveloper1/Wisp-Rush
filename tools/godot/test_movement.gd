@@ -10,7 +10,7 @@ extends SceneTree
 ## buffering, launch burst, momentum, the arrow, cancelled touches, and the review findings.
 
 const GAME_WORLD_SCENE: PackedScene = preload("res://scenes/gameplay/game_world.tscn")
-const RIFTS: RiftCatalog = preload("res://data/rifts/default_catalog.tres")
+const ENDLESS: EndlessCatalog = preload("res://data/endless/default_endless_catalog.tres")
 const FORMS: FormCatalog = preload("res://data/forms/default_catalog.tres")
 const SWIPE_LENGTH: float = 240.0
 const TOUCH_ORIGIN := Vector2(540, 1100)
@@ -399,9 +399,12 @@ func _start() -> void:
 	_game = GAME_WORLD_SCENE.instantiate() as GameWorld
 	_game.run_seed = 11
 	_game.auto_pause_on_focus_loss = false
-	_game.configure_run(
-		RunProfile.story(RIFTS.get_rift(&"obsidian_garden"), 1, {}, FORMS.get_form(&"void"))
-	)
+	var no_rosters: Array[EndlessRoster] = []
+	var reaper_only: Array[StringName] = [&"reaper"]
+	_game.configure_run(RunProfile.endless(
+		ENDLESS, ENDLESS.get_skin(ENDLESS.default_skin_id), no_rosters, reaper_only,
+		FORMS.get_form(FormCatalog.DEFAULT_FORM_ID)
+	))
 	root.add_child(_game)
 	await create_timer(0.3).timeout
 	_game.debug_quiet_arena()

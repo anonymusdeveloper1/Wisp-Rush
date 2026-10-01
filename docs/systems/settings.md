@@ -1,6 +1,6 @@
 # System: Settings, statistics and boot screens
 
-> **Status:** ✅ done · **Last updated:** 2026-09-15 · **GDD section:** §11 (prompt §18, §26)
+> **Status:** ✅ done · **Last updated:** 2026-09-25 · **GDD section:** §11 (prompt §18, §26)
 
 ## Purpose
 
@@ -21,9 +21,13 @@ About, reset progress), lifetime statistics, and the boot Loading screen.
 
 ```text
 SettingsScreen (process mode Always)
-├── Header (Back, title) · AudioCard (Music/SFX) · FeelCard (Shake slider; Haptics, Aim Arrow,
-│   Aim Assist, Reduced Motion toggles)
-├── Privacy & About · Reset Progress · FeedbackLabel
+├── Margin/Content
+│   ├── Header (Back, title, badge) — fixed, does not scroll
+│   └── %Scroll (ScrollContainer, vertical only, no scroll bar) → Body
+│       ├── %Groups: AudioCard (Music/SFX) · FeelCard (Shake slider; Haptics, Aim Arrow, Aim Assist,
+│       │   Reduced Motion toggles) · MoreCard (Privacy & About, Replay Tutorial, Reset Progress) ·
+│       │   DEVELOPER card (debug builds, built in code)
+│       └── %FeedbackLabel
 ├── AboutPanel (hidden) · ResetPanel (hidden)
 StatisticsScreen → Header, emblem, StatsGrid (rows from build_rows)
 LoadingScreen → _draw() diamond core, StatusLabel, ProgressBar
@@ -55,13 +59,17 @@ SaveManager (authority, ADR-0003), Audio (live volume preview), GameWorld (liste
 ## Rules & behaviour
 
 - Redesign v1 layout: `PanelCard` groups, ON/OFF toggle buttons, amber `DangerButton` for the armed reset; Loading draws the soul core on void charcoal.
+- Everything under the header scrolls (`%Scroll`, vertical only, since 2026-09-25); the header stays
+  put, and no scroll bar is drawn (`vertical_scroll_mode` SHOW_NEVER; owner, 2026-09-25). Cards and buttons use mouse filter Pass, so a touch swipe that starts on them scrolls and does
+  not press the button. `_show_feedback` scrolls the feedback line (ALL PROGRESS ERASED, developer
+  APPLIED / REFUSED) into view.
 - Every change goes through SaveManager, which clamps, saves and emits `settings_changed`.
 - Sliders preview volume live and save after 0.35 s at rest (and on exit); toggles save at once.
 - Reset needs the panel plus a 1.5 s disarmed countdown; Cancel is focused; hidden in a run.
 - **AIM ARROW** (caption "Show the dash path and lit targets"): the arrow, the path line and the lit
   enemies of the aim preview. **AIM ASSIST** (owner decision 2026-09-15, "Gently bends a dash into
   more enemies"): the release-time ±6° bend ([player_dash.md](player_dash.md)); independent of AIM ARROW.
-- No tutorial replay here since 2026-09-15: the Tutorial is replayable only from the Rift Map ([tutorial.md](tutorial.md)).
+- REPLAY TUTORIAL (MORE card, Home-level only like RESET PROGRESS) emits `tutorial_requested`; Main opens the Tutorial and returns Home. Back since 2026-09-24, when the Rift Map, which held the only replay, left the first release; the Rifts were removed on 2026-09-25 ([tutorial.md](tutorial.md)).
 - Privacy copy: offline, no accounts, ads, analytics or tracking; data stays on the device.
 - Loading never stays longer than 6 s — anything unfinished then loads synchronously.
 
@@ -73,14 +81,18 @@ SaveManager (authority, ADR-0003), Audio (live volume preview), GameWorld (liste
 ## Known issues / TODO
 
 - Revisit About credits once the art licence is confirmed (GDD §14 #1).
-- In a debug build the DEVELOPER card makes the screen taller than most phone views (min height
-  2,473 px measured 2026-09-15 with AIM ASSIST, ~2,366 before; ~1,780 px without the card) and there
-  is no scroll container, so the bottom clips on 2,338–2,400 px-tall phones in the debug APK.
+- A vertical swipe that starts on a slider (Music, Sound FX, Screen Shake) moves the slider instead
+  of scrolling (measured 2026-09-25 with simulated touch input); the owner keeps it that way
+  (2026-09-25).
 
 ## Change history
 
 | Date | Change |
 |---|---|
+| 2026-09-25 | The scroll bar is hidden (owner); swiping still scrolls. The touch pass-through stays and a swipe on a slider keeps moving the slider (owner) |
+| 2026-09-25 | Developer-card section brought up to date: four actions (owner) |
+| 2026-09-25 | Settings scrolls (owner): fixed header, `%Scroll` → Body (cards, feedback line); cards and buttons pass touches to the scroll; feedback scrolls into view. Developer UNLOCK EVERYTHING tooltip reads "Forms, Trials and Rift Points"; statistics row TIME IN THE RIFT → TIME PLAYED |
+| 2026-09-25 | Story Rifts removed (owner): the developer UNLOCK ALL RIFTS action removed |
 | 2026-09-15 | AIM ASSIST toggle (`aim_assist`, default ON); AIM ARROW caption now covers the path and lit targets |
 | 2026-09-15 | REPLAY TUTORIAL removed (Tutorial screen is replayed from the Rift Map) |
 | 2026-09-12 | Restyled to redesign v1 (ADR-0005) |
@@ -88,9 +100,11 @@ SaveManager (authority, ADR-0003), Audio (live volume preview), GameWorld (liste
 
 ## Developer card (debug builds only)
 
-Settings appends a **DEVELOPER** card built in `_build_developer_card()` with five actions: unlock
-everything, unlock all Rifts, unlock all forms, complete all Trials, and grant 5,000 Rift Points
-(`DevUnlock.grant_rift_points`, `RP_GRANT`); the Sanctum action went with the Sanctum (2026-09-15). It exists so features gated behind progression can be reached without playing to them.
+Settings appends a **DEVELOPER** card built in `_build_developer_card()` with four actions: UNLOCK
+EVERYTHING (characters, Trials and Rift Points in one go, `DevUnlock.unlock_everything`), UNLOCK ALL
+CHARACTERS (`unlock_forms`), COMPLETE ALL TRIALS (`complete_trials`) and +5,000 RP
+(`grant_rift_points`, `RP_GRANT`). The Sanctum action went with the Sanctum (2026-09-15) and UNLOCK
+ALL RIFTS with the story Rifts (2026-09-25). It exists so features gated behind progression can be reached without playing to them.
 
 It is gated twice, because GDD §13 forbids debug panels in a release:
 
@@ -99,5 +113,4 @@ It is gated twice, because GDD §13 forbids debug panels in a release:
 2. Every `SaveManagerService.debug_*` method independently refuses to act in a release build, so
    even a caller that bypassed the UI would change nothing.
 
-`tools/run_tests.sh dev_unlock` asserts what each action unlocks, that null saves and unknown rift
-ids are refused, and that exactly one developer card is present in a debug build.
+`tools/run_tests.sh dev_unlock` asserts what each action unlocks, that null saves are refused, and that exactly one developer card is present in a debug build. It is stale today: it still calls the removed `DevUnlock.get_unlock_wave`, so it does not parse.

@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" load_steps=14 format=3]
+[gd_resource type="SpriteFrames" load_steps=26 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/art/characters/playable/verdant_shade/verdant_shade_menu.png" id="1_menu"]
 
@@ -24,31 +24,79 @@ region = Rect2(1864, 8, 448, 448)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_menu_005"]
 atlas = ExtResource("1_menu")
-region = Rect2(2328, 8, 448, 448)
+region = Rect2(8, 472, 448, 448)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_menu_006"]
 atlas = ExtResource("1_menu")
-region = Rect2(8, 472, 448, 448)
+region = Rect2(472, 472, 448, 448)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_menu_007"]
 atlas = ExtResource("1_menu")
-region = Rect2(472, 472, 448, 448)
+region = Rect2(936, 472, 448, 448)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_menu_008"]
 atlas = ExtResource("1_menu")
-region = Rect2(936, 472, 448, 448)
+region = Rect2(1400, 472, 448, 448)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_menu_009"]
 atlas = ExtResource("1_menu")
-region = Rect2(1400, 472, 448, 448)
+region = Rect2(1864, 472, 448, 448)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_menu_010"]
 atlas = ExtResource("1_menu")
-region = Rect2(1864, 472, 448, 448)
+region = Rect2(8, 936, 448, 448)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_menu_011"]
 atlas = ExtResource("1_menu")
-region = Rect2(2328, 472, 448, 448)
+region = Rect2(472, 936, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_012"]
+atlas = ExtResource("1_menu")
+region = Rect2(936, 936, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_013"]
+atlas = ExtResource("1_menu")
+region = Rect2(1400, 936, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_014"]
+atlas = ExtResource("1_menu")
+region = Rect2(1864, 936, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_015"]
+atlas = ExtResource("1_menu")
+region = Rect2(8, 1400, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_016"]
+atlas = ExtResource("1_menu")
+region = Rect2(472, 1400, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_017"]
+atlas = ExtResource("1_menu")
+region = Rect2(936, 1400, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_018"]
+atlas = ExtResource("1_menu")
+region = Rect2(1400, 1400, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_019"]
+atlas = ExtResource("1_menu")
+region = Rect2(1864, 1400, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_020"]
+atlas = ExtResource("1_menu")
+region = Rect2(8, 1864, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_021"]
+atlas = ExtResource("1_menu")
+region = Rect2(472, 1864, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_022"]
+atlas = ExtResource("1_menu")
+region = Rect2(936, 1864, 448, 448)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_menu_023"]
+atlas = ExtResource("1_menu")
+region = Rect2(1400, 1864, 448, 448)
 
 [resource]
 animations = [{
@@ -88,8 +136,44 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_menu_011")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_012")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_013")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_014")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_015")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_016")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_017")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_018")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_019")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_020")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_021")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_022")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_menu_023")
 }],
 "loop": true,
 "name": &"storefront_idle",
-"speed": 8.4
+"speed": 12
 }]

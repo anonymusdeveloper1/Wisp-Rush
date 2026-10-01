@@ -52,9 +52,9 @@ func _run() -> void:
 	for skin: ArenaSkinData in skins:
 		var game := (load(GAME_WORLD_PATH) as PackedScene).instantiate() as GameWorld
 		game.auto_pause_on_focus_loss = false
-		var no_rifts: Array[RiftData] = []
+		var no_rosters: Array[EndlessRoster] = []
 		var reaper_only: Array[StringName] = [&"reaper"]
-		var profile := RunProfile.endless(catalog, skin, no_rifts, reaper_only, null)
+		var profile := RunProfile.endless(catalog, skin, no_rosters, reaper_only, null)
 		profile.run_seed = 714
 		game.configure_run(profile)
 		root.add_child(game)

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BossData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/boss_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/bosses/grimgrin_boss.tscn" id="2"]
+
+[resource]
+script = ExtResource("1")
+boss_id = &"grimgrin"
+display_name = "GRIMGRIN, THE HOLLOW RONIN"
+approach_callout = "GRIMGRIN APPROACHES"
+scene = ExtResource("2")
+tint = Color(1, 1, 1, 1)
+accent = Color(0.58, 0.04, 0.1, 1)

@@ -26,9 +26,9 @@ extends Resource
 @export_range(0.0, 96.0, 1.0) var blade_bonus: float = 14.0
 ## Reform duration in seconds before the first input becomes available.
 @export_range(0.0, 1.0, 0.01) var spawn_duration: float = 0.42
-## Soul Fragments a run starts with. One: a run is lost on the first contact until a Soul Vessel
-## is found, and there is no revive. Collected vessels raise it with no cap
-## ([method WispPlayer.increase_maximum_health]), so this is a starting value, not a ceiling.
+## Soul Fragments a run starts with. One, and nothing in a run adds another (the Soul Vessel drop
+## was removed, owner 2026-09-24): the first contact ends the run and there is no revive. Only the
+## Tutorial tops it up ([method WispPlayer.increase_maximum_health] is kept for it and the tests).
 @export_range(1, 20, 1) var maximum_health: int = 1
 ## Non-lethal hurt reaction duration in seconds.
 @export_range(0.05, 1.0, 0.01) var hurt_duration: float = 0.22

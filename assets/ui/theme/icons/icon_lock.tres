@@ -1,0 +1,7 @@
+[gd_resource type="CanvasTexture" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/theme/icons/icon_lock.png" id="1_wwbbg"]
+
+[resource]
+diffuse_texture = ExtResource("1_wwbbg")
+texture_filter = 1

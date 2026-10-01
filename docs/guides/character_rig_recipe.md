@@ -1,6 +1,7 @@
 > **Superseded for new characters, 2026-09-20.** Playable characters are whole-frame sprites
-> now — see [character_sprite_frames.md](character_sprite_frames.md). This recipe stays for the
-> four rigs still in the game (Veyra, Rook, Morrow, Noxen). Ilyra and Bram, which much of it was
+> now — see [character_creation.md](character_creation.md). This recipe stays for the one rig
+> still in the game (Morrow; Veyra and Noxen were removed 2026-09-25, and Rook's rig on 2026-09-27
+> when he moved to whole-frame sprites). Ilyra and Bram, which much of it was
 > written from, have been retired; their worked examples are still the clearest ones here.
 
 # How to build an animated playable character
@@ -160,7 +161,8 @@ Conventions that everything else depends on:
 
 ## 3. Build the scene
 
-Structure (see `veyra_visual.tscn` for a complete one):
+Structure (see `morrow_visual.tscn` for a complete one; Rook's rig, the example here until
+2026-09-27, was removed):
 
 ```text
 <Name>Visual (script extends PlayableCharacterVisual)

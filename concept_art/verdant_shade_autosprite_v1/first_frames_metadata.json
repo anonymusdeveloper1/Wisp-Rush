@@ -1,0 +1,132 @@
+{
+  "rules": "Patchvile's: 256 px frame resolution delivered 4x nearest, no outline, up to 256 colours with soft edges (AutoSprite's paletted export), 194 px standing",
+  "scale_source_to_native": 0.39291886409736315,
+  "standing_native": 194,
+  "frames": {
+    "storefront": {
+      "source": "sources/idle_hover_00.png",
+      "mirrored": false,
+      "alpha_bounds_native": [
+        70,
+        31,
+        186,
+        225
+      ],
+      "height_native": 194,
+      "edge_margins_native": [
+        70,
+        31,
+        70,
+        31
+      ],
+      "alpha_bounds_delivered": [
+        280,
+        124,
+        744,
+        900
+      ],
+      "colours": 255,
+      "alpha_levels": 91
+    },
+    "wall_bottom": {
+      "source": "sources/wall_bottom_00.png",
+      "mirrored": false,
+      "alpha_bounds_native": [
+        43,
+        56,
+        212,
+        200
+      ],
+      "height_native": 144,
+      "edge_margins_native": [
+        43,
+        56,
+        44,
+        56
+      ],
+      "alpha_bounds_delivered": [
+        172,
+        224,
+        848,
+        800
+      ],
+      "colours": 255,
+      "alpha_levels": 99
+    },
+    "wall_right": {
+      "source": "sources/wall_left_00.png",
+      "mirrored": true,
+      "alpha_bounds_native": [
+        55,
+        34,
+        201,
+        221
+      ],
+      "height_native": 187,
+      "edge_margins_native": [
+        55,
+        34,
+        55,
+        35
+      ],
+      "alpha_bounds_delivered": [
+        220,
+        136,
+        804,
+        884
+      ],
+      "colours": 255,
+      "alpha_levels": 89
+    },
+    "dash_attack": {
+      "source": "sources/dash_loop_01.png",
+      "mirrored": false,
+      "alpha_bounds_native": [
+        68,
+        33,
+        187,
+        223
+      ],
+      "height_native": 190,
+      "edge_margins_native": [
+        68,
+        33,
+        69,
+        33
+      ],
+      "alpha_bounds_delivered": [
+        272,
+        132,
+        748,
+        892
+      ],
+      "colours": 255,
+      "alpha_levels": 90
+    },
+    "wall_top": {
+      "source": "sources/wall_top_00.png",
+      "mirrored": false,
+      "alpha_bounds_native": [
+        68,
+        38,
+        187,
+        217
+      ],
+      "height_native": 179,
+      "edge_margins_native": [
+        68,
+        38,
+        69,
+        39
+      ],
+      "alpha_bounds_delivered": [
+        272,
+        152,
+        748,
+        868
+      ],
+      "colours": 255,
+      "alpha_levels": 89
+    }
+  }
+}

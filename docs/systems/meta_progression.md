@@ -1,6 +1,6 @@
 # System: Trials and depth milestones
 
-> **Status:** ✅ done · **Last updated:** 2026-09-15 · **GDD section:** §6 ·
+> **Status:** ✅ done · **Last updated:** 2026-09-25 · **GDD section:** §6 ·
 > **ADR:** [0013](../decisions/0013-rift-story-levels-endless-mode-and-rift-points.md) (Rift Points, no
 > permanent power)
 >
@@ -41,11 +41,12 @@ removed on 2026-09-15 (ADR-0013) and its spend refunded by the save v6 migration
 
 **Trials** — 36 goals in 12 tiers of three. Each tier mixes a survival, a cumulative combat and a
 mastery goal; rewards rise 15 → 125 RP per trial. Clearing all three ranks the player up.
-Story goals read the cumulative `level_clears` summary key (1 per story victory): FIRST STEPS
-(`t02_level_clears`, 2), PATHFINDER (`t03_level_clears`, 4), RIFT WALKER (`t06_level_clears_m`, 8)
-and ASCENDANT (`t07_level_clears_m`, 12) replace GO DEEPER wave 6/8 and the multi-level
-`rift_levels_cleared` / `run_level` goals (GDD §14 #23). GO DEEPER wave 10+ reads "Reach wave N in
-Endless."
+No goal needs the story Rifts, which were removed from the game on 2026-09-25 (owner, GDD §14 #48).
+The four level-clear goals of 2026-09-15 (FIRST STEPS, PATHFINDER, RIFT WALKER, ASCENDANT, reading
+`level_clears`) could never finish in Endless and would have locked the ladder at tier 2, so they are
+now GO DEEPER wave 6 (`t02_wave`) and wave 8 (`t03_wave`), the goals they had replaced, plus BOSS
+HUNTER (`t06_bosses_m`, 6 bosses in total) and BOSS BREAKER (`t07_bosses_m`, 9). Their old save
+progress stays under the old ids and is ignored. GO DEEPER wave 6+ reads "Reach wave N in Endless."
 HOARDER (`t08_rp_collected_m`) reads `rp_collected`: Rift Points picked up or won from bosses in one
 run, not the performance bonus, so its target of 40 keeps its old difficulty (GDD §14 #22).
 
@@ -81,6 +82,8 @@ keyed on the lifetime best wave.
 
 | Date | Change |
 |---|---|
+| 2026-09-25 | Rift wording replaced (owner): Trials REAP THE RIFT → REAP THE HORDE (`t01`–`t12_kills`), RIFT BREAKER → BOSS BREAKER (`t07_bosses_m`), RIFT SOVEREIGN → ARENA SOVEREIGN (`t12_score_m`) |
+| 2026-09-25 | Story Rifts removed (owner): the note on Trials points at their removal; `level_clears` is no longer a Trial metric |
 | 2026-09-15 | Story audit: level-clear trials replace deep-wave and multi-level goals in tiers 2, 3, 6, 7 (spec 02) |
 | 2026-09-15 | Soul Sanctum removed (spec 01, ADR-0013); rewards renamed to Rift Points (`reward_points`); HOARDER reads `rp_collected`; system renamed "Trials and depth milestones" |
 | 2026-09-12 | Created: Soul Sanctum, Trials ladder, depth milestones, save schema v3→v5 |

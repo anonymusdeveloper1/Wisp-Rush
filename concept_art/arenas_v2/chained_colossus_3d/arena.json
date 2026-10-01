@@ -1,0 +1,14 @@
+{
+  "id": "chained_colossus_3d",
+  "display_name": "CHAINED COLOSSUS 3D",
+  "description": "The stone colossus, live in 3D, holds the chained arena above the clouds in blue fire.",
+  "source": "source.png",
+  "source_note": "The Shop still of the 3D arena (ADR-0023), rendered by tools/godot/render_arena_still.gd from res://scenes/arenas/chained_colossus_3d.tscn at 941x1672 with no safe top. A run shows the live scene, not this image. The model is the owner's Meshy file in source/, built by build_colossus.py.",
+  "floor_rect_px": [
+    254,
+    647,
+    688,
+    1586
+  ],
+  "floor_rect_note": "The floor exactly as the scene drew it in the still (ModelArenaVisual.fit returns it), [left, top, right, bottom] in pixels."
+}

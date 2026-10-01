@@ -9,9 +9,9 @@ extends Control
 ## Reduced Motion freezes all of it at a calm, readable steady state.
 
 ## Painted features in home_background.png, as texture UV (measured from the art).
-const BRAZIER_UVS: Array[Vector2] = [Vector2(0.183, 0.491), Vector2(0.881, 0.566)]
-const RUNE_UVS: Array[Vector2] = [Vector2(0.149, 0.365), Vector2(0.915, 0.385)]
-const PEDESTAL_UV := Vector2(0.524, 0.573)
+const BRAZIER_UVS: Array[Vector2] = [Vector2(0.075, 0.47), Vector2(0.935, 0.47)]
+const RUNE_UVS: Array[Vector2] = [Vector2(0.05, 0.31), Vector2(0.95, 0.31)]
+const PEDESTAL_UV := Vector2(0.5, 0.61)
 ## Glow radii in background-texture pixels, before cover scaling.
 const BRAZIER_RADIUS: float = 95.0
 const RUNE_RADIUS: float = 58.0

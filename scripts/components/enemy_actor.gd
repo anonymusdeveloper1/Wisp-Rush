@@ -10,6 +10,8 @@ signal killed(
 	experience_reward: int,
 	damage_event_id: int,
 )
+## Emitted when an enemy looses a shot; the run owns the shot from then on, so it outlives the enemy.
+signal projectile_fired(projectile: EnemyProjectile)
 
 ## Shared lifecycle states; subclasses own behavior only while ACTIVE.
 enum State { TELEGRAPH, ACTIVE, DYING }
@@ -46,13 +48,17 @@ var _health: int = 1
 var _target_position: Vector2 = Vector2.ZERO
 var _last_edge_position: Vector2 = Vector2.ZERO
 var _world_speed: float = 1.0
-## Arena movement-speed multiplier (a Rift's `enemy_speed_scale`, or the Endless cycle's).
+## Arena movement-speed multiplier (the Endless cycle's).
 var _speed_scale: float = 1.0
 var _viewport_scale: float = 1.0
 var _arena_rect: Rect2 = Rect2()
 ## Painted floor as a screen-space polygon. Empty keeps the legacy rectangle containment.
 var _arena_polygon: PackedVector2Array = PackedVector2Array()
 var _base_sprite_scale: Vector2 = Vector2.ONE
+## Scale of the arrival ring and hit flash, drawn from the 362 px VFX art whatever the sprite is.
+var _effect_scale: Vector2 = Vector2.ONE
+## Travel direction of the dash that last hit this enemy, for a kill that follows the cut.
+var _last_hit_direction: Vector2 = Vector2.RIGHT
 
 var _telegraph_remaining: float = 0.0
 var _slow_remaining: float = 0.0
@@ -79,7 +85,7 @@ func _ready() -> void:
 	_target_position = position
 	_last_edge_position = position
 	_sprite.modulate.a = 0.22
-	_sprite.play(&"idle")
+	_sprite.play(_loop_animation())
 	_sprite.animation_finished.connect(_on_sprite_animation_finished)
 	_arrival_ring.visible = true
 	_hit_flash.visible = false
@@ -194,6 +200,8 @@ func try_dash_hit(
 		return false
 	if not would_dash_hit(segment_start, segment_end, corridor_radius):
 		return false
+	if not segment_start.is_equal_approx(segment_end):
+		_last_hit_direction = (segment_end - segment_start).normalized()
 	return try_direct_hit(damage, damage_event_id)
 
 
@@ -245,9 +253,26 @@ func try_direct_hit(damage: int, damage_event_id: int) -> bool:
 	return true
 
 
+## Circles that kill the Wisp on touch, even mid-dash, as world x/y/radius triples: an attack
+## striking right now (Enemies v2, owner 2026-09-27). Empty for enemies whose attacks do not.
+func get_attack_circles() -> Array[Vector3]:
+	var none: Array[Vector3] = []
+	return none
+
+
 ## Subclass hook for ACTIVE movement; delta already includes focus and local slow multipliers.
 func _advance_active(_scaled_delta: float) -> void:
 	pass
+
+
+## The animation an enemy loops while it lives.
+func _loop_animation() -> StringName:
+	return &"idle"
+
+
+## Scale of the sprite itself. The default fits the 362 px frames of the first enemy art.
+func _frame_scale() -> Vector2:
+	return Vector2.ONE * (tuning.sprite_diameter * _viewport_scale / SOURCE_FRAME_SIZE)
 
 
 ## Subclass hook fired when the arrival telegraph becomes ACTIVE.
@@ -267,7 +292,7 @@ func _on_survived_hit() -> void:
 func _show_action_telegraph(progress: float) -> void:
 	_arrival_ring.visible = true
 	_arrival_ring.modulate.a = lerpf(0.6, 1.0, VfxPool.countdown_blink(progress, 2.0))
-	_arrival_ring.scale = _base_sprite_scale * lerpf(1.35, 1.0, clampf(progress, 0.0, 1.0))
+	_arrival_ring.scale = _effect_scale * lerpf(1.35, 1.0, clampf(progress, 0.0, 1.0))
 
 
 ## Hides the action warning once the telegraphed move executes.
@@ -302,7 +327,7 @@ func _update_telegraph(delta: float) -> void:
 	_sprite.modulate.a = lerpf(0.22, 1.0, progress)
 	# The amber ring converges on the spawn point and blinks faster as the enemy arrives.
 	_arrival_ring.modulate.a = lerpf(0.55, 1.0, VfxPool.countdown_blink(progress))
-	_arrival_ring.scale = _base_sprite_scale * lerpf(1.6, 0.9, progress)
+	_arrival_ring.scale = _effect_scale * lerpf(1.6, 0.9, progress)
 	if _telegraph_remaining <= 0.0:
 		state = State.ACTIVE
 		_arrival_ring.visible = false
@@ -346,6 +371,12 @@ func _die(damage_event_id: int) -> void:
 		tuning.experience_reward,
 		damage_event_id,
 	)
+	_play_death()
+
+
+## Plays the kill and frees the enemy when it ends. The default is the first art's dissolve: the
+## silhouette breaks inward toward its core, then dissolves outward.
+func _play_death() -> void:
 	_sprite.rotation = 0.0
 	_sprite.play(&"dissolve")
 	_arrival_ring.visible = false
@@ -366,7 +397,7 @@ func _die(damage_event_id: int) -> void:
 	dissolve_tween.parallel().tween_property(
 		_hit_flash,
 		"scale",
-		_base_sprite_scale * 0.6,
+		_effect_scale * 0.6,
 		inward_time,
 	)
 	dissolve_tween.tween_property(
@@ -384,7 +415,7 @@ func _die(damage_event_id: int) -> void:
 	dissolve_tween.parallel().tween_property(
 		_hit_flash,
 		"scale",
-		_base_sprite_scale * 1.55,
+		_effect_scale * 1.55,
 		outward_time,
 	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	dissolve_tween.parallel().tween_property(_hit_flash, "modulate:a", 0.0, outward_time)
@@ -396,7 +427,7 @@ func _play_hit_flash() -> void:
 		_flash_tween.kill()
 	_show_hit_flash()
 	_flash_tween = create_tween().set_parallel(true)
-	_flash_tween.tween_property(_hit_flash, "scale", _base_sprite_scale * 1.15, 0.16)
+	_flash_tween.tween_property(_hit_flash, "scale", _effect_scale * 1.15, 0.16)
 	_flash_tween.tween_property(_hit_flash, "modulate:a", 0.0, 0.16)
 
 
@@ -404,24 +435,23 @@ func _play_hit_flash() -> void:
 func _show_hit_flash() -> void:
 	_hit_flash.visible = true
 	_hit_flash.modulate = Color(Palette.SOUL_WHITE, 0.95)
-	_hit_flash.scale = _base_sprite_scale * 0.75
+	_hit_flash.scale = _effect_scale * 0.75
 
 
 func _on_sprite_animation_finished() -> void:
-	# The one-frame hit reaction returns to the idle loop instead of freezing on its last frame.
+	# The one-frame hit reaction returns to the loop instead of freezing on its last frame.
 	if state == State.ACTIVE and _sprite.animation == &"hit":
-		_sprite.play(&"idle")
+		_sprite.play(_loop_animation())
 
 
 func _apply_visual_scale() -> void:
 	if not is_node_ready() or tuning == null:
 		return
-	_base_sprite_scale = Vector2.ONE * (
-		tuning.sprite_diameter * _viewport_scale / SOURCE_FRAME_SIZE
-	)
+	_base_sprite_scale = _frame_scale()
+	_effect_scale = Vector2.ONE * (tuning.sprite_diameter * _viewport_scale / SOURCE_FRAME_SIZE)
 	_sprite.scale = _base_sprite_scale
-	_arrival_ring.scale = _base_sprite_scale
-	_hit_flash.scale = _base_sprite_scale
+	_arrival_ring.scale = _effect_scale
+	_hit_flash.scale = _effect_scale
 	if _target_ring != null:
 		_target_ring.queue_redraw()
 

@@ -24,30 +24,30 @@ const ROW_GAP: int = 16
 ## Gap between a row's icon, text column and reward plate (design px).
 const ROW_SEPARATION: int = 20
 ## Square size of a goal row's icon (design px).
-const GOAL_ICON_SIZE: float = 84.0
+const GOAL_ICON_SIZE: float = 80.0
 ## Square size of the Rift Points icon inside a reward plate (design px).
-const REWARD_ICON_SIZE: float = 40.0
+const REWARD_ICON_SIZE: float = 48.0
 ## Font size of a goal row's description line.
-const DESCRIPTION_FONT_SIZE: int = 28
+const DESCRIPTION_FONT_SIZE: int = 33
 ## Font size of the "x / y" / state text in a goal row.
-const COUNT_FONT_SIZE: int = 32
+const COUNT_FONT_SIZE: int = 33
 ## Font size of a goal row's reward value.
-const REWARD_FONT_SIZE: int = 34
+const REWARD_FONT_SIZE: int = 33
 ## Font size of the daily completion bonus line in the portal card.
-const DAILY_BONUS_FONT_SIZE: int = 30
+const DAILY_BONUS_FONT_SIZE: int = 33
 ## Opacity of the void shade over the menu background.
 const SHADE_ALPHA: float = 0.35
 ## Opacity of icons and reward plates whose reward was already claimed.
 const CLAIMED_ALPHA: float = 0.45
 
-const _RP_ICON: Texture2D = preload("res://assets/art/ui/system/02_soul_shards.png")
-const _FALLBACK_GOAL_ICON: Texture2D = preload("res://assets/art/ui/system/13_daily.png")
+const _RP_ICON: Texture2D = preload("res://assets/ui/theme/icons/icon_currency.tres")
+const _FALLBACK_GOAL_ICON: Texture2D = preload("res://assets/ui/theme/icons/icon_daily.tres")
 const _GOAL_ICONS: Dictionary[StringName, Texture2D] = {
 	&"kills": preload("res://assets/art/ui/system/18_reaper.png"),
-	&"multi_kill_dashes": preload("res://assets/art/ui/system/05_play.png"),
-	&"wave": preload("res://assets/art/ui/system/13_daily.png"),
+	&"multi_kill_dashes": preload("res://assets/ui/theme/icons/icon_play.tres"),
+	&"wave": preload("res://assets/ui/theme/icons/icon_daily.tres"),
 	&"highest_combo": preload("res://assets/art/ui/system/03_combo_chain.png"),
-	&"rp_collected": preload("res://assets/art/ui/system/02_soul_shards.png"),
+	&"rp_collected": preload("res://assets/ui/theme/icons/icon_currency.tres"),
 	&"bosses": preload("res://assets/art/ui/system/18_reaper.png"),
 	&"rapid_ricochets": preload("res://assets/art/ui/system/07_restart.png"),
 }
@@ -118,7 +118,7 @@ func _apply_snapshot() -> void:
 	if not is_node_ready():
 		return
 	_date_label.text = _format_date(_date_key)
-	_seed_label.text = "RIFT SEED  ·  %010d" % _seed
+	_seed_label.text = "DAILY SEED  ·  %010d" % _seed
 	if not _arena_name.is_empty():
 		_seed_label.text = "%s  ·  SEED %010d" % [_arena_name.to_upper(), _seed]
 	var daily_state: Dictionary = _snapshot.get(&"daily_state", {}) as Dictionary
@@ -129,7 +129,7 @@ func _apply_snapshot() -> void:
 	_reward_label.text = (
 		"DAILY BONUS CLAIMED"
 		if bonus_claimed
-		else "%s FOR FINISHING TODAY'S RIFT" % RiftPoints.format_gain(
+		else "%s FOR FINISHING TODAY'S RUN" % RiftPoints.format_gain(
 			ChallengeTracker.DAILY_COMPLETION_REWARD
 		)
 	)
@@ -235,7 +235,7 @@ func _build_goal_row(label: Label) -> void:
 	bar_row.add_child(count)
 
 	var plate := PanelContainer.new()
-	plate.theme_type_variation = &"PanelPlate"
+	plate.theme_type_variation = &"RewardPlate"
 	plate.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(plate)

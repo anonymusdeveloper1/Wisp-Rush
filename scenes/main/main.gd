@@ -7,14 +7,13 @@ extends Node
 ## Cover, then build (owner report 2026-09-16): with transitions on, a navigation request never
 ## builds at the tap. A dark veil covers the screen at once, the next screen is built and added on a
 ## later frame under it, draws COVER_DRAW_FRAMES frames fully covered (first-draw costs land behind
-## the veil), then the veil lifts while the screen glides in. PLAY and Rift Map ENTER also prewarm the
-## run beneath the run loading screen. `get_child(0)` is the current screen, except during a run
+## the veil), then the veil lifts while the screen glides in. PLAY also prewarms the run beneath the
+## run loading screen. `get_child(0)` is the current screen, except during a run
 ## loading prewarm, when it is the held GameWorld and the loading screen draws over it from an
 ## internal CanvasLayer; `is_navigating()` tells tools a change is still pending.
 
 const LOADING_SCREEN: PackedScene = preload("res://scenes/screens/loading_screen.tscn")
 const FORM_CATALOG: FormCatalog = preload("res://data/forms/default_catalog.tres")
-const RIFT_CATALOG: RiftCatalog = preload("res://data/rifts/default_catalog.tres")
 const ENDLESS_CATALOG: EndlessCatalog = preload("res://data/endless/default_endless_catalog.tres")
 const DASH_STYLE_CATALOG: DashStyleCatalog = preload(
 	"res://data/dash_styles/default_dash_style_catalog.tres"
@@ -24,7 +23,6 @@ const TUTORIAL_CATALOG: TutorialCatalog = preload("res://data/tutorial/default_t
 const SCREEN_PATHS: Dictionary[StringName, String] = {
 	&"home": "res://scenes/screens/home_screen.tscn",
 	&"daily": "res://scenes/screens/daily_screen.tscn",
-	&"rift_map": "res://scenes/screens/rift_map_screen.tscn",
 	&"trials": "res://scenes/screens/trials_screen.tscn",
 	&"statistics": "res://scenes/screens/statistics_screen.tscn",
 	&"settings": "res://scenes/screens/settings_screen.tscn",
@@ -62,6 +60,9 @@ var transitions_enabled: bool = DisplayServer.get_name() != "headless"
 var _current_screen: Node
 ## Profile of the run on screen or just finished; restarts and Results' next steps build from it.
 var _active_profile: RunProfile
+## The next run built is a restart from the run's own dialogs (Results' PLAY AGAIN, the pause menu's
+## restart): it skips the arena's opening shot (owner, 2026-10-02).
+var _replaying: bool = false
 ## Shop tab the SHOP button opens: the last one viewed this session.
 var _shop_tab: StringName = ShopScreen.TAB_WISPS
 ## The Shop on screen was opened from Results, so its back returns there.
@@ -73,9 +74,8 @@ var _scenes: Dictionary[StringName, PackedScene] = {}
 var _switch_started_usec: int = 0
 ## Home is built once and kept: rebuilding it cost ~190 ms plus ~190 ms to first draw on device.
 var _home: HomeScreen
-## Rift and form data loaded behind the boot screen and kept (`_kept_paths`), so Home, the Rift Map
-## and run starts never reload them (271 ms for the Rift Map on desktop before). The Rifts also keep
-## the loading screen's background pool cached.
+## Form data loaded behind the boot screen and kept (`_kept_paths`), so Home and run starts never
+## reload them.
 var _kept_resources: Array[Resource] = []
 var _veil: ColorRect
 ## Holds the run loading screen above the run prewarming beneath it (`_prewarm_run`).
@@ -204,8 +204,8 @@ func _on_loading_finished(resources: Dictionary) -> void:
 	_show_first_screen.call_deferred()
 
 
-## Data the catalogs `load()` by path on every lookup (Rifts with their art, Wisp forms with their
-## portraits): loaded behind the boot screen and kept referenced, so those lookups hit the cache.
+## Data the catalogs `load()` by path on every lookup (characters with their portraits): loaded
+## behind the boot screen and kept referenced, so those lookups hit the cache.
 ##
 ## The equipped character's menu frames ride along. A whole-frame character's menu sheet is a few
 ## thousand pixels square, and loading it the moment Home first drew one cost ~700 ms on the phone;
@@ -213,8 +213,7 @@ func _on_loading_finished(resources: Dictionary) -> void:
 ## roster would hold every character's sheet at once, which is the bill the Shop's lazy cards were
 ## built to avoid.
 func _kept_paths() -> PackedStringArray:
-	var paths := PackedStringArray(RIFT_CATALOG.rift_paths)
-	paths.append_array(FORM_CATALOG.form_paths)
+	var paths := PackedStringArray(FORM_CATALOG.form_paths)
 	var equipped: FormData = FORM_CATALOG.get_form(
 		StringName(str(_save_manager.get_snapshot()[&"equipped_form"]))
 	)
@@ -228,7 +227,7 @@ func _show_first_screen() -> void:
 	if bool(_save_manager.get_snapshot()[&"tutorial_completed"]):
 		_show_home()
 	else:
-		_show_tutorial(false)
+		_show_tutorial()
 
 
 func _instantiate(key: StringName) -> Node:
@@ -242,6 +241,7 @@ func _show_home() -> void:
 		return
 	get_tree().paused = false
 	_active_profile = null
+	_replaying = false
 	_last_results_summary = {}
 	SoundFx.music_state(0.0, false)
 	var snapshot: Dictionary = _save_manager.get_snapshot()
@@ -250,7 +250,6 @@ func _show_home() -> void:
 		_home.play_requested.connect(_on_play_requested)
 		_home.wisps_requested.connect(_show_shop.bind(ShopScreen.TAB_WISPS))
 		_home.daily_requested.connect(_show_daily)
-		_home.rift_map_requested.connect(_show_rift_map)
 		_home.trials_requested.connect(_show_trials)
 		_home.statistics_requested.connect(_show_statistics)
 		_home.settings_requested.connect(_show_settings)
@@ -273,21 +272,10 @@ func _show_trials() -> void:
 	_replace_screen(trials)
 
 
-func _show_rift_map() -> void:
-	if _defer_navigation(_show_rift_map):
-		return
-	var rift_map := _instantiate(&"rift_map") as RiftMapScreen
-	rift_map.back_requested.connect(_show_home)
-	rift_map.play_requested.connect(_on_rift_play_requested)
-	rift_map.tutorial_requested.connect(_show_tutorial.bind(true))
-	rift_map.setup(_save_manager.get_snapshot())
-	_replace_screen(rift_map)
-
-
-## Opens the Tutorial on the default Endless arena. [param from_rift_map] is a replay, which
-## returns to the Rift Map; otherwise (first launch) it leads Home.
-func _show_tutorial(from_rift_map: bool) -> void:
-	if _defer_navigation(_show_tutorial.bind(from_rift_map)):
+## Opens the Tutorial on the default Endless arena; finishing it (first launch, or a replay from
+## Settings) leads Home.
+func _show_tutorial() -> void:
+	if _defer_navigation(_show_tutorial):
 		return
 	get_tree().paused = false
 	_active_profile = null
@@ -299,55 +287,19 @@ func _show_tutorial(from_rift_map: bool) -> void:
 		ENDLESS_CATALOG.get_skin(TUTORIAL_CATALOG.arena_skin_id),
 		_equipped_form(snapshot),
 	))
-	tutorial.finished.connect(_on_tutorial_finished.bind(from_rift_map))
+	tutorial.finished.connect(_on_tutorial_finished)
 	_replace_screen(tutorial)
 
 
-## Finishing or skipping marks the tutorial completed (first launch never repeats), then routes.
-func _on_tutorial_finished(skipped: bool, from_rift_map: bool) -> void:
+## Finishing or skipping marks the tutorial completed (first launch never repeats), then goes Home.
+func _on_tutorial_finished(skipped: bool) -> void:
 	_save_manager.mark_tutorial_completed()
-	print("[Main] tutorial %s | next=%s" % [
-		"skipped" if skipped else "finished", "rift_map" if from_rift_map else "home",
-	])
-	if from_rift_map:
-		_show_rift_map()
-	else:
-		_show_home()
-
-
-## Persists the chosen Rift first, then plays its next level (a mastered Rift replays its last).
-func _on_rift_play_requested(rift_id: StringName) -> void:
-	if _defer_navigation(_on_rift_play_requested.bind(rift_id)):
-		return
-	_save_manager.select_rift(rift_id)
-	_start_story(RIFT_CATALOG.get_rift(rift_id), 0, true)
-
-
-## Story runs start only from the Rift Map (RIFTS) or a Results follow-up; PLAY is Endless.
-
-
-## Starts a story run in `rift` at `level`, or at its next level when `level` is zero; with
-## [param with_loading] the run loading screen comes first (Rift Map ENTER).
-func _start_story(rift: RiftData, level: int = 0, with_loading: bool = false) -> void:
-	if _defer_navigation(_start_story.bind(rift, level, with_loading)):
-		return
-	var snapshot: Dictionary = _save_manager.get_snapshot()
-	var levels: Dictionary = snapshot[&"rift_levels"] as Dictionary
-	if not ContentUnlocks.is_rift_unlocked(rift, levels):
-		rift = RIFT_CATALOG.get_rift(RiftCatalog.DEFAULT_RIFT_ID)
-		level = 0
-	var story_level: int = level if level > 0 else ContentUnlocks.get_next_level(rift, levels)
-	var profile := RunProfile.story(rift, story_level, levels, _equipped_form(snapshot))
-	if with_loading and transitions_enabled:
-		_show_run_loading(
-			profile, PackedStringArray(), rift.display_name.to_upper(), "LEVEL %d" % story_level
-		)
-	else:
-		_show_game(profile)
+	print("[Main] tutorial %s | next=home" % ("skipped" if skipped else "finished"))
+	_show_home()
 
 
 ## PLAY (owner decision 2026-09-15): always Endless, open from the first launch, on the equipped skin,
-## with every Rift's enemies and bosses whatever the story progress.
+## with every enemy mix and boss.
 func _on_play_requested(with_loading: bool = true) -> void:
 	if _defer_navigation(_on_play_requested.bind(with_loading)):
 		return
@@ -358,12 +310,16 @@ func _on_play_requested(with_loading: bool = true) -> void:
 	var profile := RunProfile.endless(
 		ENDLESS_CATALOG,
 		skin,
-		_rifts_by_id(ContentUnlocks.get_endless_roster_rift_ids(RIFT_CATALOG)),
-		ContentUnlocks.get_endless_boss_ids(RIFT_CATALOG),
+		ENDLESS_CATALOG.get_rosters(),
+		ENDLESS_CATALOG.get_boss_ids(),
 		_equipped_form(snapshot),
 	)
+	profile.opening_boss_id = ENDLESS_CATALOG.tuning.opening_boss_id
 	var paths := PackedStringArray()
-	if skin != null and not skin.background_path.is_empty():
+	# A layered arena's run shows its scene, not its background (the Shop's still of it).
+	if skin != null and skin.has_visual_scene():
+		paths.append(skin.visual_scene_path)
+	elif skin != null and not skin.background_path.is_empty():
 		paths.append(skin.background_path)
 	if with_loading and transitions_enabled:
 		_show_run_loading(profile, paths, "ENDLESS", skin.display_name if skin != null else "")
@@ -381,19 +337,12 @@ func _on_daily_play_requested(date_key: String, daily_seed: int) -> void:
 	_show_game(RunProfile.daily(
 		ENDLESS_CATALOG,
 		ENDLESS_CATALOG.get_arena_of_the_day(date_key),
-		_rifts_by_id(tuning.daily_roster_rift_ids),
+		ENDLESS_CATALOG.get_rosters_by_id(tuning.daily_roster_ids),
 		tuning.daily_boss_ids,
 		date_key,
 		daily_seed,
 		_equipped_form(snapshot),
 	))
-
-
-func _rifts_by_id(rift_ids: Array[StringName]) -> Array[RiftData]:
-	var rifts: Array[RiftData] = []
-	for rift_id: StringName in rift_ids:
-		rifts.append(RIFT_CATALOG.get_rift(rift_id))
-	return rifts
 
 
 func _equipped_form(snapshot: Dictionary) -> FormData:
@@ -431,6 +380,8 @@ func _show_settings() -> void:
 		return
 	var settings := _instantiate(&"settings") as SettingsScreen
 	settings.back_requested.connect(_show_home)
+	# The tutorial replay lives in Settings, and a replay ends back on Home.
+	settings.tutorial_requested.connect(_show_tutorial)
 	_replace_screen(settings)
 
 
@@ -560,7 +511,7 @@ func _monetisation() -> MonetisationService:
 	return get_node_or_null(^"/root/Monetisation") as MonetisationService
 
 
-## Run loading screen (owner 2026-09-16) before PLAY and Rift Map ENTER: names the arena, loads
+## Run loading screen (owner 2026-09-16) before PLAY: names the arena, loads
 ## [param paths] (the Endless background) on worker threads, then builds and warms the run beneath
 ## it (`_prewarm_run`) and reveals that run once the bar completes; nothing is built after the bar.
 func _show_run_loading(
@@ -631,7 +582,7 @@ func _reveal_prewarmed_run(
 	_replace_screen(game)
 
 
-## Starts a run from a profile Main built; GameWorld never picks the Rift or level itself.
+## Starts a run from a profile Main built; GameWorld never picks the arena itself.
 func _show_game(profile: RunProfile) -> void:
 	if _defer_navigation(_show_game.bind(profile)):
 		return
@@ -648,6 +599,8 @@ func _build_game(profile: RunProfile) -> GameWorld:
 	_active_profile = profile
 	var game := _instantiate(&"game") as GameWorld
 	game.run_seed = profile.run_seed
+	game.play_arena_intro = not _replaying
+	_replaying = false
 	game.configure_run(profile)
 	game.home_requested.connect(_show_home)
 	game.restart_requested.connect(_restart_run)
@@ -658,31 +611,16 @@ func _build_game(profile: RunProfile) -> GameWorld:
 	return game
 
 
-## Replays the same profile: the same daily run, Endless rebuilt on the equipped skin, or the same Rift level with first-clear eligibility re-read from the save (a replay of a
-## level just cleared pays the repeat bonus).
+## Replays the same profile: the same daily run, or Endless rebuilt on the equipped skin.
 func _restart_run() -> void:
+	_replaying = true
 	var profile: RunProfile = _active_profile
 	if profile == null:
 		_on_play_requested(false)
-	elif profile.is_story():
-		_start_story(profile.rift, profile.level)
 	elif profile.mode == RunProfile.MODE_ENDLESS:
 		_on_play_requested(false)
 	else:
 		_on_daily_play_requested(profile.daily_date_key, profile.run_seed)
-
-
-## Results' NEXT LEVEL: the next level of the Rift just played.
-func _on_next_level_requested() -> void:
-	if _active_profile == null or not _active_profile.is_story():
-		_start_story(RIFT_CATALOG.get_rift(RiftCatalog.DEFAULT_RIFT_ID))
-		return
-	_start_story(_active_profile.rift)
-
-
-## Results' ENTER <RIFT>: selects the Rift this clear opened and plays its next level.
-func _on_enter_rift_requested(rift_id: StringName) -> void:
-	_on_rift_play_requested(rift_id)
 
 
 ## Banks a finished run, then shows Results with the Rift Points breakdown.
@@ -693,18 +631,8 @@ func _on_enter_rift_requested(rift_id: StringName) -> void:
 func _show_results(summary: Dictionary) -> void:
 	SoundFx.music_state(0.0, false)
 	var balance_before: int = _save_manager.get_rift_points()
-	var levels_before: Dictionary = (
-		_save_manager.get_snapshot()[&"rift_levels"] as Dictionary
-	).duplicate()
 	_save_manager.record_run(summary)
 	var snapshot: Dictionary = _save_manager.get_snapshot()
-	# A clear that opens a Rift makes it the selection, so the Rift Map opens on it.
-	var opened: Array[StringName] = ContentUnlocks.get_newly_unlocked(
-		levels_before, snapshot[&"rift_levels"] as Dictionary, RIFT_CATALOG
-	)
-	if not opened.is_empty():
-		_save_manager.select_rift(opened[0])
-		snapshot = _save_manager.get_snapshot()
 	var challenge_date: String = str(summary.get(&"daily_date", ""))
 	if challenge_date.is_empty():
 		challenge_date = ChallengeTracker.get_date_key()
@@ -738,12 +666,11 @@ func _show_results(summary: Dictionary) -> void:
 	var parts: int = (
 		maxi(0, int(summary.get(&"rp_collected", 0)))
 		+ maxi(0, int(summary.get(&"rp_performance", 0)))
-		+ maxi(0, int(summary.get(&"rp_clear_bonus", 0)))
 		+ int(display_summary[&"rp_rewards"])
 	)
 	if int(display_summary[&"rp_earned"]) != parts:
 		# Only the balance cap should ever cause this; anything else means a source paid twice.
-		push_warning("[Main] Results RP total %d != collected + performance + clear + rewards %d" % [
+		push_warning("[Main] Results RP total %d != collected + performance + rewards %d" % [
 			int(display_summary[&"rp_earned"]), parts,
 		])
 	display_summary[&"depth_reward"] = int(depth_result[&"reward_points"])
@@ -751,22 +678,8 @@ func _show_results(summary: Dictionary) -> void:
 	display_summary[&"trials_completed"] = (
 		trial_result[&"completed"] as PackedStringArray
 	).size()
-	if str(summary.get(&"mode", "")) == String(RunProfile.MODE_STORY):
-		var played: RiftData = RIFT_CATALOG.get_rift(StringName(str(summary.get(&"rift", ""))))
-		display_summary[&"rift_name"] = played.display_name
-		display_summary[&"mastered"] = ContentUnlocks.is_mastered(
-			played, snapshot[&"rift_levels"] as Dictionary
-		)
-	else:
-		var arena: ArenaSkinData = ENDLESS_CATALOG.get_skin(
-			StringName(str(summary.get(&"skin_id", "")))
-		)
-		display_summary[&"arena_name"] = arena.display_name if arena != null else ""
-	var opened_names := PackedStringArray()
-	for rift_id: StringName in opened:
-		opened_names.append(RIFT_CATALOG.get_rift(rift_id).display_name)
-	display_summary[&"opened_rift_ids"] = opened
-	display_summary[&"opened_rift_names"] = opened_names
+	var arena: ArenaSkinData = ENDLESS_CATALOG.get_skin(StringName(str(summary.get(&"skin_id", ""))))
+	display_summary[&"arena_name"] = arena.display_name if arena != null else ""
 	_present_results(display_summary)
 
 
@@ -777,8 +690,6 @@ func _present_results(display_summary: Dictionary) -> void:
 	_last_results_summary = display_summary
 	var results := _instantiate(&"results") as ResultsScreen
 	results.restart_requested.connect(_restart_run)
-	results.next_level_requested.connect(_on_next_level_requested)
-	results.enter_rift_requested.connect(_on_enter_rift_requested)
 	results.home_requested.connect(_show_home)
 	results.wisps_requested.connect(_show_shop.bind(ShopScreen.TAB_WISPS, true))
 	_replace_screen(results)
@@ -786,7 +697,7 @@ func _present_results(display_summary: Dictionary) -> void:
 
 
 ## The best score Results compares against: Endless's own best, today's daily best, or the
-## lifetime best for a story run.
+## lifetime best otherwise.
 func _mode_best_score(summary: Dictionary, snapshot: Dictionary) -> int:
 	match str(summary.get(&"mode", "")):
 		"endless":

@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="EndlessRoster" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/endless_roster.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+roster_id = &"ember_hollow"
+display_name = "EMBER HOLLOW"
+boss_id = &"cinder_maw"

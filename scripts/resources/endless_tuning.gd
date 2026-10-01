@@ -18,10 +18,13 @@ extends Resource
 @export_range(0.5, 2.0, 0.01) var speed_scale_start: float = 1.0
 @export_range(0.0, 0.5, 0.01) var speed_scale_per_cycle: float = 0.04
 @export_range(0.5, 2.0, 0.01) var speed_scale_cap: float = 1.3
-## Rifts whose rosters the daily run draws from, whatever the player has cleared.
-@export var daily_roster_rift_ids: Array[StringName] = [&"obsidian_garden"]
+## Enemy mixes (`EndlessRoster` ids) the daily run draws from.
+@export var daily_roster_ids: Array[StringName] = [&"obsidian_garden"]
 ## Bosses the daily run draws from, whatever the player has beaten.
 @export var daily_boss_ids: Array[StringName] = [&"reaper"]
+## The first boss of every Endless run; empty draws it from the pool like the rest. Grimgrin, the
+## first boss of the new set, so the owner meets him on the phone test (Claude, 2026-09-27).
+@export var opening_boss_id: StringName = &""
 
 
 ## Threat multiplier after `cycle` bosses.

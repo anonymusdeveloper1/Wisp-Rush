@@ -4,13 +4,13 @@ extends SceneTree
 ## Usage (from the repo root; every option after `--` is optional):
 ##   WISP_ISOLATED_SAVE=1 "$GODOT" --path . --resolution 540x960 \
 ##     --write-movie "$PWD/video/footage/endless_s7.avi" \
-##     --script res://tools/godot/render_gameplay_clip.gd -- mode=endless seconds=45 seed=7
+##     --script res://tools/godot/render_gameplay_clip.gd -- seconds=45 seed=7
 ## A 540×960 window records 1080×1920 on a Retina Mac. MovieWriter runs at a fixed 60 FPS (for true
 ## slow-motion material add `--fixed-fps 120` and `fps=120`). The .avi holds MJPEG video plus PCM
 ## game audio; Palmier Pro only imports mp4/mov, so transcode it first (tools/video/README.md).
 ##
 ## Options:
-##   mode=endless|story  rift=<rift id> level=<1-8> (story)  skin=<arena skin id> (endless)
+##   skin=<arena skin id>
 ##   seed=<int>  form=<form id>  dash_style=<style id>  seconds=<clip length after the run starts>
 ##   fps=<movie fps, must match --fixed-fps>  quality=<MJPEG quality 0-1, default 0.9>
 ##   rush=<starting RUSH meter>  events=<event log path, default: the movie path with .events.jsonl>
@@ -23,7 +23,6 @@ extends SceneTree
 
 const DevlogBot = preload("res://tools/godot/devlog_bot.gd")
 const GAME_WORLD_SCENE: PackedScene = preload("res://scenes/gameplay/game_world.tscn")
-const RIFT_CATALOG: RiftCatalog = preload("res://data/rifts/default_catalog.tres")
 const FORM_CATALOG: FormCatalog = preload("res://data/forms/default_catalog.tres")
 const ENDLESS_CATALOG: EndlessCatalog = preload("res://data/endless/default_endless_catalog.tres")
 const DASH_STYLE_CATALOG: DashStyleCatalog = preload(
@@ -101,28 +100,16 @@ func _run() -> void:
 	quit(0)
 
 
-## The profile a Home PLAY (Endless) or a Rift Map ENTER (story level) would build.
+## The profile a Home PLAY (Endless) would build.
 func _build_profile() -> RunProfile:
-	var form: FormData = FORM_CATALOG.get_form(StringName(str(_options.get("form", "void"))))
-	var profile: RunProfile
-	if str(_options.get("mode", "endless")) == "story":
-		var rift: RiftData = RIFT_CATALOG.get_rift(
-			StringName(str(_options.get("rift", "obsidian_garden")))
-		)
-		profile = RunProfile.story(
-			rift, clampi(DevlogBot.option_int(_options, "level", 1), 1, 8), {}, form
-		)
-	else:
-		var rifts: Array[RiftData] = []
-		for rift_id: StringName in ContentUnlocks.get_endless_roster_rift_ids(RIFT_CATALOG):
-			rifts.append(RIFT_CATALOG.get_rift(rift_id))
-		profile = RunProfile.endless(
-			ENDLESS_CATALOG,
-			ENDLESS_CATALOG.get_skin(StringName(str(_options.get("skin", "")))),
-			rifts,
-			ContentUnlocks.get_endless_boss_ids(RIFT_CATALOG),
-			form,
-		)
+	var form: FormData = FORM_CATALOG.get_form(StringName(str(_options.get("form", String(FormCatalog.DEFAULT_FORM_ID)))))
+	var profile: RunProfile = RunProfile.endless(
+		ENDLESS_CATALOG,
+		ENDLESS_CATALOG.get_skin(StringName(str(_options.get("skin", "")))),
+		ENDLESS_CATALOG.get_rosters(),
+		ENDLESS_CATALOG.get_boss_ids(),
+		form,
+	)
 	profile.dash_style = DASH_STYLE_CATALOG.get_style(
 		StringName(str(_options.get("dash_style", "")))
 	)

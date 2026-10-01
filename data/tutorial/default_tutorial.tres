@@ -72,7 +72,7 @@ demo_swipes = PackedVector2Array(-1, -0.8, 0, 0)
 script = ExtResource("2_lesson")
 lesson_id = &"danger"
 title = "DANGER"
-demo_caption = "Spikes cost a Soul Fragment. You have three."
+demo_caption = "One touch of the spikes ends a run. Stay clear."
 try_caption = "Reach the soul without getting hit."
 success_callout = "UNTOUCHED"
 goal = &"safe_kill"
@@ -83,7 +83,6 @@ hazard_position = Vector2(0.5, 0.55)
 demo_swipes = PackedVector2Array(0, -1, 0, 0)
 demo_shows_hit = true
 demo_hit_reform = Vector2(1, 0.7)
-hud_focus = &"health"
 
 [sub_resource type="Resource" id="Resource_growth"]
 script = ExtResource("2_lesson")
@@ -136,6 +135,6 @@ reset_after_demo = false
 [resource]
 script = ExtResource("1_catalog")
 lessons = Array[ExtResource("2_lesson")]([SubResource("Resource_aim_dash"), SubResource("Resource_slice"), SubResource("Resource_chain"), SubResource("Resource_redirect"), SubResource("Resource_blockers"), SubResource("Resource_danger"), SubResource("Resource_growth"), SubResource("Resource_rush"), SubResource("Resource_boss")])
-arena_skin_id = &"astral_observatory"
+arena_skin_id = &"quarry_titan"
 hold_seconds = 0.4
 boss_health = 3

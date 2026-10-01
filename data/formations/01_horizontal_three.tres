@@ -5,5 +5,5 @@ script = ExtResource("1")
 formation_id = &"horizontal_three"
 minimum_wave = 1
 threat_cost = 3
-enemy_kinds = Array[StringName]([&"soul_wisp", &"soul_wisp", &"soul_wisp"])
+enemy_kinds = Array[StringName]([&"enemy", &"enemy", &"enemy"])
 normalized_positions = PackedVector2Array(0.28, 0.5, 0.5, 0.5, 0.72, 0.5)

@@ -176,7 +176,7 @@ All commands are in the README; this is what each episode needs.
 
 | Piece | How | EP02 |
 |---|---|---|
-| Menu / flow footage | `render_devlog_tour.gd` `tour=menus` or `tour=story` (real Main, isolated save) | `tour_menus.mp4`: boot, Rift Map, Shop tabs, PLAY, loading screen, Aurora Throne run |
+| Menu / flow footage | `render_devlog_tour.gd` `tour=menus` (real Main, isolated save; `tour=story` and the Rift Map step went with the Rifts, 2026-09-25) | `tour_menus.mp4`: boot, Rift Map, Shop tabs, PLAY, loading screen, Aurora Throne run |
 | Gameplay footage | `render_gameplay_clip.gd` (bot, event log for the best moments) | the tour's run: 8-kill dash, RUSH, ×30 chain |
 | Feel shots (scripted, repeatable) | `render_feel_showcase.gd` in a quiet tutorial arena: `rings` (arrow sweeps onto a line, ×N), `assist` (same drag with AIM ASSIST off, then on), `finisher` (8 in one dash), `five` (slow motion on the last kill), `rush` (full meter, the bot keeps slicing); the log marks every shot, release and kill | EP04: `ep04_feel_v2.mp4`, `ep04_assist.mp4` |
 | Arena / scenery footage | `render_arena_showcase.gd` (Endless skins back to back, start held so no enemies spawn; `hud=0`, `wisp=1`; cut on the log's `segment_start`/`segment_end`) | EP03: `ep03_arena_showcase.mp4`, 9 Legendary/Mythic skins × 4.5 s |

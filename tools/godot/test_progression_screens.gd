@@ -12,18 +12,18 @@ func _init() -> void:
 func _run_check() -> void:
 	var failures: int = 0
 	var forms := FORMS_SCENE.instantiate() as FormsScreen
-	forms.setup(500, ["void", "eclipse"], &"eclipse", 0)
+	forms.setup(500, ["patchvile", "verdant_shade"], &"verdant_shade", 0)
 	root.add_child(forms)
 	await process_frame
-	forms.select_form(&"eclipse")
-	if forms.get_selected_form_id() != &"eclipse":
+	forms.select_form(&"verdant_shade")
+	if forms.get_selected_form_id() != &"verdant_shade":
 		failures += 1
 		push_error("progression_screens: locked Eclipse could not be previewed")
-	var eclipse_action := forms.get_node("%ActionButton") as Button
-	if not eclipse_action.disabled or eclipse_action.text != "REAPER REQUIRED":
+	var shade_action := forms.get_node("%ActionButton") as Button
+	if not shade_action.disabled or shade_action.text != "REAPER REQUIRED":
 		failures += 1
 		push_error("progression_screens: Eclipse boss gate was not presented")
-	forms.select_form(&"veyra")
+	forms.select_form(&"rook")
 	var venom_action := forms.get_node("%ActionButton") as Button
 	if venom_action.disabled or "500" not in venom_action.text:
 		failures += 1

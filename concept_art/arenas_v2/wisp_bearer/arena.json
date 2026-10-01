@@ -1,0 +1,13 @@
+{
+  "id": "wisp_bearer",
+  "display_name": "WISP BEARER",
+  "description": "A solitary soul wisp holds a quiet stone arena over a dark fantasy void.",
+  "source": "source.png",
+  "floor_rect_px": [
+    174,
+    659,
+    904,
+    1747
+  ],
+  "source_note": "Generated backplate fitted with build_source.py against the project floor mask; source.png is the opaque contract image."
+}

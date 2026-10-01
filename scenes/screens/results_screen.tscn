@@ -7,11 +7,11 @@
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/card_top.tscn" id="5_card_top"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/system/18_reaper.png" id="6_souls"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/system/03_combo_chain.png" id="7_chain"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/system/13_daily.png" id="8_wave"]
+[ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_daily.tres" id="8_wave"]
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/amber_top.tscn" id="9_amber_top"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/system/02_soul_shards.png" id="10_shards"]
+[ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_currency.tres" id="10_shards"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/system/07_restart.png" id="11_restart"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/system/16_home.png" id="12_home"]
+[ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_home.tres" id="12_home"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/system/10_forms.png" id="13_forms"]
 
 [node name="ResultsScreen" type="Control"]
@@ -86,12 +86,12 @@ text = "RUN COMPLETE"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="RiftName" type="Label" parent="SafeMargin/Center/Panel/Margin/Content"]
+[node name="ArenaName" type="Label" parent="SafeMargin/Center/Panel/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"CaptionLabel"
-theme_override_font_sizes/font_size = 30
-text = "OBSIDIAN GARDEN"
+theme_override_font_sizes/font_size = 33
+text = "ENDLESS"
 horizontal_alignment = 1
 
 [node name="UnlockBanner" type="Label" parent="SafeMargin/Center/Panel/Margin/Content"]
@@ -99,21 +99,21 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 2
 theme_type_variation = &"AmberValueLabel"
-theme_override_font_sizes/font_size = 40
-text = "SHATTERED RIFT OPEN"
+theme_override_font_sizes/font_size = 44
+text = ""
 horizontal_alignment = 1
 
 [node name="ScoreCaption" type="Label" parent="SafeMargin/Center/Panel/Margin/Content"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 26
-text = "RIFT SCORE"
+theme_override_font_sizes/font_size = 33
+text = "RUN SCORE"
 horizontal_alignment = 1
 
 [node name="ScoreValue" type="Label" parent="SafeMargin/Center/Panel/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"AmberValueLabel"
-theme_override_font_sizes/font_size = 150
+theme_override_font_sizes/font_size = 154
 text = "000000"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -264,7 +264,7 @@ theme_override_constants/separation = 0
 alignment = 1
 
 [node name="Icon" type="TextureRect" parent="SafeMargin/Center/Panel/Margin/Content/Stats/Wave/Box"]
-custom_minimum_size = Vector2(0, 92)
+custom_minimum_size = Vector2(0, 96)
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("8_wave")
@@ -287,7 +287,7 @@ horizontal_alignment = 1
 [node name="RunStats" type="Label" parent="SafeMargin/Center/Panel/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 33
 text = "0 MULTI-REAPS   •   0 BOSSES"
 horizontal_alignment = 1
 
@@ -319,7 +319,7 @@ theme_override_constants/separation = 6
 [node name="Plate" type="PanelContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/CollectedReward"]
 layout_mode = 2
 size_flags_horizontal = 4
-theme_type_variation = &"PanelPlate"
+theme_type_variation = &"RewardPlate"
 
 [node name="Pad" type="MarginContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/CollectedReward/Plate"]
 layout_mode = 2
@@ -331,7 +331,7 @@ layout_mode = 2
 theme_override_constants/separation = 6
 
 [node name="Icon" type="TextureRect" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/CollectedReward/Plate/Pad/Line"]
-custom_minimum_size = Vector2(40, 40)
+custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
@@ -343,7 +343,7 @@ stretch_mode = 5
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"AmberValueLabel"
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 33
 text = "+0 RP"
 vertical_alignment = 1
 
@@ -361,7 +361,7 @@ theme_override_constants/separation = 6
 [node name="Plate" type="PanelContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/PerformanceReward"]
 layout_mode = 2
 size_flags_horizontal = 4
-theme_type_variation = &"PanelPlate"
+theme_type_variation = &"RewardPlate"
 
 [node name="Pad" type="MarginContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/PerformanceReward/Plate"]
 layout_mode = 2
@@ -373,7 +373,7 @@ layout_mode = 2
 theme_override_constants/separation = 6
 
 [node name="Icon" type="TextureRect" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/PerformanceReward/Plate/Pad/Line"]
-custom_minimum_size = Vector2(40, 40)
+custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
@@ -385,7 +385,7 @@ stretch_mode = 5
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"AmberValueLabel"
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 33
 text = "+0 RP"
 vertical_alignment = 1
 
@@ -403,7 +403,7 @@ theme_override_constants/separation = 6
 [node name="Plate" type="PanelContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalsReward"]
 layout_mode = 2
 size_flags_horizontal = 4
-theme_type_variation = &"PanelPlate"
+theme_type_variation = &"RewardPlate"
 
 [node name="Pad" type="MarginContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalsReward/Plate"]
 layout_mode = 2
@@ -415,7 +415,7 @@ layout_mode = 2
 theme_override_constants/separation = 6
 
 [node name="Icon" type="TextureRect" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/GoalsReward/Plate/Pad/Line"]
-custom_minimum_size = Vector2(40, 40)
+custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
@@ -427,7 +427,7 @@ stretch_mode = 5
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"AmberValueLabel"
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 33
 text = "+0 RP"
 vertical_alignment = 1
 
@@ -435,50 +435,6 @@ vertical_alignment = 1
 layout_mode = 2
 theme_type_variation = &"CaptionLabel"
 text = "REWARDS"
-horizontal_alignment = 1
-
-[node name="ClearReward" type="VBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 6
-
-[node name="Plate" type="PanelContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/ClearReward"]
-layout_mode = 2
-size_flags_horizontal = 4
-theme_type_variation = &"PanelPlate"
-
-[node name="Pad" type="MarginContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/ClearReward/Plate"]
-layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_right = 18
-
-[node name="Line" type="HBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/ClearReward/Plate/Pad"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="Icon" type="TextureRect" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/ClearReward/Plate/Pad/Line"]
-custom_minimum_size = Vector2(40, 40)
-layout_mode = 2
-size_flags_vertical = 4
-mouse_filter = 2
-texture = ExtResource("10_shards")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="ClearValue" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/ClearReward/Plate/Pad/Line"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_type_variation = &"AmberValueLabel"
-theme_override_font_sizes/font_size = 36
-text = "+0 RP"
-vertical_alignment = 1
-
-[node name="Caption" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/Row/ClearReward"]
-layout_mode = 2
-theme_type_variation = &"CaptionLabel"
-text = "CLEAR BONUS"
 horizontal_alignment = 1
 
 [node name="TotalLine" type="HBoxContainer" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box"]
@@ -497,7 +453,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 4
 theme_type_variation = &"AmberValueLabel"
-theme_override_font_sizes/font_size = 42
+theme_override_font_sizes/font_size = 44
 text = "+0 RP"
 
 [node name="Divider" type="Label" parent="SafeMargin/Center/Panel/Margin/Content/Rewards/Box/TotalLine"]
@@ -517,7 +473,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 4
 theme_type_variation = &"ValueLabel"
-theme_override_font_sizes/font_size = 42
+theme_override_font_sizes/font_size = 44
 text = "0 RP"
 
 [node name="SpacerBottom" type="Control" parent="SafeMargin/Center/Panel/Margin/Content"]

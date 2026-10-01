@@ -3,9 +3,11 @@
 > **Narrowed 2026-09-20 (GDD §14 #34).** The presentation-only character
 > architecture in this ADR still stands — it is what every character, rigged or not, plugs into.
 > What changed is how a character's *art* is authored: new characters are whole-frame sprites
-> ([character_sprite_frames.md](../guides/character_sprite_frames.md)), not bone rigs. Veyra,
-> Rook, Morrow and Noxen keep their rigs; the Ilyra and Bram rigs described in the addendum were
-> retired, and the name Ilyra now belongs to the whole-frame sprite character.
+> ([character_creation.md](../guides/character_creation.md)), not bone rigs. Morrow keeps his rig
+> (Veyra and Noxen were removed 2026-09-25, GDD §14 #47; Rook's rig was replaced by whole-frame
+> sprites on 2026-09-27, GDD §14 #56); the Ilyra and Bram rigs described in the addendum were
+> retired, and the name Ilyra went to the whole-frame sprite character, itself removed 2026-09-26 (GDD §14 #52).
+> **Tiers removed 2026-09-26** (GDD §14 #53): see the addendum below.
 
 > **Status:** Accepted · **Date:** 2026-09-17 · **Deciders:** owner (three playable characters with
 > smooth animation, "they are not just wisps but characters") + Codex (Veyra prototype) + Claude Code
@@ -77,6 +79,12 @@
   frame in `_process` must opt out of it — the rigs, both ambiences, the tutorial hand, the VFX pool
   and most screens — and with it enabled the rig smoothness contract failed intermittently. Revisit
   it only if that per-frame animation moves onto the physics tick.
+
+## Addendum 2026-09-26 — no tiers
+
+Owner: tiers "would not be in the game"; every character is the same. `FormData.tier`, its
+Legendary and Mythic labels and the Shop's tier badge are removed. The 2026-09-18 addendum's first
+bullet no longer holds; its second (versioned source packs) is unchanged.
 
 ## Addendum 2026-09-18 — collectible tiers and versioned source packs
 

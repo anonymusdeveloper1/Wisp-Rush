@@ -98,7 +98,7 @@ static var _shared_lengths: Dictionary[String, Dictionary] = {}
 @export_range(64.0, 2048.0, 1.0) var design_size: float = 512.0
 ## Rig-space point menus center on: the middle of the whole silhouette, tails and halo included.
 @export var preview_center: Vector2 = Vector2.ZERO
-## Strength of the shared squash and stretch (1 = elastic Veyra; a calm character uses less).
+## Strength of the shared squash and stretch (1 = fully elastic; a calm character uses less).
 @export_range(0.0, 2.0, 0.01) var squash_amount: float = 1.0
 ## Strength of the shared bobs, lunges and recoils.
 @export_range(0.0, 2.0, 0.01) var bounce_amount: float = 1.0
@@ -263,6 +263,13 @@ func play_attack() -> void:
 	if _one_shot_state == DEATH:
 		return
 	_play_one_shot(ATTACK)
+
+
+## A mid-dash redirect is a new dash, but the controller stays in its dash state, so no state change
+## tells the rig. A rig that draws the dash as a one-shot attack restarts it here; the base, whose
+## dash is a loop, has nothing to do.
+func restart_dash() -> void:
+	pass
 
 
 ## Plays the selection flourish, a short hop. Nothing in a menu calls it since 2026-09-21 (owner:
@@ -583,17 +590,9 @@ func _make_animation(state_name: StringName) -> Animation:
 func _body_keys(state_name: StringName) -> Dictionary[StringName, Array]:
 	match state_name:
 		IDLE_HOVER:
-			return {
-				&"position": [
-					[0.0, Vector2(0, 0)], [0.45, Vector2(0, -7)], [0.9, Vector2(0, 0)],
-					[1.35, Vector2(0, 7)], [1.8, Vector2(0, 0)],
-				],
-				&"scale": [
-					[0.0, Vector2(1.0, 1.0)], [0.45, Vector2(0.985, 1.02)], [0.9, Vector2(1.0, 1.0)],
-					[1.35, Vector2(1.015, 0.985)], [1.8, Vector2(1.0, 1.0)],
-				],
-				&"rotation": [[0.0, -0.02], [0.9, 0.02], [1.8, -0.02]],
-			}
+			# The drawn sprite loop (or menu video) owns idle motion. The shared body stays
+			# anchored so it does not add a second bob, breath or wobble on top.
+			return {}
 		MOVE_FLY:
 			return {
 				&"position": [[0.0, Vector2(0, 0)], [0.35, Vector2(0, -5)], [0.7, Vector2(0, 0)]],
@@ -603,17 +602,8 @@ func _body_keys(state_name: StringName) -> Dictionary[StringName, Array]:
 				&"rotation": [[0.0, -0.03], [0.35, 0.03], [0.7, -0.03]],
 			}
 		AIM_CHARGE:
-			# Holding the aim arrow used to coil the whole body back and shiver. The owner found that
-			# unnatural (2026-09-19): a character that is standing on a wall should keep standing on
-			# it, so aiming now just carries the resting breath on. Each rig may still gesture with
-			# its own limbs in `_update_secondary_motion`.
-			return {
-				&"position": [[0.0, Vector2(0, 0)], [0.26, Vector2(0, -3)], [0.52, Vector2(0, 0)]],
-				&"scale": [
-					[0.0, Vector2(1.0, 1.0)], [0.26, Vector2(0.994, 1.008)],
-					[0.52, Vector2(1.0, 1.0)],
-				],
-			}
+			# Aiming keeps the same anchored body; the arrow carries the feedback.
+			return {}
 		DASH_START:
 			# Deep coil, then the body snaps into the blade profile it cuts with.
 			return {

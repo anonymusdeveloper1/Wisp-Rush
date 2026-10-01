@@ -1,0 +1,12 @@
+{
+  "character": "Mothmere",
+  "id": "mothmere",
+  "note": "Rows for the packer, all from this pack (AutoSprite, 2026-09-25). dash_loop is a one-shot attack (eight picked cells, turned to fly up). wall_top is wall_bottom flipped upside down and wall_left is wall_right mirrored, both done by the packer.",
+  "rows": [
+    {"state": "dash_loop", "frames": 8, "fps": 28.0, "loop": false},
+    {"state": "wall_bottom", "frames": 18, "fps": 12.0, "loop": true},
+    {"state": "wall_top", "frames": 18, "fps": 12.0, "loop": true},
+    {"state": "wall_left", "frames": 23, "fps": 12.0, "loop": true},
+    {"state": "storefront_idle", "frames": 22, "fps": 12.0, "loop": true}
+  ]
+}

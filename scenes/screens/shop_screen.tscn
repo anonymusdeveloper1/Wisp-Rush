@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/banner_top.tscn" id="3_banner"]
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/crest_top.tscn" id="4_crest_top"]
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/crest_bottom.tscn" id="5_crest_bottom"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/system/02_soul_shards.png" id="6_rp"]
+[ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_currency.tres" id="6_rp"]
 [ext_resource type="Resource" path="res://data/forms/default_catalog.tres" id="7_forms"]
 [ext_resource type="Resource" path="res://data/endless/default_endless_catalog.tres" id="9_endless"]
 [ext_resource type="Script" path="res://scripts/components/focus_carousel.gd" id="10_carousel"]
@@ -92,7 +92,7 @@ layout_mode = 2
 theme_override_constants/separation = 8
 
 [node name="RiftPointsIcon" type="TextureRect" parent="SafeMargin/Content/Header/BalancePlate/BalanceRow"]
-custom_minimum_size = Vector2(44, 44)
+custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
@@ -104,7 +104,7 @@ stretch_mode = 5
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"ValueLabel"
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 44
 text = "0 RP"
 vertical_alignment = 1
 
@@ -166,13 +166,6 @@ layout_mode = 2
 mouse_filter = 2
 script = ExtResource("11_dots")
 
-[node name="TierLabel" type="Label" parent="SafeMargin/Content/CarouselPage"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-theme_type_variation = &"CaptionLabel"
-horizontal_alignment = 1
-
 [node name="DescriptionLabel" type="Label" parent="SafeMargin/Content/CarouselPage"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 84)
@@ -186,19 +179,6 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"CaptionLabel"
 horizontal_alignment = 1
-
-[node name="ArenaPage" type="ScrollContainer" parent="SafeMargin/Content"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-size_flags_vertical = 3
-horizontal_scroll_mode = 0
-
-[node name="ArenaList" type="VBoxContainer" parent="SafeMargin/Content/ArenaPage"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 14
 
 [node name="NoAdsPage" type="VBoxContainer" parent="SafeMargin/Content"]
 unique_name_in_owner = true
@@ -242,7 +222,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_type_variation = &"TitleLabel"
-theme_override_font_sizes/font_size = 120
+theme_override_font_sizes/font_size = 132
 text = "AD"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -319,108 +299,6 @@ theme_type_variation = &"SecondaryButton"
 text = "BACK"
 
 [node name="ActionButton" type="Button" parent="SafeMargin/Content/Footer"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 4
-theme_type_variation = &"PrimaryButton"
-text = "EQUIPPED"
-
-[node name="ArenaPeek" type="Control" parent="."]
-unique_name_in_owner = true
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="PeekArt" type="TextureRect" parent="ArenaPeek"]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-expand_mode = 1
-stretch_mode = 6
-
-[node name="PeekScrim" type="ColorRect" parent="ArenaPeek"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0.03, 0.04, 0.07, 0.55)
-
-[node name="PeekPanel" type="PanelContainer" parent="ArenaPeek"]
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -520.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_type_variation = &"PanelPlate"
-
-[node name="PeekMargin" type="MarginContainer" parent="ArenaPeek/PeekPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 44
-theme_override_constants/margin_top = 34
-theme_override_constants/margin_right = 44
-theme_override_constants/margin_bottom = 40
-
-[node name="PeekColumn" type="VBoxContainer" parent="ArenaPeek/PeekPanel/PeekMargin"]
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="PeekName" type="Label" parent="ArenaPeek/PeekPanel/PeekMargin/PeekColumn"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_type_variation = &"TitleLabel"
-text = "ASTRAL OBSERVATORY"
-horizontal_alignment = 1
-
-[node name="PeekTier" type="Label" parent="ArenaPeek/PeekPanel/PeekMargin/PeekColumn"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_type_variation = &"CaptionLabel"
-text = "SIMPLE"
-horizontal_alignment = 1
-
-[node name="PeekDescription" type="Label" parent="ArenaPeek/PeekPanel/PeekMargin/PeekColumn"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 96)
-layout_mode = 2
-autowrap_mode = 3
-horizontal_alignment = 1
-
-[node name="PeekRequirement" type="Label" parent="ArenaPeek/PeekPanel/PeekMargin/PeekColumn"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_type_variation = &"CaptionLabel"
-text = "EQUIPPED"
-horizontal_alignment = 1
-
-[node name="PeekButtons" type="HBoxContainer" parent="ArenaPeek/PeekPanel/PeekMargin/PeekColumn"]
-layout_mode = 2
-theme_override_constants/separation = 20
-
-[node name="PeekBack" type="Button" parent="ArenaPeek/PeekPanel/PeekMargin/PeekColumn/PeekButtons"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(280, 0)
-layout_mode = 2
-size_flags_vertical = 4
-theme_type_variation = &"SecondaryButton"
-text = "BACK"
-
-[node name="PeekAction" type="Button" parent="ArenaPeek/PeekPanel/PeekMargin/PeekColumn/PeekButtons"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3

@@ -1,20 +1,20 @@
 [gd_scene format=3]
 
-[ext_resource type="Texture2D" path="res://assets/ui/theme/textures/ornament_banner_top.png" id="1_p7fr2"]
+[ext_resource type="Texture2D" path="res://assets/ui/theme/icons/ornament_diamond_cyan.tres" id="1_p7fr2"]
 
-[node name="BannerTopOrnament" type="Control" unique_id=294799821]
+[node name="BannerTopOrnament" type="Control" unique_id=500428470]
 layout_mode = 3
 anchors_preset = 0
 size_flags_horizontal = 4
 size_flags_vertical = 0
 mouse_filter = 2
 
-[node name="Art" type="TextureRect" parent="." unique_id=2064655612]
+[node name="Art" type="TextureRect" parent="." unique_id=1593127154]
 layout_mode = 0
-offset_left = -42.0
-offset_top = -44.0
-offset_right = 44.0
-offset_bottom = 7.0
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
 mouse_filter = 2
 texture = ExtResource("1_p7fr2")
 expand_mode = 1

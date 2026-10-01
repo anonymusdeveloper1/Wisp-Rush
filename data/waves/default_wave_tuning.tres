@@ -11,3 +11,5 @@ formation_gap = 0.7
 safe_spawn_distance = 0.16
 post_boss_budget_bonus = 4
 post_boss_gap_multiplier = 0.9
+enemy_kinds_at_start = 2
+waves_per_new_enemy_kind = 2

@@ -32,8 +32,8 @@ func _run_check() -> void:
 	if player.get_maximum_health() != 1 or player.get_current_health() != 1:
 		failures += 1
 		push_error("player_health_flow: a run did not start on one Soul Fragment")
-	# The ladder below is about i-frames, death and the summary, so stock up to three the way two
-	# Soul Vessel drops would.
+	# The ladder below is about i-frames, death and the summary, so stock up to three (the Tutorial
+	# is the only thing that does this in the game).
 	player.increase_maximum_health(2, 2)
 	var enemy := SOUL_WISP_SCENE.instantiate() as SoulWispEnemy
 	enemy.movement_enabled = false

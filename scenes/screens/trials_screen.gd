@@ -20,7 +20,8 @@ func _ready() -> void:
 
 ## Rebuilds the active tier from the banked rank and progress.
 ##
-## Safe before or after the screen enters the tree; see RiftMapScreen.setup() for why.
+## Safe before or after the screen enters the tree: callers commonly configure a screen straight
+## after instancing it, when @onready references are still null, so the rebuild waits for _ready().
 func setup(rank: int, progress: Dictionary) -> void:
 	_rank = maxi(1, rank)
 	_progress = progress.duplicate()
@@ -50,7 +51,7 @@ func _build_row(trial: TrialData) -> Control:
 
 	var title := Label.new()
 	title.theme_type_variation = &"ValueLabel"
-	title.add_theme_font_size_override(&"font_size", 36)
+	title.add_theme_font_size_override(&"font_size", 33)
 	title.text = "%s%s" % [trial.title, "  ✓" if done else ""]
 	box.add_child(title)
 

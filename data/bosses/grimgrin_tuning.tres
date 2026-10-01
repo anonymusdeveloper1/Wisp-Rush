@@ -1,0 +1,45 @@
+[gd_resource type="Resource" script_class="GrimgrinTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/grimgrin_tuning.gd" id="1_tuning"]
+
+[resource]
+script = ExtResource("1_tuning")
+design_width = 1080.0
+standing_height = 290.0
+hit_radius_ratio = 0.3
+base_health = 12
+health_per_encounter = 3
+planted_hit_value = 2
+intro_duration = 1.1
+rest_min = 0.45
+rest_max = 0.95
+dash_warning_duration = 0.5
+dash_speed = 750.0
+landing_clearance = 1.2
+fast_attack_chance = 0.3
+fast_attack_cooldown = 4.0
+first_fast_attack_delay = 3.0
+fast_warning_duration = 0.8
+fast_dash_speed = 1500.0
+fast_danger_ratio = 0.25
+ill_wall_chance = 0.35
+ill_wall_cooldown = 3.5
+first_ill_wall_delay = 2.5
+rot_spread_duration = 1.1
+rot_deadly_duration = 1.3
+rot_lane_ratio = 0.6
+second_half_health = 0.5
+grin_chance = 0.5
+grin_cooldown = 6.0
+grin_mark_duration = 4.0
+grin_rot_spread_duration = 0.55
+grin_rot_deadly_duration = 1.0
+spawn_interval_min = 3.8
+spawn_interval_max = 5.2
+spawn_count = 1
+second_half_spawn_count = 2
+max_live_enemies = 4
+score_reward = 1500
+rp_reward = 25
+experience_reward = 60
+victory_duration = 1.0

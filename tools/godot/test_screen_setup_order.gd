@@ -7,7 +7,6 @@ extends SceneTree
 ## first. This test reproduces Main's actual call order.
 
 const SCREENS: Dictionary = {
-	&"rift_map": preload("res://scenes/screens/rift_map_screen.tscn"),
 	&"trials": preload("res://scenes/screens/trials_screen.tscn"),
 	&"forms": preload("res://scenes/screens/forms_screen.tscn"),
 	&"daily": preload("res://scenes/screens/daily_screen.tscn"),
@@ -30,12 +29,9 @@ func _fail(message: String) -> void:
 func _run() -> void:
 	var snapshot: Dictionary = {
 		&"highest_wave": 12,
-		&"selected_rift": "ember_hollow",
-		&"rift_bests": {"ember_hollow": 4200},
-		&"rift_levels": {"ember_hollow": 3},
 		&"rift_points": 900,
-		&"owned_forms": ["void"],
-		&"equipped_form": "void",
+		&"owned_forms": ["patchvile"],
+		&"equipped_form": "patchvile",
 		&"bosses_defeated": 2,
 		&"best_score": 4200,
 		&"total_runs": 9,
@@ -50,8 +46,6 @@ func _run() -> void:
 	# The data-driven screens must have actually generated their rows. Asserting on the
 	# generated container is the whole point: the static scene nodes exist either way, so a
 	# whole-tree node count would pass even when every row failed to build.
-	await _check(&"rift_map", "%Carousel", 5,
-		func(screen: Node) -> void: screen.setup(snapshot))
 	await _check(&"trials", "%TrialList", 3,
 		func(screen: Node) -> void: screen.setup(3, {"t01_wave": 2}))
 
@@ -59,7 +53,7 @@ func _run() -> void:
 	await _check(&"statistics", "", 0, func(screen: Node) -> void: screen.setup(snapshot))
 	await _check(&"daily", "", 0, func(screen: Node) -> void: screen.setup("2026-09-12", 12345, snapshot))
 	await _check(&"forms", "", 0,
-		func(screen: Node) -> void: screen.setup(900, ["void"], &"void", 2))
+		func(screen: Node) -> void: screen.setup(900, ["patchvile"], &"patchvile", 2))
 	# Main refreshes the Shop and shows a purchase result before it is in the tree.
 	await _check(&"shop", "", 0, func(screen: Node) -> void:
 		screen.setup(900, false, false)

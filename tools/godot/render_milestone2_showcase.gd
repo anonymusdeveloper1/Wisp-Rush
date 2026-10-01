@@ -17,7 +17,6 @@ func _build_showcase() -> void:
 	await process_frame
 	await process_frame
 	game.debug_quiet_arena()
-	game._wave_label.text = "RIFT 05  •  FIELD GUIDE"
 	game._instruction_label.text = "THREE SOULS  •  THREE HAZARDS"
 	game._instruction_label.visible = true
 	game._instruction_label.modulate.a = 1.0

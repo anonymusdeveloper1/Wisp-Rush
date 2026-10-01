@@ -28,7 +28,7 @@ Requirements: Python 3.7+, Pillow, numpy, scipy, ffmpeg on PATH (it only *decode
 throwaway project (a window opens for a few seconds; it needs a real renderer).
 
     python tools/art/extract_menu_video.py                  # every video pack
-    python tools/art/extract_menu_video.py verdant_shade    # only this one
+    python tools/art/extract_menu_video.py <id>             # only this one
 
 QA sheets land in ``logs/menu_video/``. Never hand-edit the outputs; re-run this.
 """
@@ -53,7 +53,7 @@ Box = Tuple[int, int, int, int]
 
 ## Default rig height a match frame's whole canvas is drawn at: a `WholeFrameCharacterVisual` menu
 ## cell (448 px at `MENU_SCALE`, 384 rig px). A pack whose visual draws differently sets
-## `match_canvas_rig_px` (Ilyra's `IlyraVisual` draws her 627 px canvas at 627 rig px).
+## `match_canvas_rig_px` (Ilyra's `IlyraVisual`, removed 2026-09-26, drew her 627 px canvas at 627 rig px).
 MENU_RIG_HEIGHT = 384.0
 ## Keyness (`min(R, B) - G`) at or below which a pixel is fully opaque, and the margin under the
 ## measured background keyness at which it becomes fully transparent. Compression noise on the
@@ -82,49 +82,9 @@ CALIBRATION_REACH = 3
 MAX_ALPHA_FLOOR = 0.1
 MIN_ALPHA_CEILING = 0.85
 
-VIDEO_PACKS: Dict[str, Dict[str, object]] = {
-	"verdant_shade": {
-		"source": REPO
-		/ "concept_art/verdant_shade_storefront_video_v1/source/shade_storefront_take1.mp4",
-		# Frame 80 is the one that comes back closest to frame 0 (mean difference 2.7 against a
-		# normal step of ~2), so the loop is frames 0..79 and 80..87 fade back into 0..7.
-		"loop_frames": 80,
-		"crossfade": 8,
-		# The generator's "AI" content label, top left (the box around it spans ~17..50 x 17..45 at
-		# 640 px). Shade's closest approach to that corner is x 164, y 76, so this cannot touch her.
-		"masks": [(0, 0, 72, 64)],
-		"fps": 24,
-		# Unused since Movie Maker took over the encode (see `encode`); kept for a future encoder.
-		"quality": 9,
-		# The sprite loop this replaces: Shade is drawn as tall as she stands in this frame.
-		"match_frame": REPO
-		/ "concept_art/verdant_shade_sprite_v1/frames/verdant_shade/storefront/storefront_idle_00.png",
-		"video": OUTPUT / "verdant_shade/verdant_shade_menu.ogv",
-		"resource": REPO / "data/characters/verdant_shade_menu_video.tres",
-		"key": "magenta",
-	},
-	"ilyra": {
-		# Take 2, the ready stance the owner approved on 2026-09-21 (take 1 snapped its fans).
-		"source": REPO / "concept_art/ilyra_storefront_video_v1/source/ilyra_ready_take2.mp4",
-		# Frame 72 comes back closest to frame 0 (4.6 against a 3.4 median step; the raw end
-		# jumps 15.8), so the loop is frames 0..71 and 72..79 fade back into 0..7.
-		"loop_frames": 72,
-		"crossfade": 8,
-		# The same "AI" label, top left (x 24..41, y 23..36). Ilyra never comes nearer than x 80,
-		# y 106, so the box cannot touch her.
-		"masks": [(0, 0, 72, 64)],
-		"fps": 24,
-		"quality": 9,
-		# The painting the take was generated from, drawn at its gameplay scale: her 627 px canvas
-		# is 627 rig px in `IlyraVisual`, and so are her 724 px menu paintings at `MENU_SCALE`.
-		"match_frame": REPO / "assets/art/characters/playable/ilyra/aim_charge.png",
-		"match_canvas_rig_px": 627.0,
-		"video": OUTPUT / "ilyra/ilyra_menu.ogv",
-		"resource": REPO / "data/characters/ilyra_menu_video.tres",
-		# Green: 0.0 % of her solid pixels are greenish, against 6.5 % magenta-ish in this pose.
-		"key": "green",
-	},
-}
+## Empty since 2026-09-26: Ilyra, its last user, was removed (Scarlet replaced her; Shade's menus
+## play its storefront since 2026-09-25). Kept as the seam for the next menu video.
+VIDEO_PACKS: Dict[str, Dict[str, object]] = {}
 
 
 def keyness(pixels: np.ndarray, key_colour: str) -> np.ndarray:

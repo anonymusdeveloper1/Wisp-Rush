@@ -1,0 +1,7 @@
+[gd_resource type="CanvasTexture" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/theme/textures/button_primary_pressed.png" id="1_l026p"]
+
+[resource]
+diffuse_texture = ExtResource("1_l026p")
+texture_filter = 1

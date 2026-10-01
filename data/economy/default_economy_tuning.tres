@@ -5,7 +5,4 @@
 [resource]
 script = ExtResource("1_economy")
 score_per_rift_point = 200
-level_clear_base = 20
-level_clear_per_level = 10
-repeat_clear_fraction = 0.25
 placeholder = true

@@ -51,6 +51,20 @@ const MAX_SPARKS: int = 22
 ## Multiplies the length of the shared launch burst; 0 drops it for a character whose rig already
 ## carries the whole read, so the two never stack into a smear.
 @export_range(0.0, 2.0, 0.05) var burst_scale: float = 1.0
+## Whether the Wisp's shared dash art plays for this character: the launch streak, the long streak
+## where a long dash lands, and the momentum glow. That art is painted cyan, so a tint cannot turn
+## it into the character's own colour; a character with its own attack effects turns it off
+## (Patchvile, owner 2026-09-24). The signature above still draws.
+@export var shared_trails: bool = true
+
+## How a landing on a wall reads. [constant SPLASH] is the Wisp's: droplets, a splat on the wall and
+## a flash, in the character's tint, over art painted cyan. [constant DUST] is a puff of dust rolling
+## out along the wall and a few chips, in [member dust_tint], with none of the cyan art - for a
+## character that lands on its feet (Patchvile, owner 2026-09-24).
+enum Landing { SPLASH, DUST }
+@export var landing: Landing = Landing.SPLASH
+## Colour of a [constant Landing.DUST] landing.
+@export var dust_tint: Color = Color(0.78, 0.72, 0.62, 1.0)
 
 
 ## True when [param tint] is saturated and sits within [constant MIN_RESERVED_HUE_DISTANCE] of a
@@ -73,7 +87,7 @@ func validate() -> PackedStringArray:
 	if spark_count < 0 or spark_count > MAX_SPARKS:
 		failures.append("dash effect asks for %d sparks, the cap is %d" % [spark_count, MAX_SPARKS])
 	for named: Array in [
-		["trail", trail_tint], ["burst", burst_tint], ["spark", spark_tint],
+		["trail", trail_tint], ["burst", burst_tint], ["spark", spark_tint], ["dust", dust_tint],
 	]:
 		if is_reserved_tint(named[1] as Color):
 			failures.append("dash %s tint %s is too close to a reserved hue" % [

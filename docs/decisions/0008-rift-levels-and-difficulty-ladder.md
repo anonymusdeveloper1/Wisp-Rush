@@ -1,6 +1,6 @@
 # ADR-0008: Rift levels and the difficulty ladder
 
-> **Status:** Accepted; the level climb inside a run (and endless play after level 8) is superseded by
+> **Status:** **Rifts removed 2026-09-25** (GDD §14 #48): kept as history; Accepted; the level climb inside a run (and endless play after level 8) is superseded by
 > [ADR-0013](0013-rift-story-levels-endless-mode-and-rift-points.md) — one level per run; the threat
 > ladder stands · **Date:** 2026-09-12 · **Deciders:** owner (requested per-arena difficulty
 > and levels) + Claude Code · **Extends:** [ADR-0007](0007-rifts-as-rule-variant-arenas.md)

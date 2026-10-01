@@ -26,7 +26,9 @@ var _offered_ids: Array[StringName] = []
 func _ready() -> void:
 	assert(tuning != null, "RunProgression requires RunProgressionTuning")
 	_load_mutations()
-	assert(_mutations.size() == 7, "RunProgression requires all seven mutation Resources")
+	# Six since Reaper's Gift left the pool (2026-09-24): it healed a missing fragment, and a run
+	# never has one to heal now that nothing raises the one-fragment maximum.
+	assert(_mutations.size() == 6, "RunProgression requires all six mutation Resources")
 
 
 ## Resets XP and run-only mutation levels using a deterministic choice seed.

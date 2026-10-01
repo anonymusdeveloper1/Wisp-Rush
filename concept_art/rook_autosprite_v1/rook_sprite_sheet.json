@@ -1,0 +1,12 @@
+{
+  "character": "Rook",
+  "id": "rook",
+  "note": "Rows for the packer, all from this pack (AutoSprite, 2026-09-27), sliced and cleaned by slice_sheet.py. dash_loop is a one-shot attack (eight cells picked by the owner, turned to fly up). wall_top is his own ceiling sheet; wall_left is wall_right mirrored by the packer.",
+  "rows": [
+    {"state": "dash_loop", "frames": 8, "fps": 28.0, "loop": false},
+    {"state": "wall_bottom", "frames": 17, "fps": 12.0, "loop": true},
+    {"state": "wall_top", "frames": 19, "fps": 12.0, "loop": true},
+    {"state": "wall_left", "frames": 20, "fps": 12.0, "loop": true},
+    {"state": "storefront_idle", "frames": 23, "fps": 12.0, "loop": true}
+  ]
+}

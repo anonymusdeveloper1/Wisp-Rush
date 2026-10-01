@@ -1,30 +1,35 @@
 extends SceneTree
-## Endless catalog (ADR-0014, spec story_and_endless/05): 30 skins in manifest order, the frozen floor
-## template, backgrounds, tier prices, arena of the day, animated scenery (masks, keep-out, particles,
-## Reduced Motion) and skin saves.
+## Endless catalog (ADR-0017, ADR-0020, ADR-0021, ADR-0023, docs/guides/arena_art.md): the arenas,
+## their backgrounds and Shop thumbnails, each arena's measured floor against the floor the game uses
+## for it (the shared one, or its own), layered and 3D arenas' scenes and fitted floors, the arena of
+## the day, the rules' floor and save sanitizing of the thirty arenas retired on 2026-09-23.
+##
+##     Godot --headless --path . --script res://tools/godot/test_endless_catalog.gd
 
 const CATALOG: EndlessCatalog = preload("res://data/endless/default_endless_catalog.tres")
-const MANIFEST_PATH: String = "res://concept_art/wisp_rush_endless_v1/assets/skins_manifest.json"
-const TEMPLATE_PATH: String = "res://concept_art/wisp_rush_endless_v1/floor_template.json"
-const EXPECTED_SKIN_COUNT: int = 30
-const DEFAULT_SKIN_ID: StringName = &"astral_observatory"
-## Owner decision 2026-09-15: price per tier, with the first three skins keeping their launch prices.
-const TIER_PRICES: Dictionary[int, int] = {
-	ArenaSkinData.Tier.SIMPLE: 300,
-	ArenaSkinData.Tier.RARE: 800,
-	ArenaSkinData.Tier.LEGENDARY: 2000,
-	ArenaSkinData.Tier.MYTHIC: 3500,
-}
-const PRICE_OVERRIDES: Dictionary[StringName, int] = {
-	&"astral_observatory": 0,
-	&"drowned_sanctum": 800,
-	&"moonpetal_shrine": 1200,
-}
-## Legendary scenery stays calm (sparse particles); Mythic scenery is richer.
-const LEGENDARY_MAX_PARTICLES: int = 20
-const MYTHIC_MIN_EMITTERS: int = 2
-const MYTHIC_MIN_LIT_ZONES: int = 3
-const MASK_DIR: String = "res://assets/art/environment/endless/masks/"
+## Each arena's art manifest, whose `floor_rect_px` the catalog's floor must match.
+const ARENA_MANIFEST: String = "res://concept_art/arenas_v2/%s/arena.json"
+const DEFAULT_SKIN_ID: StringName = &"quarry_titan"
+## UV difference allowed between the catalog floor and the measured one (well under a pixel).
+const FLOOR_TOLERANCE: float = 1e-3
+## Largest Shop thumbnail width; the full background is only for cards near the focus.
+const MAX_THUMBNAIL_WIDTH: int = 400
+## Portrait screens (design px) an arena scene is fitted to, the first the owner's phone, and the
+## HUD's safe top used for them.
+const LAYERED_VIEWS: Array[Vector2] = [
+	Vector2(1080.0, 2340.0), Vector2(1080.0, 2400.0), Vector2(1080.0, 1920.0), Vector2(1200.0, 1920.0),
+]
+const LAYERED_SAFE_TOP: float = 125.0
+## The painted arena used to compare the Vigil's revised, narrower floor on the owner's phone.
+const COMPARISON_ARENA_ID: StringName = &"stitched_doll_jungle"
+const VIGIL_ID: StringName = &"stitchwarden_vigil"
+## The 3D arena whose floor is "a little bigger" than the Vigil's (owner, GDD §14 #68), and how much
+## bigger at most, so "a little" stays true.
+const COLOSSUS_3D_ID: StringName = &"chained_colossus_3d"
+const COLOSSUS_3D_MAX_GROWTH: float = 1.25
+## The zoom test arena (owner, GDD §14 #69): it opens with a zoom, and once zoomed in its floor fills
+## the screen under the HUD, so it is bigger than the Colossus 3D's on every screen.
+const ZOOM_ARENA_ID: StringName = &"zoom_arena_3d"
 
 var _failures: int = 0
 
@@ -36,214 +41,176 @@ func _init() -> void:
 func _run_checks() -> void:
 	for failure: String in CATALOG.validate():
 		_fail(failure)
-	_check_skins_against_manifest()
-	_check_template()
+	_check_skins()
+	_check_floor()
+	_check_layered()
 	_check_arena_of_the_day()
-	_check_ambience()
 	_check_rules()
 	_check_saves()
 	if _failures == 0:
-		print("endless_catalog: 30 skins, template, backgrounds, prices, daily arena, scenery and saves validated")
+		print("endless_catalog: %d arena(s), floor, backgrounds, daily arena, rules and saves validated" % (
+			CATALOG.skins.size()
+		))
 	quit(_failures)
 
 
-func _check_skins_against_manifest() -> void:
-	var manifest: Array = JSON.parse_string(FileAccess.get_file_as_string(MANIFEST_PATH)) as Array
-	if CATALOG.skins.size() != EXPECTED_SKIN_COUNT or manifest.size() != EXPECTED_SKIN_COUNT:
-		_fail("expected %d skins, catalog has %d, manifest %d" % [
-			EXPECTED_SKIN_COUNT, CATALOG.skins.size(), manifest.size(),
-		])
-		return
+func _check_skins() -> void:
 	if CATALOG.default_skin_id != DEFAULT_SKIN_ID:
 		_fail("default skin is %s" % CATALOG.default_skin_id)
-	var tier_names: PackedStringArray = ["Simple", "Rare", "Legendary", "Mythic"]
-	for index: int in EXPECTED_SKIN_COUNT:
-		var skin: ArenaSkinData = CATALOG.skins[index]
-		var entry: Dictionary = manifest[index] as Dictionary
-		if String(skin.skin_id) != str(entry["skin_id"]):
-			_fail("slot %d is %s, manifest %s" % [index, skin.skin_id, entry["skin_id"]])
-			continue
-		if tier_names[skin.tier] != str(entry["tier"]):
-			_fail("%s tier %s, manifest %s" % [skin.skin_id, tier_names[skin.tier], entry["tier"]])
-		if skin.display_name != str(entry["display_name"]).to_upper():
-			_fail("%s display name %s" % [skin.skin_id, skin.display_name])
-		var expected_price: int = PRICE_OVERRIDES.get(skin.skin_id, TIER_PRICES[skin.tier])
-		if skin.price != expected_price:
-			_fail("%s costs %d, expected %d" % [skin.skin_id, skin.price, expected_price])
+	if CATALOG.get_skin(DEFAULT_SKIN_ID) == null or CATALOG.get_skin(DEFAULT_SKIN_ID).price != 0:
+		_fail("the default arena is missing or not free")
+	var save_ids: Array[String] = []
+	for skin: ArenaSkinData in CATALOG.skins:
+		save_ids.append(String(skin.skin_id))
 		if skin.placeholder:
 			_fail("%s is a placeholder" % skin.skin_id)
 		var background: Texture2D = skin.load_background()
 		if background == null or Vector2i(background.get_size()) != EndlessCatalog.BACKGROUND_SIZE:
-			_fail("%s background is not 941x1672" % skin.skin_id)
-		if skin.thumbnail == null or skin.thumbnail.get_width() > 400:
+			_fail("%s background is not %s" % [skin.skin_id, EndlessCatalog.BACKGROUND_SIZE])
+		if skin.thumbnail == null or skin.thumbnail.get_width() > MAX_THUMBNAIL_WIDTH:
 			_fail("%s needs a small Shop thumbnail" % skin.skin_id)
-	if CATALOG.get_skin(DEFAULT_SKIN_ID).price != 0:
-		_fail("default skin is not free")
-	var save_ids: Array[String] = []
-	for skin: ArenaSkinData in CATALOG.skins:
-		save_ids.append(String(skin.skin_id))
 	if save_ids != SaveManagerService.VALID_ARENA_SKIN_IDS:
-		_fail("SaveManagerService.VALID_ARENA_SKIN_IDS does not match the catalog")
+		_fail("SaveManagerService.VALID_ARENA_SKIN_IDS %s does not match the catalog %s" % [
+			SaveManagerService.VALID_ARENA_SKIN_IDS, save_ids,
+		])
 
 
-func _check_template() -> void:
-	var template: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(TEMPLATE_PATH)) as Dictionary
-	var points: Array = template["polygon_uv"] as Array
-	if points.size() != CATALOG.floor_polygon.size():
-		_fail("floor polygon has %d points, template %d" % [CATALOG.floor_polygon.size(), points.size()])
-		return
-	for index: int in points.size():
-		var pair: Array = points[index] as Array
-		var delta: Vector2 = (CATALOG.floor_polygon[index] - Vector2(float(pair[0]), float(pair[1]))).abs()
-		if delta.x > 1e-4 or delta.y > 1e-4:
-			_fail("floor polygon point %d differs from the template" % index)
-	if not is_equal_approx(float(template["rim_tolerance_px"]), EndlessCatalog.RIM_TOLERANCE_PX):
-		_fail("RIM_TOLERANCE_PX differs from the template's rim_tolerance_px")
+## Every arena's painted floor must be exactly where the game puts the walls: the shared floor, or the
+## arena's own when it brings one (ADR-0020).
+func _check_floor() -> void:
+	var bounds := Rect2(CATALOG.floor_polygon[0], Vector2.ZERO)
+	for point: Vector2 in CATALOG.floor_polygon:
+		bounds = bounds.expand(point)
+	if not CATALOG.floor_rect.grow(FLOOR_TOLERANCE).encloses(bounds):
+		_fail("floor polygon %s leaves the floor rect %s" % [bounds, CATALOG.floor_rect])
+	var canvas := Vector2(EndlessCatalog.BACKGROUND_SIZE)
+	for skin: ArenaSkinData in CATALOG.skins:
+		var path: String = ARENA_MANIFEST % skin.skin_id
+		if not FileAccess.file_exists(path):
+			_fail("%s has no art manifest at %s" % [skin.skin_id, path])
+			continue
+		var manifest: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(path)) as Dictionary
+		var px: Array = manifest["floor_rect_px"] as Array
+		var measured := Rect2(
+			Vector2(float(px[0]), float(px[1])) / canvas,
+			Vector2(float(px[2]) - float(px[0]), float(px[3]) - float(px[1])) / canvas,
+		)
+		var expected: Rect2 = skin.floor_rect if skin.has_own_floor() else CATALOG.floor_rect
+		var delta: Vector4 = Vector4(
+			measured.position.x - expected.position.x, measured.position.y - expected.position.y,
+			measured.size.x - expected.size.x, measured.size.y - expected.size.y,
+		).abs()
+		if maxf(maxf(delta.x, delta.y), maxf(delta.z, delta.w)) > FLOOR_TOLERANCE:
+			_fail("%s paints its floor at %s, the game puts it at %s" % [
+				skin.skin_id, measured, expected,
+			])
+
+
+## An arena scene loads as an `ArenaVisual`; fitted to each phone its floor is on screen and is the
+## rect it reports. On the owner's phone the Vigil's revised floor is smaller than the Stitched Doll
+## Jungle's painted floor, cover-scaled the way GameWorld draws it; on every 1080-wide phone the 3D
+## Colossus's floor is a little bigger than the Vigil's (on the tablet shape the colossus's tall head
+## leaves less room, so it is not checked there).
+func _check_layered() -> void:
+	var floors: Dictionary[StringName, Array] = {}
+	for skin: ArenaSkinData in CATALOG.skins:
+		if not skin.has_visual_scene():
+			continue
+		var scene: PackedScene = skin.load_visual_scene()
+		var node: Node = scene.instantiate() if scene != null else null
+		var visual := node as ArenaVisual
+		if visual == null:
+			_fail("%s: its scene is not an ArenaVisual" % skin.skin_id)
+			if node != null:
+				node.free()
+			continue
+		root.add_child(visual)
+		var fitted: Array[Rect2] = []
+		for view: Vector2 in LAYERED_VIEWS:
+			var floor_rect: Rect2 = visual.fit(view, LAYERED_SAFE_TOP)
+			if not Rect2(Vector2.ZERO, view).encloses(floor_rect) or not floor_rect.has_area():
+				_fail("%s: floor %s is not on a %s screen" % [skin.skin_id, floor_rect, view])
+			if floor_rect != visual.get_floor_rect():
+				_fail("%s: fit() and get_floor_rect() disagree" % skin.skin_id)
+			fitted.append(floor_rect)
+		floors[skin.skin_id] = fitted
+		if visual.has_intro() != (skin.skin_id == ZOOM_ARENA_ID):
+			_fail("%s: has_intro() is %s" % [skin.skin_id, visual.has_intro()])
+		if visual.has_intro():
+			var ended: Array[bool] = [false]
+			visual.intro_finished.connect(func() -> void: ended[0] = true, CONNECT_ONE_SHOT)
+			visual.play_intro()
+			visual.skip_intro()
+			if not ended[0] or visual.get_drawn_floor_rect() != visual.get_floor_rect():
+				_fail("%s: a skipped intro does not end on the play floor" % skin.skin_id)
+		var owner_floor: Rect2 = visual.fit(LAYERED_VIEWS[0], LAYERED_SAFE_TOP)
+		var comparison: ArenaSkinData = CATALOG.get_skin(COMPARISON_ARENA_ID)
+		if skin.skin_id == VIGIL_ID and comparison != null and comparison.skin_id == COMPARISON_ARENA_ID \
+				and comparison.has_own_floor():
+			var canvas := Vector2(EndlessCatalog.BACKGROUND_SIZE)
+			var cover: float = maxf(LAYERED_VIEWS[0].x / canvas.x, LAYERED_VIEWS[0].y / canvas.y)
+			var painted: Vector2 = comparison.floor_rect.size * canvas * cover
+			if owner_floor.size.x >= painted.x or owner_floor.size.y >= painted.y:
+				_fail("%s: floor %s is not smaller than %s's %s" % [
+					skin.skin_id, owner_floor.size, COMPARISON_ARENA_ID, painted,
+				])
+		visual.free()
+	if floors.has(ZOOM_ARENA_ID) and floors.has(COLOSSUS_3D_ID):
+		for i: int in LAYERED_VIEWS.size():
+			var zoomed: Rect2 = floors[ZOOM_ARENA_ID][i]
+			if zoomed.size.y <= (floors[COLOSSUS_3D_ID][i] as Rect2).size.y:
+				_fail("%s: zoomed-in floor %s on %s is not bigger than the Colossus 3D's" % [
+					ZOOM_ARENA_ID, zoomed.size, LAYERED_VIEWS[i],
+				])
+	if floors.has(COLOSSUS_3D_ID) and floors.has(VIGIL_ID):
+		for i: int in LAYERED_VIEWS.size():
+			if LAYERED_VIEWS[i].x != 1080.0:
+				continue
+			var colossus: Rect2 = floors[COLOSSUS_3D_ID][i]
+			var vigil: Rect2 = floors[VIGIL_ID][i]
+			var growth: float = colossus.size.y / vigil.size.y
+			if colossus.size.x <= vigil.size.x or growth <= 1.0 or growth > COLOSSUS_3D_MAX_GROWTH:
+				_fail("%s: floor %s on %s is not a little bigger than the Vigil's %s" % [
+					COLOSSUS_3D_ID, colossus.size, LAYERED_VIEWS[i], vigil.size,
+				])
 
 
 func _check_arena_of_the_day() -> void:
-	var seen: Dictionary[StringName, bool] = {}
 	var day: int = int(Time.get_unix_time_from_datetime_string("2026-01-01T00:00:00"))
-	for offset: int in 365:
-		var date_key: String = Time.get_date_string_from_unix_time(day + offset * 86400)
-		var skin: ArenaSkinData = CATALOG.get_arena_of_the_day(date_key)
-		if skin == null or not CATALOG.skins.has(skin) or skin.placeholder:
-			_fail("arena of the day for %s is not a real catalog skin" % date_key)
+	for offset: int in 60:
+		var key: String = Time.get_date_string_from_unix_time(day + offset * 86400)
+		var skin: ArenaSkinData = CATALOG.get_arena_of_the_day(key)
+		if skin == null or not skin in CATALOG.skins:
+			_fail("no arena of the day for %s" % key)
 			return
-		if CATALOG.get_arena_of_the_day(date_key) != skin:
-			_fail("arena of the day for %s is not deterministic" % date_key)
-		seen[skin.skin_id] = true
-	# A year of dailies should visit most of the catalog, not a handful of skins.
-	if seen.size() < 20:
-		_fail("a year of dailies shows only %d skins" % seen.size())
-
-
-func _check_ambience() -> void:
-	for skin: ArenaSkinData in CATALOG.skins:
-		var scenery: ArenaSceneryData = skin.scenery
-		if skin.tier < ArenaSkinData.Tier.LEGENDARY:
-			if scenery != null:
-				_fail("%s is %s but has animated scenery" % [skin.skin_id, skin.get_tier_name()])
-			continue
-		if scenery == null or scenery.mask == null:
-			_fail("%s (%s) has no scenery mask" % [skin.skin_id, skin.get_tier_name()])
-			continue
-		_check_source_mask(skin.skin_id)
-		var particles: int = 0
-		for emitter: ArenaParticleEmitter in scenery.emitters:
-			particles += emitter.amount
-		var lit_zones: int = 0
-		for zone: ArenaSceneryZone in scenery.zones:
-			if zone.has_light():
-				lit_zones += 1
-		if skin.tier == ArenaSkinData.Tier.LEGENDARY:
-			if particles > LEGENDARY_MAX_PARTICLES:
-				_fail("%s (Legendary) has %d particles, calm means at most %d" % [
-					skin.skin_id, particles, LEGENDARY_MAX_PARTICLES,
-				])
-		elif scenery.emitters.size() < MYTHIC_MIN_EMITTERS or lit_zones < MYTHIC_MIN_LIT_ZONES:
-			_fail("%s (Mythic) has %d emitters and %d lit zones" % [
-				skin.skin_id, scenery.emitters.size(), lit_zones,
-			])
-		for failure: String in CATALOG.validate_scenery(scenery, true):
-			_fail("%s: %s" % [skin.skin_id, failure])
-	# The keep-out checks themselves must reject the floor and accept the corner scenery.
-	if CATALOG.is_region_clear_of_floor(Rect2(0.4, 0.4, 0.1, 0.1)):
-		_fail("keep-out accepts a region in the middle of the floor")
-	if CATALOG.is_region_clear_of_floor(Rect2(0.3, 0.2, 0.2, 0.04)):
-		_fail("keep-out accepts a region inside the rim tolerance")
-	if not CATALOG.is_region_clear_of_floor(Rect2(0.0, 0.0, 1.0, 0.2)):
-		_fail("keep-out rejects the top scenery band")
-	if CATALOG.is_point_clear_of_floor(Vector2(470.0, 800.0)):
-		_fail("keep-out accepts a point on the floor")
-	var drifting := ArenaParticleEmitter.new()
-	drifting.emitter_name = "into the floor"
-	drifting.points_uv = PackedVector2Array([Vector2(0.5, 0.2)])
-	drifting.direction = Vector2.DOWN
-	drifting.speed_px = Vector2(40.0, 60.0)
-	drifting.lifetime = 5.0
-	var probe := ArenaSceneryData.new()
-	probe.emitters.append(drifting)
-	if CATALOG.validate_scenery(probe, false).is_empty():
-		_fail("validate_scenery accepts particles that drift onto the floor")
-
-	# Runtime layer: material on the background, particles, Reduced Motion, cleanup, Shop material.
-	var mythic: ArenaSkinData = CATALOG.get_skin(&"aurora_throne")
-	var background := TextureRect.new()
-	root.add_child(background)
-	var ambience := ArenaAmbience.new()
-	root.add_child(ambience)
-	ambience.size = Vector2(1080.0, 2400.0)
-	ambience.configure(mythic.scenery, background)
-	var material := background.material as ShaderMaterial
-	if material == null or material != ambience.get_scenery_material():
-		_fail("scenery material is not on the background")
-	if ambience.get_particles().size() != mythic.scenery.emitters.size():
-		_fail("expected %d particle streams, got %d" % [
-			mythic.scenery.emitters.size(), ambience.get_particles().size(),
-		])
-	if not ambience.is_animating() or material == null or float(material.get_shader_parameter(&"motion")) != 1.0:
-		_fail("Mythic scenery is not animating")
-	ambience.set_active(false)
-	var hidden: bool = true
-	for particles: CPUParticles2D in ambience.get_particles():
-		hidden = hidden and not particles.visible and not particles.emitting
-	if ambience.is_animating() or not hidden or float(material.get_shader_parameter(&"motion")) != 0.0:
-		_fail("Reduced Motion does not still the scenery (motion, particles)")
-	ambience.configure(null, background)
-	if background.material != null or not ambience.get_particles().is_empty():
-		_fail("clearing the scenery leaves its material or particles behind")
-	var thumbnail_material: ShaderMaterial = ArenaAmbience.create_material(mythic.scenery)
-	if float(thumbnail_material.get_shader_parameter(&"motion")) != 0.0 \
-			or thumbnail_material.get_shader_parameter(&"scenery_mask") != mythic.scenery.mask:
-		_fail("Shop scenery material is not the static grade + glow")
-	ambience.queue_free()
-	background.queue_free()
-
-
-## The generated mask PNG (before lossy import): exact zeros on the floor, full scenery weight in the
-## far scenery, and alpha zone ids on the encoding grid.
-func _check_source_mask(skin_id: StringName) -> void:
-	var path: String = ProjectSettings.globalize_path(MASK_DIR + String(skin_id) + ".png")
-	var image := Image.load_from_file(path)
-	if image == null or image.get_size() != ArenaSceneryData.MASK_SIZE:
-		_fail("%s mask PNG is missing or not %s" % [skin_id, ArenaSceneryData.MASK_SIZE])
-		return
-	var floor_px := PackedVector2Array()
-	var mask_scale := Vector2(ArenaSceneryData.MASK_SIZE)
-	for point: Vector2 in CATALOG.floor_polygon:
-		floor_px.append(point * mask_scale)
-	var inner: Array[PackedVector2Array] = Geometry2D.offset_polygon(floor_px, -2.0)
-	for y: int in range(0, image.get_height(), 4):
-		for x: int in range(0, image.get_width(), 4):
-			var value: Color = image.get_pixel(x, y)
-			if (int(round((1.0 - value.a) * 255.0)) % ArenaSceneryData.ZONE_ALPHA_STEP) != 0:
-				_fail("%s mask alpha %s at (%d, %d) is not a zone id" % [skin_id, value.a, x, y])
-				return
-			if inner.is_empty() or not Geometry2D.is_point_in_polygon(Vector2(x, y) + Vector2(0.5, 0.5), inner[0]):
-				continue
-			if value.r > 0.0 or value.g > 0.0 or value.b > 0.0:
-				_fail("%s mask is not zero on the floor at (%d, %d): %s" % [skin_id, x, y, value])
-				return
-	if image.get_pixel(image.get_width() / 2, 4).b < 0.99:
-		_fail("%s mask has no full scenery weight in the top scenery" % skin_id)
 
 
 func _check_rules() -> void:
-	var skin: ArenaSkinData = CATALOG.get_skin(&"eclipse_sanctum")
-	var no_rifts: Array[RiftData] = []
+	var skin: ArenaSkinData = CATALOG.get_skin(DEFAULT_SKIN_ID)
+	var no_rosters: Array[EndlessRoster] = []
 	var no_bosses: Array[StringName] = []
-	var rules := EndlessArenaRules.new(CATALOG, skin, no_rifts, no_bosses)
-	if rules.get_scenery() != skin.scenery:
-		_fail("EndlessArenaRules does not pass the skin's scenery")
+	var rules := EndlessArenaRules.new(CATALOG, skin, no_rosters, no_bosses)
 	if rules.get_floor_polygon() != CATALOG.floor_polygon:
-		_fail("a skin changed the floor polygon")
+		_fail("an arena changed the floor polygon")
+	if rules.get_floor_rect_uv() != CATALOG.floor_rect:
+		_fail("EndlessArenaRules does not lay the playfield over the catalog's floor rect")
 	if rules.get_background() == null:
 		_fail("EndlessArenaRules does not load the background")
-	if ArenaRules.new().get_scenery() != null:
-		_fail("story arenas must have no animated scenery")
+	if rules.get_visual_scene() != null:
+		_fail("a painted arena gave a layered scene")
+	if ArenaRules.new().get_floor_rect_uv().has_area():
+		_fail("the neutral arena must fall back to GameWorld.ARENA_FLOOR_UV")
+	for own: ArenaSkinData in CATALOG.skins:
+		if not own.has_own_floor():
+			continue
+		var own_rules := EndlessArenaRules.new(CATALOG, own, no_rosters, no_bosses)
+		if own_rules.get_floor_rect_uv() != own.floor_rect or own_rules.get_floor_polygon().size() != 4:
+			_fail("%s does not lay the playfield over its own floor" % own.skin_id)
+		if own.has_visual_scene() and own_rules.get_visual_scene() == null:
+			_fail("%s does not give its layered scene" % own.skin_id)
 
 
+## A save that owned or equipped any of the retired arenas keeps working: only the default is left.
 func _check_saves() -> void:
 	var test_root: String = "user://test_runs/endless_catalog_%d" % Time.get_ticks_usec()
 	DirAccess.make_dir_recursive_absolute(test_root)
@@ -251,8 +218,8 @@ func _check_saves() -> void:
 	var file := FileAccess.open(save_path, FileAccess.WRITE)
 	file.store_string(JSON.stringify({
 		"schema_version": SaveManagerService.SCHEMA_VERSION,
-		"owned_arena_skins": ["placeholder_void_slate", "aurora_throne", "not_a_skin"],
-		"equipped_arena_skin": "placeholder_void_slate",
+		"owned_arena_skins": ["astral_observatory", "aurora_throne", "placeholder_void_slate"],
+		"equipped_arena_skin": "aurora_throne",
 	}))
 	file.close()
 	var manager := SaveManagerService.new()
@@ -261,24 +228,12 @@ func _check_saves() -> void:
 	manager.reload()
 	var snapshot: Dictionary = manager.get_snapshot()
 	var owned: Array = snapshot[&"owned_arena_skins"] as Array
-	if (
-		String(DEFAULT_SKIN_ID) not in owned
-		or "aurora_throne" not in owned
-		or "not_a_skin" in owned
-		or "placeholder_void_slate" in owned
-		or snapshot[&"equipped_arena_skin"] != String(DEFAULT_SKIN_ID)
-	):
-		_fail("save sanitizing kept a retired or unknown skin: %s / %s" % [
+	if owned != [String(DEFAULT_SKIN_ID)] or snapshot[&"equipped_arena_skin"] != String(DEFAULT_SKIN_ID):
+		_fail("save sanitizing kept a retired arena: %s / %s" % [
 			owned, snapshot[&"equipped_arena_skin"],
 		])
-	manager.add_rift_points(3500)
-	var kind: StringName = SaveManagerService.KIND_ARENA_SKIN
-	if not manager.purchase_cosmetic(kind, &"dragon_skull_throne", 3500, true):
-		_fail("could not buy the last Mythic skin")
-	if manager.get_snapshot()[&"equipped_arena_skin"] != "dragon_skull_throne":
-		_fail("buying a skin did not equip it")
-	if not manager.equip_cosmetic(kind, &"aurora_throne") or manager.equip_cosmetic(kind, &"titans_palm"):
-		_fail("equip accepted an unowned skin or refused an owned one")
+	if manager.equip_cosmetic(SaveManagerService.KIND_ARENA_SKIN, &"aurora_throne"):
+		_fail("equip accepted a retired arena")
 	manager.queue_free()
 
 

@@ -6,7 +6,7 @@
 script = ExtResource("1_script")
 style_id = &"abyssal"
 display_name = "ABYSSAL"
-description = "The deep blue of the Rift's floor, flaring cyan at launch."
+description = "The deep blue of the abyss, flaring cyan at launch."
 price = 900
 trail_tint = Color(0.294, 0.435, 0.878, 1)
 burst_tint = Color(0.384, 0.91, 0.949, 1)

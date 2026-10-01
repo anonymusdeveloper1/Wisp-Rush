@@ -169,7 +169,7 @@ func _check_depth_milestones() -> void:
 	if save.get_claimed_depth() != 0:
 		_fail("a fresh save reports claimed depth above zero")
 
-	save.record_run({&"score": 1, &"wave": 12, &"rift": "obsidian_garden"})
+	save.record_run({&"score": 1, &"wave": 12})
 	var deep: Dictionary = save.claim_depth_milestones()
 	# Wave 12 clears the wave-5 and wave-10 milestones together.
 	if int(deep[&"reward_points"]) != 75:
@@ -183,6 +183,6 @@ func _check_depth_milestones() -> void:
 	# Claiming again, and replaying a shallower run, must both pay nothing.
 	if int(save.claim_depth_milestones()[&"reward_points"]) != 0:
 		_fail("a depth milestone paid out twice")
-	save.record_run({&"score": 1, &"wave": 3, &"rift": "obsidian_garden"})
+	save.record_run({&"score": 1, &"wave": 3})
 	if int(save.claim_depth_milestones()[&"reward_points"]) != 0:
 		_fail("a shallow run re-paid a depth milestone")

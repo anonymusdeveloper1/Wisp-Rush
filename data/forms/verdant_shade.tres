@@ -14,5 +14,5 @@ price = 0
 texture = ExtResource("2")
 visual_scene = ExtResource("3")
 dash_effect = ExtResource("4")
+menu_frames_path = "res://data/characters/verdant_shade_menu.tres"
 tint = Color(0.36, 0.88, 0.42, 1)
-tier = 0

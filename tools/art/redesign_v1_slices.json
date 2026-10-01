@@ -17,7 +17,7 @@
  "groups": [
   {"name": "backgrounds", "mode": "opaque", "dir": "environment", "items": [
    {"file": "02_gameplay_arena_floor.png", "out": "wisp_rush_arena_background.png"},
-   {"file": "03_home_background.png", "out": "home_background.png"},
+   {"file": "../../wisp_rush_home_pixel_v1/home_background_source.png", "out": "home_background.png"},
    {"file": "04_shared_menu_background.png", "out": "menu_background.png"}
   ]},
   {"name": "wisp", "sheet": "wisp", "dir": "characters/wisp", "canvas": "legacy", "default_canvas": [362, 362], "scale": "group", "scale_ref": ["01_idle_a.png", "02_idle_b.png"], "center": "legacy", "items": [
@@ -148,7 +148,7 @@
    {"near": [915, 1235], "out": "panel_amber.png"}
   ]},
   {"name": "brand_logo", "dir": "branding", "canvas": "trim", "pad": 8, "scale": "native", "factor": 1.0, "items": [
-   {"file": "16_wordmark_logo.png", "out": "wisp_rush_logo.png", "no_legacy": true}
+   {"file": "../../wisp_rush_home_pixel_v1/wisp_rush_logo_clean.png", "out": "wisp_rush_logo.png", "no_legacy": true}
   ]},
   {"name": "brand_icon", "dir": "branding", "canvas": [1254, 1254], "scale": "fit", "box": [1150, 1150], "center": [627, 627], "items": [
    {"file": "14_brand_mark.png", "out": "wisp_rush_app_icon_master.png"}

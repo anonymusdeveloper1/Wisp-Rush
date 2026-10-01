@@ -24,16 +24,7 @@ extends Resource
 @export_range(0.0, 2.0, 0.05) var cold_wake_duration_per_level: float = 0.3
 ## Enemy speed multiplier while affected by Cold Wake.
 @export_range(0.1, 0.9, 0.05) var cold_wake_speed: float = 0.55
-## Base kill streak before Reaper's Gift heals one fragment.
-@export_range(10, 100, 1) var gift_base_streak: int = 33
-## Kill-streak reduction per Reaper's Gift level.
-@export_range(1, 10, 1) var gift_reduction_per_level: int = 3
-## Lowest allowed Reaper's Gift kill streak.
-@export_range(5, 50, 1) var gift_minimum_streak: int = 15
 ## Base attraction radius for dropped Rift Points shard pickups in design-width pixels.
-## Chance, per enemy killed, that a Soul Vessel drops: the only way to gain a Soul Fragment
-## besides Reaper's Gift. Deliberately rare — a run starts on one fragment and death is final.
-@export_range(0.0, 1.0, 0.001) var soul_vessel_drop_chance: float = 0.012
 @export_range(40.0, 600.0, 1.0) var shard_attraction_radius: float = 150.0
 ## Added attraction radius per Soul Hunger level in design-width pixels.
 @export_range(0.0, 200.0, 1.0) var hunger_attraction_per_level: float = 35.0

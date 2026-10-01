@@ -15,9 +15,9 @@ const FORM_COUNT: int = FormCatalog.REQUIRED_FORM_COUNT
 const RECORD_COUNT: int = 3
 ## Opacity of the void-charcoal shade over the menu background.
 const SHADE_ALPHA: float = 0.4
-const TILE_VALUE_FONT_SIZE: int = 52
-const ROW_NAME_FONT_SIZE: int = 30
-const ROW_VALUE_FONT_SIZE: int = 42
+const TILE_VALUE_FONT_SIZE: int = 55
+const ROW_NAME_FONT_SIZE: int = 33
+const ROW_VALUE_FONT_SIZE: int = 44
 const _CARD_ORNAMENT: PackedScene = preload("res://assets/ui/theme/ornaments/card_top.tscn")
 
 var _snapshot: Dictionary = {}
@@ -47,7 +47,7 @@ func setup(snapshot: Dictionary) -> void:
 
 ## Returns the displayed rows as `[name, value]` pairs for `snapshot`.
 static func build_rows(snapshot: Dictionary) -> Array[PackedStringArray]:
-	var owned_forms: Array = snapshot.get(&"owned_forms", ["void"]) as Array
+	var owned_forms: Array = snapshot.get(&"owned_forms", [String(FormCatalog.DEFAULT_FORM_ID)]) as Array
 	return [
 		PackedStringArray(["BEST SCORE", "%06d" % int(snapshot.get(&"best_score", 0))]),
 		PackedStringArray(["HIGHEST WAVE", "%02d" % int(snapshot.get(&"highest_wave", 1))]),
@@ -64,7 +64,7 @@ static func build_rows(snapshot: Dictionary) -> Array[PackedStringArray]:
 		PackedStringArray(["MULTI-REAP DASHES", str(int(snapshot.get(&"total_multi_kills", 0)))]),
 		PackedStringArray(["REAPERS VANQUISHED", str(int(snapshot.get(&"bosses_defeated", 0)))]),
 		PackedStringArray([
-			"TIME IN THE RIFT",
+			"TIME PLAYED",
 			format_play_time(int(float(snapshot.get(&"play_time_seconds", 0.0)))),
 		]),
 		PackedStringArray(["RIFT POINTS", RiftPoints.format(int(snapshot.get(&"rift_points", 0)))]),

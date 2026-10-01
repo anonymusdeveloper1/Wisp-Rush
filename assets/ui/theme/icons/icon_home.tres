@@ -1,0 +1,7 @@
+[gd_resource type="CanvasTexture" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/theme/icons/icon_home.png" id="1_el2cn"]
+
+[resource]
+diffuse_texture = ExtResource("1_el2cn")
+texture_filter = 1

@@ -1,7 +1,7 @@
 # System: Player health
 
-> **Status:** ✅ done · one starting fragment, no revive, Soul Vessel drops (2026-09-19) ·
-> **Last updated:** 2026-09-19 · **GDD section:** §5.3
+> **Status:** ✅ done · one fragment, no revive, nothing adds one: the Soul Vessel and Reaper's Gift
+> were removed and the HUD shows no count (2026-09-24) · **Last updated:** 2026-09-24 · **GDD section:** §5.3
 
 ## Purpose
 
@@ -52,15 +52,15 @@ WispPlayer (CharacterBody2D)
 | `WispPlayer.died` | signal | Death-dissolve finished; run may transition to Results. |
 | `WispPlayer.take_contact_damage(safe_edge)` | method | Apply one valid contact and reform safely. |
 | `WispPlayer.take_hazard_damage(safe_edge)` | method | Apply telegraphed hazard damage, including during dash. |
-| `WispPlayer.increase_maximum_health(amount, heal)` | method | Apply Soul Vessel without refilling unrelated damage. |
-| `WispPlayer.heal(amount)` | method | Apply a clamped Reaper's Gift recovery. |
+| `WispPlayer.increase_maximum_health(amount, heal)` | method | Raise the maximum; only the Tutorial and the tests use it since the Soul Vessel went. |
+| `WispPlayer.heal(amount)` | method | Clamped recovery; only the Tutorial's refill uses it since Reaper's Gift went. |
 | `WispPlayer.is_vulnerable()` | method | True only in waiting, aiming or windup without i-frames. |
 | `WispPlayer.get_current_health()` | method | Current Soul Fragment count. |
 | `WispPlayer.get_maximum_health()` | method | Current maximum Soul Fragment count. |
 
 ## Data & tuning
 
-Existing `PlayerTuning`: 3 starting Soul Fragments; 0.22 s hurt reaction; 0.9 s post-hit
+Existing `PlayerTuning`: 1 Soul Fragment (`maximum_health`); 0.22 s hurt reaction; 0.9 s post-hit
 invulnerability; 0.55 s death dissolve.
 
 ## Dependencies
@@ -70,12 +70,12 @@ authoritative for vulnerability; HUD observes player health signals.
 
 ## Rules & behaviour
 
-- Redesign v1: lives are shown in the HUD portrait ring beside the equipped form.
+- The HUD shows no lives readout (2026-09-24): a run has exactly one fragment.
 - Normal enemies cannot hurt the Wisp during spawn, dash, wall impact, hurt, death or victory.
 - Telegraphing hazards can hurt during a dash only while their visible geometry is dangerous.
 - Valid contact removes exactly one Soul Fragment and resets combo.
 - Non-lethal hits reform at a safe edge and visibly pulse during i-frames.
-- Soul Vessel adds one maximum fragment and heals one; Reaper's Gift uses the same clamped healing.
+- Nothing in a run adds or restores a fragment; the Tutorial refills it so a lesson never ends in death.
 - Zero health enters DEAD immediately, then emits `died` only after the dissolve duration.
 
 ## How to test

@@ -19,8 +19,6 @@ func _build() -> void:
 	home.setup({
 		&"best_score": 48210,
 		&"rift_points": 5670,
-		&"selected_rift": "ember_hollow",
-		&"rift_levels": {"ember_hollow": 2},
 		&"settings": {&"reduced_motion": false},
-	}, FORMS.get_form(&"ilyra"))
+	}, FORMS.get_form(&"scarlet"))
 	root.add_child(home)

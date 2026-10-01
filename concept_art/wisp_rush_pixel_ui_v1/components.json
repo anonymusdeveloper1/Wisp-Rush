@@ -1,0 +1,1090 @@
+{
+  "status": "source_only_not_integrated",
+  "grid_px": 4,
+  "palette": {
+    "void": "#0B1116",
+    "shadow": "#070B0E",
+    "panel": "#151E24",
+    "panel_alt": "#1C272D",
+    "stone_dark": "#263238",
+    "stone": "#35434A",
+    "stone_light": "#536064",
+    "stone_edge": "#697473",
+    "stitch_dark": "#604D40",
+    "stitch": "#A78768",
+    "ivory": "#E8CAA0",
+    "ivory_light": "#FAE5C1",
+    "amber_dark": "#8E552D",
+    "amber": "#ECA255",
+    "amber_light": "#FFD391",
+    "cyan_dark": "#246B78",
+    "cyan": "#63D7DF",
+    "magenta_dark": "#6B397F",
+    "magenta": "#B963CB",
+    "muted": "#697273",
+    "disabled": "#414B4F"
+  },
+  "components": [
+    {
+      "file": "components/button_primary_normal.png",
+      "role": "primary button normal",
+      "size_px": [
+        120,
+        112
+      ],
+      "nine_slice_px": [
+        40,
+        36,
+        40,
+        36
+      ],
+      "content_inset_px": [
+        40,
+        28,
+        40,
+        28
+      ]
+    },
+    {
+      "file": "components/button_primary_hover.png",
+      "role": "primary button hover",
+      "size_px": [
+        120,
+        112
+      ],
+      "nine_slice_px": [
+        40,
+        36,
+        40,
+        36
+      ],
+      "content_inset_px": [
+        40,
+        28,
+        40,
+        28
+      ]
+    },
+    {
+      "file": "components/button_primary_focus.png",
+      "role": "primary button focus",
+      "size_px": [
+        120,
+        112
+      ],
+      "nine_slice_px": [
+        40,
+        36,
+        40,
+        36
+      ],
+      "content_inset_px": [
+        40,
+        28,
+        40,
+        28
+      ]
+    },
+    {
+      "file": "components/button_primary_pressed.png",
+      "role": "primary button pressed",
+      "size_px": [
+        120,
+        112
+      ],
+      "nine_slice_px": [
+        40,
+        36,
+        40,
+        36
+      ],
+      "content_inset_px": [
+        40,
+        28,
+        40,
+        28
+      ]
+    },
+    {
+      "file": "components/button_primary_disabled.png",
+      "role": "primary button disabled",
+      "size_px": [
+        120,
+        112
+      ],
+      "nine_slice_px": [
+        40,
+        36,
+        40,
+        36
+      ],
+      "content_inset_px": [
+        40,
+        28,
+        40,
+        28
+      ]
+    },
+    {
+      "file": "components/button_secondary_normal.png",
+      "role": "secondary button normal",
+      "size_px": [
+        112,
+        96
+      ],
+      "nine_slice_px": [
+        36,
+        32,
+        36,
+        32
+      ],
+      "content_inset_px": [
+        40,
+        28,
+        40,
+        28
+      ]
+    },
+    {
+      "file": "components/button_secondary_hover.png",
+      "role": "secondary button hover",
+      "size_px": [
+        112,
+        96
+      ],
+      "nine_slice_px": [
+        36,
+        32,
+        36,
+        32
+      ],
+      "content_inset_px": [
+        40,
+        28,
+        40,
+        28
+      ]
+    },
+    {
+      "file": "components/button_secondary_focus.png",
+      "role": "secondary button focus",
+      "size_px": [
+        112,
+        96
+      ],
+      "nine_slice_px": [
+        36,
+        32,
+        36,
+        32
+      ],
+      "content_inset_px": [
+        40,
+        28,
+        40,
+        28
+      ]
+    },
+    {
+      "file": "components/button_secondary_pressed.png",
+      "role": "secondary button pressed",
+      "size_px": [
+        112,
+        96
+      ],
+      "nine_slice_px": [
+        36,
+        32,
+        36,
+        32
+      ],
+      "content_inset_px": [
+        40,
+        28,
+        40,
+        28
+      ]
+    },
+    {
+      "file": "components/button_secondary_disabled.png",
+      "role": "secondary button disabled",
+      "size_px": [
+        112,
+        96
+      ],
+      "nine_slice_px": [
+        36,
+        32,
+        36,
+        32
+      ],
+      "content_inset_px": [
+        40,
+        28,
+        40,
+        28
+      ]
+    },
+    {
+      "file": "components/button_danger_normal.png",
+      "role": "danger button normal",
+      "size_px": [
+        112,
+        96
+      ],
+      "nine_slice_px": [
+        36,
+        32,
+        36,
+        32
+      ],
+      "content_inset_px": [
+        40,
+        28,
+        40,
+        28
+      ]
+    },
+    {
+      "file": "components/button_danger_pressed.png",
+      "role": "danger button pressed",
+      "size_px": [
+        112,
+        96
+      ],
+      "nine_slice_px": [
+        36,
+        32,
+        36,
+        32
+      ],
+      "content_inset_px": [
+        40,
+        28,
+        40,
+        28
+      ]
+    },
+    {
+      "file": "components/icon_tile_normal.png",
+      "role": "secondary button normal",
+      "size_px": [
+        112,
+        112
+      ],
+      "nine_slice_px": [
+        36,
+        32,
+        36,
+        32
+      ],
+      "content_inset_px": [
+        40,
+        28,
+        40,
+        28
+      ]
+    },
+    {
+      "file": "components/icon_tile_focus.png",
+      "role": "secondary button focus",
+      "size_px": [
+        112,
+        112
+      ],
+      "nine_slice_px": [
+        36,
+        32,
+        36,
+        32
+      ],
+      "content_inset_px": [
+        40,
+        28,
+        40,
+        28
+      ]
+    },
+    {
+      "file": "components/icon_tile_disabled.png",
+      "role": "secondary button disabled",
+      "size_px": [
+        112,
+        112
+      ],
+      "nine_slice_px": [
+        36,
+        32,
+        36,
+        32
+      ],
+      "content_inset_px": [
+        40,
+        28,
+        40,
+        28
+      ]
+    },
+    {
+      "file": "components/panel_default.png",
+      "role": "default panel",
+      "size_px": [
+        128,
+        128
+      ],
+      "nine_slice_px": [
+        32,
+        32,
+        32,
+        32
+      ],
+      "content_inset_px": [
+        32,
+        32,
+        32,
+        32
+      ]
+    },
+    {
+      "file": "components/panel_card.png",
+      "role": "card panel",
+      "size_px": [
+        188,
+        252
+      ],
+      "nine_slice_px": [
+        32,
+        32,
+        32,
+        32
+      ],
+      "content_inset_px": [
+        32,
+        32,
+        32,
+        32
+      ]
+    },
+    {
+      "file": "components/panel_card_selected.png",
+      "role": "selected panel",
+      "size_px": [
+        188,
+        252
+      ],
+      "nine_slice_px": [
+        32,
+        32,
+        32,
+        32
+      ],
+      "content_inset_px": [
+        32,
+        32,
+        32,
+        32
+      ]
+    },
+    {
+      "file": "components/panel_card_locked.png",
+      "role": "locked panel",
+      "size_px": [
+        188,
+        252
+      ],
+      "nine_slice_px": [
+        32,
+        32,
+        32,
+        32
+      ],
+      "content_inset_px": [
+        32,
+        32,
+        32,
+        32
+      ]
+    },
+    {
+      "file": "components/panel_crest.png",
+      "role": "crest panel",
+      "size_px": [
+        196,
+        308
+      ],
+      "nine_slice_px": [
+        32,
+        32,
+        32,
+        32
+      ],
+      "content_inset_px": [
+        32,
+        32,
+        32,
+        32
+      ]
+    },
+    {
+      "file": "components/panel_banner.png",
+      "role": "banner panel",
+      "size_px": [
+        144,
+        96
+      ],
+      "nine_slice_px": [
+        32,
+        32,
+        32,
+        32
+      ],
+      "content_inset_px": [
+        32,
+        32,
+        32,
+        32
+      ]
+    },
+    {
+      "file": "components/plate_small.png",
+      "role": "small value plate",
+      "size_px": [
+        128,
+        64
+      ],
+      "nine_slice_px": [
+        28,
+        20,
+        28,
+        20
+      ],
+      "content_inset_px": [
+        32,
+        20,
+        32,
+        20
+      ]
+    },
+    {
+      "file": "components/hud_counter_plate.png",
+      "role": "score, currency, or wave plate",
+      "size_px": [
+        160,
+        64
+      ],
+      "nine_slice_px": [
+        28,
+        20,
+        28,
+        20
+      ],
+      "content_inset_px": [
+        32,
+        20,
+        32,
+        20
+      ]
+    },
+    {
+      "file": "components/hud_alert_plate.png",
+      "role": "warning or landmark plate",
+      "size_px": [
+        160,
+        64
+      ],
+      "nine_slice_px": [
+        28,
+        20,
+        28,
+        20
+      ],
+      "content_inset_px": [
+        32,
+        20,
+        32,
+        20
+      ]
+    },
+    {
+      "file": "components/slot_normal.png",
+      "role": "normal slot",
+      "size_px": [
+        116,
+        120
+      ],
+      "nine_slice_px": [
+        28,
+        28,
+        28,
+        28
+      ],
+      "content_inset_px": [
+        28,
+        28,
+        28,
+        28
+      ]
+    },
+    {
+      "file": "components/slot_selected.png",
+      "role": "selected slot",
+      "size_px": [
+        116,
+        120
+      ],
+      "nine_slice_px": [
+        28,
+        28,
+        28,
+        28
+      ],
+      "content_inset_px": [
+        28,
+        28,
+        28,
+        28
+      ]
+    },
+    {
+      "file": "components/slot_disabled.png",
+      "role": "disabled slot",
+      "size_px": [
+        116,
+        120
+      ],
+      "nine_slice_px": [
+        28,
+        28,
+        28,
+        28
+      ],
+      "content_inset_px": [
+        28,
+        28,
+        28,
+        28
+      ]
+    },
+    {
+      "file": "components/slot_small.png",
+      "role": "normal slot",
+      "size_px": [
+        60,
+        60
+      ],
+      "nine_slice_px": [
+        28,
+        28,
+        28,
+        28
+      ],
+      "content_inset_px": [
+        28,
+        28,
+        28,
+        28
+      ]
+    },
+    {
+      "file": "components/tab_normal.png",
+      "role": "tab normal",
+      "size_px": [
+        136,
+        64
+      ],
+      "nine_slice_px": [
+        32,
+        20,
+        32,
+        20
+      ],
+      "content_inset_px": [
+        32,
+        16,
+        32,
+        16
+      ]
+    },
+    {
+      "file": "components/tab_active.png",
+      "role": "tab active",
+      "size_px": [
+        136,
+        64
+      ],
+      "nine_slice_px": [
+        32,
+        20,
+        32,
+        20
+      ],
+      "content_inset_px": [
+        32,
+        16,
+        32,
+        16
+      ]
+    },
+    {
+      "file": "components/caption_tile_normal.png",
+      "role": "captioned Home tile normal; icon above separator, text below",
+      "size_px": [
+        140,
+        164
+      ],
+      "content_inset_px": [
+        16,
+        16,
+        16,
+        16
+      ]
+    },
+    {
+      "file": "components/caption_tile_focus.png",
+      "role": "captioned Home tile focus; icon above separator, text below",
+      "size_px": [
+        140,
+        164
+      ],
+      "content_inset_px": [
+        16,
+        16,
+        16,
+        16
+      ]
+    },
+    {
+      "file": "components/caption_tile_disabled.png",
+      "role": "captioned Home tile disabled; icon above separator, text below",
+      "size_px": [
+        140,
+        164
+      ],
+      "content_inset_px": [
+        16,
+        16,
+        16,
+        16
+      ]
+    },
+    {
+      "file": "components/portrait_ring.png",
+      "role": "transparent portrait ring",
+      "size_px": [
+        280,
+        280
+      ]
+    },
+    {
+      "file": "components/portrait_ring_selected.png",
+      "role": "transparent portrait ring selected",
+      "size_px": [
+        280,
+        280
+      ]
+    },
+    {
+      "file": "components/nav_dock.png",
+      "role": "navigation dock panel",
+      "size_px": [
+        480,
+        88
+      ],
+      "nine_slice_px": [
+        32,
+        32,
+        32,
+        32
+      ],
+      "content_inset_px": [
+        32,
+        32,
+        32,
+        32
+      ]
+    },
+    {
+      "file": "components/badge_plate_warm.png",
+      "role": "text-free reward or NEW badge frame",
+      "size_px": [
+        96,
+        40
+      ],
+      "nine_slice_px": [
+        28,
+        12,
+        28,
+        12
+      ],
+      "content_inset_px": [
+        32,
+        12,
+        32,
+        12
+      ]
+    },
+    {
+      "file": "components/badge_plate_muted.png",
+      "role": "text-free locked badge frame",
+      "size_px": [
+        96,
+        40
+      ],
+      "nine_slice_px": [
+        28,
+        12,
+        28,
+        12
+      ],
+      "content_inset_px": [
+        32,
+        12,
+        32,
+        12
+      ]
+    },
+    {
+      "file": "components/progress_track.png",
+      "role": "stone track bar",
+      "size_px": [
+        96,
+        40
+      ],
+      "nine_slice_px": [
+        20,
+        12,
+        20,
+        12
+      ]
+    },
+    {
+      "file": "components/progress_fill_xp.png",
+      "role": "cyan fill bar",
+      "size_px": [
+        96,
+        40
+      ],
+      "nine_slice_px": [
+        20,
+        12,
+        20,
+        12
+      ]
+    },
+    {
+      "file": "components/progress_fill_boss.png",
+      "role": "magenta fill bar",
+      "size_px": [
+        96,
+        40
+      ],
+      "nine_slice_px": [
+        20,
+        12,
+        20,
+        12
+      ]
+    },
+    {
+      "file": "components/progress_fill_reward.png",
+      "role": "amber fill bar",
+      "size_px": [
+        96,
+        40
+      ],
+      "nine_slice_px": [
+        20,
+        12,
+        20,
+        12
+      ]
+    },
+    {
+      "file": "components/hud_slim_track.png",
+      "role": "stone track bar",
+      "size_px": [
+        96,
+        20
+      ],
+      "nine_slice_px": [
+        16,
+        8,
+        16,
+        8
+      ]
+    },
+    {
+      "file": "components/hud_slim_fill_xp.png",
+      "role": "cyan fill bar",
+      "size_px": [
+        96,
+        20
+      ],
+      "nine_slice_px": [
+        16,
+        8,
+        16,
+        8
+      ]
+    },
+    {
+      "file": "components/hud_slim_fill_rush.png",
+      "role": "ivory fill bar",
+      "size_px": [
+        96,
+        20
+      ],
+      "nine_slice_px": [
+        16,
+        8,
+        16,
+        8
+      ]
+    },
+    {
+      "file": "components/hud_slim_fill_boss.png",
+      "role": "magenta fill bar",
+      "size_px": [
+        96,
+        20
+      ],
+      "nine_slice_px": [
+        16,
+        8,
+        16,
+        8
+      ]
+    },
+    {
+      "file": "components/divider.png",
+      "role": "stone seam divider",
+      "size_px": [
+        128,
+        16
+      ],
+      "nine_slice_px": [
+        16,
+        4,
+        16,
+        4
+      ]
+    },
+    {
+      "file": "components/page_diamond_idle.png",
+      "role": "carousel page diamond idle",
+      "size_px": [
+        24,
+        24
+      ]
+    },
+    {
+      "file": "components/page_diamond_active.png",
+      "role": "carousel page diamond active",
+      "size_px": [
+        24,
+        24
+      ]
+    },
+    {
+      "file": "components/page_diamond_locked.png",
+      "role": "carousel page diamond locked",
+      "size_px": [
+        24,
+        24
+      ]
+    },
+    {
+      "file": "components/slider_grabber_idle.png",
+      "role": "slider grabber idle",
+      "size_px": [
+        60,
+        60
+      ]
+    },
+    {
+      "file": "components/slider_grabber_active.png",
+      "role": "slider grabber active",
+      "size_px": [
+        60,
+        60
+      ]
+    },
+    {
+      "file": "components/slider_grabber_disabled.png",
+      "role": "slider grabber disabled",
+      "size_px": [
+        60,
+        60
+      ]
+    },
+    {
+      "file": "components/hud_health_socket.png",
+      "role": "Soul Fragment socket",
+      "size_px": [
+        48,
+        48
+      ]
+    },
+    {
+      "file": "components/hud_health_full.png",
+      "role": "filled Soul Fragment",
+      "size_px": [
+        48,
+        48
+      ]
+    },
+    {
+      "file": "components/ornament_diamond_warm.png",
+      "role": "separate edge ornament warm",
+      "size_px": [
+        48,
+        48
+      ]
+    },
+    {
+      "file": "components/ornament_diamond_cyan.png",
+      "role": "separate edge ornament cyan",
+      "size_px": [
+        48,
+        48
+      ]
+    },
+    {
+      "file": "components/ornament_stitches.png",
+      "role": "separate stitched repair ornament",
+      "size_px": [
+        48,
+        48
+      ]
+    },
+    {
+      "file": "components/icon_play.png",
+      "role": "text-free play glyph",
+      "size_px": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "components/icon_pause.png",
+      "role": "text-free pause glyph",
+      "size_px": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "components/icon_back.png",
+      "role": "text-free back glyph",
+      "size_px": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "components/icon_home.png",
+      "role": "text-free home glyph",
+      "size_px": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "components/icon_lock.png",
+      "role": "text-free lock glyph",
+      "size_px": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "components/icon_settings.png",
+      "role": "text-free settings glyph",
+      "size_px": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "components/icon_shop.png",
+      "role": "text-free shop glyph",
+      "size_px": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "components/icon_trials.png",
+      "role": "text-free trials glyph",
+      "size_px": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "components/icon_daily.png",
+      "role": "text-free daily glyph",
+      "size_px": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "components/icon_stats.png",
+      "role": "text-free stats glyph",
+      "size_px": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "components/icon_rift.png",
+      "role": "text-free rift glyph",
+      "size_px": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "components/icon_currency.png",
+      "role": "text-free currency glyph",
+      "size_px": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "components/icon_health.png",
+      "role": "text-free health glyph",
+      "size_px": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "components/icon_audio.png",
+      "role": "text-free audio glyph",
+      "size_px": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "components/icon_mute.png",
+      "role": "text-free mute glyph",
+      "size_px": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "components/icon_close.png",
+      "role": "text-free close glyph",
+      "size_px": [
+        64,
+        64
+      ]
+    }
+  ],
+  "nine_slice_order": "left,top,right,bottom"
+}

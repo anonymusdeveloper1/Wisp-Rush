@@ -1,0 +1,28 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/components/whole_frame_enemy.gd" id="1_enemy"]
+[ext_resource type="Resource" path="res://data/enemies/claw_ghost.tres" id="2_tuning"]
+[ext_resource type="SpriteFrames" path="res://data/enemies/claw_ghost_frames.tres" id="3_frames"]
+[ext_resource type="Texture2D" path="res://assets/art/vfx/11_boss_warning_ring.png" id="4_arrival"]
+[ext_resource type="Texture2D" path="res://assets/art/vfx/03_wall_impact_small.png" id="5_hit_flash"]
+
+[node name="ClawGhost" type="Node2D" groups=["enemies"]]
+script = ExtResource("1_enemy")
+tuning = ExtResource("2_tuning")
+attack = 0
+strike_frames = Vector2i(12, 15)
+faces_right = true
+
+[node name="ArrivalRing" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+texture = ExtResource("4_arrival")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+unique_name_in_owner = true
+sprite_frames = ExtResource("3_frames")
+animation = &"move"
+
+[node name="HitFlash" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+z_index = 2
+texture = ExtResource("5_hit_flash")

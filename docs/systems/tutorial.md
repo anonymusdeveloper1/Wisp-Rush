@@ -1,6 +1,6 @@
 # System: Tutorial
 
-> **Status:** ✅ done (device pass pending) · **Last updated:** 2026-09-15 · **GDD section:** §11, §14 #29
+> **Status:** ✅ done (device pass pending) · **Last updated:** 2026-09-28 · **GDD section:** §11, §14 #29
 >
 > **Changed 2026-09-15 (owner decision):** a separate Tutorial screen replaced the in-run first-run
 > lesson (`TutorialOverlay`, `GameWorld.tutorial_enabled` / `tutorial_completed`). Real runs never teach.
@@ -9,7 +9,7 @@
 
 Teach every base mechanic, easiest first, as "show, then you try" lessons: a ghost hand demonstrates
 the gesture while the real Wisp performs it, then the player repeats it and the lesson passes only on
-success. First launch opens it after Loading; afterwards it is replayable only from the Rift Map.
+success. First launch opens it after Loading; afterwards it is replayable from Settings → REPLAY TUTORIAL (the Rift Map's TUTORIAL button went with the Rifts, removed on 2026-09-25).
 
 ## Files
 
@@ -22,7 +22,7 @@ success. First launch opens it after Loading; afterwards it is replayable only f
 | `res://data/tutorial/default_tutorial.tres` | The nine lessons, arena skin id, boss health, every timing |
 | `res://scenes/gameplay/run_profile.gd` | `RunProfile.tutorial()` / `MODE_TUTORIAL` / `is_scripted()` |
 | `res://scenes/gameplay/game_world.gd` | Run event signals and scripted-run hooks ([core_run.md](core_run.md)) |
-| `res://scenes/main/main.gd` | First-launch routing, Rift Map replay, `mark_tutorial_completed` |
+| `res://scenes/main/main.gd` | First-launch routing, Settings replay, `mark_tutorial_completed` |
 
 ## Scene / node structure
 
@@ -30,7 +30,8 @@ success. First launch opens it after Loading; afterwards it is replayable only f
 TutorialScreen (Control, mouse ignore)          GameWorld is added in _ready as child 0 (MODE_TUTORIAL)
 ├── %Director (TutorialDirector)
 ├── GuideLayer (CanvasLayer 9: above the world, under the HUD's layer 10)
-│   └── Guide → %SkipButton (SecondaryButton, top-right where the hidden pause button sits)
+│   └── Guide → %SkipButton (SecondaryButton, top-left where the hidden pause button sits; top-right
+│       holds Rift Points and the score since 2026-09-24)
 │             %GuideMargin → Center → %GuidePanel → Copy: StepRow (%StepLabel, %Dots PageDots), %CaptionLabel
 ├── HandLayer (CanvasLayer 11: above the HUD, so the hand can tap the upgrade tray's cards)
 │   └── %GhostHand (TutorialGhostHand)
@@ -78,9 +79,13 @@ SaveManager (`mark_tutorial_completed`, Reduced Motion), `PageDots`, `SoundFx`, 
 
 ## Rules & behaviour
 
-- **Lessons (easy → skilful):** 1 aim & dash (goal: a wall landing) · 2 slice one Soul Wisp (caption:
+- **Targets:** the Hooded Scribe (Enemies v2, 2026-09-28; `TutorialLessonData.enemy_kind`), standing
+  still: a stationary enemy never attacks (owner: the Tutorial uses the new enemies, standing still).
+  Until 2026-09-28 they were Soul Wisps.
+- **Lessons (easy → skilful):** 1 aim & dash (goal: a wall landing) · 2 slice one enemy (caption:
   aim until it lights up) · 3 chain ≥ 2 of 3 in one dash (caption: line up lit souls, read the ×count) · 4 redirect: a kill on a leg started mid-dash · 5 blockers: reach the soul behind
-  a split void crystal · 6 danger: kill past a spike bloom without a hit (focus ring on Soul Fragments)
+  a split void crystal · 6 danger: kill past a spike bloom without a hit ("One touch of the spikes ends a run."; no focus ring
+  since the HUD lost its lives readout, 2026-09-24)
   · 7 Rift Points & XP: kills drop shards (swept on landing), XP fills and banks a level (UPGRADE
   READY), the cards slide up at the lesson's calm moment, tap one · 8 RUSH: meter
   starts at 90 %, fill it, kill during RUSH (targets respawn when RUSH starts) · 9 boss: Reaper with 3
@@ -115,23 +120,23 @@ SaveManager (`mark_tutorial_completed`, Reduced Motion), `PageDots`, `SoundFx`, 
   focus-loss pause, GameWorld leaves back/Escape to the host. RP and XP shown in the HUD are never banked.
   No natural calm moments: the upgrade tray opens only on a lesson's `request_upgrade_calm_moment`.
 - **Routing (Main):** after Loading, `tutorial_completed == false` → Tutorial, else Home. Finishing or
-  skipping calls `mark_tutorial_completed()`; first launch → Home, Rift Map replay → Rift Map. The
+  skipping calls `mark_tutorial_completed()` and goes Home (first launch and replay alike). The
   Tutorial never glides in transitions (it hosts a screen-space arena).
 - **Reduced Motion:** no trail, glow pulse, ring growth, focus pulse or caption pop; the gesture plays.
 
 ## How to test
 
 - Fresh save (Settings → Reset Progress): launch → Tutorial; play all nine lessons; Home follows.
-- Rift Map → TUTORIAL → SKIP → confirm → back on the Rift Map; Android back inside opens the confirm.
+- Settings → REPLAY TUTORIAL → SKIP → confirm → Home; Android back inside opens the confirm.
 - Automated: none (owner preference 2026-09-15). A temporary headless smoke walked every lesson,
-  skip, first-launch and Rift Map routing (0 failures) and was deleted. Logs: `[Tutorial] lesson n/9 id | demo|try|retry|passed`.
+  skip, first-launch and the then Rift Map routing (0 failures) and was deleted. Logs: `[Tutorial] lesson n/9 id | demo|try|retry|passed`.
 
 ## Known issues / TODO
 
 - Placeholder art: the ghost hand is code-drawn (ROADMAP M6). The arena is the default Endless skin, now
   real art (2026-09-15).
 - The mid-dash redirect window is short (a dash crosses the arena in ~0.25 s); needs the device pass.
-- The aim preview follows the player's AIM ARROW setting; with it OFF (possible on a Rift Map replay)
+- The aim preview follows the player's AIM ARROW setting; with it OFF (possible on a replay)
   the slice/chain captions mention lighting the player cannot see.
 - Demo dashes are real physics: an unlucky natural hazard hit can change a demo's second swipe path
   (the demo still moves on to the try).
@@ -140,6 +145,8 @@ SaveManager (`mark_tutorial_completed`, Reduced Motion), `PageDots`, `SoundFx`, 
 
 | Date | Change |
 |---|---|
+| 2026-09-28 | Targets are the Hooded Scribe (Enemies v2), standing still and never attacking; the Soul Wisp is gone |
+| 2026-09-25 | Story Rifts removed (owner): the replay is Settings → REPLAY TUTORIAL only, and it returns Home |
 | 2026-09-15 | Lesson 7 uses the banked upgrade flow: UPGRADE READY, calm-moment tray, hand taps a card (`demo_upgrade_tap`, `play_tap`, HandLayer 11), new captions |
 | 2026-09-15 | Aim help: slice/chain captions teach lit enemies and ×count, demos show the aim path, demo hold 0.4 s, skip confirm clears the aim |
 | 2026-09-15 | Rebuilt as a separate Tutorial screen: nine show-then-try lessons, ghost hand, SKIP confirm, first-launch and Rift Map routing; in-run lesson removed |

@@ -27,7 +27,7 @@ const _POOL: Array[Dictionary] = [
 	},
 	{
 		&"id": &"rift_diver",
-		&"title": "RIFT DIVER",
+		&"title": "DEEP DIVER",
 		&"description": "Reach wave 5",
 		&"metric": &"wave",
 		&"target": 5,

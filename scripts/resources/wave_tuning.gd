@@ -16,3 +16,9 @@ extends Resource
 @export_range(0, 30, 1) var post_boss_budget_bonus: int = 4
 ## Formation-gap multiplier applied per post-boss difficulty tier.
 @export_range(0.5, 1.0, 0.01) var post_boss_gap_multiplier: float = 0.9
+
+@export_group("Enemies v2 ramp")
+## Enemy kinds a run starts with (owner, 2026-09-27: it starts with one or two).
+@export_range(1, 10, 1) var enemy_kinds_at_start: int = 2
+## Waves between each new enemy kind joining the run (owner: another every so often).
+@export_range(1, 20, 1) var waves_per_new_enemy_kind: int = 2

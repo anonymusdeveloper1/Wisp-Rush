@@ -20,12 +20,10 @@ func _run_checks() -> void:
 	var defaults: Dictionary = manager.get_snapshot()
 	if (
 		defaults[&"schema_version"] != SaveManagerService.SCHEMA_VERSION
-		or defaults[&"owned_forms"] != ["void"]
-		or defaults[&"selected_rift"] != SaveManagerService.DEFAULT_RIFT_ID
+		or defaults[&"owned_forms"] != ["patchvile"]
 		or defaults[&"rift_points"] != 0
 		or defaults.has(&"soul_shards")
 		or defaults.has(&"sanctum_levels")
-		or not (defaults[&"rift_bests"] as Dictionary).is_empty()
 		# The direction arrow replaced the aim line and is on by default.
 		or not bool((defaults[&"settings"] as Dictionary)[&"aim_arrow"])
 	):
@@ -44,7 +42,7 @@ func _run_checks() -> void:
 		&"rp_collected": 35,
 		&"rp_performance": 3,
 	})
-	if not manager.purchase_form(&"eclipse", 250) or not manager.equip_form(&"eclipse"):
+	if not manager.purchase_form(&"verdant_shade", 250) or not manager.equip_form(&"verdant_shade"):
 		failures += 1
 		push_error("save_manager: purchase/equip transaction failed")
 	var saved: Dictionary = manager.get_snapshot()
@@ -52,7 +50,7 @@ func _run_checks() -> void:
 		saved[&"best_score"] != 1200
 		or saved[&"highest_wave"] != 6
 		or saved[&"bosses_defeated"] != 1
-		or saved[&"equipped_form"] != "eclipse"
+		or saved[&"equipped_form"] != "verdant_shade"
 		# 400 granted + 35 collected + 3 performance - 250 for Ash, each counted exactly once.
 		or saved[&"rift_points"] != 188
 	):
@@ -62,7 +60,7 @@ func _run_checks() -> void:
 	var reloaded := SAVE_SCRIPT.new() as SaveManagerService
 	reloaded.configure_storage_paths(save_path, temp_path, backup_path)
 	root.add_child(reloaded)
-	if reloaded.get_snapshot()[&"equipped_form"] != "eclipse":
+	if reloaded.get_snapshot()[&"equipped_form"] != "verdant_shade":
 		failures += 1
 		push_error("save_manager: disk round trip failed")
 
@@ -84,8 +82,8 @@ func _run_checks() -> void:
 		"high_score": 777,
 		"currency": 320,
 		"tutorial_seen": true,
-		"unlocked_forms": ["void", "veyra", "invalid"],
-		"selected_form": "veyra",
+		"unlocked_forms": ["patchvile", "rook", "invalid"],
+		"selected_form": "rook",
 		"highest_wave": -9,
 	}))
 	legacy.close()
@@ -102,7 +100,7 @@ func _run_checks() -> void:
 		or migrated_data[&"best_score"] != 777
 		or migrated_data[&"rift_points"] != 320
 		or migrated_data[&"highest_wave"] != 1
-		or migrated_data[&"equipped_form"] != "veyra"
+		or migrated_data[&"equipped_form"] != "rook"
 		or not migrated_data[&"tutorial_completed"]
 	):
 		failures += 1
@@ -120,7 +118,6 @@ func _run_checks() -> void:
 		"schema_version": 1,
 		"best_score": 4200,
 		"soul_shards": 55,
-		"selected_rift": "frozen_choir",
 	}))
 	v1_file.close()
 	var upgraded := SAVE_SCRIPT.new() as SaveManagerService
@@ -136,11 +133,9 @@ func _run_checks() -> void:
 		or upgraded_data[&"best_score"] != 4200
 		or upgraded_data[&"rift_points"] != 55
 		or upgraded_data.has(&"soul_shards")
-		or upgraded_data[&"selected_rift"] != "frozen_choir"
-		or not (upgraded_data[&"rift_bests"] as Dictionary).is_empty()
 	):
 		failures += 1
-		push_error("save_manager: v1 to v2 rift migration failed")
+		push_error("save_manager: v1 migration failed")
 
 	upgraded.queue_free()
 	await process_frame
@@ -167,8 +162,8 @@ func _check_v6_migration() -> int:
 		# keen_edge 1..2 = 200 + 320, soul_reserve 1 = 1500; unknown ids refund nothing and a level
 		# above a node's cap refunds only up to the cap (first_gift caps at 1 = 900).
 		"sanctum_levels": {"keen_edge": 2, "soul_reserve": 1, "not_a_node": 4, "first_gift": 7},
-		"owned_forms": ["void", "eclipse"],
-		"equipped_form": "eclipse",
+		"owned_forms": ["patchvile", "verdant_shade"],
+		"equipped_form": "verdant_shade",
 		"trial_rank": 8,
 		"trial_progress": {"t08_soul_shards_m": 31, "t01_wave": 4},
 		"challenge_state": {date_key: {"progress": {"shard_seeker": 5}, "claimed": ["shard_seeker"]}},
@@ -191,7 +186,7 @@ func _check_v6_migration() -> int:
 		or data.has(&"soul_shards")
 		or data.has(&"sanctum_levels")
 		or data[&"best_score"] != 9100
-		or data[&"equipped_form"] != "eclipse"
+		or data[&"equipped_form"] != "verdant_shade"
 		or not bool(data[&"ads_removed"])
 		or int(data[&"trial_rank"]) != 8
 		or int(progress.get("t08_rp_collected_m", -1)) != 31

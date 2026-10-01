@@ -1,6 +1,6 @@
 # System: Run progression and mutations
 
-> **Status:** ✅ done · **Last updated:** 2026-09-15 · **GDD section:** §5.5, §6–7, §15–16
+> **Status:** ✅ done · six mutations since Reaper's Gift left the pool (2026-09-24) · **Last updated:** 2026-09-25 · **GDD section:** §5.5, §6–7, §15–16
 
 ## Purpose
 
@@ -66,10 +66,11 @@ GameWorld
 
 ## Data & tuning
 
-All seven tray mutations have supplied icons, concise next-value copy and sensible caps. (SOUL
-VESSEL was the eighth; since 2026-09-19 its effect is the Soul Vessel *pickup* instead — see
-[player_health.md](player_health.md) — because a card capped at three levels cannot express an
-uncapped fragment count.) XP threshold
+All six tray mutations have supplied icons, concise next-value copy and sensible caps. SOUL VESSEL
+was the eighth: it became a floor pickup on 2026-09-19 and was removed from the game on 2026-09-24.
+REAPER'S GIFT was the seventh, until 2026-09-24: it healed a missing fragment on a kill streak, and a
+run now has exactly one fragment and nothing that raises it, so there is never one to heal
+([player_health.md](player_health.md), GDD §14 #45). `RunProgression` asserts six. XP threshold
 uses a rising Resource-defined curve (`base_xp_threshold` 30, `xp_growth` 1.32).
 `RunProgressionTuning` group **Upgrade offer** (starting values, tune on device): `tray_time_scale`
 0.3, `tray_timeout` 6.0 real s, `tray_slide_seconds` 0.22 real s, `calm_window_seconds` 4.0 game s,
@@ -112,10 +113,10 @@ GameWorld translates mutation levels into Wisp/enemy/hazard effects and owns run
   and **run end** close it (instant at run end); scene exit and `_reset_view_effects` drop the hold.
   A pending boss waits for an open tray to close (≤ timeout).
 - Banked but unpicked levels are lost at run end; the summary's `run_level` counts only picked levels,
-  so Results and Trials stay correct. Same rules in story Rift levels, Endless and the daily run.
+  so Results and Trials stay correct. Same rules in Endless and the daily run.
 - RUSH never starts and finishers never play while the tray is up.
-- Wide Reap, Soul Hunger, Death Pulse, Soul Link, Cold Wake, Void Velocity and
-  Reaper's Gift all change live run behavior; nothing persists between runs — mutations are the only
+- Wide Reap, Soul Hunger, Death Pulse, Soul Link, Cold Wake and Void Velocity all change live run
+  behavior; nothing persists between runs — mutations are the only
   run power, and there is no permanent power (ADR-0013).
 - Rift Points remain separate from score and are reported by Results. Soul Hunger's copy reads
   "stronger pickup pull".
@@ -126,7 +127,8 @@ GameWorld translates mutation levels into Wisp/enemy/hazard effects and owns run
 ## How to test
 
 - Run `tools/godot/test_run_progression.gd` for threshold/choice rules and
-  `tools/godot/test_mutation_effects.gd` for all seven live effects and the Soul Vessel drop.
+  `tools/godot/test_mutation_effects.gd` for the live effects, the one-fragment start and that
+  Reaper's Gift is out of the pool.
 - Manual (device, owner preference): bank two levels mid-combo (pill ×2, no interruption); stop at a
   wave start (cards slide up, world slow); tap one (next set slides in), swipe the arena on the second
   (tray away, pill ×1); wait out 6 s once; pause with the tray up; repeat with Reduced Motion.
@@ -150,6 +152,7 @@ GameWorld translates mutation levels into Wisp/enemy/hazard effects and owns run
 
 | Date | Change |
 |---|---|
+| 2026-09-25 | Story Rifts removed (owner): Rift-level mention dropped |
 | 2026-09-15 | Tray simplified: no header text or frame, UPGRADE READY pill removed (owner) |
 | 2026-09-15 | Banked level-ups, calm moments, bottom `UpgradeTray` with slow motion, swipe/timeout dismiss, UPGRADE READY pill; paused `UpgradeSelect` removed (owner decision, GDD §5.5) |
 | 2026-09-15 | Pickup auto-collect sweep (`sweep_to`, `collect_now`); Soul Hunger's mid-wave role noted (spec rush_and_feel) |

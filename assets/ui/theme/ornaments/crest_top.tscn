@@ -1,20 +1,20 @@
 [gd_scene format=3]
 
-[ext_resource type="Texture2D" path="res://assets/ui/theme/textures/ornament_crest_top.png" id="1_pcv1r"]
+[ext_resource type="Texture2D" path="res://assets/ui/theme/icons/ornament_diamond_cyan.tres" id="1_pcv1r"]
 
-[node name="CrestTopOrnament" type="Control" unique_id=1001018147]
+[node name="CrestTopOrnament" type="Control" unique_id=1851826016]
 layout_mode = 3
 anchors_preset = 0
 size_flags_horizontal = 4
 size_flags_vertical = 0
 mouse_filter = 2
 
-[node name="Art" type="TextureRect" parent="." unique_id=205340308]
+[node name="Art" type="TextureRect" parent="." unique_id=952641616]
 layout_mode = 0
-offset_left = -90.0
-offset_top = -126.0
-offset_right = 86.0
-offset_bottom = -31.0
+offset_left = -24.0
+offset_top = -94.0
+offset_right = 24.0
+offset_bottom = -46.0
 mouse_filter = 2
 texture = ExtResource("1_pcv1r")
 expand_mode = 1

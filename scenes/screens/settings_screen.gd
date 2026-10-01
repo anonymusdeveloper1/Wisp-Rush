@@ -1,17 +1,23 @@
 class_name SettingsScreen
 extends Control
-## Player settings: volumes, haptics, reduced motion, shake, about and reset.
+## Player settings: volumes, haptics, reduced motion, shake, tutorial replay, about and reset.
 ##
 ## Works as a Home-level screen and as an overlay inside the paused run (process mode Always).
 ## Changes go through the SaveManager autoload, which validates, persists and emits
 ## `settings_changed`; Audio and GameWorld react to that signal. Slider saves are debounced.
 ## Styling comes from the project theme (redesign v1): PanelCard groups, SecondaryButton toggles
 ## whose pressed (cyan) state means ON, and a DangerButton reset behind an armed confirmation.
+## Everything under the header scrolls vertically, so the cards fit any phone height. Cards and
+## buttons use mouse filter Pass, so a touch swipe that starts on them reaches the ScrollContainer
+## (a swipe that starts on a slider moves the slider instead). No scroll bar is drawn (owner,
+## 2026-09-25).
 
 ## Requests leaving Settings (Main returns Home; GameWorld closes its overlay).
 signal back_requested
 ## Emitted after the player confirmed a full progress reset.
 signal progress_reset
+## The player asked to replay the Tutorial. Home-level only.
+signal tutorial_requested
 
 ## Seconds a slider must rest before its value is saved.
 const SAVE_DELAY: float = 0.35
@@ -26,7 +32,8 @@ const RUN_BACK_GLYPH: String = "‹"
 ## Keeps the glyph's line height under the 64 px icon it replaces, so the button stays square.
 const RUN_BACK_GLYPH_SIZE: int = 44
 
-## False inside an active run: hides the destructive progress reset.
+## False inside an active run: hides the destructive progress reset, and the tutorial replay,
+## which would abandon the run.
 @export var allow_progress_reset: bool = true
 
 var _pending_changes: Dictionary = {}
@@ -34,6 +41,7 @@ var _save_countdown: float = -1.0
 var _reset_arm_remaining: float = -1.0
 
 @onready var _groups: VBoxContainer = %Groups
+@onready var _scroll: ScrollContainer = %Scroll
 @onready var _shade: ColorRect = %Shade
 @onready var _margin: MarginContainer = %Margin
 @onready var _back_button: Button = %BackButton
@@ -48,6 +56,7 @@ var _reset_arm_remaining: float = -1.0
 @onready var _aim_arrow_toggle: Button = %AimArrowToggle
 @onready var _aim_assist_toggle: Button = %AimAssistToggle
 @onready var _about_button: Button = %AboutButton
+@onready var _replay_tutorial_button: Button = %ReplayTutorialButton
 @onready var _reset_button: Button = %ResetButton
 @onready var _feedback_label: Label = %FeedbackLabel
 @onready var _about_panel: Control = %AboutPanel
@@ -94,11 +103,13 @@ func _ready() -> void:
 		func(enabled: bool) -> void: _queue_change(&"aim_assist", enabled, true)
 	)
 	_about_button.pressed.connect(_on_about_button_pressed)
+	_replay_tutorial_button.pressed.connect(_on_replay_tutorial_button_pressed)
 	_about_close_button.pressed.connect(_close_panels)
 	_reset_button.pressed.connect(_on_reset_button_pressed)
 	_reset_confirm_button.pressed.connect(_on_reset_confirm_button_pressed)
 	_reset_cancel_button.pressed.connect(_close_panels)
 	_reset_button.visible = allow_progress_reset
+	_replay_tutorial_button.visible = allow_progress_reset
 	_about_text.text = build_about_text()
 	_about_panel.visible = false
 	_reset_panel.visible = false
@@ -163,6 +174,7 @@ static func build_about_text() -> String:
 		"CREDITS",
 		"Illustrations from the Wisp Rush asset pack. Sound is synthesized in-game.",
 		"Made with Godot Engine %s (© Godot Engine contributors, MIT licence)." % engine_version,
+		"Pixelify Sans font © 2021 The Pixelify Sans Project Authors, SIL Open Font License 1.1.",
 	])
 
 
@@ -258,6 +270,11 @@ func _on_back_button_pressed() -> void:
 	back_requested.emit()
 
 
+func _on_replay_tutorial_button_pressed() -> void:
+	_flush_changes()
+	tutorial_requested.emit()
+
+
 func _on_about_button_pressed() -> void:
 	_about_panel.visible = true
 	_about_close_button.grab_focus()
@@ -279,7 +296,7 @@ func _on_reset_confirm_button_pressed() -> void:
 		save_manager.reset_save()
 		setup(save_manager.get_settings())
 	_close_panels()
-	_feedback_label.text = "ALL PROGRESS ERASED"
+	_show_feedback("ALL PROGRESS ERASED")
 	progress_reset.emit()
 
 
@@ -294,6 +311,7 @@ func _build_developer_card() -> void:
 
 	var card := PanelContainer.new()
 	card.theme_type_variation = &"PanelCard"
+	card.mouse_filter = Control.MOUSE_FILTER_PASS
 	var rows := VBoxContainer.new()
 	rows.add_theme_constant_override(&"separation", 10)
 	card.add_child(rows)
@@ -305,10 +323,8 @@ func _build_developer_card() -> void:
 
 	# label, tooltip, action
 	var actions: Array[Array] = [
-		["UNLOCK EVERYTHING", "Rifts, forms, Trials and Rift Points",
+		["UNLOCK EVERYTHING", "Forms, Trials and Rift Points",
 			func() -> bool: return DevUnlock.unlock_everything(save)],
-		["UNLOCK ALL RIFTS", "Raises the lifetime best wave past every gate",
-			func() -> bool: return DevUnlock.unlock_rifts(save)],
 		["UNLOCK ALL CHARACTERS", "Owns every character in the Shop",
 			func() -> bool: return DevUnlock.unlock_forms(save)],
 		["COMPLETE ALL TRIALS", "Finishes the whole ladder",
@@ -322,6 +338,7 @@ func _build_developer_card() -> void:
 		button.text = action[0] as String
 		button.tooltip_text = action[1] as String
 		button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		button.mouse_filter = Control.MOUSE_FILTER_PASS
 		var run: Callable = action[2] as Callable
 		var label: String = action[0] as String
 		button.pressed.connect(func() -> void: _on_developer_action(label, run))
@@ -337,4 +354,10 @@ func _on_developer_action(label: String, run: Callable) -> void:
 	_feedback_label.add_theme_color_override(
 		&"font_color", Palette.SOUL_CYAN if applied else Palette.WARNING_AMBER
 	)
-	_feedback_label.text = "%s %s" % [label, "APPLIED" if applied else "REFUSED"]
+	_show_feedback("%s %s" % [label, "APPLIED" if applied else "REFUSED"])
+
+
+## Shows [param text] under the cards and scrolls it into view, since it may sit below the fold.
+func _show_feedback(text: String) -> void:
+	_feedback_label.text = text
+	_scroll.ensure_control_visible.call_deferred(_feedback_label)

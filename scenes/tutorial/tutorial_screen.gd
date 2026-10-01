@@ -6,8 +6,8 @@ extends Control
 ## default skin; no waves, run end or recording) and a TutorialDirector running the lessons of
 ## `data/tutorial/default_tutorial.tres`. Above the arena sit the step counter with progress dots
 ## and a one-line caption; the code-drawn ghost hand sits above the HUD too, so it can tap upgrade
-## cards. SKIP is always visible and, like Android back and Escape, asks "SKIP THE TUTORIAL?" first. Main decides where `finished` leads (Home on first
-## launch, the Rift Map on a replay) and marks the tutorial completed.
+## cards. SKIP is always visible and, like Android back and Escape, asks "SKIP THE TUTORIAL?" first. Main decides where `finished` leads (Home) and
+## marks the tutorial completed.
 
 ## The tutorial ended: every lesson passed ([param skipped] false) or the player confirmed SKIP.
 signal finished(skipped: bool)
@@ -181,14 +181,15 @@ func _on_completion_started() -> void:
 	_skip_button.disabled = true
 
 
-## Lines the SKIP button and guide band up with the HUD's safe margins.
+## Lines the SKIP button and guide band up with the HUD's safe margins. SKIP sits top-left, where
+## the run's pause button would be (hidden here); the top-right holds Rift Points and the score.
 func _layout() -> void:
 	if not is_instance_valid(_game):
 		return
 	var margins: Vector4 = _game.get_safe_margins()
 	var skip_size: Vector2 = _skip_button.get_combined_minimum_size()
-	_skip_button.offset_left = -(margins.z + skip_size.x)
-	_skip_button.offset_right = -margins.z
+	_skip_button.offset_left = margins.x
+	_skip_button.offset_right = margins.x + skip_size.x
 	_skip_button.offset_top = margins.y
 	_skip_button.offset_bottom = margins.y + skip_size.y
 	_guide_margin.offset_top = -(margins.w + GUIDE_BAND_HEIGHT)

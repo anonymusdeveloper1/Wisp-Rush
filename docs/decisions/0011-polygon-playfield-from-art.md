@@ -1,6 +1,6 @@
 # ADR-0011: The playfield is each Rift's painted floor, derived from its art
 
-> **Status:** Accepted · **Date:** 2026-09-12 · **Deciders:** owner (chose option 4 of 6) + Claude Code ·
+> **Status:** **Rifts removed 2026-09-25** (GDD §14 #48): kept as history; the Rift floors are gone, Endless uses its shared floor (ADR-0017) · Accepted · **Date:** 2026-09-12 · **Deciders:** owner (chose option 4 of 6) + Claude Code ·
 > **Supersedes the wall half of:** [ADR-0006](0006-inset-playfield-and-larger-sprites.md) (its scale guarantees stand)
 
 ## Context

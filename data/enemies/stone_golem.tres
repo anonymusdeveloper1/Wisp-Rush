@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="EnemyTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/enemy_tuning.gd" id="1_enemy_tuning"]
+
+[resource]
+script = ExtResource("1_enemy_tuning")
+design_width = 1080.0
+movement_speed = 65.0
+turn_speed = 2.2
+collision_radius = 58.0
+sprite_diameter = 180.0
+maximum_health = 1
+score_reward = 15
+experience_reward = 10
+threat_cost = 1
+shard_drop_chance = 0.12
+telegraph_duration = 0.6
+dissolve_duration = 0.32
+action_interval = 2.8
+attack_range = 1400.0
+keep_distance = 420.0
+projectile_speed = 650.0
+projectile_radius = 22.0
+projectile_size = 64.0

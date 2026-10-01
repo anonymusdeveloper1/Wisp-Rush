@@ -1,0 +1,7 @@
+[gd_resource type="CanvasTexture" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/theme/icons/icon_play.png" id="1_05t4n"]
+
+[resource]
+diffuse_texture = ExtResource("1_05t4n")
+texture_filter = 1

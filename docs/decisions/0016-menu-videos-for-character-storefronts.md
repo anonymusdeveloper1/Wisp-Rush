@@ -1,6 +1,6 @@
 # ADR-0016: A character's menu performance may be a pre-rendered video
 
-> **Status:** Accepted · **Date:** 2026-09-21 · **Deciders:** owner ("instead of having an idle
+> **Status:** Accepted; Shade's clip and its sources were removed 2026-09-25 (its menus play the AutoSprite storefront), and Ilyra's went with her on 2026-09-26 (GDD §14 #52), so no character plays one now · **Date:** 2026-09-21 · **Deciders:** owner ("instead of having an idle
 > animation for the store front and the home screen … an animation video already made"; "use ai
 > for video creation") + Claude Code · **Relates to:** [ADR-0015](0015-animated-playable-characters.md)
 > (presentation-only characters), GDD §14 #36 (the five-animation set), GDD §14 #37

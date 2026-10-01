@@ -1,13 +1,13 @@
 extends Control
-## Debug screen showing every Wisp theme type variation (redesign v1) on the menu background.
+## Debug screen showing every Wisp theme type variation (pixel UI kit) on the menu background.
 ##
 ## Run: Godot --path . res://scenes/debug/theme_gallery.tscn, or capture it with
 ## tools/screenshot.sh res://scenes/debug/theme_gallery.tscn 20. Built in code so each sample
 ## reads as a usage example: set theme_type_variation, never per-node style/colour overrides.
 ## "Focused" samples draw their focus stylebox permanently so all variants can be compared.
 
-const ICON_DIR := "res://assets/art/ui/system/"
-const FORM_DIR := "res://assets/art/characters/forms/"
+const ICON_DIR := "res://assets/ui/theme/icons/"
+const FORM_DIR := "res://assets/art/characters/playable/"
 const MUTATION := "res://assets/art/ui/mutations/01_wide_reap.png"
 const ORNAMENTS := "res://assets/ui/theme/ornaments/"
 
@@ -94,7 +94,7 @@ func _add_slots() -> void:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override(&"separation", 20)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	var icons := ["06_pause.png", "15_settings.png", "16_home.png"]
+	var icons := ["icon_pause.tres", "icon_settings.tres", "icon_home.tres"]
 	for i: int in 3:
 		var b := Button.new()
 		b.theme_type_variation = &"IconButton"
@@ -106,7 +106,27 @@ func _add_slots() -> void:
 		elif i == 2:
 			b.disabled = true
 		row.add_child(b)
-	var forms := ["01_void.png", "06_eclipse.png"]
+	var tile_icons := ["icon_trials.tres", "icon_shop.tres"]
+	for i: int in 2:
+		var tile := Button.new()
+		tile.theme_type_variation = &"CaptionTile"
+		tile.custom_minimum_size = Vector2(140, 164)
+		tile.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		var glyph := TextureRect.new()
+		glyph.texture = load(ICON_DIR + tile_icons[i])
+		glyph.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		glyph.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		glyph.position = Vector2(22, 18)
+		glyph.size = Vector2(96, 96)
+		glyph.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tile.add_child(glyph)
+		if i == 1:
+			_show_focus(tile)
+		row.add_child(tile)
+	var forms := [
+		"patchvile/patchvile_portrait.png", "verdant_shade/verdant_shade_portrait.png",
+		"scarlet/scarlet_portrait.png",
+	]
 	for i: int in 3:
 		var s := Button.new()
 		s.theme_type_variation = &"SlotButton"
@@ -151,7 +171,7 @@ func _add_cards() -> void:
 	var ring := _panel(&"PortraitRing")
 	ring.custom_minimum_size = Vector2(290, 290)
 	var portrait := TextureRect.new()
-	portrait.texture = load(FORM_DIR + "06_eclipse.png")
+	portrait.texture = load(FORM_DIR + "patchvile/patchvile_portrait.png")
 	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	ring.add_child(portrait)
@@ -188,28 +208,34 @@ func _add_panels() -> void:
 	var rift_points := _panel(&"PanelPlate")
 	var rift_points_row := HBoxContainer.new()
 	var rift_points_icon := TextureRect.new()
-	rift_points_icon.texture = load(ICON_DIR + "02_soul_shards.png")
+	rift_points_icon.texture = load(ICON_DIR + "icon_currency.tres")
 	rift_points_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	rift_points_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	rift_points_icon.custom_minimum_size = Vector2(44, 44)
+	rift_points_icon.custom_minimum_size = Vector2(48, 48)
 	rift_points_row.add_child(rift_points_icon)
 	var rift_points_value := _label(RiftPoints.format(320), &"ValueLabel")
-	rift_points_value.add_theme_font_size_override(&"font_size", 40)
+	rift_points_value.add_theme_font_size_override(&"font_size", 44)
 	rift_points_row.add_child(rift_points_value)
 	rift_points.add_child(rift_points_row)
 	plates.add_child(rift_points)
 	var best := _panel(&"PanelPlate")
 	var best_value := _label("12,480", &"AmberValueLabel")
-	best_value.add_theme_font_size_override(&"font_size", 40)
+	best_value.add_theme_font_size_override(&"font_size", 44)
 	best.add_child(best_value)
 	plates.add_child(best)
+	var reward := _panel(&"RewardPlate")
+	var reward_value := _label("+120", &"AmberValueLabel")
+	reward_value.add_theme_font_size_override(&"font_size", 44)
+	reward.add_child(reward_value)
+	plates.add_child(reward)
 	right.add_child(plates)
 	row.add_child(right)
 	_rows.add_child(row)
 
 
 func _add_bars() -> void:
-	var bars: Array[Array] = [[&"", 65.0], [&"BossProgressBar", 40.0], [&"SlimProgressBar", 70.0]]
+	var bars: Array[Array] = [[&"", 65.0], [&"BossProgressBar", 40.0], [&"SlimProgressBar", 70.0],
+			[&"RushProgressBar", 55.0]]
 	for b: Array in bars:
 		var bar := ProgressBar.new()
 		bar.theme_type_variation = b[0]

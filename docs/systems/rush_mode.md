@@ -1,7 +1,7 @@
 # System: RUSH mode and fast feel
 
 > **Status:** ✅ done (device pass pending) ·
-> **Last updated:** 2026-09-15 · **GDD section:** §5.1, §5.6, §8, §14 #27–#28
+> **Last updated:** 2026-09-25 · **GDD section:** §5.1, §5.6, §8, §14 #27–#28
 >
 > Built from [specs/rush_and_feel/](../specs/rush_and_feel/README.md). The GDD owns the rules; this
 > file owns how they are built.
@@ -9,7 +9,7 @@
 ## Purpose
 Makes a run feel faster with no new buttons: visible chain momentum, Rift Point shards that collect
 themselves, a short slow-motion finisher on big moments, and a RUSH meter that fires a 6-second power
-burst. Run-local; no mode-specific code, so it works the same in Rift levels, Endless and the daily run.
+burst. Run-local; no mode-specific code, so it works the same in Endless and the daily run.
 
 ## Files
 | Path | Role |
@@ -118,23 +118,24 @@ Presentation-only constants (orb size, callout scale, glow texture size, HUD off
   take a hit); leave shards and start a wave/boss; reap 5 in one dash; clear the field twice within
   6 s; kill a boss; fill RUSH (~25 kills) and check ×1.3 speed, ×2 score, frozen combo, no damage,
   peak music, meter empty after; pause and bank an upgrade with a full meter; repeat with Reduced
-  Motion; play a Rift level, Endless and the daily run. Logs: `[GameWorld] RUSH start|end`,
+  Motion; play Endless and the daily run. Logs: `[GameWorld] RUSH start|end`,
   `finisher | reason=`, `shard sweep | shards=`.
 - Automated: none (owner preference 2026-09-15). Planned: `test_rush_mode.gd`, `test_run_feel.gd` (spec
   Verify section); `test_movement` should stay green.
 - Layout: `tools/qa_matrix.sh game` → `logs/qa/game_sheet.png` (RUSH row, five phone sizes).
 
 ## Known issues / TODO
-- Every value is a starting value: RUSH frequency per Rift level / Endless run and finisher feel need
+- Every value is a starting value: RUSH frequency per Endless run and finisher feel need
   the device pass (ROADMAP M11).
 - The boss panel and callouts moved down 34 px for the RUSH row; the boss panel was not in the QA
   capture (no boss screen in `qa_matrix.sh`).
-- A boss killing-blow finisher slows the boss's defeat dissolve for its 0.4 s, so a Rift level's
-  victory beat starts slightly later (intended).
+- A boss killing-blow finisher slows the boss's defeat dissolve for its 0.4 s, so the victory beat
+  starts slightly later (intended).
 
 ## Change history
 | Date | Change |
 |---|---|
+| 2026-09-25 | Story Rifts removed (owner): Rift-level mentions dropped |
 | 2026-09-15 | Keyed time-scale holds (`_hold_time_scale` / `_release_time_scale`) for the upgrade tray; the paused upgrade choice is gone |
 | 2026-09-15 | Meter gating reads `set_rush_enabled` (Tutorial screen) instead of the removed in-run lesson |
 | 2026-09-15 | Built (spec rush_and_feel): time-scale owner, game-time momentum, visible momentum, auto-collect, finisher, RUSH meter and mode, `RushProgressBar`, `rush_count` |

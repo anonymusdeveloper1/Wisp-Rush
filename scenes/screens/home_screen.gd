@@ -1,26 +1,23 @@
 class_name HomeScreen
 extends Control
-## Home: top bar and wordmark, a living hero Wisp between two button columns, then PLAY and Rifts.
+## Home: top bar and wordmark, a living hero Wisp between two button columns, then PLAY.
 ##
-## Layout (owner decisions 2026-09-13 and 2026-09-15): the top bar and logo stay; the equipped Wisp
-## floats in the middle and tapping it opens the Shop; Trials and Daily sit in a column on the left,
-## Shop and Remove Ads on the right; below the Wisp, clear of every animation, a caption and a large
-## animated PLAY, centred between an empty balance slot on its left and the Rifts button on its
-## right. PLAY always starts Endless (caption `ENDLESS  •  BEST WAVE n`, top bar BEST = the Endless
-## best); the story Rifts are entered only through RIFTS and the Rift Map. The screen feels alive
-## through the Wisp's float, breathe, sway and glow, the orbiting soul sparks, HomeAmbience over the
-## painted backdrop, PLAY's glow pulse and light sweep, and the turning Rift portal. The orbit and
-## glow shrink to the room between the columns, so no animation ever passes over a button. Reduced
-## Motion stills all of it. All styling comes from theme type variations and Palette.
+## Layout (owner decisions 2026-09-13, 2026-09-15 and 2026-09-24): the top bar and logo stay; the
+## equipped Wisp rests above the central dais and tapping it opens the Shop; Trials and Daily sit in a
+## column on the left, Shop and Remove Ads on the right; below the Wisp, clear of every animation, a
+## caption and a large animated PLAY, centred. PLAY starts Endless (caption `ENDLESS  •  BEST WAVE n`,
+## top bar BEST = the Endless best). The screen feels alive through
+## the character's own animation and glow, the orbiting soul sparks, HomeAmbience over the backdrop,
+## and PLAY's glow pulse and light sweep. The orbit and glow shrink to the room between the columns,
+## so no animation ever passes over a button. Reduced Motion stills all of it. All styling comes from
+## theme type variations and Palette.
 
 ## Emitted when PLAY is activated; the host starts an Endless run with the equipped skin.
 signal play_requested
 ## Emitted when the player taps the hero character; Main opens the Shop's CHARACTERS tab.
 signal wisps_requested
-## Emitted when the player opens today's deterministic Rift.
+## Emitted when the player opens today's daily run.
 signal daily_requested
-## The player asked to open the Rift map to pick an arena.
-signal rift_map_requested
 ## The player asked to open the Trials ladder.
 signal trials_requested
 ## Emitted when the player opens lifetime statistics.
@@ -32,37 +29,37 @@ signal shop_requested
 ## The player tapped Remove Ads; the host opens the Shop on that product.
 signal remove_ads_requested
 
-## Centre of the Wisp painted into home_background.png, as a fraction of the texture size.
-const PAINTED_WISP_CENTER := Vector2(0.49, 0.466)
-## Hero preview edge in background-texture pixels (covers the painted Wisp and its flame).
-const PAINTED_WISP_SIZE := 400.0
+## Centre of the empty hero pocket above the home dais, in background-texture UV.
+const HERO_STAGE_CENTER := Vector2(0.5, 0.49)
+## Hero preview edge in background-texture pixels.
+const HERO_PREVIEW_SIZE := 400.0
 ## Size of the dark pocket behind the preview, relative to the preview edge.
 const HERO_POCKET_SCALE := 1.35
 ## Pocket opacity at its centre and at half its radius (fades to 0 at the edge).
-const POCKET_CORE_ALPHA := 0.62
-const POCKET_MID_ALPHA := 0.38
+const POCKET_CORE_ALPHA := 0.28
+const POCKET_MID_ALPHA := 0.12
 ## Hero glow: largest size relative to the preview edge, and its steady and pulsing alpha.
 const HERO_GLOW_SCALE := 1.9
 const HERO_GLOW_ALPHA := 0.5
 const HERO_GLOW_PULSE := 0.16
 ## Share of the glow's radius that is visibly lit; the soft tail beyond it is negligible.
 const GLOW_VISIBLE_SHARE := 0.8
-## Hero motion. Float is a fraction of the preview edge; breathe is scale; sway is radians.
-const FLOAT_AMOUNT := 0.035
-const FLOAT_SPEED := 1.55
-const BREATHE_AMOUNT := 0.03
+## The glow breathes behind the character; its extra Home transform stays fixed.
+const GLOW_BREATHE_AMOUNT := 0.03
 const BREATHE_SPEED := 2.3
-const SWAY_AMOUNT := 0.035
-const SWAY_SPEED := 1.05
 ## Largest orbit radius relative to the preview edge, and how far below the Wisp's centre the ring
 ## sits. Lowered so the front arc passes beneath the body instead of across the face.
 const ORBIT_SCALE := 0.74
 const ORBIT_DROP := 0.2
 ## Design pixels kept between the hero's furthest animated pixel and the side button columns.
 const HERO_SIDE_CLEARANCE := 28.0
-## Design pixels between the hero's lowest animated pixel and the Rift caption and PLAY row, which
+## Design pixels between the hero's lowest animated pixel and the caption and PLAY row, which
 ## sit directly under the Wisp (owner: about 50 px or more, with no animation in the way).
 const HERO_BOTTOM_CLEARANCE := 64.0
+## Extra design pixels the caption and PLAY drop below that clearance, taken only from the free space
+## under them, so the hero never shrinks for it (owner, 2026-09-24: "move the play button a little
+## lower"). 80 puts PLAY 64 px lower than it sat beside the old 164 px Rifts tile.
+const ACTION_DROP := 80.0
 ## Least gap between the bottom of a side column and the caption and PLAY row.
 const COLUMN_ACTION_GAP := 24.0
 ## A press on the Wisp that moves further than this (design pixels) is not a tap.
@@ -81,13 +78,7 @@ const PLAY_SHEEN_SWEEP := 0.8
 const PLAY_SHEEN_WIDTH := 90.0
 const PLAY_SHEEN_ALPHA := 0.38
 const PLAY_SHEEN_TILT := 0.36
-## Rift portal icon: box relative to the Rifts button, turn speed (radians/second) and pulse.
-const RIFT_ICON_SHARE := 0.6
-const RIFT_ICON_TOP_SHARE := 0.07
-const RIFT_ICON_SPIN := 0.9
-const RIFT_ICON_PULSE := 0.06
-const RIFT_ICON_PULSE_SPEED := 2.0
-## Design pixels above the Rift caption where the darkening gradient behind the PLAY row begins.
+## Design pixels above the PLAY caption where the darkening gradient behind the PLAY row begins.
 const BOTTOM_SHADE_LEAD := 300.0
 ## Screen margins in the 1080-wide design space before the device safe area is added.
 const BASE_MARGIN_SIDE := 36.0
@@ -134,13 +125,11 @@ var _play_press_tween: Tween
 @onready var _remove_ads_button: Button = %RemoveAdsButton
 @onready var _remove_ads_strike: ColorRect = %RemoveAdsStrike
 @onready var _action_block: VBoxContainer = %ActionBlock
-@onready var _rift_caption: Label = %RiftCaption
+@onready var _play_caption: Label = %PlayCaption
 @onready var _play_button: Button = %PlayButton
 @onready var _play_glow: TextureRect = %PlayGlow
 @onready var _play_sheen_clip: Control = %PlaySheenClip
 @onready var _play_sheen: TextureRect = %PlaySheen
-@onready var _rifts_button: Button = %RiftsButton
-@onready var _rifts_icon: TextureRect = %RiftsIcon
 @onready var _stats_button: Button = %StatsButton
 @onready var _settings_button: Button = %SettingsButton
 @onready var _best_label: Label = %BestLabel
@@ -173,7 +162,6 @@ func _ready() -> void:
 	_bottom_shade.texture = _bottom_shade_texture()
 	_ambience.background = _background.texture
 	_play_button.pressed.connect(func() -> void: play_requested.emit())
-	_rifts_button.pressed.connect(func() -> void: rift_map_requested.emit())
 	_trials_button.pressed.connect(func() -> void: trials_requested.emit())
 	_daily_button.pressed.connect(func() -> void: daily_requested.emit())
 	_shop_button.pressed.connect(func() -> void: shop_requested.emit())
@@ -186,7 +174,7 @@ func _ready() -> void:
 	_play_button.button_up.connect(_tween_play_press.bind(1.0, 0.16))
 	_wisp_preview.gui_input.connect(_on_wisp_preview_gui_input)
 	_hero_area.item_rect_changed.connect(_layout_hero)
-	for control: Control in [_play_button, _play_sheen_clip, _rifts_button]:
+	for control: Control in [_play_button, _play_sheen_clip]:
 		control.resized.connect(_layout_actions)
 	_apply_safe_area()
 	_refresh()
@@ -212,7 +200,7 @@ func _notification(what: int) -> void:
 			_cancel_hero_press()
 
 
-## Refreshes Rift Points, best, the equipped form, the Rift PLAY will enter, ENDLESS and Remove Ads.
+## Refreshes Rift Points, best, the equipped form, the ENDLESS caption and Remove Ads.
 func setup(snapshot: Dictionary, equipped_form: FormData) -> void:
 	_rift_points = int(snapshot.get(&"rift_points", 0))
 	_ads_removed = bool(snapshot.get(&"ads_removed", false))
@@ -244,24 +232,23 @@ func is_animating() -> bool:
 
 ## Text currently shown above PLAY, for tests.
 func get_play_caption() -> String:
-	return _rift_caption.text
+	return _play_caption.text
 
 
 ## Global rectangle that every hero animation stays inside at its extremes, for tests.
 ##
-## Covers the swaying, breathing, floating Wisp, the orbit sparks with their halos and the visible
+## Covers the fixed character preview, the orbit sparks with their halos and the visible
 ## glow to either side and below. Only the Wisp bounds the top: the glow may spill onto the logo.
 func get_hero_motion_rect() -> Rect2:
 	var extent: Vector2 = OrbitMotes.get_extent_ratio()
 	var preview_half: float = _hero_edge * _preview_half_share()
 	var glow_reach: float = _glow_edge * 0.5 * _glow_reach_share()
-	var float_offset: float = _hero_edge * FLOAT_AMOUNT
 	var half_width: float = maxf(preview_half, maxf(extent.x * _orbit_radius, glow_reach))
-	var below: float = float_offset + maxf(
+	var below: float = maxf(
 		preview_half,
 		maxf(_hero_edge * ORBIT_DROP + extent.y * _orbit_radius, glow_reach),
 	)
-	var above: float = preview_half + float_offset
+	var above: float = preview_half
 	var centre: Vector2 = _hero_area.global_position + _hero_rest
 	return Rect2(centre.x - half_width, centre.y - above, half_width * 2.0, above + below)
 
@@ -275,10 +262,10 @@ func _refresh() -> void:
 	_hero_glow.self_modulate = Color(_equipped_tint, 1.0)
 	for orbit: OrbitMotes in [_orbit_back, _orbit_front]:
 		orbit.tint = _equipped_tint
-	_rift_caption.text = _describe_play()
+	_play_caption.text = _describe_play()
 	# Nothing left to sell once ads are removed; the Shop stays reachable for restores.
 	_remove_ads_button.visible = not _ads_removed
-	# Reduced Motion stills the hero, the orbit, PLAY, the portal and the living background.
+	# Reduced Motion stills the hero, the orbit, PLAY and the living background.
 	set_process(not _reduced_motion)
 	for orbit: OrbitMotes in [_orbit_back, _orbit_front]:
 		orbit.set_process(not _reduced_motion)
@@ -297,12 +284,13 @@ func _describe_play() -> String:
 		return "ENDLESS"
 	return "ENDLESS  •  BEST WAVE %d" % _endless_best_wave
 
-## Places the hero over the painted Wisp, the button columns beside it and PLAY under it.
+## Places the equipped hero above the empty stone dais, the button columns beside it and PLAY under it.
 ##
-## The preview keeps covering the Wisp painted into the backdrop, so its size follows the art. The
+## The preview aligns to the stage pocket in the backdrop. The
 ## orbit and glow then shrink to the room left between the columns, the group rises when needed to
 ## leave room below, and the caption and PLAY row sit HERO_BOTTOM_CLEARANCE under its lowest
-## animated pixel, so no animation ever passes over a button.
+## animated pixel, plus ACTION_DROP where the screen has room, so no animation ever passes over a
+## button.
 func _layout_hero() -> void:
 	if _background.texture == null or not is_node_ready():
 		return
@@ -319,17 +307,17 @@ func _layout_hero() -> void:
 	var image_size: Vector2 = texture_size * cover
 	var image_origin: Vector2 = (size - image_size) * 0.5
 	var area_origin: Vector2 = _hero_area.global_position - global_position
-	var painted_center: Vector2 = image_origin + image_size * PAINTED_WISP_CENTER - area_origin
+	var stage_center: Vector2 = image_origin + image_size * HERO_STAGE_CENTER - area_origin
 
 	var extent: Vector2 = OrbitMotes.get_extent_ratio()
-	var above_share: float = _preview_half_share() + FLOAT_AMOUNT
+	var above_share: float = _preview_half_share()
 	# Sized against the largest orbit and glow, so the smaller ones chosen below always fit too.
-	var below_share_max: float = FLOAT_AMOUNT + maxf(
+	var below_share_max: float = maxf(
 		_preview_half_share(),
 		maxf(ORBIT_DROP + extent.y * ORBIT_SCALE, HERO_GLOW_SCALE * 0.5 * _glow_reach_share()),
 	)
-	# The swaying, breathing preview is wider than its edge, so cap the edge by that animated width.
-	var edge: float = minf(PAINTED_WISP_SIZE * cover, free_width / (2.0 * _preview_half_share()))
+	# Cap the preview edge to the clear width between the side columns.
+	var edge: float = minf(HERO_PREVIEW_SIZE * cover, free_width / (2.0 * _preview_half_share()))
 	edge = minf(edge, usable_height / (above_share + below_share_max))
 	if edge <= 0.0:
 		return
@@ -337,19 +325,19 @@ func _layout_hero() -> void:
 	var left_limit: float = left_size.x + HERO_SIDE_CLEARANCE
 	var right_limit: float = area_size.x - right_size.x - HERO_SIDE_CLEARANCE
 	var centre_x: float = clampf(
-		painted_center.x,
+		stage_center.x,
 		left_limit + edge * _preview_half_share(),
 		right_limit - edge * _preview_half_share(),
 	)
 	var room: float = maxf(0.0, minf(centre_x - left_limit, right_limit - centre_x))
 	var orbit_scale: float = minf(ORBIT_SCALE, room / (extent.x * edge))
 	var glow_scale: float = minf(HERO_GLOW_SCALE, room * 2.0 / (edge * _glow_reach_share()))
-	var below_share: float = FLOAT_AMOUNT + maxf(
+	var below_share: float = maxf(
 		_preview_half_share(),
 		maxf(ORBIT_DROP + extent.y * orbit_scale, glow_scale * 0.5 * _glow_reach_share()),
 	)
 	var centre_y: float = clampf(
-		painted_center.y,
+		stage_center.y,
 		edge * above_share,
 		maxf(edge * above_share, usable_height - edge * below_share),
 	)
@@ -372,7 +360,10 @@ func _layout_hero() -> void:
 	for orbit: OrbitMotes in [_orbit_back, _orbit_front]:
 		orbit.radius = _orbit_radius
 
-	var action_top: float = centre_y + edge * below_share + HERO_BOTTOM_CLEARANCE
+	var hero_bottom: float = centre_y + edge * below_share + HERO_BOTTOM_CLEARANCE
+	var action_top: float = maxf(
+		hero_bottom, minf(hero_bottom + ACTION_DROP, area_size.y - action_size.y)
+	)
 	_action_block.position = Vector2(0.0, action_top)
 	_action_block.size = Vector2(area_size.x, action_size.y)
 	_layout_bottom_shade(area_origin.y + action_top)
@@ -391,24 +382,23 @@ func _layout_hero() -> void:
 	_animate_hero()
 
 
-## Float, breathe, sway and glow pulse. At time zero (Reduced Motion) this is the resting pose.
+## Keeps the character transform fixed while its authored frames, glow and orbit may animate.
 func _animate_hero() -> void:
 	if _hero_edge <= 0.0:
 		return
 	var t: float = _animation_time
-	var float_offset: float = sin(t * FLOAT_SPEED) * _hero_edge * FLOAT_AMOUNT
-	var breathe: float = 1.0 + sin(t * BREATHE_SPEED) * BREATHE_AMOUNT
-	var centre: Vector2 = _hero_rest + Vector2(0.0, float_offset)
+	var glow_breathe: float = sin(t * BREATHE_SPEED) * GLOW_BREATHE_AMOUNT
+	var centre: Vector2 = _hero_rest
 	_wisp_preview.position = centre - _wisp_preview.size * 0.5
-	_wisp_preview.scale = Vector2.ONE * breathe * _hero_press_scale
-	_wisp_preview.rotation = sin(t * SWAY_SPEED) * SWAY_AMOUNT
+	_wisp_preview.scale = Vector2.ONE * _hero_press_scale
+	_wisp_preview.rotation = 0.0
 	_character_preview.position = _wisp_preview.position
 	_character_preview.scale = _wisp_preview.scale
 	_character_preview.rotation = _wisp_preview.rotation
 	_hero_glow.position = centre - _hero_glow.size * 0.5
-	_hero_glow.scale = Vector2.ONE * (1.0 + (breathe - 1.0) * 2.0)
+	_hero_glow.scale = Vector2.ONE * (1.0 + glow_breathe * 2.0)
 	_hero_glow.modulate.a = HERO_GLOW_ALPHA + sin(t * BREATHE_SPEED) * HERO_GLOW_PULSE
-	# The orbit follows the Wisp's float but not its sway, so the ring stays level. Both halves run
+	# The orbit stays centred on the held character. Both halves run
 	# one clock, so a spark leaving the back half reappears exactly where the front half picks it up.
 	var ring_centre: Vector2 = centre + Vector2(0.0, _hero_edge * ORBIT_DROP)
 	_orbit_back.position = ring_centre
@@ -428,7 +418,7 @@ func _apply_equipped_visual() -> void:
 		_wisp_preview.self_modulate.a = 0.0 if animated else 1.0
 
 
-## Sizes PLAY's glow and light sweep and the Rift portal icon to their buttons.
+## Sizes PLAY's glow and light sweep to the button.
 func _layout_actions() -> void:
 	if not is_node_ready():
 		return
@@ -441,17 +431,12 @@ func _layout_actions() -> void:
 	_play_sheen.size = Vector2(PLAY_SHEEN_WIDTH, clip_size.y * 2.2)
 	_play_sheen.pivot_offset = _play_sheen.size * 0.5
 	_play_sheen.position.y = (clip_size.y - _play_sheen.size.y) * 0.5
-	var rifts_size: Vector2 = _rifts_button.size
-	var icon_edge: float = rifts_size.x * RIFT_ICON_SHARE
-	_rifts_icon.size = Vector2(icon_edge, icon_edge)
-	_rifts_icon.pivot_offset = _rifts_icon.size * 0.5
-	_rifts_icon.position = Vector2((rifts_size.x - icon_edge) * 0.5, rifts_size.y * RIFT_ICON_TOP_SHARE)
 	_animate_actions()
 
 
-## PLAY breathing, glow pulse and periodic light sweep, and the turning Rift portal.
+## PLAY breathing, glow pulse and periodic light sweep.
 ##
-## At time zero (Reduced Motion) this is the resting pose: no sweep, steady glow, still portal.
+## At time zero (Reduced Motion) this is the resting pose: no sweep, steady glow.
 func _animate_actions() -> void:
 	var t: float = _animation_time
 	var wave: float = sin(t * PLAY_BREATHE_SPEED)
@@ -467,8 +452,6 @@ func _animate_actions() -> void:
 			_play_sheen_clip.size.x + _play_sheen.size.x * 0.5,
 			progress,
 		)
-	_rifts_icon.rotation = t * RIFT_ICON_SPIN
-	_rifts_icon.scale = Vector2.ONE * (1.0 + sin(t * RIFT_ICON_PULSE_SPEED) * RIFT_ICON_PULSE)
 
 
 ## A tap on the hero character opens the Shop's CHARACTERS tab; a drag or a cancelled touch does not.
@@ -545,14 +528,14 @@ func _apply_play_press(value: float) -> void:
 	_animate_actions()
 
 
-## Half the preview's on-screen extent per edge unit, with breathing and sway at their peaks.
+## Half the fixed preview extent per edge unit.
 func _preview_half_share() -> float:
-	return 0.5 * (1.0 + BREATHE_AMOUNT) * (cos(SWAY_AMOUNT) + sin(SWAY_AMOUNT))
+	return 0.5
 
 
 ## Visible glow radius per unit of glow half-size, with the breathing scale at its peak.
 func _glow_reach_share() -> float:
-	return (1.0 + BREATHE_AMOUNT * 2.0) * GLOW_VISIBLE_SHARE
+	return (1.0 + GLOW_BREATHE_AMOUNT * 2.0) * GLOW_VISIBLE_SHARE
 
 
 ## Darkens the screen from just above the caption down, so it and PLAY stay legible over the art.

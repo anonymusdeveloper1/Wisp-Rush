@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="DashEffectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/dash_effect_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+effect_id = &"patchvile"
+signature = 1
+trail_tint = Color(0.949, 0.902, 0.8, 1)
+burst_tint = Color(1, 0.9765, 0.9333, 1)
+spark_tint = Color(0.949, 0.8902, 0.7804, 1)
+spark_count = 12
+ribbon_width = 0.6
+ribbon_seconds = 0.26
+arc_spread = 0
+burst_scale = 0.9
+shared_trails = false
+landing = 1
+dust_tint = Color(0.78, 0.72, 0.62, 1)

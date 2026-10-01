@@ -1,0 +1,7 @@
+[gd_resource type="CanvasTexture" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/theme/textures/slider_grabber_disabled.png" id="1_roius"]
+
+[resource]
+diffuse_texture = ExtResource("1_roius")
+texture_filter = 1

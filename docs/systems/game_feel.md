@@ -1,6 +1,6 @@
 # System: Game feel & lifecycle
 
-> **Status:** ✅ done (device tuning pending) · **Last updated:** 2026-09-15 · **GDD section:** §5.6, §8, §12
+> **Status:** ✅ done (device tuning pending) · **Last updated:** 2026-09-28 · **GDD section:** §5.6, §8, §12
 > (prompt §21, §26, §27)
 
 ## Purpose
@@ -17,6 +17,7 @@ safe across app interruptions and back presses.
 | `res://scenes/gameplay/game_world.tscn` | PauseOverlay (Resume, Restart, Settings, Home) and ConfirmOverlay |
 | `res://scripts/components/vfx_pool.gd` | `VfxPool`: 24 pooled Sprite2D one-shots (and flights), no per-effect allocation |
 | `res://scenes/gameplay/wall_splash_fx.gd` | `WallSplashFx`: the splash where the Wisp hits a wall — pooled droplet emitters plus a splat and flash through `VfxPool` |
+| `res://scenes/gameplay/strike_fx.gd` | `StrikeFx`: the hit animation, a pixel-art strike drawn in code where a dash lands a hit on an enemy or a boss — eight pooled strikes at absolute z 16 |
 | `res://scripts/utils/haptics.gd` | `Haptics.pulse()` — mobile-only, settings-gated vibration |
 | `res://scripts/utils/frame_pacing.gd` | `FramePacing.match_display()` — simulation rate follows the screen's refresh rate |
 | `res://scripts/utils/sound_fx.gd` | `SoundFx` — null-safe Audio shortcuts and UI click binding |
@@ -29,7 +30,8 @@ safe across app interruptions and back presses.
 GameWorld
 ├── WorldContent
 │   ├── … EffectsLayer   one-off effects (e.g. Death Pulse)
-│   └── VfxPool          pooled effects, created in _ready
+│   ├── VfxPool          pooled effects, created in _ready
+│   └── StrikeFx         pooled hit strikes, created in _ready
 └── HUD (CanvasLayer — never shakes)
     ├── PauseOverlay → ConfirmOverlay → SettingsScreen overlay (instanced on demand)
 /root/DebugOverlay       debug builds only
@@ -85,6 +87,13 @@ trauma decays 1.8/s. Strength = Screen Shake × (`REDUCED_MOTION_SHAKE` 0.3 when
 - Reduced Motion scales shake to 30 %, disables hit-stop, the finisher's slow motion and flash (its
   sound stays), speed lines, the RUSH edge glow and soul-orb flights, and halves the wall flash.
 - Pooled effects are tinted with the equipped form; when full, the most-finished effect is recycled.
+- **Hit animation (owner, 2026-09-28; GDD §8):** every dash hit that lands on an enemy or a boss
+  (`try_dash_hit` true) plays a `StrikeFx` strike halfway between the dash's path and the target's
+  centre. Pixel art drawn in code on the grid Grimgrin's rot uses (4 design px, scaled with the arena):
+  four frames over 0.18 s — a flash and a white cut crossing the dash at 45°, the whole cut with eight
+  sparks, the cut thinning in the form tint as the sparks fly, the tips and sparks darkened. Reduced
+  Motion plays the first two frames without sparks. A Warden's shield block is not a hit. The look and
+  timings are Claude's, for the owner's phone test.
 - Focus loss or app pause opens the pause overlay (never resumes into danger); music ducks.
 - Restart/Home from pause confirm only when progress would be lost; in-run Settings hides Reset.
 - The debug overlay is never created in release builds.
@@ -106,6 +115,7 @@ trauma decays 1.8/s. Strength = Screen Shake × (`REDUCED_MOTION_SHAKE` 0.3 when
 
 | Date | Change |
 |---|---|
+| 2026-09-28 | Hit animation: `StrikeFx` on every dash hit on an enemy or a boss (owner, GDD §14 #61). Verified: `validate.sh` OK; not run in a test (the owner tests on the phone) |
 | 2026-09-15 | Time-scale request owner (hit-stop + finisher), finisher flash, `VfxPool.play_flight` (spec rush_and_feel) |
 | 2026-09-12 | Redesign v1 colours; VFX converted to straight alpha (ADR-0005) |
 | 2026-09-11 | Created and verified in Milestone 4 |

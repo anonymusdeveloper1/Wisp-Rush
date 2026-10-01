@@ -36,8 +36,9 @@ const GOALS: Array[StringName] = [
 @export_range(1, 10, 1) var goal_count: int = 1
 ## Where the Wisp rests when the lesson (and each retry) starts, arena UV.
 @export var player_start: Vector2 = Vector2(0.5, 1.0)
-## Stationary enemy kind spawned at `enemy_positions`.
-@export var enemy_kind: StringName = &"soul_wisp"
+## Stationary enemy kind spawned at `enemy_positions`; it neither moves nor attacks (owner,
+## 2026-09-28: the Tutorial uses the new enemies, standing still).
+@export var enemy_kind: StringName = &"hooded_scribe"
 ## Enemy positions, arena UV.
 @export var enemy_positions: PackedVector2Array = PackedVector2Array()
 ## Extra targets spawned whenever RUSH starts or the field empties during RUSH (`GOAL_RUSH_KILL`).
@@ -63,7 +64,8 @@ const GOALS: Array[StringName] = [
 @export var reset_after_demo: bool = true
 ## Whether a wall landing that misses the goal rebuilds the lesson for another attempt.
 @export var retry_on_miss: bool = false
-## HUD element the hand's focus ring points at: `&"health"`, `&"xp"`, `&"rush"` or empty.
+## HUD element the hand's focus ring points at: `&"xp"`, `&"rush"` or empty (the HUD has no lives
+## readout since 2026-09-24).
 @export var hud_focus: StringName = &""
 ## Kills and bosses grant XP (the upgrade lesson).
 @export var experience_enabled: bool = false

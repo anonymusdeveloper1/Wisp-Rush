@@ -8,6 +8,9 @@
 > which parts are worth filming, how to capture them, and what must never be claimed. Facts live in
 > [DEVLOG.md](../DEVLOG.md) (newest first) and the system docs; this file only adds the video angle.
 >
+> **2026-09-25:** the story Rifts were removed from the game (GDD §14 #48). Row 6 and the story-mode
+> notes below are history and can no longer be filmed; the tutorial is replayed from Settings.
+>
 > **How to cut the videos:** [devlog_video_recipe.md](devlog_video_recipe.md) (owner-approved
 > 2026-09-16). §8's suggestions are superseded by the episode table in `tools/video/README.md`.
 >
@@ -27,9 +30,9 @@ burst, a real tutorial, and a navigation/loading pass that removed the freezes.
 | 1 | **30 Endless arena skins** with animated scenery | The strongest visual: aurora ribbons, rotating eclipse corona, swirling galaxy, glowing abyss gate, dragon-skull embers | Shop → ARENAS (swipe the carousel), then PLAY on a Mythic skin |
 | 2 | **RUSH mode** | 6 s of ×1.3 speed, ×2 score, no damage, peak music — a clean "power fantasy" beat | Any run: fill the meter under the XP bar, RUSH starts itself |
 | 3 | **Slow-motion finisher** | A 5-kill dash, a cleared field or a boss killing blow drops time to 0.3× for ~0.4 s | Any run; easiest on a dense wave |
-| 4 | **Interactive tutorial** (9 lessons) | A ghost hand demonstrates, then the player repeats — very readable in a 15 s clip | RIFTS → TUTORIAL |
+| 4 | **Interactive tutorial** (9 lessons) | A ghost hand demonstrates, then the player repeats — very readable in a 15 s clip | Settings → REPLAY TUTORIAL |
 | 5 | **Aim help** | Cyan rings light up every enemy the dash will slice, with a ×3 combo count, plus a gentle 6° aim assist | Any run: hold to aim beside a cluster |
-| 6 | **Story Rifts** | One level per run, the boss ends it, clearing level 1 opens the next Rift | Rift Map → ENTER, beat the boss |
+| 6 | ~~**Story Rifts**~~ | Removed 2026-09-25 (history: one level per run, the boss ended it, clearing level 1 opened the next Rift) | — |
 | 7 | **Upgrade cards** | Cards slide up in slow motion at a calm moment instead of pausing the game | Any run after a level-up, or tap the UPGRADE button |
 | 8 | **New loading screen** | Random painted arena background, slow zoom, logo, arena name, LOADING… bar | Home → PLAY |
 | 9 | **Before/after: navigation freeze** | Numbers land well in a "polish" video: tap-to-build went from 87–576 ms to 1.6–29 ms | Screen-record menus; read the numbers from this file |
@@ -38,12 +41,13 @@ burst, a real tutorial, and a navigation/loading pass that removed the freezes.
 
 - **Rift Points (RP)** replaced Soul Shards. The Soul Sanctum was removed and its spend refunded, so
   power no longer carries between runs — cosmetics only.
-- **Story mode:** a Rift run plays exactly one level of 4 waves and ends in victory on the level's
-  boss. Clearing level 1 of a Rift opens the next one. 8 levels per Rift, 5 Rifts, 5 bosses.
+- **Story mode** (history, removed 2026-09-25): a Rift run played exactly one level of 4 waves and
+  ended in victory on the level's boss. Clearing level 1 of a Rift opened the next one. 8 levels per
+  Rift, 5 Rifts, 5 bosses.
 - **Endless:** PLAY always starts Endless, open from the first launch, on one shared floor shape with
-  a cosmetic skin over it. Every Rift's enemies and bosses can appear. Waves never pause: a new
+  a cosmetic skin over it. Every enemy mix and boss can appear. Waves never pause: a new
   formation arrives while ≤ 2 enemies are alive.
-- **Shop:** one screen, four tabs — CHARACTERS (6 Wisp forms + Veyra, Rook and Morrow, all animated),
+- **Shop:** one screen, four tabs — CHARACTERS (Patchvile, Shade, Ilyra, Rook and Morrow, all animated; roster since 2026-09-25),
   DASHES (4 trail colours), ARENAS (30 skins),
   NO ADS. Prices: Simple 300 · Rare 800 · Legendary 2,000 · Mythic 3,500 RP (01–03 keep 0/800/1,200).
 - **Arena scenery:** a shader grades the painting (Mythic scenery roughly doubles in saturation), its
@@ -104,17 +108,18 @@ of a release build, player counts).
   soon to mobile" is the safe line.
 - **No monetisation promises.** The Shop's NO ADS tab is visible but disabled; there is no billing.
 - Placeholder content must not be filmed as final: the ghost hand in the tutorial is a code-drawn
-  placeholder, and Rift level balance is untuned.
+  placeholder, and Endless balance is untuned.
 
 ## 7. Known rough edges (avoid filming, or film honestly as "work in progress")
 
 - One 681 ms stall when the run loading screen loads its random background (fix pending).
 - HUD text can be hard to read over bright painted scenery on Quartz Grotto, Slate Cliffs and Dusk
   Sandstone; Mythic top set pieces sit partly behind the score plate.
-- The Settings screen overflows in debug builds (developer card); no scrolling yet.
+- ~~The Settings screen overflows in debug builds (developer card); no scrolling yet.~~ Settings
+  scrolls since 2026-09-25.
 - Most headless tests are stale after the rework; only the new/updated ones pass.
 - Six skins have wide flat decorative borders that could read as walkable.
-- Balance (RP pacing, prices, Rift difficulty, RUSH frequency) is all starting values.
+- Balance (RP pacing, prices, Endless difficulty, RUSH frequency) is all starting values.
 
 ## 8. Suggested first three videos
 

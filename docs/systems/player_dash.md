@@ -1,6 +1,6 @@
 # System: Player dash
 
-> **Status:** ✅ done · per-character dash signatures 2026-09-19 · **Last updated:** 2026-09-19 · **GDD section:** §4–5.1, §5.6, §8
+> **Status:** ✅ done · per-character dash signatures 2026-09-19 · **Last updated:** 2026-09-25 · **GDD section:** §4–5.1, §5.6, §8
 
 ## Purpose
 
@@ -58,7 +58,7 @@ WispPlayer (CharacterBody2D)  wisp_player.gd
 | `get_dash_speed_multiplier()` | method | Current run-local dash-speed multiplier. |
 | `interrupt_dash_at(position, normal)` | method | Stop a live dash at an indestructible obstacle. |
 | `redirect_dash(direction)` | method | Turn a live dash from the current position; false unless dashing. |
-| `set_arena_polygon(polygon)` | method | Apply the Rift floor polygon (ADR-0011); empty keeps the rectangle. |
+| `set_arena_polygon(polygon)` | method | Apply the arena's floor polygon (ADR-0011; the Endless catalog's `floor_polygon`); empty keeps the rectangle. |
 | `set_aim_arrow_enabled(enabled)` | method | Show or hide the direction arrow; off also hides the lit-target rings and ×N (AIM ARROW). |
 | `set_aim_assist_enabled(enabled)` / `is_aim_assist_enabled()` | method | AIM ASSIST setting. |
 | `set_aim_target_counter(counter)` | method | GameWorld hands down `func(origin, landing, corridor_radius) -> int` (enemies a dash would slice); invalid = no assist. |
@@ -101,7 +101,7 @@ removed on the same day. `GameWorld` resolves it in `configure_run` and:
 - reads its tints first in `_get_dash_burst_tint` / `_get_dash_trail_tint`, falling through to the
   old dash style and then the form tint, so a character without a signature is unchanged;
 - scales the shared launch burst by `burst_scale`, so a signature that already carries the launch
-  (Ilyra's twin fans at 0.45) turns the generic flash down instead of stacking on it.
+  (Scarlet's twin fan arcs at 0.6) turns the generic flash down instead of stacking on it.
 
 Momentum is the only intensity knob (`get_momentum_visual_level()`), so a chain grows the ribbon and
 RUSH pins it without a branch of its own. Reduced Motion keeps a shorter, thinner ribbon and throws
@@ -186,13 +186,14 @@ no sparks. Everything is built in code — no new art and no shader — and the 
 ## Known issues / TODO
 
 - Touch minimum is design-scaled; physical-device density tuning needs device QA.
-- Aim help needs the device pass: line/ring readability on every Rift floor, whether 6° feels
+- Aim help needs the device pass: line/ring readability on every arena floor, whether 6° feels
   gentle, whether lighting 2–3 health enemies that survive reads as a promise of a kill.
 
 ## Change history
 
 | Date | Change |
 |---|---|
+| 2026-09-25 | Story Rifts removed (owner): the floor polygon comes from the Endless catalog only |
 | 2026-09-19 | Per-character dash signatures: `DashEffectData`, `DashEffectFx` and twelve `.tres`. Replaces the purchasable dash styles as the thing that decides how a dash looks; the old styles stay as the fallback |
 | 2026-09-17 | Animated character rigs: `%CharacterVisualMount`, `set_cosmetic_form(…, visual_scene)`, per-frame `sync_controller` (state, dash/drift/aim direction, speed), `play_attack_visual` (ADR-0015) |
 | 2026-09-15 | Aim help: `aim_preview_changed`, GameWorld path line + lit enemies + ×N, release-time aim assist (±6°, AIM ASSIST), `get_dash_corridor_radius` (owner decision) |

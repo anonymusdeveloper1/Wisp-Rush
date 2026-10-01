@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1")
 trial_id = &"t11_kills"
-title = "REAP THE RIFT"
+title = "REAP THE HORDE"
 description = "Defeat 5000 enemies in total."
 metric = &"kills"
 target = 5000

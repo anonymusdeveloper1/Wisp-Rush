@@ -1,0 +1,40 @@
+{
+  "source": "concept_art/arenas_v2/chained_colossus_3d/source/Meshy_AI_Chained_Titan_s_Gameb_0930163022_texture.blend",
+  "source_triangles": 337015,
+  "triangles": 84253,
+  "decimate_ratio": 0.25,
+  "floor_vertices_protected": 1846,
+  "floor_plane_blender_y": -0.259,
+  "floor_rect_blender_xz": {
+    "left": -0.268,
+    "right": 0.144,
+    "bottom": -0.594,
+    "top": 0.298
+  },
+  "floor_size": [
+    0.412,
+    0.892
+  ],
+  "eye_blender": [
+    0.0529,
+    -0.2222,
+    0.6997
+  ],
+  "eye_texture": "Image_0",
+  "eye_samples": 14,
+  "head_centre_blender": [
+    -0.034,
+    0.0126,
+    0.7597
+  ],
+  "head_pivot_blender": [
+    -0.034,
+    0.0126,
+    0.56
+  ],
+  "head_vertices": 6890,
+  "flame_points": 360,
+  "skull_points": 6,
+  "glb": "assets/art/environment/arenas/chained_colossus_3d/chained_colossus.glb",
+  "glb_bytes": 12374224
+}

@@ -1,0 +1,111 @@
+{
+  "rules": "The recipe's: 256 px frame resolution delivered 4x nearest (Patchvile's pixel size), up to 256 colours with soft edges (AutoSprite's paletted export), no outline; her own height, 166 px standing, and each pose scaled so her head matches the storefront's (owner, 2026-09-26)",
+  "scale_source_to_native": 0.13576866283839212,
+  "standing_native": 166,
+  "frames": {
+    "storefront": {
+      "source": "sources/storefront.png",
+      "pose_scale": 1.0,
+      "alpha_bounds_native": [
+        55,
+        45,
+        201,
+        211
+      ],
+      "height_native": 166,
+      "width_native": 146,
+      "edge_margins_native": [
+        55,
+        45,
+        55,
+        45
+      ],
+      "alpha_bounds_delivered": [
+        220,
+        180,
+        804,
+        844
+      ],
+      "colours": 255,
+      "alpha_levels": 74
+    },
+    "wall_bottom": {
+      "source": "sources/wall_bottom.png",
+      "pose_scale": 1.0,
+      "alpha_bounds_native": [
+        47,
+        65,
+        208,
+        191
+      ],
+      "height_native": 126,
+      "width_native": 161,
+      "edge_margins_native": [
+        47,
+        65,
+        48,
+        65
+      ],
+      "alpha_bounds_delivered": [
+        188,
+        260,
+        832,
+        764
+      ],
+      "colours": 255,
+      "alpha_levels": 89
+    },
+    "wall_right": {
+      "source": "sources/wall_right.png",
+      "pose_scale": 1.21580547112462,
+      "alpha_bounds_native": [
+        37,
+        38,
+        218,
+        217
+      ],
+      "height_native": 179,
+      "width_native": 181,
+      "edge_margins_native": [
+        37,
+        38,
+        38,
+        39
+      ],
+      "alpha_bounds_delivered": [
+        148,
+        152,
+        872,
+        868
+      ],
+      "colours": 255,
+      "alpha_levels": 95
+    },
+    "dash_attack": {
+      "source": "sources/dash_attack.png",
+      "pose_scale": 1.3793103448275863,
+      "alpha_bounds_native": [
+        21,
+        39,
+        235,
+        217
+      ],
+      "height_native": 178,
+      "width_native": 214,
+      "edge_margins_native": [
+        21,
+        39,
+        21,
+        39
+      ],
+      "alpha_bounds_delivered": [
+        84,
+        156,
+        940,
+        868
+      ],
+      "colours": 255,
+      "alpha_levels": 89
+    }
+  }
+}

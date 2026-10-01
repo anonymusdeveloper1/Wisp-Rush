@@ -1,6 +1,6 @@
 # ADR-0013: Rift story levels, a cosmetic Endless mode and earned-only Rift Points
 
-> **Status:** Accepted (design; implementation planned in
+> **Status:** **Rifts removed 2026-09-25** (GDD §14 #48): kept as history; Endless, Rift Points and the Shop stand, the story Rift levels are gone · Accepted (design; implementation planned in
 > [docs/specs/story_and_endless/](../specs/story_and_endless/README.md)) · **Date:** 2026-09-14 ·
 > **Deciders:** owner (direction) + Claude Code (details, marked ASSUMPTION in GDD §14 #12–#21) ·
 > **Partially supersedes:** [ADR-0007](0007-rifts-as-rule-variant-arenas.md) (wave-gated unlocks),

@@ -1,0 +1,9 @@
+{
+  "id": "zoom_arena_3d",
+  "display_name": "3D ZOOM ARENA",
+  "description": "The colossus's arena seen whole, then zoomed in until its floor fills the screen.",
+  "source": "source.png",
+  "source_note": "The Shop still of the zoom test arena (owner 2026-10-01, GDD §14 #69): res://scenes/arenas/zoom_arena_3d.tscn (the Chained Colossus 3D scene with its zoom intro on) rendered by tools/godot/render_arena_still.gd at 941x1672 with no safe top, on its opening shot. A run zooms in from this shot until the floor fills the screen under the HUD.",
+  "floor_rect_px": [267, 609, 579, 1284],
+  "floor_rect_note": "The floor as drawn in the still's opening shot (ModelArenaVisual.get_drawn_floor_rect), [left, top, right, bottom] in pixels. The floor it plays on is the zoomed-in one."
+}

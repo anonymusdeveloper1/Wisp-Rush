@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1")
 trial_id = &"t12_score_m"
-title = "RIFT SOVEREIGN"
+title = "ARENA SOVEREIGN"
 description = "Score 25000 in a single run."
 metric = &"score"
 target = 25000

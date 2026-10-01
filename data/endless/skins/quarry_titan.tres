@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ArenaSkinData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/arena_skin_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/arenas/thumbnails/quarry_titan.png" id="2_thumbnail"]
+
+[resource]
+script = ExtResource("1_script")
+skin_id = &"quarry_titan"
+display_name = "QUARRY TITAN"
+description = "A mining titan holds the arena up over a moonlit quarry camp."
+tier = 0
+background_path = "res://assets/art/environment/arenas/quarry_titan.png"
+thumbnail = ExtResource("2_thumbnail")
+price = 0
+accent = Color(0.91, 0.66, 0.2, 1)

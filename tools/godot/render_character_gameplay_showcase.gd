@@ -1,7 +1,8 @@
 extends Node
 ## Visual-QA fixture: one character in the production GameWorld, slowed during a diagonal dash.
 ##
-## Usage (WISP_CHARACTER picks the form, default veyra):
+## Usage (WISP_CHARACTER picks the form, default rook; WISP_DASH="x,y" the dash direction,
+## default up and a little left):
 ##   WISP_CHARACTER=morrow tools/screenshot.sh \
 ##     res://tools/godot/render_character_gameplay_showcase.tscn 120 540x960
 
@@ -13,7 +14,7 @@ const FORM_CATALOG: FormCatalog = preload("res://data/forms/default_catalog.tres
 func _ready() -> void:
 	var form_id := StringName(OS.get_environment("WISP_CHARACTER"))
 	if form_id.is_empty():
-		form_id = &"veyra"
+		form_id = &"rook"
 	var skin: ArenaSkinData = ENDLESS_CATALOG.get_skin(ENDLESS_CATALOG.default_skin_id)
 	var game := GAME_WORLD_SCENE.instantiate() as GameWorld
 	game.run_seed = 717
@@ -25,7 +26,11 @@ func _ready() -> void:
 	var player := game.get_node("WorldContent/PlayerLayer/WispPlayer") as WispPlayer
 	if player != null:
 		Engine.time_scale = 0.18
-		player.request_dash(Vector2(-0.26, -1.0).normalized())
+		var direction := Vector2(-0.26, -1.0)
+		var asked: PackedStringArray = OS.get_environment("WISP_DASH").split(",")
+		if asked.size() == 2:
+			direction = Vector2(float(asked[0]), float(asked[1]))
+		player.request_dash(direction.normalized())
 
 
 func _exit_tree() -> void:

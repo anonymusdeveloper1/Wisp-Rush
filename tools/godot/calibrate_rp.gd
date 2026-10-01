@@ -5,14 +5,14 @@ extends SceneTree
 ##
 ## Usage:
 ##   WISP_ISOLATED_SAVE=1 Godot --headless --path . --script res://tools/godot/calibrate_rp.gd
-## Runs, in Obsidian Garden level 1 like a new player: the tutorial run (a novice bot finishes the
+## Runs, in Endless on the daily pool (the Obsidian Garden mix and the Reaper) like a new player: the tutorial run (a novice bot finishes the
 ## lesson, then plays on), three novice runs (aims at a random enemy with a wide aim error and a
 ## slow rhythm) and three steady runs (picks the line through the most enemies). No bot dodges, so
 ## these approximate early play only; device play is the real calibration. The game runs at
 ## TIME_SCALE with hit-stop off (Reduced Motion) so the batch finishes in minutes.
 
 const GAME_WORLD_SCENE: PackedScene = preload("res://scenes/gameplay/game_world.tscn")
-const RIFT_CATALOG: RiftCatalog = preload("res://data/rifts/default_catalog.tres")
+const ENDLESS: EndlessCatalog = preload("res://data/endless/default_endless_catalog.tres")
 const FORM_CATALOG: FormCatalog = preload("res://data/forms/default_catalog.tres")
 const TIME_SCALE: float = 4.0
 ## Game seconds after which a run that is still alive is ended and reported as capped.
@@ -52,8 +52,10 @@ func _play(bot: StringName, seed_value: int, _tutorial: bool) -> Dictionary:
 	var game := GAME_WORLD_SCENE.instantiate() as GameWorld
 	game.run_seed = seed_value
 	game.auto_pause_on_focus_loss = false
-	game.configure_run(RunProfile.story(
-		RIFT_CATALOG.get_rift(&"obsidian_garden"), 1, {}, FORM_CATALOG.get_form(&"void")
+	game.configure_run(RunProfile.endless(
+		ENDLESS, ENDLESS.get_skin(ENDLESS.default_skin_id),
+		ENDLESS.get_rosters_by_id(ENDLESS.tuning.daily_roster_ids), ENDLESS.tuning.daily_boss_ids,
+		FORM_CATALOG.get_form(FormCatalog.DEFAULT_FORM_ID)
 	))
 	game.run_ended.connect(func(summary: Dictionary) -> void: _summary = summary)
 	root.add_child(game)

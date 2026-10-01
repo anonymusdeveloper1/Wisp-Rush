@@ -1,43 +1,62 @@
 extends SceneTree
-## Generates res://assets/ui/theme/wisp_theme.tres and the ornament scenes from textures/slices.json.
+## Generates res://assets/ui/theme/wisp_theme.tres, the ornament scenes, the nearest-filtered texture wrappers and the pixel font from the pixel UI kit.
 ##
-## Pipeline (repo root): python3 assets/ui/theme/tools/build_theme_textures.py, then
+## Pipeline (repo root): python assets/ui/theme/tools/build_theme_textures.py, then
 ## Godot --headless --path . --import, then
 ## Godot --headless --path . --script res://assets/ui/theme/tools/build_wisp_theme.gd
-## The theme is generated rather than hand-edited so nine-patch margins always match the derived
-## textures. Colours come from Palette (scripts/utils/palette.gd). See docs/systems/ui_design_system.md.
+## Every PNG in textures/ and icons/ gets a CanvasTexture .tres beside it with nearest filtering:
+## the theme, scenes and scripts use the .tres, so the pixel art stays crisp while the project-wide
+## default filter stays linear for everything else. The theme is generated, never hand-edited, so
+## nine-patch margins always match textures/slices.json. Colours come from Palette
+## (scripts/utils/palette.gd). See docs/systems/ui_design_system.md.
+##
+## The pixel font (owner, 2026-09-24) is Pixelify Sans, whose font pixel is 1/11 of the em. It is
+## built here from the gdignored source TTF into a FontFile with no anti-aliasing, no hinting and
+## whole-pixel glyph positions. It is saved beside the source and set as the theme's default font.
+## Every font size is a multiple of 11, so one font pixel covers a whole number of design pixels
+## (22 = 2 px … 66 = 6 px). The engine's default font is its fallback for the two symbols Pixelify
+## lacks (→ and ✓).
 
 const Pal := preload("res://scripts/utils/palette.gd")
 
 const THEME_DIR := "res://assets/ui/theme/"
 const TEX_DIR := THEME_DIR + "textures/"
+const ICON_DIR := THEME_DIR + "icons/"
 const THEME_PATH := THEME_DIR + "wisp_theme.tres"
 const ORNAMENT_DIR := THEME_DIR + "ornaments/"
-const RING_TEXTURE := "res://assets/art/ui/frames/portrait_ring.png"
-
-const FONT_BODY := 30
-const FONT_CAPTION := 26
-const FONT_TITLE := 48
-const FONT_VALUE := 56
-const FONT_AMBER := 64
+const FONT_SOURCE := "res://assets/fonts/pixelify_sans/source/PixelifySans.ttf"
+const FONT_PATH := "res://assets/fonts/pixelify_sans/pixelify_sans.res"
+## Pixelify Sans draws one font pixel per 11 units of size, so sizes are multiples of 11. Each was
+## the old size × 1.06 (Pixelify is ~6 % narrower than the default font) snapped to that grid.
+const FONT_GRID := 11
+const FONT_BODY := 33
+const FONT_CAPTION := 33
+const FONT_TITLE := 55
+const FONT_VALUE := 55
+const FONT_AMBER := 66
 const FONT_PRIMARY := 44
-const FONT_SECONDARY := 34
-const FONT_SLOT := 26
-const FONT_CARD := 30
+const FONT_SECONDARY := 33
+const FONT_SLOT := 33
+const FONT_CARD := 33
 const FONT_BAR := 22
-const FONT_NAV := 26
-## The system glyphs fill only ~60 % of their texture canvas, so the icon box is larger than the
-## glyph should appear.
-const NAV_ICON := 96
+const FONT_NAV := 33
+## Kit glyphs are 64 px: drawn at native size in buttons (whole art pixels).
 const ICON_MAX := 64
+## The Shop tab row is this tall for touch; NavButton draws the 64 px kit tab centred inside it.
+const NAV_ROW := 88.0
 const HOVER := Color(1.12, 1.12, 1.12)
-const PRESS_BRIGHT := Color(1.35, 1.35, 1.35)
-const DIM := Color(0.55, 0.57, 0.62, 0.85)
+const PRESS_BRIGHT := Color(1.3, 1.3, 1.3)
+## Hard drop shadow under titles and reward numbers: one art pixel (4 px) down, no blur.
+const SHADOW_DROP := 4
 
 var _slices: Dictionary = {}
 var _theme: Theme
+## CanvasTexture wrappers by texture name (textures/ and icons/ share one namespace).
+var _wrapped: Dictionary = {}
 ## Content margins per panel variation, reused to position ornaments inside PanelContainers.
 var _panel_margins: Dictionary = {}
+## The pixel font, as saved at [constant FONT_PATH]; every font resource in the theme builds on it.
+var _font: FontFile
 
 
 func _initialize() -> void:
@@ -47,7 +66,15 @@ func _initialize() -> void:
 		quit(1)
 		return
 	_slices = parsed
+	if not (_wrap_folder(TEX_DIR) and _wrap_folder(ICON_DIR)):
+		quit(1)
+		return
+	_font = _build_font()
+	if _font == null:
+		quit(1)
+		return
 	_theme = Theme.new()
+	_theme.default_font = _font
 	_theme.default_font_size = FONT_BODY
 	_build_labels()
 	_build_buttons()
@@ -62,32 +89,63 @@ func _initialize() -> void:
 		quit(1)
 		return
 	_build_ornaments()
-	print("[ThemeBuilder] saved %s" % THEME_PATH)
+	print("[ThemeBuilder] saved %s (%d nearest-filtered textures)" % [THEME_PATH, _wrapped.size()])
 	quit(0)
+
+
+# ------------------------------------------------------------------------ texture wrappers
+
+## Wraps every PNG in [param dir] in a CanvasTexture .tres with nearest filtering.
+func _wrap_folder(dir: String) -> bool:
+	for file: String in DirAccess.get_files_at(dir):
+		if file.get_extension() != "png":
+			continue
+		var tex_name := file.get_basename()
+		var path := dir + tex_name + ".tres"
+		var diffuse := load(dir + file) as Texture2D
+		if diffuse == null:
+			push_error("[ThemeBuilder] %s%s is not imported; run --import first" % [dir, file])
+			return false
+		var wrapper: CanvasTexture = null
+		if ResourceLoader.exists(path):
+			wrapper = load(path) as CanvasTexture
+		var is_new := wrapper == null
+		if is_new:
+			wrapper = CanvasTexture.new()
+		wrapper.diffuse_texture = diffuse
+		wrapper.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		var err := ResourceSaver.save(wrapper, path)
+		if err != OK:
+			push_error("[ThemeBuilder] saving %s failed: %d" % [path, err])
+			return false
+		if is_new:
+			# Bind the object to its file, so the theme and scenes reference the .tres instead of
+			# embedding a copy.
+			wrapper.take_over_path(path)
+		_wrapped[tex_name] = wrapper
+	return true
 
 
 # ------------------------------------------------------------------------ helpers
 
-func _slice(name: String) -> Dictionary:
-	assert(_slices.has(name), "missing slice " + name)
-	return _slices[name]
+func _slice(tex_name: String) -> Dictionary:
+	assert(_slices.has(tex_name), "missing slice " + tex_name)
+	return _slices[tex_name]
 
 
-## A nine-patch StyleBoxTexture from textures/<name>.png with margins from slices.json.
-func _tex(name: String, content: Array, modulate: Color = Color.WHITE) -> StyleBoxTexture:
-	var s: Dictionary = _slice(name)
+func _native_height(tex_name: String) -> float:
+	return float(_slice(tex_name).size[1])
+
+
+## A nine-patch StyleBoxTexture over the wrapper of textures/<name>.png (margins from slices.json).
+func _tex(tex_name: String, content: Array, modulate: Color = Color.WHITE) -> StyleBoxTexture:
+	var m: Array = _slice(tex_name).margins
 	var sb := StyleBoxTexture.new()
-	sb.texture = load(TEX_DIR + name + ".png")
-	var m: Array = s.get("margins", [0, 0, 0, 0])
-	var e: Array = s.get("expand", [0, 0, 0, 0])
+	sb.texture = _wrapped[tex_name]
 	sb.texture_margin_left = m[0]
 	sb.texture_margin_top = m[1]
 	sb.texture_margin_right = m[2]
 	sb.texture_margin_bottom = m[3]
-	sb.expand_margin_left = e[0]
-	sb.expand_margin_top = e[1]
-	sb.expand_margin_right = e[2]
-	sb.expand_margin_bottom = e[3]
 	sb.content_margin_left = content[0]
 	sb.content_margin_top = content[1]
 	sb.content_margin_right = content[2]
@@ -96,46 +154,31 @@ func _tex(name: String, content: Array, modulate: Color = Color.WHITE) -> StyleB
 	return sb
 
 
-## Content margins = distance from the frame edge to the flat interior + padding.
-func _inner(name: String, pad: Array) -> Array:
-	var inner: Array = _slice(name).get("inner", [0, 0, 0, 0])
-	return [inner[0] + pad[0], inner[1] + pad[1], inner[2] + pad[2], inner[3] + pad[3]]
+## Content margins that make one text line of [param font_size] fill the piece's native height
+## exactly, so buttons and banners are drawn at their kit size.
+func _fit_line(tex_name: String, side: float, font_size: int) -> Array:
+	var line_h: float = _font.get_height(font_size)
+	var spare: float = maxf(0.0, _native_height(tex_name) - line_h)
+	var top := floorf(spare * 0.5)
+	return [side, top, side, spare - top]
 
 
-## Button content margins: sides clear the frame tips, vertical keeps the native frame height.
-func _button_content(name: String, font_size: int, side_pad: float) -> Array:
-	var s: Dictionary = _slice(name)
-	var frame_h: float = s.frame[1]
-	var line_h: float = ThemeDB.fallback_font.get_height(font_size)
-	var v := maxf(8.0, floorf((frame_h - line_h) * 0.5))
-	var inner: Array = s.inner
-	return [inner[0] + side_pad, v, inner[2] + side_pad, v]
+## Pressed kit art is drawn one art pixel (4 px) lower, so its label moves with it.
+func _pressed(content: Array) -> Array:
+	return [content[0], content[1] + 4.0, content[2], content[3] - 4.0]
 
 
-## Chamfered cyan outline used as the keyboard/controller focus state.
-func _focus_box(expand: float, color: Color = Pal.SOUL_CYAN) -> StyleBoxFlat:
-	var sb := StyleBoxFlat.new()
-	sb.draw_center = false
-	sb.set_border_width_all(4)
-	sb.border_color = color
-	sb.set_corner_radius_all(16)
-	sb.corner_detail = 1
-	sb.set_expand_margin_all(expand)
-	return sb
+## A focus ring overlay (kit focus art minus normal art); Godot draws it over the current state.
+func _ring(tex_name: String) -> StyleBoxTexture:
+	return _tex(tex_name, [0, 0, 0, 0])
 
 
-## Flat chamfered box for tracks and slim bars (no frame piece fits these).
-func _flat(bg: Color, border: Color, border_w: int, radius: int, content_v: float) -> StyleBoxFlat:
+## Crisp flat box for the scrollbar (no kit piece): square corners, no anti-aliasing.
+func _flat(bg: Color, content: float) -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = bg
-	sb.set_border_width_all(border_w)
-	sb.border_color = border
-	sb.set_corner_radius_all(radius)
-	sb.corner_detail = 1
-	sb.content_margin_top = content_v
-	sb.content_margin_bottom = content_v
-	sb.content_margin_left = content_v
-	sb.content_margin_right = content_v
+	sb.anti_aliasing = false
+	sb.set_content_margin_all(content)
 	return sb
 
 
@@ -143,11 +186,42 @@ func _variation(type: StringName, base: StringName) -> void:
 	_theme.set_type_variation(type, base)
 
 
+## The pixel font with crisp rendering, saved to [constant FONT_PATH] and loaded back, so the theme
+## references the file rather than embedding a copy.
+func _build_font() -> FontFile:
+	var font := FontFile.new()
+	var err := font.load_dynamic_font(FONT_SOURCE)
+	if err != OK:
+		push_error("[ThemeBuilder] cannot load %s: %d" % [FONT_SOURCE, err])
+		return null
+	font.antialiasing = TextServer.FONT_ANTIALIASING_NONE
+	font.hinting = TextServer.HINTING_NONE
+	font.subpixel_positioning = TextServer.SUBPIXEL_POSITIONING_DISABLED
+	font.generate_mipmaps = false
+	font.multichannel_signed_distance_field = false
+	# Pixelify has no → or ✓; the engine's default font draws those two.
+	font.fallbacks = [ThemeDB.fallback_font]
+	err = ResourceSaver.save(font, FONT_PATH)
+	if err != OK:
+		push_error("[ThemeBuilder] saving %s failed: %d" % [FONT_PATH, err])
+		return null
+	return load(FONT_PATH) as FontFile
+
+
 func _font_tnum() -> FontVariation:
 	var fv := FontVariation.new()
+	fv.base_font = _font
 	var ts := TextServerManager.get_primary_interface()
 	fv.opentype_features = {ts.name_to_tag("tnum"): 1}
 	return fv
+
+
+## Hard one-art-pixel drop shadow (no blur) under a label type.
+func _drop_shadow(type: StringName, outline: int) -> void:
+	_theme.set_color(&"font_shadow_color", type, Color(Pal.OBSIDIAN, 0.9))
+	_theme.set_constant(&"shadow_outline_size", type, outline)
+	_theme.set_constant(&"shadow_offset_x", type, 0)
+	_theme.set_constant(&"shadow_offset_y", type, SHADOW_DROP)
 
 
 # ------------------------------------------------------------------------ labels
@@ -161,18 +235,17 @@ func _build_labels() -> void:
 	_theme.set_constant(&"outline_size", t, 0)
 	_theme.set_constant(&"line_spacing", t, 2)
 
+	# No embolden: it thickens strokes by a fraction of a pixel and blurs the grid. The spacing is
+	# one font pixel at title size.
 	var title_font := FontVariation.new()
-	title_font.spacing_glyph = 3
-	title_font.variation_embolden = 0.35
+	title_font.base_font = _font
+	title_font.spacing_glyph = FONT_TITLE / FONT_GRID
 	_variation(&"TitleLabel", t)
 	_theme.set_font(&"font", &"TitleLabel", title_font)
 	_theme.set_font_size(&"font_size", &"TitleLabel", FONT_TITLE)
-	_theme.set_color(&"font_color", &"TitleLabel", Pal.SOUL_WHITE)
+	_theme.set_color(&"font_color", &"TitleLabel", Pal.IVORY_LIGHT)
 	_theme.set_constant(&"outline_size", &"TitleLabel", 8)
-	_theme.set_color(&"font_shadow_color", &"TitleLabel", Color(Pal.SOUL_CYAN, 0.30))
-	_theme.set_constant(&"shadow_outline_size", &"TitleLabel", 14)
-	_theme.set_constant(&"shadow_offset_x", &"TitleLabel", 0)
-	_theme.set_constant(&"shadow_offset_y", &"TitleLabel", 0)
+	_drop_shadow(&"TitleLabel", 8)
 
 	_variation(&"CaptionLabel", t)
 	_theme.set_font_size(&"font_size", &"CaptionLabel", FONT_CAPTION)
@@ -190,10 +263,7 @@ func _build_labels() -> void:
 	_theme.set_font_size(&"font_size", &"AmberValueLabel", FONT_AMBER)
 	_theme.set_color(&"font_color", &"AmberValueLabel", Pal.WARNING_AMBER)
 	_theme.set_constant(&"outline_size", &"AmberValueLabel", 6)
-	_theme.set_color(&"font_shadow_color", &"AmberValueLabel", Pal.AMBER_GLOW)
-	_theme.set_constant(&"shadow_outline_size", &"AmberValueLabel", 12)
-	_theme.set_constant(&"shadow_offset_x", &"AmberValueLabel", 0)
-	_theme.set_constant(&"shadow_offset_y", &"AmberValueLabel", 0)
+	_drop_shadow(&"AmberValueLabel", 6)
 
 
 # ------------------------------------------------------------------------ buttons
@@ -216,102 +286,106 @@ func _set_button(type: StringName, boxes: Dictionary, font_size: int, text: Colo
 	_theme.set_constant(&"outline_size", type, 0)
 
 
+## The five kit states of a text button: normal, hover, pressed (4 px lower), disabled, focus ring.
+func _kit_button(prefix: String, font_size: int, hover_art: bool, disabled: String,
+		ring: String) -> Dictionary:
+	var c := _fit_line(prefix + "_normal", 40.0, font_size)
+	var hover := _tex(prefix + "_hover", c) if hover_art else _tex(prefix + "_normal", c, HOVER)
+	var pressed := _tex(prefix + "_pressed", _pressed(c))
+	return {
+		"normal": _tex(prefix + "_normal", c),
+		"hover": hover,
+		"pressed": pressed,
+		"hover_pressed": _tex(prefix + "_pressed", _pressed(c)),
+		"disabled": _tex(disabled, c),
+		"focus": _ring(ring),
+	}
+
+
 func _build_buttons() -> void:
 	# Default Button = the quieter secondary tier; opt into PrimaryButton for the one main action.
-	var sec := _button_content("button_secondary", FONT_SECONDARY, 14.0)
-	var secondary := {
-		"normal": _tex("button_secondary", sec),
-		"hover": _tex("button_secondary", sec, HOVER),
-		"pressed": _tex("button_secondary_pressed", sec),
-		"hover_pressed": _tex("button_secondary_pressed", sec),
-		"disabled": _tex("button_disabled_small", sec),
-		"focus": _tex("button_focus_small", [0, 0, 0, 0]),
-	}
+	var secondary := _kit_button("button_secondary", FONT_SECONDARY, true,
+			"button_secondary_disabled", "button_secondary_focus_ring")
 	_set_button(&"Button", secondary, FONT_SECONDARY, Pal.SOUL_WHITE)
 	_variation(&"SecondaryButton", &"Button")
 	_set_button(&"SecondaryButton", secondary, FONT_SECONDARY, Pal.SOUL_WHITE)
 
-	var pri := _button_content("button_primary", FONT_PRIMARY, 16.0)
 	_variation(&"PrimaryButton", &"Button")
-	_set_button(&"PrimaryButton", {
-		"normal": _tex("button_primary", pri),
-		"hover": _tex("button_primary", pri, HOVER),
-		"pressed": _tex("button_primary_pressed", pri),
-		"hover_pressed": _tex("button_primary_pressed", pri),
-		"disabled": _tex("button_disabled", pri),
-		"focus": _tex("button_primary_focus", [0, 0, 0, 0]),
-	}, FONT_PRIMARY, Pal.SOUL_WHITE)
+	_set_button(&"PrimaryButton", _kit_button("button_primary", FONT_PRIMARY, true,
+			"button_primary_disabled", "button_primary_focus_ring"), FONT_PRIMARY, Pal.IVORY_LIGHT)
 
-	var dng := _button_content("button_danger", FONT_SECONDARY, 14.0)
 	_variation(&"DangerButton", &"Button")
-	_set_button(&"DangerButton", {
-		"normal": _tex("button_danger", dng),
-		"hover": _tex("button_danger", dng, HOVER),
-		"pressed": _tex("button_danger_pressed", dng),
-		"hover_pressed": _tex("button_danger_pressed", dng),
-		"disabled": _tex("button_disabled_small", dng),
-		"focus": _tex("button_focus_small", [0, 0, 0, 0]),
-	}, FONT_SECONDARY, Color("#FFE2B8"))
+	_set_button(&"DangerButton", _kit_button("button_danger", FONT_SECONDARY, false,
+			"button_secondary_disabled", "button_secondary_focus_ring"), FONT_SECONDARY,
+			Pal.AMBER_LIGHT)
 
+	# Square icon tile (Pause, Back, Settings, Stats, the HUD upgrade button). The kit has no
+	# pressed tile, so pressed brightens the normal one.
 	var icon_c := [24, 24, 24, 24]
 	_variation(&"IconButton", &"Button")
 	_set_button(&"IconButton", {
-		"normal": _tex("slot_small", icon_c),
-		"hover": _tex("slot_small", icon_c, HOVER),
-		"pressed": _tex("slot_small", icon_c, PRESS_BRIGHT),
-		"hover_pressed": _tex("slot_small", icon_c, PRESS_BRIGHT),
-		"disabled": _tex("slot_small", icon_c, DIM),
-		"focus": _focus_box(6.0),
+		"normal": _tex("icon_tile_normal", icon_c),
+		"hover": _tex("icon_tile_normal", icon_c, HOVER),
+		"pressed": _tex("icon_tile_normal", icon_c, PRESS_BRIGHT),
+		"hover_pressed": _tex("icon_tile_normal", icon_c, PRESS_BRIGHT),
+		"disabled": _tex("icon_tile_disabled", icon_c),
+		"focus": _ring("icon_tile_focus_ring"),
 	}, FONT_SLOT, Pal.SOUL_WHITE)
 
-	var slot_c := _inner("slot", [8, 8, 8, 8])
+	# Captioned Home tile (140 x 164, native only): icon box above the seam, caption below it.
+	var tile_c := [16, 16, 16, 16]
+	_variation(&"CaptionTile", &"Button")
+	_set_button(&"CaptionTile", {
+		"normal": _tex("caption_tile_normal", tile_c),
+		"hover": _tex("caption_tile_normal", tile_c, HOVER),
+		"pressed": _tex("caption_tile_normal", tile_c, PRESS_BRIGHT),
+		"hover_pressed": _tex("caption_tile_normal", tile_c, PRESS_BRIGHT),
+		"disabled": _tex("caption_tile_disabled", tile_c),
+		"focus": _ring("caption_tile_focus_ring"),
+	}, FONT_SLOT, Pal.SOUL_WHITE)
+
+	var slot_c := [28, 28, 28, 28]
 	_variation(&"SlotButton", &"Button")
 	_set_button(&"SlotButton", {
-		"normal": _tex("slot", slot_c),
-		"hover": _tex("slot", slot_c, HOVER),
+		"normal": _tex("slot_normal", slot_c),
+		"hover": _tex("slot_normal", slot_c, HOVER),
 		"pressed": _tex("slot_selected", slot_c),
 		"hover_pressed": _tex("slot_selected", slot_c),
-		"disabled": _tex("slot", slot_c, DIM),
-		"focus": _focus_box(6.0),
+		"disabled": _tex("slot_disabled", slot_c),
+		"focus": _ring("icon_tile_focus_ring"),
 	}, FONT_SLOT, Pal.SOUL_WHITE)
 	_theme.set_constant(&"icon_max_width", &"SlotButton", 0)
 
-	var card_c := _inner("panel_card", [16, 28, 16, 16])
+	var card_c := [36, 52, 36, 48]
 	_variation(&"CardButton", &"Button")
 	_set_button(&"CardButton", {
 		"normal": _tex("panel_card", card_c),
 		"hover": _tex("panel_card", card_c, HOVER),
 		"pressed": _tex("panel_card_selected", card_c),
 		"hover_pressed": _tex("panel_card_selected", card_c),
-		"disabled": _tex("panel_card", card_c, DIM),
-		"focus": _focus_box(8.0),
+		"disabled": _tex("panel_card_locked", card_c),
+		"focus": _ring("icon_tile_focus_ring"),
 	}, FONT_CARD, Pal.SOUL_WHITE)
 	_theme.set_constant(&"icon_max_width", &"CardButton", 0)
 
-	# NavButton: one tab of the Home bottom navigation bar. Flat, icon above a short caption, so the
-	# bar reads as a single calm dock rather than five framed buttons. The pressed and focused
-	# states use a chamfered cyan lozenge behind the item - stone-cut corners, not a soft pill.
-	var nav_pad := [8.0, 10.0, 8.0, 10.0]
-	var nav_empty := StyleBoxEmpty.new()
-	for side: int in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
-		nav_empty.set_content_margin(side, nav_pad[side])
-	var nav_active := _flat(Color(Pal.SOUL_CYAN, 0.14), Color(Pal.SOUL_CYAN, 0.55), 2, 18, 10.0)
-	nav_active.content_margin_left = nav_pad[0]
-	nav_active.content_margin_right = nav_pad[2]
+	# NavButton: one tab of the Shop's tab dock. The 64 px kit tab is drawn centred in the 88 px
+	# touch row (negative expand margins), so the dock reads exactly like the kit's while the whole
+	# row stays tappable. Pressed = the active tab (amber lines, cyan rune).
+	var inset := -(NAV_ROW - _native_height("tab_normal")) * 0.5
+	var nav_c := [32.0, 12.0, 32.0, 12.0]
+	var nav := {}
+	for state: String in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
+		var tab := "tab_active" if state.contains("pressed") else "tab_normal"
+		var box := _tex(tab, nav_c, HOVER if state == "hover" else Color.WHITE)
+		box.expand_margin_top = inset
+		box.expand_margin_bottom = inset
+		nav[state] = box
+	nav["focus"] = _ring("icon_tile_focus_ring")
 	_variation(&"NavButton", &"Button")
-	_set_button(&"NavButton", {
-		"normal": nav_empty,
-		"hover": nav_empty,
-		"pressed": nav_active,
-		"hover_pressed": nav_active,
-		"disabled": nav_empty,
-		"focus": _focus_box(2.0),
-	}, FONT_NAV, Pal.TEXT_MUTED)
-	for c: StringName in [&"font_hover_color", &"font_pressed_color", &"font_hover_pressed_color",
-			&"font_focus_color"]:
-		_theme.set_color(c, &"NavButton", Pal.SOUL_WHITE)
-	_theme.set_color(&"icon_hover_color", &"NavButton", Color(1.15, 1.15, 1.15))
-	_theme.set_constant(&"icon_max_width", &"NavButton", NAV_ICON)
+	_set_button(&"NavButton", nav, FONT_NAV, Pal.TEXT_MUTED)
+	for c: StringName in [&"font_pressed_color", &"font_hover_pressed_color"]:
+		_theme.set_color(c, &"NavButton", Pal.IVORY_LIGHT)
+	_theme.set_color(&"font_hover_color", &"NavButton", Pal.SOUL_WHITE)
 	_theme.set_constant(&"h_separation", &"NavButton", 4)
 
 
@@ -326,118 +400,96 @@ func _panel(type: StringName, box: StyleBox) -> void:
 
 
 func _build_panels() -> void:
-	_panel(&"PanelContainer", _tex("panel_default", _inner("panel_default", [24, 24, 24, 24])))
-	_panel(&"PanelCard", _tex("panel_card", _inner("panel_card", [16, 28, 16, 16])))
-	_panel(&"PanelCrest", _tex("panel_crest", _inner("panel_crest", [20, 56, 20, 36])))
-	_panel(&"PanelBanner", _tex("panel_banner", _inner("panel_banner", [28, 4, 28, 4])))
-	_panel(&"PanelPlate", _tex("plate_small", _inner("plate_small", [10, 0, 10, 0])))
-	# NavBar: the Home bottom navigation dock. The default stone panel, with tight vertical padding
-	# so five NavButtons fit a thumb-height strip.
-	_panel(&"NavBar", _tex("panel_default", _inner("panel_default", [6, 2, 6, 2])))
-	var ring := StyleBoxTexture.new()
-	ring.texture = load(RING_TEXTURE)
-	for side: int in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
-		ring.set_content_margin(side, 56.0)
-	_panel(&"PortraitRing", ring)
+	_panel(&"PanelContainer", _tex("panel_default", [36, 36, 36, 36]))
+	_panel(&"PanelCard", _tex("panel_card", [36, 52, 36, 48]))
+	_panel(&"PanelCrest", _tex("panel_crest", [64, 80, 64, 64]))
+	_panel(&"PanelBanner", _tex("panel_banner", _fit_line("panel_banner", 48.0, FONT_TITLE)))
+	# Plates: digits sit on the interior, which is one art pixel lower than the frame's middle.
+	_panel(&"PanelPlate", _tex("plate_small", [28, 6, 28, 10]))
+	_panel(&"RewardPlate", _tex("hud_alert_plate", [28, 6, 28, 10]))
+	# The Shop tab dock: no vertical padding, so 88 px NavButtons fill it at its native height.
+	_panel(&"NavBar", _tex("nav_dock", [20, 0, 20, 0]))
+	_panel(&"PortraitRing", _tex("portrait_ring", [56, 56, 56, 56]))
 
 
 # ------------------------------------------------------------------------ bars
 
-func _bar_bg() -> StyleBoxTexture:
-	var s: Dictionary = _slice("bar_track")
-	var half := floorf(float(s.frame[1]) * 0.5)
-	var m: Array = s.margins
-	var e: Array = s.expand
-	return _tex("bar_track", [m[0] - e[0], half, m[2] - e[2], float(s.frame[1]) - half])
-
-
-func _bar_fill(name: String) -> StyleBoxTexture:
-	return _tex(name, _slice(name).content)
+## Track and fill share one outline in the kit: the fill covers the track where it reaches.
+func _bar(type: StringName, track: String, fill: String) -> void:
+	var half := _native_height(track) * 0.5
+	var side: float = _slice(track).margins[0]
+	_theme.set_stylebox(&"background", type, _tex(track, [side, half, side, half]))
+	_theme.set_stylebox(&"fill", type, _tex(fill, [side, 0, side, 0]))
 
 
 func _build_bars() -> void:
 	var t := &"ProgressBar"
-	_theme.set_stylebox(&"background", t, _bar_bg())
-	_theme.set_stylebox(&"fill", t, _bar_fill("bar_fill"))
+	_bar(t, "progress_track", "progress_fill_xp")
 	_theme.set_color(&"font_color", t, Pal.SOUL_WHITE)
 	_theme.set_color(&"font_outline_color", t, Pal.TEXT_OUTLINE)
 	_theme.set_font_size(&"font_size", t, FONT_BAR)
 	_theme.set_constant(&"outline_size", t, 4)
 
 	_variation(&"BossProgressBar", t)
-	_theme.set_stylebox(&"background", &"BossProgressBar", _bar_bg())
-	_theme.set_stylebox(&"fill", &"BossProgressBar", _bar_fill("bar_fill_boss"))
-
+	_bar(&"BossProgressBar", "progress_track", "progress_fill_boss")
 	_variation(&"SlimProgressBar", t)
-	_theme.set_stylebox(&"background", &"SlimProgressBar",
-			_flat(Color(Pal.VOID_CHARCOAL, 0.92), Pal.STEEL_BORDER, 2, 6, 9.0))
-	var fill := _flat(Pal.SOUL_CYAN, Color(Pal.VOID_CHARCOAL, 0.92), 3, 6, 0.0)
-	fill.content_margin_left = 6.0
-	fill.content_margin_right = 6.0
-	_theme.set_stylebox(&"fill", &"SlimProgressBar", fill)
-
-	# RUSH meter under the HUD XP strip: the same slim track, a Soul White fill with a cyan rim so it
-	# never reads as a second XP bar (GDD §5.6).
+	_bar(&"SlimProgressBar", "hud_slim_track", "hud_slim_fill_xp")
+	# RUSH meter: the slim track with the kit's ivory fill, so it never reads as a second XP strip.
 	_variation(&"RushProgressBar", t)
-	_theme.set_stylebox(&"background", &"RushProgressBar",
-			_flat(Color(Pal.VOID_CHARCOAL, 0.92), Pal.STEEL_BORDER, 2, 6, 9.0))
-	var rush_fill := _flat(Pal.SOUL_WHITE, Pal.SOUL_CYAN, 3, 6, 0.0)
-	rush_fill.content_margin_left = 6.0
-	rush_fill.content_margin_right = 6.0
-	_theme.set_stylebox(&"fill", &"RushProgressBar", rush_fill)
+	_bar(&"RushProgressBar", "hud_slim_track", "hud_slim_fill_rush")
 
 
 func _build_slider() -> void:
 	var t := &"HSlider"
-	_theme.set_stylebox(&"slider", t,
-			_flat(Color(Pal.VOID_CHARCOAL, 0.92), Pal.STEEL_BORDER, 2, 6, 8.0))
-	_theme.set_stylebox(&"grabber_area", t, _flat(Pal.SOUL_CYAN, Pal.SOUL_CYAN, 0, 6, 8.0))
-	_theme.set_stylebox(&"grabber_area_highlight", t,
-			_flat(Pal.SOUL_CYAN.lerp(Pal.SOUL_WHITE, 0.4), Pal.SOUL_CYAN, 0, 6, 8.0))
-	_theme.set_stylebox(&"focus", t, _focus_box(6.0))
-	_theme.set_icon(&"grabber", t, load(TEX_DIR + "grabber.png"))
-	_theme.set_icon(&"grabber_highlight", t, load(TEX_DIR + "grabber_highlight.png"))
-	_theme.set_icon(&"grabber_disabled", t, load(TEX_DIR + "grabber_disabled.png"))
+	var half := _native_height("hud_slim_track") * 0.5
+	var c := [16, half, 16, half]
+	_theme.set_stylebox(&"slider", t, _tex("hud_slim_track", c))
+	_theme.set_stylebox(&"grabber_area", t, _tex("hud_slim_fill_xp", c))
+	_theme.set_stylebox(&"grabber_area_highlight", t, _tex("hud_slim_fill_xp", c, HOVER))
+	_theme.set_stylebox(&"focus", t, _ring("icon_tile_focus_ring"))
+	_theme.set_icon(&"grabber", t, _wrapped["slider_grabber_idle"])
+	_theme.set_icon(&"grabber_highlight", t, _wrapped["slider_grabber_active"])
+	_theme.set_icon(&"grabber_disabled", t, _wrapped["slider_grabber_disabled"])
 	_theme.set_icon(&"tick", t, ImageTexture.new())
 	_theme.set_constant(&"center_grabber", t, 0)
 	_theme.set_constant(&"grabber_offset", t, 0)
 
 
 func _build_separator() -> void:
-	var s: Dictionary = _slice("divider_line")
-	var h: float = s.frame[1]
-	var box := _tex("divider_line", [0, floorf(h * 0.5), 0, h - floorf(h * 0.5)])
+	var h := _native_height("divider")
+	var box := _tex("divider", [0, floorf(h * 0.5), 0, h - floorf(h * 0.5)])
 	_theme.set_stylebox(&"separator", &"HSeparator", box)
 	_theme.set_constant(&"separation", &"HSeparator", 24)
 
 
 func _build_scrollbar() -> void:
 	var t := &"VScrollBar"
-	var track := _flat(Color(Pal.VOID_CHARCOAL, 0.5), Color(0, 0, 0, 0), 0, 4, 5.0)
+	var track := _flat(Color(Pal.OBSIDIAN, 0.6), 4.0)
 	_theme.set_stylebox(&"scroll", t, track)
 	_theme.set_stylebox(&"scroll_focus", t, track)
-	_theme.set_stylebox(&"grabber", t, _flat(Color(Pal.SOUL_CYAN, 0.55), Color(0, 0, 0, 0), 0, 4, 5.0))
-	_theme.set_stylebox(&"grabber_highlight", t, _flat(Pal.SOUL_CYAN, Color(0, 0, 0, 0), 0, 4, 5.0))
-	_theme.set_stylebox(&"grabber_pressed", t, _flat(Pal.SOUL_WHITE, Color(0, 0, 0, 0), 0, 4, 5.0))
+	_theme.set_stylebox(&"grabber", t, _flat(Pal.STONE_LIGHT, 4.0))
+	_theme.set_stylebox(&"grabber_highlight", t, _flat(Pal.STITCH, 4.0))
+	_theme.set_stylebox(&"grabber_pressed", t, _flat(Pal.IVORY_LIGHT, 4.0))
 
 
 # ------------------------------------------------------------------------ ornaments
 
 ## Ornament scenes: instance one as a child of a PanelContainer with the matching variation.
 ## The root is a zero-size Control the container centres on its content edge; the art is
-## offset back out onto the frame edge using that variation's content margin.
+## offset back out so the kit's 48 px edge ornament sits centred on the frame's top/bottom band.
 func _build_ornaments() -> void:
-	_ornament("crest_top", "ornament_crest_top", &"PanelCrest")
-	_ornament("crest_bottom", "ornament_crest_bottom", &"PanelCrest")
-	_ornament("card_top", "ornament_card_top", &"PanelCard")
-	_ornament("banner_top", "ornament_banner_top", &"PanelBanner")
-	_ornament("amber_top", "ornament_amber_top", &"PanelContainer")
+	_ornament("crest_top", "ornament_diamond_cyan", &"PanelCrest", "panel_crest", true)
+	_ornament("crest_bottom", "ornament_diamond_cyan", &"PanelCrest", "panel_crest", false)
+	_ornament("card_top", "ornament_diamond_cyan", &"PanelCard", "panel_card", true)
+	_ornament("banner_top", "ornament_diamond_cyan", &"PanelBanner", "panel_banner", true)
+	_ornament("amber_top", "ornament_diamond_warm", &"PanelContainer", "panel_default", true)
 
 
-func _ornament(scene_name: String, tex_name: String, panel: StringName) -> void:
-	var s: Dictionary = _slice(tex_name)
-	var size := Vector2(s.size[0], s.size[1])
-	var off := Vector2(s.offset[0], s.offset[1])
+func _ornament(scene_name: String, tex_name: String, panel: StringName, piece: String,
+		top: bool) -> void:
+	var s: Dictionary = _slice(piece)
+	var art_tex: Texture2D = _wrapped[tex_name]
+	var art_size: Vector2 = art_tex.get_size()
 	var margins: Array = _panel_margins[panel]
 	var root := Control.new()
 	root.name = scene_name.to_pascal_case() + "Ornament"
@@ -445,17 +497,21 @@ func _ornament(scene_name: String, tex_name: String, panel: StringName) -> void:
 	root.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	var art := TextureRect.new()
 	art.name = "Art"
-	art.texture = load(TEX_DIR + tex_name + ".png")
+	art.texture = art_tex
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	art.size = size
-	if s.edge == "top":
+	art.size = art_size
+	var x := -floorf(art_size.x * 0.5)
+	if top:
+		var band: Array = s.top_band
+		var centre: float = (float(band[0]) + float(band[1])) * 0.5
 		root.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-		art.position = Vector2(roundf(-size.x * 0.5 + off.x), roundf(off.y - float(margins[1])))
+		art.position = Vector2(x, roundf(centre - art_size.y * 0.5 - float(margins[1])))
 	else:
+		var band: Array = s.bottom_band
+		var from_bottom: float = float(s.size[1]) - (float(band[0]) + float(band[1])) * 0.5
 		root.size_flags_vertical = Control.SIZE_SHRINK_END
-		art.position = Vector2(roundf(-size.x * 0.5 + off.x),
-				roundf(float(margins[3]) + off.y - size.y))
+		art.position = Vector2(x, roundf(float(margins[3]) - from_bottom - art_size.y * 0.5))
 	root.add_child(art)
 	art.owner = root
 	var packed := PackedScene.new()

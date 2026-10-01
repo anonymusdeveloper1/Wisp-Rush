@@ -1,0 +1,31 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/components/whole_frame_enemy.gd" id="1_enemy"]
+[ext_resource type="Resource" path="res://data/enemies/stone_golem.tres" id="2_tuning"]
+[ext_resource type="SpriteFrames" path="res://data/enemies/stone_golem_frames.tres" id="3_frames"]
+[ext_resource type="Texture2D" path="res://assets/art/vfx/11_boss_warning_ring.png" id="4_arrival"]
+[ext_resource type="Texture2D" path="res://assets/art/vfx/03_wall_impact_small.png" id="5_hit_flash"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/enemies_v2/projectiles/stone_golem_projectile.png" id="6_shot"]
+
+[node name="StoneGolem" type="Node2D" groups=["enemies"]]
+script = ExtResource("1_enemy")
+tuning = ExtResource("2_tuning")
+attack = 2
+release_frame = 16
+release_offset = Vector2(60, 8)
+faces_right = true
+projectile_texture = ExtResource("6_shot")
+
+[node name="ArrivalRing" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+texture = ExtResource("4_arrival")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+unique_name_in_owner = true
+sprite_frames = ExtResource("3_frames")
+animation = &"move"
+
+[node name="HitFlash" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+z_index = 2
+texture = ExtResource("5_hit_flash")

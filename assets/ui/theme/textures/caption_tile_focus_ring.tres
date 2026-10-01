@@ -1,0 +1,7 @@
+[gd_resource type="CanvasTexture" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/theme/textures/caption_tile_focus_ring.png" id="1_8m8fo"]
+
+[resource]
+diffuse_texture = ExtResource("1_8m8fo")
+texture_filter = 1

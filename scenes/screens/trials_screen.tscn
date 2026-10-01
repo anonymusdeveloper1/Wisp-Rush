@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scenes/screens/trials_screen.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/art/environment/menu_background.png" id="2_bg"]
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/banner_top.tscn" id="3_banner"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/system/02_soul_shards.png" id="4_shards"]
+[ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_currency.tres" id="4_shards"]
 
 [node name="TrialsScreen" type="Control"]
 layout_mode = 3
@@ -82,7 +82,7 @@ layout_mode = 2
 theme_override_constants/separation = 14
 
 [node name="Icon" type="TextureRect" parent="Root/Column/Header/RankPlate/RankRow"]
-custom_minimum_size = Vector2(52, 52)
+custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 size_flags_vertical = 4
 texture = ExtResource("4_shards")
@@ -93,7 +93,7 @@ stretch_mode = 5
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"AmberValueLabel"
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 44
 text = "RANK 1"
 
 [node name="Scroll" type="ScrollContainer" parent="Root/Column"]

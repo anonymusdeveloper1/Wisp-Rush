@@ -1,0 +1,1126 @@
+{
+  "board": "board_01",
+  "art_pixel_to_game_pixel": 2,
+  "board_width_art": 540,
+  "floor_width_art": 468,
+  "floor_x_art": 36,
+  "lighting": "top_left",
+  "palette": {
+    "iron": [
+      "#0B1116",
+      "#151E24",
+      "#263238",
+      "#35434A",
+      "#62716C"
+    ],
+    "wood": [
+      "#241A16",
+      "#36241B",
+      "#493021",
+      "#5D3C29",
+      "#754E32",
+      "#8B603C",
+      "#A67749"
+    ],
+    "stone": [
+      "#3E3C38",
+      "#48453F",
+      "#514D45",
+      "#5C564D",
+      "#655D52",
+      "#71685B"
+    ],
+    "stone_light": [
+      "#91806C",
+      "#A28F76",
+      "#B4A084",
+      "#C3AF93"
+    ],
+    "cloth": [
+      "#8E795F",
+      "#B19A78",
+      "#D3BB96",
+      "#FAE5C1"
+    ],
+    "stitches": [
+      "#7C3B28",
+      "#AD5435"
+    ],
+    "brass_amber": [
+      "#674222",
+      "#95662E",
+      "#C88E39",
+      "#F3A847",
+      "#FFD275"
+    ],
+    "flame_core": [
+      "#FFF1C3",
+      "#EAFDFF"
+    ],
+    "moss": [
+      "#2F3C27",
+      "#465836",
+      "#5E7D4C",
+      "#82985C"
+    ],
+    "soul": [
+      "#276E80",
+      "#3FB7C4",
+      "#62E8F2"
+    ],
+    "boss": [
+      "#512860",
+      "#883BA7",
+      "#B14CD9"
+    ]
+  },
+  "files": [
+    {
+      "path": "floor/floor_tile_a.png",
+      "size": [
+        96,
+        96
+      ],
+      "kind": "tile",
+      "tiles": "xy"
+    },
+    {
+      "path": "floor/floor_tile_b.png",
+      "size": [
+        96,
+        96
+      ],
+      "kind": "tile",
+      "tiles": "xy"
+    },
+    {
+      "path": "floor/floor_tile_c.png",
+      "size": [
+        96,
+        96
+      ],
+      "kind": "tile",
+      "tiles": "xy"
+    },
+    {
+      "path": "floor/floor_tile_a_light.png",
+      "size": [
+        96,
+        96
+      ],
+      "kind": "tile",
+      "tiles": "xy"
+    },
+    {
+      "path": "frame/post_left_segment.png",
+      "size": [
+        36,
+        64
+      ],
+      "kind": "tile",
+      "tiles": "y"
+    },
+    {
+      "path": "frame/post_right_segment.png",
+      "size": [
+        36,
+        64
+      ],
+      "kind": "tile",
+      "tiles": "y"
+    },
+    {
+      "path": "frame/beam_top_segment.png",
+      "size": [
+        64,
+        64
+      ],
+      "kind": "tile",
+      "tiles": "x"
+    },
+    {
+      "path": "frame/beam_bottom_segment.png",
+      "size": [
+        64,
+        28
+      ],
+      "kind": "tile",
+      "tiles": "x"
+    },
+    {
+      "path": "frame/corner_top_left.png",
+      "size": [
+        36,
+        64
+      ],
+      "kind": "piece",
+      "tiles": null
+    },
+    {
+      "path": "frame/corner_top_right.png",
+      "size": [
+        36,
+        64
+      ],
+      "kind": "piece",
+      "tiles": null
+    },
+    {
+      "path": "frame/corner_bottom_left.png",
+      "size": [
+        36,
+        28
+      ],
+      "kind": "piece",
+      "tiles": null
+    },
+    {
+      "path": "frame/corner_bottom_right.png",
+      "size": [
+        36,
+        28
+      ],
+      "kind": "piece",
+      "tiles": null
+    },
+    {
+      "path": "frame/cap_top_segment.png",
+      "size": [
+        64,
+        64
+      ],
+      "kind": "tile",
+      "tiles": "xy"
+    },
+    {
+      "path": "frame/cap_bottom_segment.png",
+      "size": [
+        64,
+        32
+      ],
+      "kind": "tile",
+      "tiles": "x"
+    },
+    {
+      "path": "frame/rim_h.png",
+      "size": [
+        64,
+        4
+      ],
+      "kind": "tile",
+      "tiles": "x"
+    },
+    {
+      "path": "frame/rim_v.png",
+      "size": [
+        4,
+        64
+      ],
+      "kind": "tile",
+      "tiles": "y"
+    },
+    {
+      "path": "frame/rim_corner.png",
+      "size": [
+        4,
+        4
+      ],
+      "kind": "piece",
+      "tiles": null
+    },
+    {
+      "path": "deco/chain_segment.png",
+      "size": [
+        8,
+        16
+      ],
+      "kind": "tile",
+      "tiles": "y"
+    },
+    {
+      "path": "deco/rivet.png",
+      "size": [
+        6,
+        6
+      ],
+      "kind": "overlay",
+      "tiles": null
+    },
+    {
+      "path": "hud/pause_button_normal.png",
+      "size": [
+        52,
+        52
+      ],
+      "kind": "piece",
+      "tiles": null
+    },
+    {
+      "path": "hud/pause_button_pressed.png",
+      "size": [
+        52,
+        52
+      ],
+      "kind": "piece",
+      "tiles": null
+    },
+    {
+      "path": "hud/crest_center.png",
+      "size": [
+        200,
+        44
+      ],
+      "kind": "piece",
+      "tiles": null
+    },
+    {
+      "path": "hud/boss_plate.png",
+      "size": [
+        200,
+        44
+      ],
+      "kind": "piece",
+      "tiles": null,
+      "icon_socket": [
+        17,
+        6,
+        32,
+        32
+      ],
+      "fill_rect": [
+        60,
+        16,
+        132,
+        12
+      ]
+    },
+    {
+      "path": "hud/boss_fill_segment.png",
+      "size": [
+        8,
+        12
+      ],
+      "kind": "overlay",
+      "tiles": "x",
+      "fill_rect": [
+        0,
+        0,
+        8,
+        12
+      ]
+    },
+    {
+      "path": "hud/score_plate.png",
+      "size": [
+        120,
+        26
+      ],
+      "kind": "piece",
+      "tiles": null,
+      "text_rect": [
+        8,
+        4,
+        104,
+        18
+      ]
+    },
+    {
+      "path": "hud/rp_plate.png",
+      "size": [
+        120,
+        26
+      ],
+      "kind": "piece",
+      "tiles": null,
+      "icon_socket": [
+        10,
+        3,
+        20,
+        20
+      ],
+      "text_rect": [
+        40,
+        4,
+        72,
+        18
+      ]
+    },
+    {
+      "path": "hud/soul_gauge_top.png",
+      "size": [
+        36,
+        44
+      ],
+      "kind": "piece",
+      "tiles": null,
+      "text_rect": [
+        6,
+        4,
+        24,
+        24
+      ],
+      "icon_socket": [
+        6,
+        4,
+        24,
+        24
+      ],
+      "fill_rect": [
+        12,
+        33,
+        12,
+        11
+      ]
+    },
+    {
+      "path": "hud/soul_gauge_segment.png",
+      "size": [
+        36,
+        32
+      ],
+      "kind": "piece",
+      "tiles": "y",
+      "fill_rect": [
+        12,
+        0,
+        12,
+        32
+      ]
+    },
+    {
+      "path": "hud/soul_gauge_bottom.png",
+      "size": [
+        36,
+        20
+      ],
+      "kind": "piece",
+      "tiles": null,
+      "fill_rect": [
+        12,
+        0,
+        12,
+        10
+      ]
+    },
+    {
+      "path": "hud/soul_fill_segment.png",
+      "size": [
+        12,
+        32
+      ],
+      "kind": "overlay",
+      "tiles": "y",
+      "fill_rect": [
+        0,
+        0,
+        12,
+        32
+      ]
+    },
+    {
+      "path": "hud/soul_fill_top.png",
+      "size": [
+        12,
+        8
+      ],
+      "kind": "overlay",
+      "tiles": null,
+      "fill_rect": [
+        0,
+        0,
+        12,
+        8
+      ]
+    },
+    {
+      "path": "hud/rush_gauge_top.png",
+      "size": [
+        36,
+        44
+      ],
+      "kind": "piece",
+      "tiles": null,
+      "fill_rect": [
+        12,
+        33,
+        12,
+        11
+      ]
+    },
+    {
+      "path": "hud/rush_gauge_segment.png",
+      "size": [
+        36,
+        32
+      ],
+      "kind": "piece",
+      "tiles": "y",
+      "fill_rect": [
+        12,
+        0,
+        12,
+        32
+      ]
+    },
+    {
+      "path": "hud/rush_gauge_bottom.png",
+      "size": [
+        36,
+        20
+      ],
+      "kind": "piece",
+      "tiles": null,
+      "fill_rect": [
+        12,
+        0,
+        12,
+        10
+      ]
+    },
+    {
+      "path": "hud/rush_fill_segment.png",
+      "size": [
+        12,
+        32
+      ],
+      "kind": "overlay",
+      "tiles": "y",
+      "fill_rect": [
+        0,
+        0,
+        12,
+        32
+      ]
+    },
+    {
+      "path": "hud/rush_fill_top.png",
+      "size": [
+        12,
+        8
+      ],
+      "kind": "overlay",
+      "tiles": null,
+      "fill_rect": [
+        0,
+        0,
+        12,
+        8
+      ]
+    },
+    {
+      "path": "hud/rush_full_flare.png",
+      "size": [
+        36,
+        64
+      ],
+      "kind": "overlay",
+      "tiles": null
+    },
+    {
+      "path": "hud/upgrade_count_tag.png",
+      "size": [
+        24,
+        18
+      ],
+      "kind": "piece",
+      "tiles": null,
+      "text_rect": [
+        5,
+        4,
+        14,
+        10
+      ]
+    },
+    {
+      "path": "anim/lantern_off.png",
+      "size": [
+        28,
+        44
+      ],
+      "kind": "anim_frame",
+      "tiles": null,
+      "anchor": [
+        14,
+        43
+      ],
+      "light_rect": [
+        7,
+        23,
+        14,
+        12
+      ],
+      "animation": "off"
+    },
+    {
+      "path": "anim/lantern_lit_0.png",
+      "size": [
+        28,
+        44
+      ],
+      "kind": "anim_frame",
+      "tiles": null,
+      "anchor": [
+        14,
+        43
+      ],
+      "light_rect": [
+        7,
+        23,
+        14,
+        12
+      ],
+      "animation": "lit"
+    },
+    {
+      "path": "anim/lantern_lit_1.png",
+      "size": [
+        28,
+        44
+      ],
+      "kind": "anim_frame",
+      "tiles": null,
+      "anchor": [
+        14,
+        43
+      ],
+      "light_rect": [
+        7,
+        23,
+        14,
+        12
+      ],
+      "animation": "lit"
+    },
+    {
+      "path": "anim/lantern_lit_2.png",
+      "size": [
+        28,
+        44
+      ],
+      "kind": "anim_frame",
+      "tiles": null,
+      "anchor": [
+        14,
+        43
+      ],
+      "light_rect": [
+        7,
+        23,
+        14,
+        12
+      ],
+      "animation": "lit"
+    },
+    {
+      "path": "anim/lantern_lit_3.png",
+      "size": [
+        28,
+        44
+      ],
+      "kind": "anim_frame",
+      "tiles": null,
+      "anchor": [
+        14,
+        43
+      ],
+      "light_rect": [
+        7,
+        23,
+        14,
+        12
+      ],
+      "animation": "lit"
+    },
+    {
+      "path": "anim/lantern_glow_0.png",
+      "size": [
+        28,
+        44
+      ],
+      "kind": "anim_frame",
+      "tiles": null,
+      "anchor": [
+        14,
+        43
+      ],
+      "light_rect": [
+        7,
+        23,
+        14,
+        12
+      ],
+      "animation": "glow"
+    },
+    {
+      "path": "anim/lantern_glow_1.png",
+      "size": [
+        28,
+        44
+      ],
+      "kind": "anim_frame",
+      "tiles": null,
+      "anchor": [
+        14,
+        43
+      ],
+      "light_rect": [
+        7,
+        23,
+        14,
+        12
+      ],
+      "animation": "glow"
+    },
+    {
+      "path": "anim/lantern_glow_2.png",
+      "size": [
+        28,
+        44
+      ],
+      "kind": "anim_frame",
+      "tiles": null,
+      "anchor": [
+        14,
+        43
+      ],
+      "light_rect": [
+        7,
+        23,
+        14,
+        12
+      ],
+      "animation": "glow"
+    },
+    {
+      "path": "anim/lantern_glow_3.png",
+      "size": [
+        28,
+        44
+      ],
+      "kind": "anim_frame",
+      "tiles": null,
+      "anchor": [
+        14,
+        43
+      ],
+      "light_rect": [
+        7,
+        23,
+        14,
+        12
+      ],
+      "animation": "glow"
+    },
+    {
+      "path": "deco/cloth_wrap_post_a.png",
+      "size": [
+        36,
+        48
+      ],
+      "kind": "overlay",
+      "tiles": null
+    },
+    {
+      "path": "deco/cloth_tail_beam_a.png",
+      "size": [
+        48,
+        24
+      ],
+      "kind": "overlay",
+      "tiles": null
+    },
+    {
+      "path": "deco/cloth_wrap_post_b.png",
+      "size": [
+        36,
+        48
+      ],
+      "kind": "overlay",
+      "tiles": null
+    },
+    {
+      "path": "deco/cloth_tail_beam_b.png",
+      "size": [
+        48,
+        24
+      ],
+      "kind": "overlay",
+      "tiles": null
+    },
+    {
+      "path": "deco/cloth_wrap_post_c.png",
+      "size": [
+        36,
+        48
+      ],
+      "kind": "overlay",
+      "tiles": null
+    },
+    {
+      "path": "deco/cloth_tail_beam_c.png",
+      "size": [
+        48,
+        24
+      ],
+      "kind": "overlay",
+      "tiles": null
+    },
+    {
+      "path": "deco/moss_a.png",
+      "size": [
+        18,
+        18
+      ],
+      "kind": "overlay",
+      "tiles": null
+    },
+    {
+      "path": "deco/moss_b.png",
+      "size": [
+        20,
+        20
+      ],
+      "kind": "overlay",
+      "tiles": null
+    },
+    {
+      "path": "deco/moss_c.png",
+      "size": [
+        24,
+        24
+      ],
+      "kind": "overlay",
+      "tiles": null
+    },
+    {
+      "path": "deco/moss_d.png",
+      "size": [
+        16,
+        16
+      ],
+      "kind": "overlay",
+      "tiles": null
+    },
+    {
+      "path": "deco/moss_e.png",
+      "size": [
+        22,
+        22
+      ],
+      "kind": "overlay",
+      "tiles": null
+    },
+    {
+      "path": "deco/moss_f.png",
+      "size": [
+        14,
+        14
+      ],
+      "kind": "overlay",
+      "tiles": null
+    },
+    {
+      "path": "preview/mock_1080x2340.png",
+      "size": [
+        1080,
+        2340
+      ],
+      "kind": "piece",
+      "tiles": null,
+      "pixel_scale": 2,
+      "floor_rect_game": [
+        72,
+        252,
+        936,
+        1992
+      ],
+      "top_cap_game": 124,
+      "bottom_cap_game": 40,
+      "preview_only": [
+        "004250",
+        "125",
+        "7",
+        "2",
+        "plain character silhouette"
+      ]
+    },
+    {
+      "path": "preview/mock_1080x1920.png",
+      "size": [
+        1080,
+        1920
+      ],
+      "kind": "piece",
+      "tiles": null,
+      "pixel_scale": 2,
+      "floor_rect_game": [
+        72,
+        192,
+        936,
+        1632
+      ],
+      "top_cap_game": 64,
+      "bottom_cap_game": 40,
+      "preview_only": [
+        "004250",
+        "125",
+        "7",
+        "2",
+        "plain character silhouette"
+      ]
+    },
+    {
+      "path": "review/tiling_check.png",
+      "size": [
+        960,
+        1920
+      ],
+      "kind": "piece",
+      "tiles": null,
+      "panels": [
+        {
+          "row": 1,
+          "column": 1,
+          "path": "floor/floor_tile_a.png",
+          "integer_preview_scale": 1
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "path": "floor/floor_tile_b.png",
+          "integer_preview_scale": 1
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "path": "floor/floor_tile_c.png",
+          "integer_preview_scale": 1
+        },
+        {
+          "row": 2,
+          "column": 1,
+          "path": "floor/floor_tile_a_light.png",
+          "integer_preview_scale": 1
+        },
+        {
+          "row": 2,
+          "column": 2,
+          "path": "frame/post_left_segment.png",
+          "integer_preview_scale": 1
+        },
+        {
+          "row": 2,
+          "column": 3,
+          "path": "frame/post_right_segment.png",
+          "integer_preview_scale": 1
+        },
+        {
+          "row": 3,
+          "column": 1,
+          "path": "frame/beam_top_segment.png",
+          "integer_preview_scale": 1
+        },
+        {
+          "row": 3,
+          "column": 2,
+          "path": "frame/beam_bottom_segment.png",
+          "integer_preview_scale": 1
+        },
+        {
+          "row": 3,
+          "column": 3,
+          "path": "frame/cap_top_segment.png",
+          "integer_preview_scale": 1
+        },
+        {
+          "row": 4,
+          "column": 1,
+          "path": "frame/cap_bottom_segment.png",
+          "integer_preview_scale": 1
+        },
+        {
+          "row": 4,
+          "column": 2,
+          "path": "frame/rim_h.png",
+          "integer_preview_scale": 1
+        },
+        {
+          "row": 4,
+          "column": 3,
+          "path": "frame/rim_v.png",
+          "integer_preview_scale": 1
+        },
+        {
+          "row": 5,
+          "column": 1,
+          "path": "deco/chain_segment.png",
+          "integer_preview_scale": 4
+        },
+        {
+          "row": 5,
+          "column": 2,
+          "path": "hud/boss_fill_segment.png",
+          "integer_preview_scale": 4
+        },
+        {
+          "row": 5,
+          "column": 3,
+          "path": "hud/soul_gauge_segment.png",
+          "integer_preview_scale": 2
+        },
+        {
+          "row": 6,
+          "column": 1,
+          "path": "hud/soul_fill_segment.png",
+          "integer_preview_scale": 3
+        },
+        {
+          "row": 6,
+          "column": 2,
+          "path": "hud/rush_gauge_segment.png",
+          "integer_preview_scale": 2
+        },
+        {
+          "row": 6,
+          "column": 3,
+          "path": "hud/rush_fill_segment.png",
+          "integer_preview_scale": 3
+        }
+      ]
+    }
+  ],
+  "documents": [
+    "README.md",
+    "manifest.json"
+  ],
+  "existing_inputs_unchanged": [
+    "CODEX_PROMPT.md",
+    "reference/owner_board_reference.png"
+  ],
+  "previews": {
+    "mock_1080x2340": {
+      "art_size": [
+        540,
+        1170
+      ],
+      "top_cap_art": 62,
+      "bottom_cap_art": 20,
+      "floor_rect_art": [
+        36,
+        126,
+        468,
+        996
+      ],
+      "soul_gauge_art": [
+        0,
+        214,
+        36,
+        352
+      ],
+      "rush_gauge_art": [
+        504,
+        214,
+        36,
+        352
+      ],
+      "center": "boss_plate",
+      "lantern_positions_art": [
+        [
+          4,
+          134
+        ],
+        [
+          508,
+          134
+        ],
+        [
+          4,
+          1066
+        ],
+        [
+          508,
+          1066
+        ]
+      ]
+    },
+    "mock_1080x1920": {
+      "art_size": [
+        540,
+        960
+      ],
+      "top_cap_art": 32,
+      "bottom_cap_art": 20,
+      "floor_rect_art": [
+        36,
+        96,
+        468,
+        816
+      ],
+      "soul_gauge_art": [
+        0,
+        184,
+        36,
+        352
+      ],
+      "rush_gauge_art": [
+        504,
+        184,
+        36,
+        352
+      ],
+      "center": "crest_center",
+      "lantern_positions_art": [
+        [
+          4,
+          104
+        ],
+        [
+          508,
+          104
+        ],
+        [
+          4,
+          856
+        ],
+        [
+          508,
+          856
+        ]
+      ]
+    }
+  },
+  "animation_frames": {
+    "off": [
+      "anim/lantern_off.png"
+    ],
+    "lit": [
+      "anim/lantern_lit_0.png",
+      "anim/lantern_lit_1.png",
+      "anim/lantern_lit_2.png",
+      "anim/lantern_lit_3.png"
+    ],
+    "glow": [
+      "anim/lantern_glow_0.png",
+      "anim/lantern_glow_1.png",
+      "anim/lantern_glow_2.png",
+      "anim/lantern_glow_3.png"
+    ]
+  },
+  "validation": {
+    "png_count": 62,
+    "art_png_count": 59,
+    "palette_color_count_used": 44,
+    "floor_mean_luma": {
+      "floor/floor_tile_a.png": 0.3415,
+      "floor/floor_tile_b.png": 0.3403,
+      "floor/floor_tile_c.png": 0.3419,
+      "floor/floor_tile_a_light.png": 0.5387
+    },
+    "binary_alpha": true,
+    "tile_join_edges": "all matched, including all 16 floor pairings",
+    "preview_nearest_2x": true,
+    "frame_intrusion_into_floor": false,
+    "lantern_frames_distinct": true,
+    "lantern_casing_fixed": true
+  }
+}

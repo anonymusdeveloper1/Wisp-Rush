@@ -1,0 +1,9 @@
+{
+  "id": "stitched_doll_jungle",
+  "display_name": "STITCHED DOLL JUNGLE",
+  "description": "A giant stitched doll with a burning scythe holds the arena up over jungle ruins at night.",
+  "source": "source.png",
+  "source_note": "The owner's image (night version), placed here by Codex on 2026-09-30, unchanged. 941x1672 (9:16): the safe zone only, no bleed. Its floor is not the shared one; the owner keeps the image as it is and the arena brings its own floor (2026-09-30, ADR-0020).",
+  "floor_rect_px": [265, 450, 679, 1266],
+  "floor_rect_note": "The tiled floor inside the frame, [left, top, right, bottom] in source pixels, measured on the frame's dark inner outline (the top one just under the beam). Lanterns and cloth hang over its corners and top edge, as painted."
+}

@@ -9,9 +9,8 @@ complete concept sheet. Each run also writes a QA contact sheet per character to
 Requirements: Python 3.7+, Pillow 9.5, numpy 1.21 and scipy 1.7.
 
     python3 tools/art/extract_playable_characters.py              # every character
-    python3 tools/art/extract_playable_characters.py rook morrow  # only these
-    python3 tools/art/extract_playable_characters.py ilyra           # a whole-pose pack
-    python3 tools/art/extract_playable_characters.py verdant_shade   # a packed sheet pack
+    python3 tools/art/extract_playable_characters.py morrow        # only these
+    python3 tools/art/extract_playable_characters.py scarlet         # a packed sheet pack
 """
 import json
 import shutil
@@ -32,17 +31,35 @@ CONTACTS = REPO / "logs/playable_characters"
 
 ## Widest texture every device is guaranteed to accept; each packed sheet stays inside it.
 MAX_TEXTURE = 4096
-## How close to a frame's border a detached piece has to sit, as a share of the frame, to count as
-## severed rather than as part of the character. See `strip_clipped_fragments`.
-CLIP_MARGIN_SHARE = 0.05
 ## Transparent gutter around every packed cell, in sheet pixels.
 ##
 ## Without it a frame whose art reaches its cell edge bleeds into its neighbour: the canvas texture
 ## filter samples half a texel outside the atlas region, so the player sees a sliver of a *different*
-## frame stuck to the edge of the current one. Verdant Shade's first pack measured a 0 px margin on
-## some cells and did exactly that on the phone. Eight pixels is more than any linear tap or the
+## frame stuck to the edge of the current one. A character pack once measured a 0 px margin on some
+## cells and did exactly that on the phone. Eight pixels is more than any linear tap or the
 ## importer's `fix_alpha_border` expansion can reach.
 CELL_PADDING = 8
+## The flips a sheet pack's `derive` may ask for: `flip_v` turns a floor loop into a ceiling one,
+## `flip_h` one side wall into the other.
+FLIPS = {"flip_v": Image.FLIP_TOP_BOTTOM, "flip_h": Image.FLIP_LEFT_RIGHT}
+
+## The roster size (owner, 2026-09-24; restored 2026-09-26): every AutoSprite character has
+## Patchvile's pixel count and every character is the same size. In its 256 px frames the whole figure
+## stands 194 px tall, measured on the first storefront frame from its highest point (hood, hair,
+## crown) to its feet. AutoSprite keeps the proportions of the uploaded first frame exactly (his dash
+## upload filled 77.2 % of its width, the frame 77.3 %), so Codex draws every first frame at that
+## size. A pack with `"roster_scale": True` is then packed at Patchvile's exact scale instead of
+## fitting its own frames, so the same pixel count means the same size and the same detail on screen.
+ROSTER_STANDING = 194
+## Cell px per source px at Patchvile's scale. His `fit` made these: his largest run animation spans
+## 188 source px and his storefront 223, each filled to 92 % of its cell (256 and 448 px). The run
+## factor serves the dash sheet too, as his `fit_match` does.
+ROSTER_RUN_FACTOR = 0.92 * 256 / 188
+ROSTER_MENU_FACTOR = 0.92 * 448 / 223
+## How far a character's standing height may sit from ROSTER_STANDING (or a pack's own `standing`,
+## Scarlet's), as a share: past the first it warns, past the second the pack is refused.
+ROSTER_STANDING_WARN = 0.05
+ROSTER_STANDING_LIMIT = 0.10
 
 Box = Tuple[int, int, int, int]
 Polygon = List[Tuple[int, int]]
@@ -51,56 +68,39 @@ Polygon = List[Tuple[int, int]]
 # output), while later packs point at their own approved rig source. `tools/art/make_rig_source.py`
 # builds these transparent sheets from the opaque approved references.
 ## Empty since 2026-09-20: the two characters that used a rig source sheet (Ilyra, Bram) were
-## retired, and Noxen ships as a per-file part pack. Kept as the seam for the next sheet pack.
+## retired. Kept as the seam for the next sheet pack.
 SOURCE_SHEETS: Dict[str, Path] = {}
 
 # Newer packs ship one transparent PNG per rig group plus a `manifest.json` of pivots, so there is
 # nothing to cut: the art is ingested verbatim (re-cropping would invalidate every pivot) and only
 # checked. `tools/art/build_character_rig.py` turns the same manifest into the rig scene.
-PART_PACKS: Dict[str, Path] = {
-	"noxen": REPO / "concept_art/noxen_v1/parts/noxen",
-}
+## Empty since 2026-09-25: Noxen, its only user, was removed. Kept as the seam for the next part pack.
+PART_PACKS: Dict[str, Path] = {}
 # Parts that bend on a bone chain at runtime; their spine runs straight from pivot to tip, because
 # the pack authors every hanging part vertically at rest.
-PACK_RIBBONS: Dict[str, List[str]] = {
-	"noxen": ["root_ribbon_l", "root_ribbon_r"],
-}
+PACK_RIBBONS: Dict[str, List[str]] = {}
 
 # A pose pack is a different kind of input: not parts of a rig, but one finished painting per
 # animation state. Nothing is cut - the approved PNGs are copied byte for byte - and the extractor
 # only measures where the figure sits inside each equally sized canvas, so the runtime can put every
 # pose on the same anchor at the same apparent height (`CharacterPoseSheet`).
-POSE_PACKS: Dict[str, Dict[str, object]] = {
-	"ilyra": {
-		"source": REPO / "concept_art/ilyra_2_sprite_test/final_sprites",
-		"sheet": REPO / "data/characters/ilyra_poses.tres",
-		"poses": [
-			"idle_hover", "idle_blink", "move_fly_00", "move_fly_01", "aim_charge",
-			"dash_start_00", "dash_start_01", "dash_loop_00", "dash_loop_01_attack", "dash_end",
-			"hit_reaction", "death", "revive_spawn", "victory",
-			"character_selected", "character_unlocked",
-			"wall_bottom", "wall_top", "wall_left", "wall_right",
-		],
-	},
-}
+## Empty since 2026-09-26: Ilyra, its only user, was removed (Scarlet replaced her). Kept as the seam
+## for the next pose pack.
+POSE_PACKS: Dict[str, Dict[str, object]] = {}
 
 # Apparent-height corrections, measured by matching the character's head across the pack (normalized
 # cross-correlation over scale and rotation, seeded from the idle pose) and rounded to 1 %. Only a
 # pose the generator drew at a different size gets one: `wall_top` is painted inside extra padding at
 # 0.84 of the pack's size, the single deviation the pack's own review notes call out.
-POSE_SCALES: Dict[str, Dict[str, float]] = {
-	"ilyra": {"wall_top": 1.19},
-}
+POSE_SCALES: Dict[str, Dict[str, float]] = {}
 # Authored drawing offsets, in pixels, for a pose the pack frames wrongly. Empty is the normal
-# answer and the measured one for `ilyra`: the pack paints every pose from one camera with the
+# answer and the measured one for Ilyra, its last user: her pack painted every pose from one camera with the
 # character's feet toward the bottom of the canvas, so the canvas centre already *is* the anchor.
 # Chasing each pose's silhouette box instead would be worse than doing nothing, because that box
 # moves with the pose - a crouch lowers the head while the feet stay put - and following it lifts
 # a crouching character off the surface she is crouching on. Every pose's measured drift is
 # written into the sheet so a review can see what is left and author a correction here.
-POSE_OFFSETS: Dict[str, Dict[str, Tuple[float, float]]] = {
-	"ilyra": {},
-}
+POSE_OFFSETS: Dict[str, Dict[str, Tuple[float, float]]] = {}
 # Alpha above which a pixel counts as the painted figure rather than its glow.
 POSE_CORE_ALPHA: int = 200
 
@@ -111,61 +111,23 @@ POSE_CORE_ALPHA: int = 200
 # The detached kit ships two files under swapped names - `dash_slash.png` is a pair of small
 # sparkles and `sparkle_pair.png` is the big slash arc - so the intake renames them on the way
 # in rather than carrying the mistake into the game.
-ORNAMENT_PACKS: Dict[str, Dict[str, object]] = {
-	"ilyra": {
-		"source": REPO / "concept_art/ilyra_2_sprite_test/detached_parts/sprites/secondary_motion",
-		"parts": {
-			"sparkle_small.png": "sparkle_00.png",
-			"sparkle_large.png": "sparkle_01.png",
-			"sparkle_twin.png": "dash_slash.png",
-			"crown_center.png": "crown_center.png",
-			"crown_shard_l.png": "crown_side_a.png",
-			"crown_shard_r.png": "crown_side_b.png",
-			"chest_gem_glow.png": "chest_gem_glow.png",
-			"slash_arc.png": "sparkle_pair.png",
-		},
-	},
-}
+## Empty since 2026-09-26: Ilyra, its only user, was removed (Scarlet replaced her). Kept as the seam
+## for the next ornament pack.
+ORNAMENT_PACKS: Dict[str, Dict[str, object]] = {}
 
-# Ilyra 2's figure cut into body parts. Same verbatim copy as the ornaments, into its own
-# sub-folder. NOTHING LOADS THESE RIGHT NOW: the jointed menu puppet built from them was reverted on
-# 2026-09-20 (DEVLOG) in favour of more registered frames. Kept because the intake is deterministic
-# and the parts are the material if part-level motion is revisited. Each limb carries gold caps at
-# its joints, so shoulder, elbow and wrist are findable by colour rather than by eye.
-PUPPET_PACKS: Dict[str, Dict[str, object]] = {
-	"ilyra": {
-		"source": REPO / "concept_art/ilyra_2_sprite_test/detached_parts/sprites",
-		"parts": {
-			"upper_body": [
-				"head", "torso",
-				"upper_arm_00", "upper_arm_01", "upper_arm_02", "upper_arm_03",
-				"forearm_00", "forearm_01", "forearm_02", "forearm_03",
-				"hand_grip_a", "hand_grip_b", "hand_relaxed_a", "hand_relaxed_b",
-			],
-			"lower_body": [
-				"waist_armor", "underskirt", "hip_flap_a", "hip_flap_b",
-				"upper_leg_a", "upper_leg_b", "lower_leg_boot_a", "lower_leg_boot_b",
-			],
-			"secondary_motion": ["fan_open_a", "fan_open_b", "braid_a", "braid_b"],
-		},
-	},
-}
+# A figure cut into body parts, copied verbatim like the ornaments into its own sub-folder. Ilyra 2's
+# was the only one, and nothing loaded it after the jointed menu puppet built from it was reverted on
+# 2026-09-20 (DEVLOG).
+## Empty since 2026-09-26: Ilyra, its only user, was removed (Scarlet replaced her). Kept as the seam
+## for the next puppet pack.
+PUPPET_PACKS: Dict[str, Dict[str, object]] = {}
 
 # Whole frames of a menu loop, copied verbatim onto their own stable canvas.
-FRAME_PACKS: Dict[str, Dict[str, object]] = {
-	"ilyra": {
-		"source": REPO / "concept_art/ilyra_2_sprite_test/detached_parts/storefront_frames",
-		"folder": "storefront",
-		"frames": [
-			"storefront_welcome.png",
-			"storefront_blink.png",
-			"storefront_flourish.png",
-			"storefront_settle.png",
-		],
-	},
-}
+## Empty since 2026-09-26: Ilyra, its only user, was removed (Scarlet replaced her). Kept as the seam
+## for the next frame pack.
+FRAME_PACKS: Dict[str, Dict[str, object]] = {}
 
-# A sheet pack is the whole-frame character intake (docs/guides/character_sprite_frames.md): one
+# A sheet pack is the whole-frame character intake (docs/guides/character_creation.md): one
 # numbered PNG per frame in, packed atlas sheets plus ready-made `SpriteFrames` out. The pack's own
 # JSON is the authority for row order, frame counts, fps and looping, so nothing is retyped here and
 # a mismatch is an error rather than a silent truncation.
@@ -175,93 +137,200 @@ FRAME_PACKS: Dict[str, Dict[str, object]] = {
 # five on 2026-09-20 and the reaction sheet had nothing left on it.
 SHEET_PACKS: Dict[str, Dict[str, object]] = {
 	"verdant_shade": {
-		"source": REPO / "concept_art/verdant_shade_sprite_v1/frames/verdant_shade",
-		"manifest": REPO
-		/ "concept_art/verdant_shade_sprite_v1/sheets/verdant_shade_sprite_sheet.json",
-		# Cells are smaller than the delivered frames on purpose: the character draws at ~230 px in a
-		# run and ~520 px on a Shop card, so 512 and 724 are downscaled once, here, deterministically.
-		# The menu cell was 576 and cost a 3552 px square, ~50 MB to upload the first time a Shop
-		# card woke it - owner saw a half-second hitch on the phone. She draws at ~520 px on a card,
-		# so 512 is still about 1:1 and the sheet drops to 3168 px.
-		"cells": {"run": 384, "menu": 448},
-		# Looping animations play this much faster than the pack authored them. Owner feedback on
-		# the phone, 2026-09-20: the idles read as steps rather than motion. It is a compromise, not
-		# a fix - a 12-frame loop is simply few - and the real answer is more frames per loop. The
-		# one-shots are deliberately NOT scaled: their rates are matched to the state lengths in
-		# `PlayableCharacterVisual.STATE_LENGTHS`, so speeding them up would end them early.
-		"loop_fps_scale": 1.4,
-		"columns": {"run": 8, "menu": 6},
-		# Five animations, and no more (owner, 2026-09-20): the dash - which is also the attack -
-		# the three wall loops the player spends most of a run looking at, and one storefront idle
-		# for Home and the Shop card. Every other state resolves onto one of these in
-		# `WholeFrameCharacterVisual._target_animation`. The cut frames are still in the pack, so
-		# restoring one is a name in this list and a re-pack.
+		# All AutoSprite (owner, 2026-09-25), the second character on the recipe after Patchvile: the
+		# storefront, the floor, the right wall, the ceiling and the dash attack.
+		"source": REPO / "concept_art/verdant_shade_autosprite_v1/frames",
+		"manifest": REPO / "concept_art/verdant_shade_autosprite_v1/verdant_shade_sprite_sheet.json",
+		# The owner generated the ceiling as its own sheet (today's pose, the flames gripping it), so
+		# only the left wall is derived: the right wall mirrored, which the visual mirrors back on the
+		# right wall.
+		"derive": {"wall_left": ("wall_right", "flip_h")},
+		# Patchvile's layout: 256 px run cells for 256 px frames, the dash on its own 336 px sheet at the
+		# walls' pixel scale, the storefront on 448 px menu cells.
+		"cells": {"run": 256, "dash": 336, "menu": 448},
+		"columns": {"run": 8, "dash": 8, "menu": 5},
 		"sheets": {
-			"run": ["dash_loop", "wall_bottom", "wall_top", "wall_left"],
+			"run": ["wall_bottom", "wall_top", "wall_left"],
+			"dash": ["dash_loop"],
 			"menu": ["storefront_idle"],
 		},
-		# Which sheets each generated `SpriteFrames` draws from, and where that resource is written.
 		"resources": {
-			"gameplay": (["run"], REPO / "data/characters/verdant_shade_gameplay.tres"),
+			"gameplay": (["run", "dash"], REPO / "data/characters/verdant_shade_gameplay.tres"),
 			"menu": (["menu"], REPO / "data/characters/verdant_shade_menu.tres"),
 		},
-		# Menu frames live in their own sub-folder of the pack.
 		"menu_source": "storefront",
-		# This pack's frames are cut from phase atlases and the cut catches a sliver of the
-		# neighbouring cell; see `strip_floating_strays`. OFF by default and enabled only here,
-		# because on a clean pack the same rule would amputate anything the character legitimately
-		# floats above itself - Void's flame plumes lose their tips to it.
-		"strip_strays": True,
+		"loop_fps_scale": 1.0,
+		# Patchvile's pixel size: packed at his exact scale (docs/guides/character_creation.md §4).
+		"roster_scale": True,
+		# The loose leaves beside the right-wall pose, which the dash throws off (`DashParticles`).
+		"particles": {
+			"source": REPO / "concept_art/verdant_shade_autosprite_v1/particles",
+			"parts": ["leaf_a", "leaf_b", "leaf_c", "leaf_d"],
+			"cell": 48,
+			"file": "verdant_shade_leaves.png",
+		},
 	},
-	"void": {
-		"source": REPO / "concept_art/void_wisp_sprite_v1/frames/void_wisp",
-		"manifest": REPO / "concept_art/void_wisp_sprite_v1/sheets/void_wisp_sprite_sheet.json",
-		"cells": {"run": 384, "menu": 448},
-		"columns": {"run": 8, "menu": 6},
-		# Five animations, and no more (owner, 2026-09-20): the dash - which is also the attack -
-		# the three wall loops the player spends most of a run looking at, and one storefront idle
-		# for Home and the Shop card. Every other state resolves onto one of these in
-		# `WholeFrameCharacterVisual._target_animation`. The cut frames are still in the pack, so
-		# restoring one is a name in this list and a re-pack.
+	"patchvile": {
+		# All AutoSprite (owner, 2026-09-23): the storefront, the floor, the right wall and the dash
+		# attack. The manifest in the AutoSprite pack lists every row.
+		"source": REPO / "concept_art/patchvile_autosprite_v1/frames",
+		# Two generations instead of four (owner, 2026-09-23): the ceiling is the floor upside down,
+		# and the left wall is the right wall mirrored - which the visual mirrors back on the right
+		# wall, so the right wall shows AutoSprite's art exactly as generated.
+		"derive": {"wall_top": ("wall_bottom", "flip_v"), "wall_left": ("wall_right", "flip_h")},
+		"manifest": REPO / "concept_art/patchvile_autosprite_v1/patchvile_sprite_sheet.json",
+		# AutoSprite delivers 256 px frames, so a 384 run cell would only enlarge them - and 76 of them
+		# at 384 made a 3200 x 4000 sheet that loaded in twice the others' time. At 256 the sheet is
+		# about the size of everyone else's. His scene's `design_size` is 256 to match.
+		# The dash attack's extended lunge is as wide as its whole 256 px frame, so at the walls' scale
+		# it needs ~321 px: it gets its own sheet of 336 px cells, drawn at the walls' pixel scale
+		# (`fit_match`), so he stays one size and only the dash frames carry the extra room.
+		"cells": {"run": 256, "dash": 336, "menu": 448},
+		# The walls are 24 frames and the storefront 25, so the sheets are wider than the contract's.
+		"columns": {"run": 8, "dash": 8, "menu": 5},
 		"sheets": {
-			"run": ["dash_loop", "wall_bottom", "wall_top", "wall_left"],
+			"run": ["wall_bottom", "wall_top", "wall_left"],
+			"dash": ["dash_loop"],
 			"menu": ["storefront_idle"],
 		},
 		"resources": {
-			"gameplay": (["run"], REPO / "data/characters/void_gameplay.tres"),
-			"menu": (["menu"], REPO / "data/characters/void_menu.tres"),
+			"gameplay": (["run", "dash"], REPO / "data/characters/patchvile_gameplay.tres"),
+			"menu": (["menu"], REPO / "data/characters/patchvile_menu.tres"),
 		},
 		"menu_source": "storefront",
-		# The pack registers to 0.5 px; its loops play at the authored rate until the owner says
-		# otherwise on a device. It does need de-clipping: 21 of its frames draw the character
-		# larger than the 512 canvas and the top edge severs the crystal above its head.
 		"loop_fps_scale": 1.0,
-		"strip_clipped": True,
+		# The generator drew him at ~65% of his canvas, against 85-94% for the shipped characters,
+		# and off centre; `fit_sheet_frames` scales and centres each sheet (owner, 2026-09-23).
+		"fit": {"run": 0.92, "dash": 0.92, "menu": 0.92},
+		"fit_match": {"dash": "run"},
+		# Scraps of his costume his dash throws off (`DashParticles`), one strip the particles pick
+		# a random cell from: four of Codex's ornaments, kept in the pack when the rest of that
+		# rejected draft was deleted (2026-09-25). Only ever seen this small.
+		"particles": {
+			"source": REPO / "concept_art/patchvile_autosprite_v1/particles",
+			"parts": ["cross_button", "stitched_patch", "bandage_ribbon", "scarf_tassel"],
+			"cell": 96,
+			"file": "patchvile_scraps.png",
+		},
 	},
-	"eclipse": {
-		"source": REPO / "concept_art/eclipse_wisp_sprite_v1/frames/eclipse_wisp",
-		"manifest": REPO
-		/ "concept_art/eclipse_wisp_sprite_v1/sheets/eclipse_wisp_sprite_sheet.json",
-		"cells": {"run": 384, "menu": 448},
-		"columns": {"run": 8, "menu": 6},
-		# Five animations, and no more (owner, 2026-09-20): the dash - which is also the attack -
-		# the three wall loops the player spends most of a run looking at, and one storefront idle
-		# for Home and the Shop card. Every other state resolves onto one of these in
-		# `WholeFrameCharacterVisual._target_animation`. The cut frames are still in the pack, so
-		# restoring one is a name in this list and a re-pack.
+	"mothmere": {
+		# All AutoSprite (owner, 2026-09-25): the storefront, the floor, the right wall and the dash
+		# attack, from first frames that keep the outline his Codex images carry (GDD §14 #49).
+		"source": REPO / "concept_art/mothmere_autosprite_v1/frames",
+		"manifest": REPO / "concept_art/mothmere_autosprite_v1/mothmere_sprite_sheet.json",
+		# Patchvile's recipe: the ceiling is the floor upside down and the left wall the right wall
+		# mirrored, which the visual mirrors back on the right wall.
+		"derive": {"wall_top": ("wall_bottom", "flip_v"), "wall_left": ("wall_right", "flip_h")},
+		# Patchvile's layout: 256 px run cells for 256 px frames, the dash on its own 336 px sheet at the
+		# walls' pixel scale, the storefront on 448 px menu cells.
+		"cells": {"run": 256, "dash": 336, "menu": 448},
+		"columns": {"run": 8, "dash": 8, "menu": 5},
 		"sheets": {
-			"run": ["dash_loop", "wall_bottom", "wall_top", "wall_left"],
+			"run": ["wall_bottom", "wall_top", "wall_left"],
+			"dash": ["dash_loop"],
 			"menu": ["storefront_idle"],
 		},
 		"resources": {
-			"gameplay": (["run"], REPO / "data/characters/eclipse_gameplay.tres"),
-			"menu": (["menu"], REPO / "data/characters/eclipse_menu.tres"),
+			"gameplay": (["run", "dash"], REPO / "data/characters/mothmere_gameplay.tres"),
+			"menu": (["menu"], REPO / "data/characters/mothmere_menu.tres"),
 		},
 		"menu_source": "storefront",
-		# The cleanest pack of the three: registered to 0.5 px and not one frame reaches a border,
-		# so neither cleanup is enabled. Its orbiting moon beads are detached by design and must be
-		# left alone - `strip_clipped` would be the thing that ate them.
 		"loop_fps_scale": 1.0,
+		# Patchvile's pixel size: packed at his exact scale (docs/guides/character_creation.md §4).
+		"roster_scale": True,
+	},
+	"scarlet": {
+		# All AutoSprite (owner, 2026-09-26): the storefront, the floor, the right wall and the dash
+		# attack, sliced and cleaned (the fan's rib gaps, the reap's black tips) by the pack's slicer.
+		"source": REPO / "concept_art/scarlet_autosprite_v1/frames",
+		"manifest": REPO / "concept_art/scarlet_autosprite_v1/scarlet_sprite_sheet.json",
+		# Patchvile's recipe: the ceiling is the floor upside down and the left wall the right wall
+		# mirrored, which the visual mirrors back on the right wall.
+		"derive": {"wall_top": ("wall_bottom", "flip_v"), "wall_left": ("wall_right", "flip_h")},
+		# Patchvile's layout: 256 px run cells for 256 px frames, the dash on its own 336 px sheet at the
+		# walls' pixel scale, the storefront on 448 px menu cells.
+		"cells": {"run": 256, "dash": 336, "menu": 448},
+		"columns": {"run": 8, "dash": 8, "menu": 5},
+		"sheets": {
+			"run": ["wall_bottom", "wall_top", "wall_left"],
+			"dash": ["dash_loop"],
+			"menu": ["storefront_idle"],
+		},
+		"resources": {
+			"gameplay": (["run", "dash"], REPO / "data/characters/scarlet_gameplay.tres"),
+			"menu": (["menu"], REPO / "data/characters/scarlet_menu.tres"),
+		},
+		"menu_source": "storefront",
+		"loop_fps_scale": 1.0,
+		# Patchvile's pixel size: packed at his exact scale (docs/guides/character_creation.md §4).
+		"roster_scale": True,
+		# The one exception to ROSTER_STANDING: her sheets were made with her standing 166 px (fan top
+		# to feet). Her scene draws her 1.16x larger (`art_scale` 1.38, `menu_art_scale` 1.45), so she is
+		# the same size as everyone on screen (owner, 2026-09-26, GDD §14 #54).
+		"standing": 166,
+		# Her own pieces (the pack's slicer cuts them from her frames): the reap crescent her dash
+		# throws off (`DashParticles`) and her crown diamond trailing behind (`TrailParticles`).
+		"particles": [
+			{
+				"source": REPO / "concept_art/scarlet_autosprite_v1/particles",
+				"parts": ["reap_arc_a", "reap_arc_b"],
+				"cell": 96,
+				"file": "scarlet_reap_arcs.png",
+			},
+			{
+				"source": REPO / "concept_art/scarlet_autosprite_v1/particles",
+				"parts": ["crown_diamond"],
+				"cell": 24,
+				"file": "scarlet_diamond.png",
+			},
+		],
+	},
+	"rook": {
+		# All AutoSprite (owner, 2026-09-27), replacing his bone rig: the storefront, the floor, the right
+		# wall, his own ceiling and the dash attack, sliced and cleaned (the white AutoSprite's background
+		# remover left in his gaps) by the pack's slicer.
+		"source": REPO / "concept_art/rook_autosprite_v1/frames",
+		"manifest": REPO / "concept_art/rook_autosprite_v1/rook_sprite_sheet.json",
+		# His own ceiling sheet (GDD §14 #55), so only the left wall is derived: the right wall mirrored,
+		# which the visual mirrors back on the right wall.
+		"derive": {"wall_left": ("wall_right", "flip_h")},
+		# At Patchvile's scale his walls do not fit a 256 px cell: the floor spans 239 source px (wing
+		# tip to tail) and the right wall's tail swing 256, which is 299 and 321 cell px. So his run
+		# sheet has the dash's 336 px cells; his scene's `design_size` is 336 and its `art_scale` grows
+		# by 336/256 to match, so he is drawn at the same size as everyone else.
+		"cells": {"run": 336, "dash": 336, "menu": 448},
+		"columns": {"run": 8, "dash": 8, "menu": 5},
+		"sheets": {
+			"run": ["wall_bottom", "wall_top", "wall_left"],
+			"dash": ["dash_loop"],
+			"menu": ["storefront_idle"],
+		},
+		"resources": {
+			"gameplay": (["run", "dash"], REPO / "data/characters/rook_gameplay.tres"),
+			"menu": (["menu"], REPO / "data/characters/rook_menu.tres"),
+		},
+		"menu_source": "storefront",
+		"loop_fps_scale": 1.0,
+		# Patchvile's pixel size: packed at his exact scale (docs/guides/character_creation.md §4).
+		"roster_scale": True,
+		# His dash look is kept from the rig (owner, 2026-09-27): the streak his dash throws off
+		# (`DashParticles`) and the dust mote of his trail and his ring (`TrailParticles`, `Aura`), the two
+		# effect pieces the rig cut from its sheet, copied into the pack unchanged. One piece a strip, each
+		# at its own size.
+		"particles": [
+			{
+				"source": REPO / "concept_art/rook_autosprite_v1/particles",
+				"parts": ["dash_streak"],
+				"cell": 312,
+				"file": "rook_dash_streak.png",
+			},
+			{
+				"source": REPO / "concept_art/rook_autosprite_v1/particles",
+				"parts": ["wing_dust"],
+				"cell": 188,
+				"file": "rook_wing_dust.png",
+			},
+		],
 	},
 }
 
@@ -270,7 +339,7 @@ SHEET_PACKS: Dict[str, Dict[str, object]] = {
 # component cleanup runs; the painted pixels inside it are never altered.
 # Some approved sheets isolate a part only inside a turnaround pose. A mask polygon, in sheet pixels,
 # cuts that silhouette out before the usual component cleanup runs; the painted pixels inside it are
-# never altered. (Ilyra needed this for her v2 torso; she ships from a per-file pack now.)
+# never altered. (Ilyra's v2 torso needed this; she was removed on 2026-09-26.)
 MASKS: Dict[str, Dict[str, Polygon]] = {
 }
 
@@ -278,37 +347,6 @@ MASKS: Dict[str, Dict[str, Polygon]] = {
 # atlas. `min_area` removes the detached colour specks the generator leaves between painted parts.
 # Cell order follows the generation prompts in GENERATION_PROMPT.md.
 CHARACTERS: Dict[str, Dict[str, Tuple[Box, int]]] = {
-	"veyra": {
-		"preview": ((20, 0, 430, 570), 700),
-		"outer_body": ((450, 0, 815, 525), 900),
-		"core": ((845, 75, 1100, 500), 700),
-		"eyes": ((1130, 225, 1435, 430), 700),
-		"left_fin": ((45, 545, 330, 805), 700),
-		"right_fin": ((385, 545, 680, 805), 700),
-		# The halo cell holds two arc groups; each half floats on its own in the rig.
-		"halo_left": ((670, 505, 905, 810), 260),
-		"halo_right": ((905, 505, 1100, 810), 260),
-		"tail_a": ((1080, 500, 1448, 810), 700),
-		"tail_b": ((20, 775, 355, 1086), 700),
-		"tail_c": ((370, 775, 800, 1086), 700),
-		"soul_spark": ((845, 825, 1050, 1045), 350),
-	},
-	"rook": {
-		"preview": ((0, 25, 540, 448), 900),
-		"shadow_body": ((530, 35, 725, 450), 900),
-		"skull": ((785, 55, 1060, 415), 900),
-		# "Left"/"right" are Rook's own sides: he faces the camera, so his left wing is on screen right.
-		"wing_frame_left": ((1075, 50, 1448, 450), 900),
-		"wing_frame_right": ((20, 445, 380, 830), 900),
-		"membrane_left": ((400, 450, 740, 800), 900),
-		"membrane_right": ((745, 450, 1085, 800), 900),
-		"foot_right": ((1100, 530, 1266, 765), 900),
-		"foot_left": ((1266, 530, 1440, 765), 900),
-		"tail_segment": ((50, 830, 340, 1010), 900),
-		"tail_fin": ((460, 805, 705, 1050), 900),
-		"dash_streak": ((760, 830, 1100, 1030), 700),
-		"wing_dust": ((1175, 830, 1375, 1015), 700),
-	},
 	"morrow": {
 		"preview": ((25, 0, 415, 490), 900),
 		"cloak_body": ((425, 75, 830, 470), 900),
@@ -331,7 +369,6 @@ CHARACTERS: Dict[str, Dict[str, Tuple[Box, int]]] = {
 # Ribbon layers bend on a bone chain. The spine runs from the attachment root (given as a fraction
 # of the extracted image) to the geodesically farthest painted pixel.
 RIBBONS: Dict[str, Dict[str, Tuple[float, float]]] = {
-	"veyra": {"tail_a": (0.05, 0.12), "tail_b": (0.08, 0.1), "tail_c": (0.06, 0.1)},
 	"morrow": {"scarf_a": (0.62, 0.03), "scarf_b": (0.55, 0.03)},
 }
 SPINE_POINTS = 5
@@ -746,77 +783,70 @@ def extract_character(name: str) -> None:
 	print("  CONTACT: %s" % contact)
 
 
-def strip_floating_strays(art: Image.Image) -> Tuple[Image.Image, int]:
-	"""Removes anything drawn entirely above the body: it is the cell above, not this frame.
+def _union_box(boxes: List[Box]) -> Box:
+	return (min(b[0] for b in boxes), min(b[1] for b in boxes),
+			max(b[2] for b in boxes), max(b[3] for b in boxes))
 
-	The Verdant Shade pack's frames are cut out of phase atlases, and the cut takes a sliver of the
-	neighbouring cell with it - a band of flame tips floating over the character's head, clearly
-	severed. The owner saw it in a run and in the Shop. It is the *source* that is wrong (recorded as
-	a follow-up against `concept_art/verdant_shade_sprite_v1/build_sprite_pack.py`); this is the
-	intake refusing to carry the mistake into the game.
 
-	The rule is narrow on purpose. Only a connected piece lying **wholly above the top of the largest
-	piece** is dropped, so the leaves this character legitimately scatters around itself - in `death`
-	and `revive_spawn` especially - are kept, and so is a body that runs off the canvas edge.
+def fit_sheet_frames(
+	frames: Dict[str, List[Image.Image]], fill: float,
+) -> Dict[str, Tuple[float, Tuple[float, float]]]:
+	"""One scale for a whole sheet and one centre per animation, from the art's own bounds.
+
+	The scale makes the largest animation's combined bounds fill `fill` of the frame; each
+	animation's combined bounds are then centred. Both are constant across a loop, so a loop keeps
+	its registration exactly and the character keeps one size across every animation on the sheet.
+	Frames delivered on different canvas sizes come from different packs, drawn at different
+	sizes, so each canvas size gets its own scale.
 	"""
-	pixels = np.asarray(art).copy()
-	solid = pixels[:, :, 3] > 8
-	labels, count = ndimage.label(solid)
-	if count < 2:
-		return art, 0
-	sizes = ndimage.sum(solid, labels, range(1, count + 1))
-	body = int(np.argmax(sizes)) + 1
-	top = int(np.nonzero(labels == body)[0].min())
-	strays: List[int] = []
-	for index in range(1, count + 1):
-		if index == body:
-			continue
-		rows = np.nonzero(labels == index)[0]
-		if rows.max() < top:
-			strays.append(index)
-	if not strays:
-		return art, 0
-	mask = np.isin(labels, strays)
-	pixels[mask] = 0
-	return Image.fromarray(pixels, "RGBA"), int(mask.sum())
+	unions: Dict[str, Box] = {}
+	for state, arts in frames.items():
+		unions[state] = _union_box([art.getchannel("A").getbbox() for art in arts])
+	widths = {state: arts[0].width for state, arts in frames.items()}
+	fits: Dict[str, Tuple[float, Tuple[float, float]]] = {}
+	for width in sorted(set(widths.values())):
+		members = [state for state in frames if widths[state] == width]
+		largest = max(max(unions[s][2] - unions[s][0], unions[s][3] - unions[s][1]) for s in members)
+		scale = fill * width / float(largest)
+		for state in members:
+			b = unions[state]
+			fits[state] = (scale, ((b[0] + b[2]) / 2.0, (b[1] + b[3]) / 2.0))
+	return fits
 
 
-def strip_clipped_fragments(art: Image.Image) -> Tuple[Image.Image, int]:
-	"""Removes a detached piece that the frame edge has cut through.
+def _check_roster_standing(name: str, storefront: Path, expected: int = ROSTER_STANDING) -> None:
+	"""Measures the first storefront frame against the roster size and warns, or refuses the pack.
 
-	A different defect from `strip_floating_strays`. Void's pack draws the character larger than its
-	512 canvas in the dash, move and attack frames, so the crystal above its head is severed by the
-	top edge: what is left is a flat-cut sliver that floats over the wisp in a run. The pixels are
-	gone and cannot be recovered here, and a missing crystal reads better than a guillotined one.
-
-	Only pieces that are BOTH detached from the body AND hugging the frame border go. A floating orb
-	that sits clear of the border is the character's own design and stays - `move_fly_00` keeps a
-	105 px orb and loses a 2,336 px severed one. The body is never removed, even when it runs off
-	the edge.
+	A character drawn smaller or larger than Patchvile in its 256 px frames would come out at a
+	different size and detail from everyone else, because a roster pack is not fitted.
 	"""
-	pixels = np.asarray(art).copy()
-	solid = pixels[:, :, 3] > 8
-	labels, count = ndimage.label(solid)
-	if count < 2:
-		return art, 0
-	sizes = ndimage.sum(solid, labels, range(1, count + 1))
-	body = int(np.argmax(sizes)) + 1
-	# A margin, not the exact edge: the pack re-centres each frame's silhouette after cutting it, so
-	# a severed piece ends up a few pixels short of the border it was cut by.
-	margin = max(4, int(round(min(pixels.shape[0], pixels.shape[1]) * CLIP_MARGIN_SHARE)))
-	clipped: List[int] = []
-	for index in range(1, count + 1):
-		if index == body:
-			continue
-		rows, columns = np.nonzero(labels == index)
-		if (rows.min() < margin or rows.max() >= pixels.shape[0] - margin
-				or columns.min() < margin or columns.max() >= pixels.shape[1] - margin):
-			clipped.append(index)
-	if not clipped:
-		return art, 0
-	mask = np.isin(labels, clipped)
-	pixels[mask] = 0
-	return Image.fromarray(pixels, "RGBA"), int(mask.sum())
+	art = Image.open(storefront).convert("RGBA")
+	box = art.getchannel("A").getbbox()
+	standing = box[3] - box[1]
+	share = standing / float(expected) - 1.0
+	line = "  ROSTER CHECK: %s stands %d px in its %d px frame (roster %d, %+.0f %%)" % (
+		name, standing, art.height, expected, share * 100.0)
+	if abs(share) > ROSTER_STANDING_LIMIT:
+		raise SystemExit(line + " - refused: redraw the first frames at the roster size "
+						 "(docs/guides/character_creation.md §3)")
+	print(line + (" - WARNING: off the roster size" if abs(share) > ROSTER_STANDING_WARN else " - ok"))
+
+
+def fit_frame(art: Image.Image, scale: float, centre: Tuple[float, float], cell: int) -> Image.Image:
+	"""Scales `art` about `centre`, puts `centre` on the cell centre and resamples to `cell` once.
+
+	Resampled premultiplied, so the zeroed colour under alpha 0 cannot darken the silhouette edge.
+	"""
+	factor = scale * cell / float(art.width)
+	half = cell / 2.0
+	matrix = (1.0 / factor, 0.0, centre[0] - half / factor,
+			  0.0, 1.0 / factor, centre[1] - half / factor)
+	fitted = art.convert("RGBa").transform(
+		(cell, cell), Image.AFFINE, matrix, resample=Image.BICUBIC).convert("RGBA")
+	box = fitted.getchannel("A").getbbox()
+	if box is None or box[0] == 0 or box[1] == 0 or box[2] == cell or box[3] == cell:
+		raise SystemExit("fit pushed the art to the cell edge (%s in %d px)" % (box, cell))
+	return fitted
 
 
 def _sheet_pack_rows(spec: Dict[str, object]) -> Dict[str, Dict[str, object]]:
@@ -837,10 +867,21 @@ def ingest_sheet_pack(name: str) -> None:
 	out_dir = OUTPUT / name
 	out_dir.mkdir(parents=True, exist_ok=True)
 
-	strip = bool(spec.get("strip_strays", False))  # type: ignore[union-attr]
-	declip = bool(spec.get("strip_clipped", False))  # type: ignore[union-attr]
+	# Packed at Patchvile's scale rather than fitted (ROSTER_*); `fit` and `fit_match` then do not apply.
+	roster = bool(spec.get("roster_scale", False))  # type: ignore[union-attr]
+	if roster:
+		_check_roster_standing(name, menu_source / "storefront_idle_00.png",
+							   int(spec.get("standing", ROSTER_STANDING)))  # type: ignore[call-overload]
+	fills: Dict[str, float] = dict(spec.get("fit", {}))  # type: ignore[call-overload]
+	# A sheet listed here takes another sheet's pixel scale (source px to sheet px) instead of its
+	# own fit, so a character packed across two cell sizes stays one size; it must come after the
+	# sheet it matches in `sheets`.
+	matches: Dict[str, str] = dict(spec.get("fit_match", {}))  # type: ignore[call-overload]
+	# Scale per sheet, per delivered frame size (see `fit_sheet_frames`).
+	sheet_scales: Dict[str, Dict[int, float]] = {}
+	state_folders: Dict[str, Path] = dict(spec.get("state_folders", {}))  # type: ignore[call-overload]
+	derive: Dict[str, Tuple[str, str]] = dict(spec.get("derive", {}))  # type: ignore[call-overload]
 	placed: Dict[str, List[Tuple[str, int, int, int]]] = {}
-	stripped: Dict[str, int] = {}
 	drifts: List[Tuple[float, float]] = []
 	frames_seen: List[str] = []
 	preview: Dict[str, Image.Image] = {}
@@ -864,26 +905,56 @@ def ingest_sheet_pack(name: str) -> None:
 				name, sheet, size[0], size[1], MAX_TEXTURE))
 		canvas = Image.new("RGBA", size, (0, 0, 0, 0))
 		placed[sheet] = []
+		cleaned: List[Image.Image] = []
 		for state, file, row, column in grid:
-			art_path = folder / file
+			# A derived state reads another state's frames and flips them.
+			origin, flip = derive.get(state, (state, ""))
+			read_file = origin + file[len(state):]
+			art_path = Path(str(state_folders.get(origin, folder))) / read_file
 			if not art_path.exists() and folder is menu_source:
 				# The menu sheet may carry a gameplay animation as well - the storefront idle test
 				# puts `idle_hover` on it - and those frames live in the pack root.
-				art_path = source / file
+				art_path = source / read_file
 			if not art_path.exists():
 				raise FileNotFoundError(art_path)
 			art = Image.open(art_path).convert("RGBA")
+			if flip:
+				art = art.transpose(FLIPS[flip])
 			if art.width != art.height:
 				raise SystemExit("%s is %s; a frame must be square" % (file, art.size))
-			if strip:
-				art, removed = strip_floating_strays(art)
-				if removed:
-					stripped[state] = stripped.get(state, 0) + removed
-			if declip:
-				art, removed = strip_clipped_fragments(art)
-				if removed:
-					stripped[state] = stripped.get(state, 0) + removed
-			art = clear_invisible_rgb(art.resize((cell, cell), Image.LANCZOS))
+			cleaned.append(art)
+		fits: Dict[str, Tuple[float, Tuple[float, float]]] = {}
+		if roster:
+			# Patchvile's scale, not a fit: each animation is still centred on its own bounds.
+			factor = ROSTER_MENU_FACTOR if sheet == "menu" else ROSTER_RUN_FACTOR
+			by_state_r: Dict[str, List[Image.Image]] = {}
+			for (state, _file, _row, _column), art in zip(grid, cleaned):
+				by_state_r.setdefault(state, []).append(art)
+			for state, arts in by_state_r.items():
+				union = _union_box([a.getchannel("A").getbbox() for a in arts])
+				fits[state] = (factor * arts[0].width / float(cell),
+							   ((union[0] + union[2]) / 2.0, (union[1] + union[3]) / 2.0))
+			sheet_scales[sheet] = {by_state_r[s][0].width: fits[s][0] for s in fits}
+			print("  ROSTER: %s sheet at Patchvile's scale, %.3f cell px per source px" % (sheet, factor))
+		elif sheet in fills:
+			by_state: Dict[str, List[Image.Image]] = {}
+			for (state, _file, _row, _column), art in zip(grid, cleaned):
+				by_state.setdefault(state, []).append(art)
+			fits = fit_sheet_frames(by_state, fills[sheet])
+			if sheet in matches:
+				reference = matches[sheet]
+				fits = {state: (sheet_scales[reference][by_state[state][0].width]
+								* cells[reference] / float(cell), centre)
+						for state, (_scale, centre) in fits.items()}
+			sheet_scales[sheet] = {by_state[s][0].width: fits[s][0] for s in fits}
+			for width, scale in sorted(sheet_scales[sheet].items()):
+				print("  FIT: %s sheet, %d px frames x%.3f, each animation centred" % (
+					sheet, width, scale))
+		for (state, file, row, column), art in zip(grid, cleaned):
+			if state in fits:
+				art = clear_invisible_rgb(fit_frame(art, fits[state][0], fits[state][1], cell))
+			else:
+				art = clear_invisible_rgb(art.resize((cell, cell), Image.LANCZOS))
 			x, y = column * pitch + CELL_PADDING, row * pitch + CELL_PADDING
 			canvas.paste(art, (x, y))
 			placed[sheet].append((state, x, y, cell))
@@ -900,28 +971,50 @@ def ingest_sheet_pack(name: str) -> None:
 
 	# A standalone portrait, so the HUD icon and an unfocused Shop card never pull a whole sheet
 	# into memory just to show one still.
-	portrait = clear_invisible_rgb(
-		Image.open(source / "idle_hover_00.png").convert("RGBA").resize(
-			(cells["run"], cells["run"]), Image.LANCZOS))
+	portrait_art = Image.open(source / "idle_hover_00.png").convert("RGBA")
+	portrait_scale = sheet_scales.get("run", {}).get(portrait_art.width)
+	if portrait_scale is not None:
+		box = portrait_art.getchannel("A").getbbox()
+		portrait = clear_invisible_rgb(fit_frame(
+			portrait_art, portrait_scale, ((box[0] + box[2]) / 2.0, (box[1] + box[3]) / 2.0),
+			cells["run"]))
+	else:
+		portrait = clear_invisible_rgb(
+			portrait_art.resize((cells["run"], cells["run"]), Image.LANCZOS))
 	portrait.save(out_dir / ("%s_portrait.png" % name), optimize=True)
 	print("PLAYABLE ART: %s portrait %dx%d -> %s" % (
 		name, cells["run"], cells["run"], out_dir / ("%s_portrait.png" % name)))
 
 	worst = max(drifts, key=lambda d: abs(d[0]) + abs(d[1]))
 	print("  ANCHOR: worst residual drift %s px over %d frames" % (worst, len(drifts)))
-	if stripped:
-		total = sum(stripped.values())
-		print("  CLEANUP: removed %d source pixels across %d states" % (
-			total, len(stripped)))
-		for state in sorted(stripped, key=lambda k: -stripped[k]):
-			print("    %-22s %6d px" % (state, stripped[state]))
 	scale = float(spec.get("loop_fps_scale", 1.0))  # type: ignore[union-attr]
 	for key in dict(spec["resources"]):  # type: ignore[arg-type]
 		members, path = dict(spec["resources"])[key]  # type: ignore[index]
 		_write_sprite_frames(name, key, list(members), placed, rows, Path(str(path)), scale)
+	# One strip, or a list of them when a character's two emitters each throw their own pieces.
+	strips = spec.get("particles", [])  # type: ignore[union-attr]
+	for strip in (strips if isinstance(strips, list) else [strips]):
+		_write_particle_strip(name, dict(strip), out_dir)  # type: ignore[arg-type]
 	write_pose_sheet(REPO / ("data/characters/%s_frames.tres" % name), frames_seen,
 					 [(0.0, 0.0)] * len(frames_seen), drifts, {}, float(cells["run"]))
 	print("  CONTACT: %s" % make_contact(name, preview, {}))
+
+
+def _write_particle_strip(name: str, spec: Dict[str, object], out_dir: Path) -> None:
+	"""A horizontal strip of loose pieces for a particle emitter, one centred piece per cell."""
+	cell = int(spec["cell"])  # type: ignore[arg-type]
+	parts: List[str] = list(spec["parts"])  # type: ignore[arg-type]
+	strip = Image.new("RGBA", (cell * len(parts), cell), (0, 0, 0, 0))
+	for index, part in enumerate(parts):
+		art = Image.open(Path(str(spec["source"])) / ("%s.png" % part)).convert("RGBA")
+		art = art.crop(art.getchannel("A").getbbox())
+		fit = (cell - 8) / float(max(art.size))
+		art = art.resize((max(1, round(art.width * fit)), max(1, round(art.height * fit))), Image.LANCZOS)
+		strip.alpha_composite(art, (index * cell + (cell - art.width) // 2, (cell - art.height) // 2))
+	strip = clear_invisible_rgb(strip)
+	strip.save(out_dir / str(spec["file"]), optimize=True)
+	print("PLAYABLE ART: %s particle strip %dx%d, %d pieces -> %s" % (
+		name, strip.width, strip.height, len(parts), out_dir / str(spec["file"])))
 
 
 def _write_sprite_frames(

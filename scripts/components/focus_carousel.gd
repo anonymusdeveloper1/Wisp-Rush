@@ -2,7 +2,7 @@ class_name FocusCarousel
 extends Control
 ## Portrait card picker: one large focused card in the centre, its neighbours peeking in dimmed.
 ##
-## Shared by the Forms and Rift Map screens (owner reference: a focus card picker where the selected
+## Used by the Shop's card pagers (owner reference: a focus card picker where the selected
 ## card is bigger, lifted and framed). Screens supply the cards; this component owns layout, motion
 ## and input. Swipe sideways to move between cards and release to snap; a flick advances one card;
 ## tapping a side card focuses it; tapping the focused card emits `activated`. Left/right keys and

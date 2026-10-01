@@ -126,18 +126,19 @@ func _check_polygon_helpers() -> void:
 	_check_vector(bounds.position, Vector2.ZERO, "polygon bounds position")
 	_check_vector(bounds.size, Vector2(100.0, 100.0), "polygon bounds size")
 
-	# Every baked Rift polygon must be usable: closed, in UV range, and containing its centroid.
-	var catalog := load("res://data/rifts/default_catalog.tres") as RiftCatalog
-	for rift: RiftData in catalog.load_rifts():
-		if not rift.has_floor_polygon():
-			_fail("%s has no baked floor polygon" % rift.rift_id)
+	# Every real floor polygon must be usable: closed, in UV range, and containing its centroid.
+	var floors: Dictionary[StringName, PackedVector2Array] = _floors()
+	for floor_id: StringName in floors:
+		var floor_uv: PackedVector2Array = floors[floor_id]
+		if floor_uv.size() < 3:
+			_fail("%s has no floor polygon" % floor_id)
 			continue
 		var screen: PackedVector2Array = DashGeometry.polygon_from_uv(
-			rift.floor_polygon, Rect2(0.0, 0.0, 1080.0, 1920.0)
+			floor_uv, Rect2(0.0, 0.0, 1080.0, 1920.0)
 		)
 		var centre: Vector2 = DashGeometry.polygon_centroid(screen)
 		if not DashGeometry.is_inside_polygon(centre, screen):
-			_fail("%s polygon does not contain its own centroid" % rift.rift_id)
+			_fail("%s polygon does not contain its own centroid" % floor_id)
 		# A dash from the centre must reach a wall in every direction.
 		for step: int in 8:
 			var angle: float = TAU * float(step) / 8.0
@@ -145,10 +146,16 @@ func _check_polygon_helpers() -> void:
 				centre, Vector2.RIGHT.rotated(angle), screen
 			)
 			if landing.distance_to(centre) < 1.0:
-				_fail("%s: a dash at %.2f rad found no wall" % [rift.rift_id, angle])
+				_fail("%s: a dash at %.2f rad found no wall" % [floor_id, angle])
 		var area: float = DashGeometry.polygon_bounds(screen).get_area()
 		if area < 1080.0 * 1920.0 * 0.15:
-			_fail("%s floor polygon is implausibly small" % rift.rift_id)
+			_fail("%s floor polygon is implausibly small" % floor_id)
+
+
+## The floors the game plays on: the Endless floor every arena shares.
+func _floors() -> Dictionary[StringName, PackedVector2Array]:
+	var catalog := load("res://data/endless/default_endless_catalog.tres") as EndlessCatalog
+	return {&"endless": catalog.floor_polygon}
 
 
 func _fail(message: String) -> void:
@@ -173,24 +180,24 @@ func _check_float(actual: float, expected: float, label: String) -> void:
 ## The Wisp rests on the wall, so every swipe casts from the boundary. Three things can go wrong
 ## there and all three are silent: the cast lands on the edge underfoot (zero-length dash, swipe
 ## swallowed), the reflection folds about the wrong plane (dash leaves the floor), and containment
-## is undefined on the boundary. This sweeps every edge of every real Rift against a direction fan.
+## is undefined on the boundary. This sweeps every edge of every real floor against a direction fan.
 func _check_on_boundary_dashes() -> void:
-	var catalog := load("res://data/rifts/default_catalog.tres") as RiftCatalog
+	var floors: Dictionary[StringName, PackedVector2Array] = _floors()
 	var screen_rect := Rect2(0.0, 0.0, 1080.0, 1920.0)
 	# Only absorbs float error; the resting edge is excluded by identity, not by distance.
 	var skip: float = 1.0
 	var directions: int = 16
 
-	for rift: RiftData in catalog.load_rifts():
+	for floor_id: StringName in floors:
 		var polygon: PackedVector2Array = DashGeometry.polygon_from_uv(
-			rift.floor_polygon, screen_rect
+			floors[floor_id], screen_rect
 		)
 		if polygon.size() < 3:
-			_fail("%s has no usable polygon" % rift.rift_id)
+			_fail("%s has no usable polygon" % floor_id)
 			continue
 		# Winding must be consistent, or edge normals point the wrong way.
 		if is_zero_approx(DashGeometry.polygon_signed_area(polygon)):
-			_fail("%s polygon has zero area" % rift.rift_id)
+			_fail("%s polygon has zero area" % floor_id)
 			continue
 
 		for edge: int in polygon.size():
@@ -202,7 +209,7 @@ func _check_on_boundary_dashes() -> void:
 			# The edge normal must point into the shape.
 			var probe: Vector2 = origin + normal * 6.0
 			if not DashGeometry.is_inside_polygon_slack(probe, polygon, 1.0):
-				_fail("%s edge %d normal points outward" % [rift.rift_id, edge])
+				_fail("%s edge %d normal points outward" % [floor_id, edge])
 				continue
 
 			for step: int in directions:
@@ -214,35 +221,35 @@ func _check_on_boundary_dashes() -> void:
 				)
 				if resolved.dot(normal) < -0.01:
 					_fail("%s edge %d: resolved aim still points out of the floor"
-						% [rift.rift_id, edge])
+						% [floor_id, edge])
 					break
 				var hit: Dictionary = DashGeometry.cast_polygon(
 					origin, resolved, polygon, skip, edge
 				)
 				if hit.is_empty():
-					_fail("%s edge %d: no wall found from the boundary" % [rift.rift_id, edge])
+					_fail("%s edge %d: no wall found from the boundary" % [floor_id, edge])
 					break
 				# The landing must be forward and on a different edge than the one underfoot.
 				if float(hit[&"distance"]) <= skip:
 					_fail("%s edge %d: dash landed on itself (%.2f px)"
-						% [rift.rift_id, edge, float(hit[&"distance"])])
+						% [floor_id, edge, float(hit[&"distance"])])
 					break
 				if int(hit[&"edge"]) == edge:
-					_fail("%s edge %d: dash hit the edge it started on" % [rift.rift_id, edge])
+					_fail("%s edge %d: dash hit the edge it started on" % [floor_id, edge])
 					break
 				# And it must be on the floor, not past it.
 				if not DashGeometry.is_inside_polygon_slack(
 					hit[&"point"] as Vector2, polygon, 1.0
 				):
-					_fail("%s edge %d: landing is off the floor" % [rift.rift_id, edge])
+					_fail("%s edge %d: landing is off the floor" % [floor_id, edge])
 					break
 
 	# The inset polygon must never come back empty, even squeezed hard.
-	for rift: RiftData in catalog.load_rifts():
+	for floor_id: StringName in floors:
 		var polygon: PackedVector2Array = DashGeometry.polygon_from_uv(
-			rift.floor_polygon, screen_rect
+			floors[floor_id], screen_rect
 		)
 		for inset: float in [20.0, 80.0, 400.0, 2000.0]:
 			var shrunk: PackedVector2Array = DashGeometry.inset_polygon(polygon, inset)
 			if shrunk.size() < 3:
-				_fail("%s inset by %.0f produced an empty polygon" % [rift.rift_id, inset])
+				_fail("%s inset by %.0f produced an empty polygon" % [floor_id, inset])

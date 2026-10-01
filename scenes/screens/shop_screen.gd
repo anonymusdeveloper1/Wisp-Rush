@@ -3,7 +3,9 @@ extends Control
 ## The Shop: the one place Rift Points are spent. Three tabs - CHARACTERS, ARENAS, NO ADS.
 ##
 ## Each RP tab is a FocusCarousel of cards that behaves like the old Forms picker (owner reference
-## 2026-09-13): swipe or tap a side card to browse, locked items stay previewable, one description
+## 2026-09-13); ARENAS went back to it from a thumbnail gallery when the thirty Endless arenas were
+## replaced by painted ones (owner, 2026-09-23). Swipe or tap a side card to browse, locked items stay
+## previewable, one description
 ## line and a single main button. The button reads BUY • price, NEED n RP, the gate reason, EQUIP or
 ## EQUIPPED (spec story_and_endless/04). NO ADS is the ADR-0012 Remove Ads panel with no Rift Points
 ## anywhere: its buttons stay disabled until a real store is connected. The screen only emits
@@ -29,58 +31,28 @@ const TAB_ARENAS: StringName = &"arenas"
 const TAB_NO_ADS: StringName = &"no_ads"
 const TABS: Array[StringName] = [TAB_WISPS, TAB_ARENAS, TAB_NO_ADS]
 
-const RP_ICON: Texture2D = preload("res://assets/art/ui/system/02_soul_shards.png")
-const LOCK_ICON: Texture2D = preload("res://assets/art/ui/system/17_lock.png")
+const RP_ICON: Texture2D = preload("res://assets/ui/theme/icons/icon_currency.tres")
+const LOCK_ICON: Texture2D = preload("res://assets/ui/theme/icons/icon_lock.tres")
 const OWNED_ICON: Texture2D = preload("res://assets/art/ui/system/10_forms.png")
 const REAPER_ICON: Texture2D = preload("res://assets/art/ui/system/18_reaper.png")
+
 ## Brightness of an unowned item's visual, so ownership reads at a glance on every card.
-## Badge colour per collectible tier; [constant FormData.Tier.STANDARD] shows no badge at all.
-## Arena gallery: columns of thumbnails, and the height of one tile's art.
-##
-## Arenas are places, not collectibles. Thirty of them in the one-at-a-time card carousel meant
-## thirty swipes and a picture of a picture; the gallery shows them as the art they are, grouped by
-## tier, and tapping one opens it full-bleed the way it will actually look in a run
-## (owner decision 2026-09-20).
-## Three across, and the art is drawn at the thumbnails' own portrait shape (282x502). A landscape
-## tile cropped every arena down to its empty floor, which is the one part they all share.
-const ARENA_COLUMNS: int = 3
-const ARENA_TILE_HEIGHT: float = 500.0
-## Caption size on a tile; the default is sized for a full-width card, not a third of one.
-const ARENA_TILE_FONT_SIZE: int = 22
-## Tier accent for an arena section header, indexed by [enum ArenaSkinData.Tier].
-const ARENA_TIER_COLOURS: Array[Color] = [
-	Color(0.47, 0.59, 0.65),
-	Color(0.43, 0.78, 0.90),
-	Palette.WARNING_AMBER,
-	Palette.RIFT_MAGENTA,
-]
-
-const TIER_COLOURS: Dictionary[FormData.Tier, Color] = {
-	FormData.Tier.LEGENDARY: Palette.WARNING_AMBER,
-	FormData.Tier.MYTHIC: Palette.RIFT_MAGENTA,
-}
-
 const LOCKED_VISUAL_BRIGHTNESS: float = 0.42
 ## Card text sizes in the 1080-wide design space.
 const CARD_NAME_SIZE: int = 44
-const CARD_STATE_SIZE: int = 34
+const CARD_STATE_SIZE: int = 33
 const STATE_ICON_SIZE := Vector2(48, 48)
 ## Soft halo in the form's own tint behind its portrait.
 const PORTRAIT_GLOW_ALPHA: float = 0.42
 const LOCKED_GLOW_ALPHA: float = 0.14
-## ARENAS cards get their thumbnail and scenery grade only within this many cards of the focused
-## one; the rest keep an empty card frame until the carousel scrolls near (30 grade materials built
-## at once stalled the Shop's first frame on device, owner report 2026-09-16).
-const ARENA_VISUAL_RADIUS: int = 2
-## Share of a CHARACTERS card's picture area a rigged character and a single-image form fill.
-## How many cards either side of the focused one are built as live, animated characters.
-## Every other card shows its still portrait. A live card holds its character's whole menu
-## frame set, and a texture costs its full uncompressed size in VRAM whatever it cost on
-## disk, so building all of them at once is what a whole-frame roster cannot afford
-## (docs/guides/character_sprite_frames.md §9c).
+## How many cards either side of the focused one are built live: an animated character, or an
+## arena's full-size art instead of its thumbnail. Every other card shows its still thumbnail. A
+## live card holds a character's whole menu frame set or an arena's full background, and a texture
+## costs its full uncompressed size in VRAM whatever it cost on disk, so building all of them at
+## once is what the roster cannot afford.
 const LIVE_CARD_RADIUS: int = 1
+## Share of a CHARACTERS card's picture area a live character fills.
 const CHARACTER_FILL: float = 0.94
-const PORTRAIT_FILL: float = 0.9
 
 @export var form_catalog: FormCatalog
 @export var endless_catalog: EndlessCatalog
@@ -99,27 +71,15 @@ var _glow_texture: GradientTexture2D
 ## Live character previews of the CHARACTERS cards by form id (rigs and animated portraits alike).
 var _character_previews: Dictionary[StringName, PlayableCharacterPreview] = {}
 var _tab_buttons: Dictionary[StringName, Button] = {}
-## ARENAS card indices whose thumbnail is filled, and the card index they were last filled around.
-## One scenery grade material per scenery, shared by every card that shows it.
-var _scenery_materials: Dictionary[ArenaSceneryData, ShaderMaterial] = {}
+## ARENAS cards currently showing their full-size background, by skin id.
+var _live_arenas: Dictionary[StringName, bool] = {}
 
 @onready var _balance_label: Label = %BalanceLabel
 @onready var _carousel_page: Control = %CarouselPage
 @onready var _carousel: FocusCarousel = %Carousel
 @onready var _dots: PageDots = %Dots
-@onready var _tier_label: Label = %TierLabel
 @onready var _description_label: Label = %DescriptionLabel
 @onready var _requirement_label: Label = %RequirementLabel
-@onready var _arena_page: ScrollContainer = %ArenaPage
-@onready var _arena_list: VBoxContainer = %ArenaList
-@onready var _arena_peek: Control = %ArenaPeek
-@onready var _peek_art: TextureRect = %PeekArt
-@onready var _peek_name: Label = %PeekName
-@onready var _peek_tier: Label = %PeekTier
-@onready var _peek_description: Label = %PeekDescription
-@onready var _peek_requirement: Label = %PeekRequirement
-@onready var _peek_action: Button = %PeekAction
-@onready var _peek_back: Button = %PeekBack
 @onready var _no_ads_page: Control = %NoAdsPage
 @onready var _offer_status: Label = %OfferStatus
 @onready var _offer_strike: ColorRect = %OfferStrike
@@ -151,8 +111,6 @@ func _ready() -> void:
 	_back_button.pressed.connect(func() -> void: back_requested.emit())
 	_action_button.pressed.connect(_on_action_pressed)
 	_restore_button.pressed.connect(func() -> void: restore_requested.emit())
-	_peek_action.pressed.connect(_on_action_pressed)
-	_peek_back.pressed.connect(_close_arena_peek)
 	_carousel.selection_changed.connect(_on_carousel_selection_changed)
 	_carousel.activated.connect(func(_index: int) -> void: _on_action_pressed())
 	_rebuild()
@@ -169,7 +127,7 @@ func _process(_delta: float) -> void:
 ## Shows `tab` for a save snapshot. Safe before `_ready` (Main sets screens up before adding them).
 ##
 ## Reads `rift_points`, `owned_*` / `equipped_*` for characters and arena skins,
-## `bosses_defeated`, `rift_levels`, `ads_removed` and `settings`, plus `store_available`, which
+## `bosses_defeated`, `ads_removed` and `settings`, plus `store_available`, which
 ## Main adds because the store is not part of the save.
 func setup(snapshot: Dictionary, tab: StringName) -> void:
 	_snapshot = snapshot.duplicate(true)
@@ -210,12 +168,8 @@ func _rebuild() -> void:
 	for tab: StringName in TABS:
 		_tab_buttons[tab].set_pressed_no_signal(tab == _tab)
 	var rp_tab: bool = _tab != TAB_NO_ADS
-	var gallery: bool = _tab == TAB_ARENAS
-	_carousel_page.visible = rp_tab and not gallery
-	_arena_page.visible = gallery
+	_carousel_page.visible = rp_tab
 	_no_ads_page.visible = not rp_tab
-	if not gallery:
-		_close_arena_peek()
 	if rp_tab and _built_tab != _tab:
 		_build_cards()
 	elif rp_tab and not _selected_ids.has(_tab):
@@ -233,10 +187,7 @@ func _build_cards() -> void:
 	_built_tab = _tab
 	_items = _items_for(_tab)
 	_character_previews.clear()
-	if _tab == TAB_ARENAS:
-		_built_tab = _tab
-		_build_arena_gallery()
-		return
+	_live_arenas.clear()
 	var cards: Array[Control] = []
 	for item: Resource in _items:
 		cards.append(_build_card(item))
@@ -282,9 +233,6 @@ func _refresh() -> void:
 	if _tab == TAB_NO_ADS:
 		_refresh_no_ads()
 		return
-	if _tab == TAB_ARENAS:
-		_refresh_arena_gallery()
-		return
 	var hollow := PackedInt32Array()
 	for index: int in _items.size():
 		_refresh_card(_carousel.get_card(index), _items[index])
@@ -293,13 +241,11 @@ func _refresh() -> void:
 	_dots.hollow = hollow
 	var selected_index: int = _index_of(_selected_id(_tab))
 	if selected_index >= _items.size():
-		_apply_tier(null)
 		_description_label.text = ""
 		_action_button.text = "EQUIPPED"
 		_action_button.disabled = true
 		return
 	var item: Resource = _items[selected_index]
-	_apply_tier(item)
 	_description_label.text = str(item.get(&"description"))
 	var price: int = _price(item)
 	var gate: String = _gate_reason(item)
@@ -322,209 +268,6 @@ func _refresh() -> void:
 		_requirement_label.text = "READY TO BUY"
 		_action_button.text = "BUY  •  %s" % RiftPoints.format(price)
 		_action_button.disabled = false
-
-
-## Builds the arena gallery: one section per tier, thumbnails two across inside it.
-func _build_arena_gallery() -> void:
-	for child: Node in _arena_list.get_children():
-		child.queue_free()
-	var sections: Dictionary[int, GridContainer] = {}
-	for item: Resource in _items:
-		var skin := item as ArenaSkinData
-		if skin == null:
-			continue
-		var tier: int = int(skin.tier)
-		if not sections.has(tier):
-			sections[tier] = _add_arena_section(tier)
-		sections[tier].add_child(_build_arena_tile(skin))
-	_refresh_arena_gallery()
-
-
-## A tier heading with its count, and the grid the tier's tiles go into.
-func _add_arena_section(tier: int) -> GridContainer:
-	var header := HBoxContainer.new()
-	header.add_theme_constant_override(&"separation", 16)
-	_arena_list.add_child(header)
-	var title := Label.new()
-	title.text = ArenaSkinData.TIER_NAMES[clampi(tier, 0, ArenaSkinData.TIER_NAMES.size() - 1)]
-	title.theme_type_variation = &"CaptionLabel"
-	title.add_theme_color_override(&"font_color", ARENA_TIER_COLOURS[
-		clampi(tier, 0, ARENA_TIER_COLOURS.size() - 1)
-	])
-	header.add_child(title)
-	var rule := Control.new()
-	rule.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header.add_child(rule)
-	var count := Label.new()
-	count.name = "Count"
-	count.theme_type_variation = &"CaptionLabel"
-	header.add_child(count)
-	var grid := GridContainer.new()
-	grid.columns = ARENA_COLUMNS
-	grid.add_theme_constant_override(&"h_separation", 18)
-	grid.add_theme_constant_override(&"v_separation", 18)
-	_arena_list.add_child(grid)
-	return grid
-
-
-## One tile: the arena's own thumbnail, its name, and what it costs or that you own it.
-func _build_arena_tile(skin: ArenaSkinData) -> Control:
-	var tile := Button.new()
-	tile.name = "Tile_%s" % skin.skin_id
-	# Flat on purpose: a gallery tile is the arena's own art, not a card. The ornate card frame is
-	# the collectible signifier that made thirty places look like thirty trading cards, and its
-	# bottom trim sat right where the price has to go.
-	tile.flat = true
-	tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tile.custom_minimum_size = Vector2(0, ARENA_TILE_HEIGHT + 96.0)
-	tile.pressed.connect(_on_arena_tile_pressed.bind(skin))
-	var column := VBoxContainer.new()
-	column.set_anchors_preset(Control.PRESET_FULL_RECT)
-	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	column.add_theme_constant_override(&"separation", 6)
-	tile.add_child(column)
-	var art := TextureRect.new()
-	art.name = "Art"
-	art.texture = skin.thumbnail
-	art.custom_minimum_size = Vector2(0, ARENA_TILE_HEIGHT)
-	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	art.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	column.add_child(art)
-	var name_label := Label.new()
-	name_label.text = skin.display_name
-	name_label.theme_type_variation = &"CaptionLabel"
-	name_label.add_theme_font_size_override(&"font_size", ARENA_TILE_FONT_SIZE)
-	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	# A three-column tile is narrower than the longest arena name, so the name shrinks to fit
-	# rather than spilling over its neighbour.
-	name_label.autowrap_mode = TextServer.AUTOWRAP_OFF
-	name_label.clip_text = true
-	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	column.add_child(name_label)
-	var state := Label.new()
-	state.name = "State"
-	state.theme_type_variation = &"CaptionLabel"
-	state.add_theme_font_size_override(&"font_size", ARENA_TILE_FONT_SIZE)
-	state.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	state.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	column.add_child(state)
-	return tile
-
-
-## Ownership, price and lock state on every tile, plus the tier counts.
-func _refresh_arena_gallery() -> void:
-	var owned_per_tier: Dictionary[int, int] = {}
-	var total_per_tier: Dictionary[int, int] = {}
-	for item: Resource in _items:
-		var skin := item as ArenaSkinData
-		if skin == null:
-			continue
-		var tier: int = int(skin.tier)
-		total_per_tier[tier] = total_per_tier.get(tier, 0) + 1
-		var tile := _arena_list.find_child("Tile_%s" % skin.skin_id, true, false) as Button
-		if tile == null:
-			continue
-		var art := tile.find_child("Art", true, false) as CanvasItem
-		var state := tile.find_child("State", true, false) as Label
-		var owns: bool = _owns(skin)
-		if owns:
-			owned_per_tier[tier] = owned_per_tier.get(tier, 0) + 1
-		if art != null:
-			var shade: float = 1.0 if owns else LOCKED_VISUAL_BRIGHTNESS
-			art.modulate = Color(shade, shade, shade, 1.0)
-		if state == null:
-			continue
-		var gate: String = _gate_reason(skin)
-		if _is_equipped(skin):
-			state.text = "EQUIPPED"
-			state.add_theme_color_override(&"font_color", Palette.SOUL_CYAN)
-		elif owns:
-			state.text = "OWNED"
-			state.add_theme_color_override(&"font_color", Palette.SOUL_CYAN)
-		elif not gate.is_empty():
-			state.text = gate
-			state.add_theme_color_override(&"font_color", Palette.WARNING_AMBER)
-		else:
-			state.text = RiftPoints.format(_price(skin))
-			state.add_theme_color_override(&"font_color", Palette.WARNING_AMBER)
-	var section: int = 0
-	for child: Node in _arena_list.get_children():
-		var count := child.find_child("Count", true, false) as Label
-		if count == null:
-			continue
-		var tier: int = section
-		section += 1
-		count.text = "%d / %d" % [owned_per_tier.get(tier, 0), total_per_tier.get(tier, 0)]
-	if _arena_peek.visible:
-		_refresh_arena_peek()
-
-
-func _on_arena_tile_pressed(skin: ArenaSkinData) -> void:
-	_selected_ids[_tab] = skin.skin_id
-	_feedback_label.text = ""
-	_open_arena_peek()
-
-
-## The peek: the arena filling the screen the way a run will show it, with its own buy/equip.
-func _open_arena_peek() -> void:
-	_arena_peek.visible = true
-	_refresh_arena_peek()
-
-
-func _close_arena_peek() -> void:
-	if not _arena_peek.visible:
-		return
-	_arena_peek.visible = false
-	_refresh()
-
-
-## Closes the peek before the Shop itself handles Back, so Android back steps out one level at a
-## time instead of leaving the screen from under an open preview.
-func handle_back() -> bool:
-	if _arena_peek.visible:
-		_close_arena_peek()
-		return true
-	return false
-
-
-func _refresh_arena_peek() -> void:
-	var index: int = _index_of(_selected_id(_tab))
-	if index >= _items.size():
-		_close_arena_peek()
-		return
-	var skin := _items[index] as ArenaSkinData
-	if skin == null:
-		return
-	_peek_art.texture = skin.load_background()
-	_peek_name.text = skin.display_name
-	_peek_tier.text = skin.get_tier_name()
-	_peek_tier.add_theme_color_override(&"font_color", ARENA_TIER_COLOURS[
-		clampi(int(skin.tier), 0, ARENA_TIER_COLOURS.size() - 1)
-	])
-	_peek_description.text = skin.description
-	var price: int = _price(skin)
-	var gate: String = _gate_reason(skin)
-	_peek_action.icon = null
-	if _owns(skin):
-		var equipped: bool = _is_equipped(skin)
-		_peek_requirement.text = "EQUIPPED" if equipped else "OWNED  ·  READY TO EQUIP"
-		_peek_action.text = "EQUIPPED" if equipped else "EQUIP"
-		_peek_action.disabled = equipped
-	elif not gate.is_empty():
-		_peek_requirement.text = "LOCKED"
-		_peek_action.icon = LOCK_ICON
-		_peek_action.text = gate
-		_peek_action.disabled = true
-	elif _balance() < price:
-		_peek_requirement.text = "LOCKED  ·  %s" % RiftPoints.format(price)
-		_peek_action.text = "NEED %s" % RiftPoints.format(price - _balance())
-		_peek_action.disabled = true
-	else:
-		_peek_requirement.text = "READY TO BUY"
-		_peek_action.text = "BUY  •  %s" % RiftPoints.format(price)
-		_peek_action.disabled = false
 
 
 func _refresh_no_ads() -> void:
@@ -568,8 +311,7 @@ func _ensure_no_ads_focus() -> void:
 
 
 func _on_action_pressed() -> void:
-	var driver: Button = _peek_action if _arena_peek.visible else _action_button
-	if driver.disabled:
+	if _action_button.disabled:
 		return
 	if _tab == TAB_NO_ADS:
 		store_purchase_requested.emit(MonetisationService.PRODUCT_REMOVE_ADS)
@@ -598,17 +340,6 @@ func _item_id(item: Resource) -> StringName:
 	return (item as FormData).form_id
 
 
-## Shows the focused character's collectible tier above its description. Ordinary characters and
-## every non-character tab show nothing, and the badge never replaces price or ownership state.
-func _apply_tier(item: Resource) -> void:
-	var form := item as FormData
-	var label: String = form.get_tier_name() if form != null else ""
-	_tier_label.text = label
-	_tier_label.visible = not label.is_empty()
-	if form != null:
-		_tier_label.modulate = TIER_COLOURS.get(form.tier, Palette.TEXT_MUTED)
-
-
 func _price(item: Resource) -> int:
 	return maxi(0, int(item.get(&"price")))
 
@@ -628,7 +359,7 @@ func _equipped_id(tab: StringName) -> StringName:
 			return StringName(str(_snapshot.get(
 				&"equipped_arena_skin", endless_catalog.default_skin_id
 			)))
-	return StringName(str(_snapshot.get(&"equipped_form", "void")))
+	return StringName(str(_snapshot.get(&"equipped_form", String(FormCatalog.DEFAULT_FORM_ID))))
 
 
 func _selected_id(tab: StringName) -> StringName:
@@ -680,9 +411,8 @@ func _equipped_form_tint() -> Color:
 
 # ------------------------------------------------------------------------ cards
 
-## One portrait card: name on top, the item's visual in the middle, its state at the bottom.
-## Builds a character card for the carousel. Arenas do not come through here any more: they are a
-## gallery of their own art now (see [method _build_arena_gallery]).
+## One portrait card: name on top, the item's visual in the middle, its state at the bottom. The
+## same card holds a character or an arena.
 func _build_card(item: Resource) -> Control:
 	var card := Button.new()
 	card.theme_type_variation = &"CardButton"
@@ -709,7 +439,10 @@ func _build_card(item: Resource) -> Control:
 	visual.name = "Visual"
 	visual.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(visual)
-	_add_form_visual(visual, item as FormData)
+	if item is ArenaSkinData:
+		_add_arena_visual(visual, item as ArenaSkinData)
+	else:
+		_add_form_visual(visual, item as FormData)
 
 	var state_row := HBoxContainer.new()
 	state_row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -744,10 +477,21 @@ func _add_form_visual(visual: Control, form: FormData) -> void:
 	visual.add_child(portrait)
 
 
+## The arena's thumbnail, whole and uncropped. [method _sync_live_cards] swaps in the full-size
+## art when the card comes near the focus.
+func _add_arena_visual(visual: Control, skin: ArenaSkinData) -> void:
+	var art := _texture_rect(skin.thumbnail, TextureRect.STRETCH_KEEP_ASPECT_CENTERED)
+	art.name = "Portrait"
+	visual.add_child(art)
+
+
 ## Brings the focused card and its [constant LIVE_CARD_RADIUS] neighbours to life and puts every
 ## other card back to its still portrait. Called whenever the carousel moves, so walking the roster
-## never holds more than a few characters' menu frames at once.
+## never holds more than a few characters' menu frames, or arenas' full backgrounds, at once.
 func _sync_live_cards() -> void:
+	if _tab == TAB_ARENAS:
+		_sync_live_arenas()
+		return
 	if _tab != TAB_WISPS:
 		return
 	var centre: int = _index_of(_selected_id(_tab))
@@ -765,6 +509,28 @@ func _sync_live_cards() -> void:
 			_wake_card(index, form)
 		else:
 			_sleep_card(index, form)
+
+
+## Full-size art on the ARENAS cards near the focus, the thumbnail on the rest.
+func _sync_live_arenas() -> void:
+	var centre: int = _index_of(_selected_id(_tab))
+	for index: int in _items.size():
+		var skin := _items[index] as ArenaSkinData
+		var visual: Control = _card_visual(index)
+		if skin == null or visual == null:
+			continue
+		var wanted: bool = absi(index - centre) <= LIVE_CARD_RADIUS
+		if wanted == _live_arenas.has(skin.skin_id):
+			continue
+		var art := visual.get_node_or_null(^"Portrait") as TextureRect
+		if art == null:
+			continue
+		var background: Texture2D = skin.load_background() if wanted else null
+		art.texture = background if background != null else skin.thumbnail
+		if wanted:
+			_live_arenas[skin.skin_id] = true
+		else:
+			_live_arenas.erase(skin.skin_id)
 
 
 ## Replaces a card's still portrait with a live character.

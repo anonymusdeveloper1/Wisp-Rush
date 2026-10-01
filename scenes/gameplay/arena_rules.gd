@@ -1,12 +1,12 @@
 class_name ArenaRules
 extends RefCounted
-## The one seam GameWorld reads for everything an arena decides: backdrop, floor, rule twist, boss
-## cadence and pick, difficulty, roster and whether a boss ends the run.
+## The one seam GameWorld reads for everything an arena decides: backdrop, floor, boss cadence
+## and pick, and difficulty. Which enemies come is the run's `EnemyRamp`, not the arena's.
 ##
-## Built by `RunProfile.create_arena_rules()`. `RiftArenaRules` wraps a Rift level (story runs);
-## `EndlessArenaRules` wraps the Endless catalog, a skin and a pool (Endless and the daily run).
-## This base class is the neutral arena used when a run has no profile (F6 runs, fixtures): the
-## scene's own backdrop, the legacy floor rectangle, no twist, the Reaper every four waves.
+## Built by `RunProfile.create_arena_rules()`. `EndlessArenaRules` wraps the Endless catalog, a skin
+## and a pool (Endless, the daily run and the tutorial). This base class is the neutral arena used
+## when a run has no profile (F6 runs, fixtures): the scene's own backdrop, the legacy floor
+## rectangle, the Reaper every four waves.
 
 ## Boss cadence of the neutral arena.
 const DEFAULT_BOSS_WAVE_INTERVAL: int = 4
@@ -14,6 +14,12 @@ const DEFAULT_BOSS_WAVE_INTERVAL: int = 4
 
 ## Full-bleed backdrop, or null to keep the scene's own.
 func get_background() -> Texture2D:
+	return null
+
+
+## A layered or 3D arena's scene (an `ArenaVisual`, ADR-0021, ADR-0023), shown instead of the
+## background and giving the floor; null (a painted backdrop) by default.
+func get_visual_scene() -> PackedScene:
 	return null
 
 
@@ -27,24 +33,15 @@ func get_floor_polygon() -> PackedVector2Array:
 	return PackedVector2Array()
 
 
-## Mechanical twist GameWorld switches on; `&"none"` is the baseline.
-func get_rule_key() -> StringName:
-	return &"none"
+## Rectangle formations, hazards and the playfield's scale are laid out over, in background UV
+## space. Empty means `GameWorld.ARENA_FLOOR_UV`, measured on the arenas' shared 941x1672 canvas.
+func get_floor_rect_uv() -> Rect2:
+	return Rect2()
 
 
 ## Waves between boss encounters; the boss arrives on every multiple.
 func get_boss_wave_interval() -> int:
 	return DEFAULT_BOSS_WAVE_INTERVAL
-
-
-## Waves in one story level, or zero when bosses never end the run.
-func get_level_waves() -> int:
-	return 0
-
-
-## Whether the boss of `wave` ends the run in victory.
-func is_final_boss_wave(_wave: int) -> bool:
-	return false
 
 
 ## WaveDirector threat multiplier after `cycle` bosses have been beaten.
@@ -57,26 +54,11 @@ func get_enemy_speed_scale(_cycle: int) -> float:
 	return 1.0
 
 
-## Maps an authored formation enemy kind onto the roster of `wave` in a run seeded `run_seed`.
-func substitute_enemy(base_kind: StringName, _wave: int, _run_seed: int) -> StringName:
-	return base_kind
-
-
-## Player-facing name of the roster `wave` uses, or empty when the arena has a single roster.
-func get_roster_name(_wave: int, _run_seed: int) -> String:
-	return ""
-
-
 ## Boss id for the zero-based `boss_index`-th encounter of a run seeded `run_seed`.
 func get_boss_id(_boss_index: int, _run_seed: int) -> StringName:
 	return &"reaper"
 
 
-## Rift id for the run summary and Rift bests; empty for arenas that are not a Rift.
-func get_rift_id() -> StringName:
-	return &""
-
-
-## Arena skin id for the run summary; empty for Rifts.
+## Arena skin id for the run summary; empty for the neutral arena.
 func get_skin_id() -> StringName:
 	return &""

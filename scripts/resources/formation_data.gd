@@ -1,8 +1,13 @@
 class_name FormationData
 extends Resource
 ## Data-driven normalized enemy and optional hazard placement for one readable encounter.
+##
+## Since Enemies v2 (2026-09-28) a formation says only where enemies arrive: every enemy slot is
+## [constant ENEMY_SLOT], and the run's `EnemyRamp` decides which enemy fills it.
 
-const VALID_ENEMY_KINDS: Array[StringName] = [&"soul_wisp", &"shard_wraith", &"bone_mote"]
+## The one enemy slot kind a formation places.
+const ENEMY_SLOT: StringName = &"enemy"
+const VALID_ENEMY_KINDS: Array[StringName] = [ENEMY_SLOT]
 const VALID_HAZARD_KINDS: Array[StringName] = [
 	&"",
 	&"split_crystal",
@@ -19,7 +24,7 @@ const HAZARD_MARGIN: float = 0.18
 @export_range(1, 99, 1) var minimum_wave: int = 1
 ## Amount removed from the current wave threat budget when selected.
 @export_range(1, 30, 1) var threat_cost: int = 1
-## Enemy archetype identifiers paired by index with [member normalized_positions].
+## One [constant ENEMY_SLOT] per enemy, paired by index with [member normalized_positions].
 @export var enemy_kinds: Array[StringName] = []
 ## Viewport-normalized enemy points kept inside readable margins.
 @export var normalized_positions: PackedVector2Array = PackedVector2Array()

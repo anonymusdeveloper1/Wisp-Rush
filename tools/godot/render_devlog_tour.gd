@@ -6,14 +6,10 @@ extends SceneTree
 ##     --write-movie "$PWD/video/footage/tour_menus.avi" \
 ##     --script res://tools/godot/render_devlog_tour.gd -- tour=menus
 ## Tours:
-##   menus — boot loading screen → Home → Rift Map cards → Shop WISPS/DASHES/ARENAS (to the Mythic
-##           cards) → Home → PLAY → run loading screen → an Endless run on `skin` played by the bot.
-##   story — boot → Home → Rift Map (Obsidian Garden, then the locked Shattered Rift) → ENTER →
-##           the level-1 run until the boss falls → Results (CLEARED, SHATTERED RIFT OPEN) →
-##           ENTER SHATTERED RIFT → its loading screen and the first seconds of that run.
-## Options: tour=menus|story  skin=<arena skin to own and equip, default aurora_throne>
+##   menus — boot loading screen → Home → Shop WISPS/DASHES/ARENAS (to the Mythic cards) → Home →
+##           PLAY → run loading screen → an Endless run on `skin` played by the bot.
+## Options: tour=menus  skin=<arena skin to own and equip, default quarry_titan>
 ##   rift_points=<balance, default 4200>  run_seconds=<Endless play time, default 14>
-##   story_cap=<max movie seconds for the story run, default 150>  next_seconds=<default 8>
 ##   quality=<MJPEG quality 0-1, default 0.9>  plus devlog_bot.gd options (hold, redirects, survive…)
 ## Uses its own isolated save (user://test_runs/devlog_tour*.json), reset at start. Navigation runs
 ## through Main's real handlers, so the cover-then-build veil, glides and loading screens are the
@@ -65,11 +61,7 @@ func _run() -> void:
 		_abort("Main never showed Home")
 		return
 
-	match str(_options.get("tour", "menus")):
-		"story":
-			await _tour_story()
-		_:
-			await _tour_menus()
+	await _tour_menus()
 
 	_step(&"end")
 	if _events != null:
@@ -83,7 +75,7 @@ func _prepare_save(save_manager: SaveManagerService) -> void:
 	save_manager.reload()
 	save_manager.reset_save()
 	save_manager.mark_tutorial_completed()
-	var skin_id := StringName(str(_options.get("skin", "aurora_throne")))
+	var skin_id := StringName(str(_options.get("skin", "quarry_titan")))
 	var skin: ArenaSkinData = ENDLESS_CATALOG.get_skin(skin_id)
 	if skin != null and skin.skin_id == skin_id:
 		# Grant exactly the price, so the purchase leaves a zero balance before the shown one.
@@ -96,20 +88,6 @@ func _prepare_save(save_manager: SaveManagerService) -> void:
 func _tour_menus() -> void:
 	var home := _current() as HomeScreen
 	await _hold(1.6)
-
-	_step(&"rift_map")
-	home.rift_map_requested.emit()
-	var rift_map := await _wait_for(RiftMapScreen) as RiftMapScreen
-	if rift_map == null:
-		_abort("Rift Map did not open")
-		return
-	await _hold(1.2)
-	for index: int in [1, 2, 0]:
-		rift_map._carousel.select(index, true)
-		await _hold(1.0)
-	rift_map.back_requested.emit()
-	await _wait_for(HomeScreen)
-	await _hold(1.0)
 
 	_step(&"shop")
 	home.shop_requested.emit()
@@ -148,59 +126,6 @@ func _tour_menus() -> void:
 		return
 	_step(&"run")
 	await _hold(DevlogBot.option_float(_options, "run_seconds", 14.0))
-
-
-func _tour_story() -> void:
-	var home := _current() as HomeScreen
-	await _hold(1.0)
-
-	_step(&"rift_map")
-	home.rift_map_requested.emit()
-	var rift_map := await _wait_for(RiftMapScreen) as RiftMapScreen
-	if rift_map == null:
-		_abort("Rift Map did not open")
-		return
-	await _hold(1.4)
-	_step(&"rift_locked")
-	rift_map._carousel.select(1, true)
-	await _hold(1.8)
-	rift_map._carousel.select(0, true)
-	await _hold(1.1)
-
-	_step(&"enter")
-	rift_map._on_enter_pressed()
-	var awaited_3: Node = await _wait_for(LoadingScreen, false)
-	if awaited_3 == null:
-		_abort("ENTER did not open the run loading screen")
-		return
-	var game := await _wait_for(GameWorld) as GameWorld
-	if game == null:
-		_abort("the story run never started")
-		return
-	_step(&"story_run")
-	var cap: float = DevlogBot.option_float(_options, "story_cap", 150.0)
-	var started: float = _now()
-	while not (_current() is ResultsScreen):
-		if _now() - started > cap:
-			_abort("the story run did not end within %.0f s" % cap)
-			return
-		await _frame()
-
-	_step(&"results")
-	var results := _current() as ResultsScreen
-	await _hold(6.5)
-	_step(&"enter_next")
-	results._on_primary_pressed()
-	var awaited_4: Node = await _wait_for(LoadingScreen, false)
-	if awaited_4 == null:
-		_abort("the Results primary action did not open a run loading screen")
-		return
-	var awaited_5: Node = await _wait_for(GameWorld)
-	if awaited_5 == null:
-		_abort("the next Rift never started")
-		return
-	_step(&"next_run")
-	await _hold(DevlogBot.option_float(_options, "next_seconds", 8.0))
 
 
 ## The current screen: Main's first regular child.

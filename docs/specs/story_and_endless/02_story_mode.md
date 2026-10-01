@@ -1,5 +1,8 @@
 # Phase 2 — Rifts become story levels
 
+> **History:** the story Rifts were removed from the game on 2026-09-25 (GDD §14 #48). This work
+> order is kept as a record; Endless keeps the Rifts' enemy mixes and bosses.
+
 > **Status:** ✅ built 2026-09-15 (DEVLOG) — implementation only; the Tests and QA items were skipped by
 > owner request. The system docs now own these rules.
 >

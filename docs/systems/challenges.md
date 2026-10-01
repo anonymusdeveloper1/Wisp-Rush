@@ -1,16 +1,16 @@
 # System: Daily run and local challenges
 
-> **Status:** ✅ done · **Last updated:** 2026-09-15 · **GDD section:** §6, §20
+> **Status:** ✅ done · **Last updated:** 2026-09-25 · **GDD section:** §6, §20
 >
 > **Endless rules (spec 03, 2026-09-15):** the daily run plays on Endless rules — the shared floor
-> template, `EndlessTuning.daily_roster_rift_ids` / `daily_boss_ids` (Obsidian Garden roster, the Reaper)
+> template, `EndlessTuning.daily_roster_ids` / `daily_boss_ids` (Obsidian Garden roster, the Reaper)
 > and `EndlessCatalog.get_arena_of_the_day(date)` — ignoring progress and ownership, so every player gets
 > the same run. The Daily screen's seed line names the arena (`DailyScreen.setup(..., arena_name)`).
 
 ## Purpose
 
 Provide deterministic offline return goals without penalties or network dependence: one
-calendar-seeded Rift of the Day and three rotating local challenges.
+calendar-seeded daily run and three rotating local challenges.
 
 ## Files
 
@@ -25,7 +25,7 @@ calendar-seeded Rift of the Day and three rotating local challenges.
 ```text
 Main
 └── DailyScreen
-    ├── Rift of the Day summary
+    ├── daily run summary (portal card)
     ├── three challenge rows
     └── Play Daily + Back
 ```
@@ -55,8 +55,7 @@ Main supplies completed GameWorld summaries and persists the returned state thro
 
 - Redesign v1 layout: portal hero card, today's-best plate, three goal rows with progress bars and reward pills, one primary Play action.
 - Local date alone selects the same three challenge definitions and daily seed offline.
-- Daily challenges keep their wave goals (RIFT DIVER, wave 5): story runs end at wave 4, so only
-  Endless and daily runs complete them.
+- Daily challenges keep their wave goals (DEEP DIVER, wave 5; id `rift_diver`); Endless and daily runs complete them.
 - Progress never decreases; completed rewards are claimed once per date/challenge.
 - Completing a daily run grants one 10 RP reward per date; missing a date has no penalty.
 - Reward plates and the daily bonus line read `+15 RP` (`RiftPoints` formatting, spec 01).
@@ -73,6 +72,8 @@ Main supplies completed GameWorld summaries and persists the returned state thro
 
 | Date | Change |
 |---|---|
+| 2026-09-25 | Rift wording replaced (owner): DAILY RUN title, PLAY TODAY'S RUN, DAILY SEED line, "… TODAY'S RUN" reward line; challenge RIFT DIVER → DEEP DIVER (id `rift_diver` kept) |
+| 2026-09-25 | Story Rifts removed (owner): `daily_roster_rift_ids` → `daily_roster_ids`; story-run note dropped |
 | 2026-09-15 | Rewards in Rift Points (`reward_points`, `+15 RP`); SHARD SEEKER → POINT SEEKER on `rp_collected` (spec 01) |
 | 2026-09-12 | Restyled to redesign v1 (ADR-0005) |
 | 2026-09-11 | Planned for Milestone 3 |

@@ -1,8 +1,8 @@
 extends SceneTree
-## Every Rift's boss resolves to a real variant, escalates in toughness, and swaps its atlas.
+## Every Endless mix's boss resolves to a real variant, escalates in toughness, and swaps its atlas.
 
 const REAPER_SCENE: PackedScene = preload("res://scenes/bosses/reaper_boss.tscn")
-const RIFTS: RiftCatalog = preload("res://data/rifts/default_catalog.tres")
+const ENDLESS: EndlessCatalog = preload("res://data/endless/default_endless_catalog.tres")
 ## Animations the phase machine plays; a variant missing any of these would freeze mid-encounter.
 const REQUIRED_ANIMATIONS: Array[StringName] = [
 	&"idle", &"arrival", &"appear", &"windup", &"strike",
@@ -24,10 +24,10 @@ func _fail(message: String) -> void:
 func _run() -> void:
 	var variants: Dictionary = GameWorld.BOSS_VARIANTS
 
-	# Every Rift must name a boss that actually exists.
-	for rift: RiftData in RIFTS.load_rifts():
-		if not variants.has(rift.boss_id):
-			_fail("%s names unknown boss %s" % [rift.rift_id, rift.boss_id])
+	# Every Endless mix must name a boss that actually exists.
+	for roster: EndlessRoster in ENDLESS.get_rosters():
+		if not variants.has(roster.boss_id):
+			_fail("%s names unknown boss %s" % [roster.roster_id, roster.boss_id])
 
 	var seen_ids: Dictionary = {}
 	for key: StringName in variants:
@@ -42,21 +42,27 @@ func _run() -> void:
 		if seen_ids.has(data.display_name):
 			_fail("duplicate boss name %s" % data.display_name)
 		seen_ids[data.display_name] = true
+		# A boss with its own scene must be a BossActor.
+		if data.scene != null:
+			var actor: Node = data.scene.instantiate()
+			if not actor is BossActor:
+				_fail("%s scene is not a BossActor" % key)
+			actor.free()
 		# A supplied atlas must cover every animation the phase machine plays.
 		if data.frames != null:
 			for anim: StringName in REQUIRED_ANIMATIONS:
 				if not data.frames.has_animation(anim):
 					_fail("%s atlas is missing the %s animation" % [key, anim])
 
-	# Toughness must climb with the Rift ladder.
+	# Toughness must climb along the Endless mixes, in pick order (the old Rift ladder order).
 	var previous_health: int = 0
-	for rift: RiftData in RIFTS.load_rifts():
-		var data := variants.get(rift.boss_id) as BossData
+	for roster: EndlessRoster in ENDLESS.get_rosters():
+		var data := variants.get(roster.boss_id) as BossData
 		if data == null or data.tuning == null:
 			continue
 		if data.tuning.base_health < previous_health:
-			_fail("%s boss is weaker than the Rift before it (%d < %d)" % [
-				rift.rift_id, data.tuning.base_health, previous_health,
+			_fail("%s boss is weaker than the mix before it (%d < %d)" % [
+				roster.roster_id, data.tuning.base_health, previous_health,
 			])
 		previous_health = data.tuning.base_health
 

@@ -1,0 +1,107 @@
+{
+  "rules": "The recipe's: 256 px frame resolution delivered 4x nearest, up to 256 colours with soft edges (AutoSprite's paletted export), 194 px standing; the sources' outline kept (owner, 2026-09-25)",
+  "scale_source_to_native": 0.1896510721247563,
+  "standing_native": 194,
+  "frames": {
+    "storefront": {
+      "source": "sources/storefront.png",
+      "alpha_bounds_native": [
+        73,
+        31,
+        183,
+        225
+      ],
+      "height_native": 194,
+      "width_native": 110,
+      "edge_margins_native": [
+        73,
+        31,
+        73,
+        31
+      ],
+      "alpha_bounds_delivered": [
+        292,
+        124,
+        732,
+        900
+      ],
+      "colours": 255,
+      "alpha_levels": 94
+    },
+    "wall_bottom": {
+      "source": "sources/wall_bottom.png",
+      "alpha_bounds_native": [
+        55,
+        50,
+        200,
+        205
+      ],
+      "height_native": 155,
+      "width_native": 145,
+      "edge_margins_native": [
+        55,
+        50,
+        56,
+        51
+      ],
+      "alpha_bounds_delivered": [
+        220,
+        200,
+        800,
+        820
+      ],
+      "colours": 255,
+      "alpha_levels": 92
+    },
+    "wall_right": {
+      "source": "sources/wall_right.png",
+      "alpha_bounds_native": [
+        70,
+        47,
+        186,
+        208
+      ],
+      "height_native": 161,
+      "width_native": 116,
+      "edge_margins_native": [
+        70,
+        47,
+        70,
+        48
+      ],
+      "alpha_bounds_delivered": [
+        280,
+        188,
+        744,
+        832
+      ],
+      "colours": 255,
+      "alpha_levels": 84
+    },
+    "dash_attack": {
+      "source": "sources/dash_attack.png",
+      "alpha_bounds_native": [
+        27,
+        71,
+        229,
+        184
+      ],
+      "height_native": 113,
+      "width_native": 202,
+      "edge_margins_native": [
+        27,
+        71,
+        27,
+        72
+      ],
+      "alpha_bounds_delivered": [
+        108,
+        284,
+        916,
+        736
+      ],
+      "colours": 255,
+      "alpha_levels": 92
+    }
+  }
+}

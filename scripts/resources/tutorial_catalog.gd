@@ -4,8 +4,8 @@ extends Resource
 
 ## Ordered lessons, easiest to most skilful.
 @export var lessons: Array[TutorialLessonData] = []
-## Endless skin the tutorial arena shows (the default, Astral Observatory).
-@export var arena_skin_id: StringName = &"astral_observatory"
+## Endless arena the tutorial shows (the default, the Quarry Titan).
+@export var arena_skin_id: StringName = &"quarry_titan"
 ## Boss health in the boss lesson (rounded to three phase bands).
 @export_range(3, 30, 3) var boss_health: int = 3
 ## Caption while a missed attempt rebuilds.
@@ -14,7 +14,7 @@ extends Resource
 @export var hit_caption: String = "Hit! Watch the danger and try again."
 ## Callout and caption of the final beat.
 @export var complete_callout: String = "TUTORIAL COMPLETE"
-@export var complete_caption: String = "The Rift is yours."
+@export var complete_caption: String = "The arena is yours."
 @export_group("Demo")
 ## Seconds after a lesson is set up before the hand moves (spawn telegraphs finish first).
 @export_range(0.0, 3.0, 0.05) var demo_start_delay: float = 1.0

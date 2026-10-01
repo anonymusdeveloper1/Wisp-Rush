@@ -1,7 +1,14 @@
-# System: Rifts
+# System: Rifts (removed — history)
 
-> **Status:** ✅ done (story levels, clear-based unlocks, difficulty, rosters, all four rule twists and
-> five bosses) · **Last updated:** 2026-09-15 · **GDD section:** §5.4, §6 ·
+> **⛔ Removed from the game on 2026-09-25** (owner, GDD §14 #48). This page is kept as history and
+> describes the mode as it was. The code, data, Rift Map, backdrops and Rift save fields are gone;
+> Endless keeps the Rifts' five enemy mixes and boss pool as `EndlessRoster`s
+> ([endless_mode.md](endless_mode.md)).
+>
+> **Status (history):** ✅ done (story levels, clear-based unlocks, difficulty, rosters, all four rule twists and
+> five bosses) · ⏸ **not in the first release** (owner, 2026-09-24): Home has no RIFTS button, so
+> nothing opens the Rift Map. The mode stays in the build (GDD §14 #44) · **Last updated:** 2026-09-25 ·
+> **GDD section:** §5.4, §6 ·
 > **ADR:** [0007](../decisions/0007-rifts-as-rule-variant-arenas.md),
 > [0013](../decisions/0013-rift-story-levels-endless-mode-and-rift-points.md) (story levels, spec 02)
 
@@ -129,7 +136,8 @@ Rift has no requirement, every other one names an earlier Rift and a level insid
 - `test_menu_screens.gd` (lock gating, selection, ENTER); `test_screen_setup_order.gd` (`%Carousel`, 5 cards).
 - Visual: `WISP_ISOLATED_SAVE=1 tools/screenshot.sh res://scenes/screens/rift_map_screen.tscn 24 1080x1920`;
   phone layouts `tools/qa_matrix.sh rifts rifts_locked`.
-- Manual: Home → RIFTS → swipe to an unlocked Rift → ENTER; the arena backdrop changes and Results
+- Manual (until the Rifts return, open it from code, as `render_devlog_tour.gd` does with
+  `Main._show_rift_map()`): Home → RIFTS → swipe to an unlocked Rift → ENTER; the arena backdrop changes and Results
   records a best against that Rift.
 
 ## Known issues / TODO

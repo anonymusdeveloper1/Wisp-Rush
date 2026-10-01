@@ -97,7 +97,7 @@ func _check_pool_placement() -> void:
 
 ## A dash through the real controller leaves a ribbon, and it is the character's colour.
 func _check_a_real_dash_draws_its_colour() -> void:
-	for form_id: StringName in [&"morrow", &"ilyra", &"void"]:
+	for form_id: StringName in [&"morrow", &"scarlet", &"patchvile"]:
 		var form: FormData = CATALOG.get_form(form_id)
 		var game: GameWorld = await _open_run(form)
 		if game == null:
@@ -133,7 +133,7 @@ func _check_a_real_dash_draws_its_colour() -> void:
 
 ## A redirect ends a leg without ever touching a wall. Each leg still gets its own ribbon.
 func _check_redirect_draws_every_leg() -> void:
-	var game: GameWorld = await _open_run(CATALOG.get_form(&"eclipse"))
+	var game: GameWorld = await _open_run(CATALOG.get_form(&"verdant_shade"))
 	if game == null:
 		return
 	var player := game.get_node(^"WorldContent/PlayerLayer/WispPlayer") as WispPlayer

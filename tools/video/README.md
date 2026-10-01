@@ -12,7 +12,7 @@ the game itself**, **Kokoro** voices, **game first, open about AI**. EP01-EP04 w
 | Path | What |
 |---|---|
 | `tools/godot/render_gameplay_clip.gd` | Bot plays a real run while Godot's MovieWriter records 1080×1920 video + game audio; writes `<movie>.events.jsonl` |
-| `tools/godot/render_devlog_tour.gd` | Drives the real `Main` through a scripted tour and records it: `tour=menus` (boot → Rift Map → Shop WISPS/DASHES/ARENAS → PLAY → run loading screen → Endless run on `skin`), `tour=story` (Rift Map → locked card → ENTER → level 1 → Results → next Rift). Own isolated save, real veil/glide/loading screens |
+| `tools/godot/render_devlog_tour.gd` | Drives the real `Main` through a scripted tour and records it: `tour=menus` (boot → Home → Shop WISPS/DASHES/ARENAS → PLAY → run loading screen → Endless run on `skin`; the Rift Map step and `tour=story` went with the story Rifts on 2026-09-25). Own isolated save, real veil/glide/loading screens |
 | `tools/godot/render_feel_showcase.gd` | Scripted feel shots in a quiet tutorial arena (aim rings sweep, AIM ASSIST off/on, 8-kill finisher, 5-kill finisher, RUSH with the bot); event log marks shots, releases and kills |
 | `tools/godot/render_arena_showcase.gd` | Endless arena skins back to back with live scenery and no enemies (a real GameWorld whose run start is held); event log marks `segment_start` / `segment_end` per skin |
 | `tools/godot/render_character_motion.gd` | One playable character through a scripted gameplay timeline on a plain arena; `WISP_MOTION_CLIP=1` runs the dash showcase (aim hold → dive → kill accent → mid-dash turn → ceiling and floor landings) with a trailing camera and a state caption, `WISP_MOTION_SCALE=0.25` makes it 4× slow motion |
@@ -48,7 +48,7 @@ Run from the repo root; `GODOT=/Users/dimitarslezenkovski/Desktop/Godot.app/Cont
    WISP_ISOLATED_SAVE=1 "$GODOT" --path . --resolution 540x960 --write-movie "$PWD/video/footage/NAME.avi" \
      --script res://tools/godot/render_gameplay_clip.gd -- mode=endless skin=starforged_citadel seed=7 seconds=45
    ```
-   - Story Rifts: `mode=story rift=ember_hollow level=1`. Endless uses the 30 real skins; keep gameplay
+   - `mode=story` was removed with the story Rifts (2026-09-25). Endless uses the 30 real skins; keep gameplay
      off quartz_grotto, slate_cliffs and dusk_sandstone (HUD over bright scenery) and prefer skins whose
      rim the checker did not flag (brief §7): starforged_citadel and dragon_skull_throne among the Mythics.
    - Level 1 runs have ~20 s empty stretches between waves: cut to the event log's `multi_kill`
@@ -60,7 +60,6 @@ Run from the repo root; `GODOT=/Users/dimitarslezenkovski/Desktop/Godot.app/Cont
    WISP_ISOLATED_SAVE=1 "$GODOT" --path . --resolution 540x960 --write-movie "$PWD/video/footage/tour_menus.avi" \
      --script res://tools/godot/render_devlog_tour.gd -- tour=menus skin=aurora_throne run_seconds=16
    ```
-   `tour=story` walks the Rift Map → ENTER → level 1 → Results → next Rift (not run yet).
    Scripted feel shots (aim rings, AIM ASSIST off/on, finishers, RUSH):
    ```bash
    WISP_ISOLATED_SAVE=1 "$GODOT" --path . --resolution 540x960 --write-movie "$PWD/video/footage/feel.avi" \
@@ -165,5 +164,5 @@ briefs but not their numbers:
 
 Other backlog ideas (all from docs/DEVLOG.md): the phone-only audio crash, walls traced from the
 art, 400 ms of dead input, RUSH and its endless-RUSH bug, one boss per video, every Rift breaks a
-rule, the fragment bug (same symptom, two diseases), the ARENAS gallery research, the `ext_resource`
+rule (history: the Rifts were removed on 2026-09-25), the fragment bug (same symptom, two diseases), the ARENAS gallery research, the `ext_resource`
 id that threw a parse error on a file nobody touched, one life and the Soul Vessel drop.

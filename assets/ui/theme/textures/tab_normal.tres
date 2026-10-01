@@ -1,0 +1,7 @@
+[gd_resource type="CanvasTexture" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/theme/textures/tab_normal.png" id="1_rkxrp"]
+
+[resource]
+diffuse_texture = ExtResource("1_rkxrp")
+texture_filter = 1

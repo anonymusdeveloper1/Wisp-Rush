@@ -1,0 +1,59 @@
+{
+  "about": "The Endless arena image contract - docs/guides/arena_art.md. Pixels of the canvas; rectangles are [left, top, right, bottom], right/bottom exclusive.",
+  "canvas": [
+    1080,
+    2400
+  ],
+  "safe_zone": [
+    0,
+    240,
+    1080,
+    2160
+  ],
+  "bleed_top": [
+    0,
+    0,
+    1080,
+    240
+  ],
+  "bleed_bottom": [
+    0,
+    2160,
+    1080,
+    2400
+  ],
+  "side_margin": 60,
+  "floor": [
+    174,
+    659,
+    904,
+    1747
+  ],
+  "floor_size": [
+    730,
+    1088
+  ],
+  "floor_tolerance_px": 6,
+  "rim_width": 40,
+  "rim_outer": [
+    134,
+    619,
+    944,
+    1787
+  ],
+  "floor_edge_band": 150,
+  "hud_top_on_16x9": [
+    0,
+    240,
+    1080,
+    560
+  ],
+  "hud_bottom_on_16x9": [
+    0,
+    2040,
+    1080,
+    2160
+  ],
+  "mask": "arena_floor_mask.png",
+  "guide": "arena_layout_guide.png"
+}

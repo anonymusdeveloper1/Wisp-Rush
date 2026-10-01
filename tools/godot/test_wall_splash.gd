@@ -2,7 +2,7 @@ extends SceneTree
 ## Wall splash: plays on impact, sits on the wall, sprays into the floor, and nothing highlights the wall.
 
 const GAME_WORLD_SCENE: PackedScene = preload("res://scenes/gameplay/game_world.tscn")
-const RIFTS: RiftCatalog = preload("res://data/rifts/default_catalog.tres")
+const ENDLESS: EndlessCatalog = preload("res://data/endless/default_endless_catalog.tres")
 const FORMS: FormCatalog = preload("res://data/forms/default_catalog.tres")
 
 var _failures: int = 0
@@ -21,7 +21,12 @@ func _run() -> void:
 	var game := GAME_WORLD_SCENE.instantiate() as GameWorld
 	game.run_seed = 3
 	game.auto_pause_on_focus_loss = false
-	game.configure_run_profile(FORMS.get_form(&"void"), "", RIFTS.get_rift(&"ember_hollow"), 1)
+	var no_rosters: Array[EndlessRoster] = []
+	var reaper_only: Array[StringName] = [&"reaper"]
+	game.configure_run(RunProfile.endless(
+		ENDLESS, ENDLESS.get_skin(ENDLESS.default_skin_id), no_rosters, reaper_only,
+		FORMS.get_form(FormCatalog.DEFAULT_FORM_ID)
+	))
 	root.add_child(game)
 	await create_timer(0.6).timeout
 	game.debug_quiet_arena()
@@ -51,15 +56,14 @@ func _run() -> void:
 		if player.state == WispPlayer.State.WAITING_AT_EDGE:
 			break
 		await create_timer(0.03).timeout
-	var before: Array[bool] = []
-	for emitter: CPUParticles2D in splash.get_emitters():
-		before.append(emitter.emitting)
+	# The default character decides the landing: droplets (splash) or grains (dust); watch both.
+	var landing_emitters: Array[CPUParticles2D] = splash.get_emitters() + splash.get_dust_emitters()
 	player.request_dash(Vector2(0.55, -1.0))
 
 	var fired: CPUParticles2D = null
 	for _wait: int in 80:
 		await create_timer(0.02).timeout
-		for emitter: CPUParticles2D in splash.get_emitters():
+		for emitter: CPUParticles2D in landing_emitters:
 			if emitter.emitting:
 				fired = emitter
 		if fired != null:

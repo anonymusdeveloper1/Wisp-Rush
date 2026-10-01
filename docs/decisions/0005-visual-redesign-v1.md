@@ -1,6 +1,6 @@
 # ADR-0005: Adopt visual redesign v1
 
-> **Status:** Accepted · **Date:** 2026-09-11 · **Deciders:** owner (requested) + Claude Code
+> **Status:** Accepted; its painterly rendering style superseded by [ADR-0018](0018-pixel-art-direction.md) (pixel art, 2026-09-24), its palette kept · **Date:** 2026-09-11 · **Deciders:** owner (requested) + Claude Code
 
 ## Context
 The first production art (violet/plum, owner asset pack v2) shipped with baked checkerboards, clipped

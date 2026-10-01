@@ -26,18 +26,18 @@ game shows it.
 
 `extract_playable_characters.py` isolates the approved transparent cutout sheets under
 `concept_art/wisp_rush_playable_characters_v1/assets/` into independent runtime PNG layers for
-Veyra, Rook and Morrow:
+Morrow (Veyra was removed 2026-09-25; Rook became a whole-frame sheet pack on 2026-09-27):
 
 ```sh
-python3 tools/art/extract_playable_characters.py              # all three
-python3 tools/art/extract_playable_characters.py rook morrow  # only these
+python3 tools/art/extract_playable_characters.py              # every character
+python3 tools/art/extract_playable_characters.py morrow       # only this one
 ```
 
 It uses fixed cells (the cell order of each `GENERATION_PROMPT.md`), removes detached generation
 speckles by connected area, preserves nearby soft glow, and writes a QA contact sheet per character
 to `logs/playable_characters/<id>_parts.png`. The complete source sheets are never runtime textures.
 
-For every ribbon layer (Veyra's tails, Morrow's scarves) it also prints a `SPINE` line — the centre
+For every ribbon layer (Morrow's scarves) it also prints a `SPINE` line — the centre
 line the rig bends the ribbon along, as `PackedVector2Array(...)` in texture pixels. After replacing
 a source sheet, paste the printed spines into the `RibbonChain` nodes of
 `scenes/player/visuals/<id>_visual.tscn` (the yellow overlay on the contact sheet shows them), then
@@ -109,17 +109,25 @@ These options control which components are kept:
 - Content never leaves the canvas. If it would, it is shifted inward first and scaled down only as a last resort; both cases are listed in the report.
 - `background: "#rrggbb"` flattens the output to an opaque RGB file.
 
-## Floor polygons (`extract_floor_polygons.py`)
+## Floor polygons (history)
 
-Bakes each Rift's playable floor into `RiftData.floor_polygon` from its **runtime** background
-(ADR-0011). Run it after `extract_rifts.py` or any background change:
+`extract_floor_polygons.py` baked each story Rift's playable floor into `RiftData.floor_polygon` from
+its runtime background (ADR-0011). It went to the Recycle Bin with the story Rifts on 2026-09-25; the
+Endless floor is measured by `make_arena.py` below and lives in `EndlessCatalog.floor_polygon`.
+`extract_rifts.py` now slices only the Rifts v1 pack's enemies and bosses (the Endless enemy mixes).
+
+## Painted Endless arenas (`make_arena.py`)
+
+An Endless arena is one painted image to the contract in `docs/guides/arena_art.md` (1080×2400,
+a 1080×1920 safe zone, the shared floor at x 174–904, y 659–1747). Its source and an `arena.json`
+(name, description, the measured `floor_rect_px`) live in `concept_art/arenas_v2/<id>/`:
 
 ```sh
-python3 tools/art/extract_floor_polygons.py
+python tools/art/make_arena.py quarry_titan   # background + 0.3x Shop thumbnail, prints the floor in UV
+python tools/art/make_arena.py --guide        # concept_art/arenas_v2/_layout/arena_layout_guide.png
 ```
 
-Then **look at** `logs/rifts/floor_<rift>.png` — the bake is a heuristic. Pipeline: score pixels as
-smooth and desaturated (never by brightness), keep the top share, close, keep the largest region,
-fill enclosed holes (runes, cracks), erode, then cast 24 rays from the centroid, clamp single-ray
-spikes against their neighbours and pull in any edge whose midpoint leaves the floor. The top is
-clamped to V 0.255 so the resting Wisp never sits behind the HUD.
+**Retired 2026-09-23** with the thirty generated skins they made (ADR-0017): `extract_endless.py`,
+`make_endless_skin_data.py`, `endless_scenery.py`, `make_endless_floor_template.py`,
+`check_endless_skin.py` and `set_endless_import_lossy.py`. Do not run them: they would write the
+removed skins back into `data/endless/` and `assets/art/environment/endless/`.

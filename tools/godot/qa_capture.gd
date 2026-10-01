@@ -5,11 +5,11 @@ extends SceneTree
 ## Usage (normally driven by tools/qa_matrix.sh):
 ##   WISP_ISOLATED_SAVE=1 Godot --path . --resolution 390x844 \
 ##     --script res://tools/godot/qa_capture.gd -- <screen> <out.png>
-## Screens: home, shop_wisps, shop_arenas, shop_no_ads, rifts, rifts_locked, daily,
+## Set WISP_CHARACTER to capture Home with a specific equipped form; otherwise the sample form is used.
+## Screens: home, shop_wisps, shop_arenas, shop_no_ads, daily,
 ## trials, stats, settings, results, game, pause, upgrade, tutorial, and endless_<skin_id> (an
 ## Endless run on that arena skin, with its animated scenery).
 
-const MAIN_SCENE_PATH: String = "res://scenes/main/main.tscn"
 const GAME_WORLD_PATH: String = "res://scenes/gameplay/game_world.tscn"
 const TUTORIAL_PATH: String = "res://scenes/tutorial/tutorial_screen.tscn"
 const ENDLESS_CATALOG_PATH: String = "res://data/endless/default_endless_catalog.tres"
@@ -48,24 +48,14 @@ func _build(screen: String) -> int:
 		return _build_endless(StringName(screen.trim_prefix("endless_")))
 	match screen:
 		"home":
-			var main: Node = (load(MAIN_SCENE_PATH) as PackedScene).instantiate()
-			root.add_child(main)
-			for frame: int in 900:
-				if main.get_child_count() > 0 and main.get_child(0) is HomeScreen:
-					break
-				await process_frame
+			# The isolated save may still need the Tutorial; build Home directly for layout QA.
+			var home := _add_screen("res://scenes/screens/home_screen.tscn") as HomeScreen
+			var forms := load("res://data/forms/default_catalog.tres") as FormCatalog
+			var form_id := StringName(OS.get_environment("WISP_CHARACTER"))
+			if form_id.is_empty():
+				form_id = StringName(str(snapshot.get(&"equipped_form", String(FormCatalog.DEFAULT_FORM_ID))))
+			home.setup(snapshot, forms.get_form(form_id))
 			return 20
-		"rifts", "rifts_locked":
-			var rifts := _add_screen("res://scenes/screens/rift_map_screen.tscn") as RiftMapScreen
-			var rift_snapshot: Dictionary = snapshot.duplicate(true)
-			rift_snapshot[&"selected_rift"] = "shattered_rift"
-			rift_snapshot[&"rift_bests"] = {"obsidian_garden": 48210, "shattered_rift": 6120}
-			rift_snapshot[&"rift_levels"] = {"obsidian_garden": 8, "shattered_rift": 3}
-			rifts.setup(rift_snapshot)
-			if screen == "rifts_locked":
-				# Focus Ember Hollow (wave 10 gate) to check the lock card and disabled ENTER.
-				(rifts.get_node("%Carousel") as FocusCarousel).select(2, false)
-			return 30
 		"daily":
 			var daily := _add_screen("res://scenes/screens/daily_screen.tscn") as DailyScreen
 			var date_key: String = ChallengeTracker.get_date_key()
@@ -136,9 +126,9 @@ func _build_endless(skin_id: StringName) -> int:
 		return -1
 	var game := (load(GAME_WORLD_PATH) as PackedScene).instantiate() as GameWorld
 	game.auto_pause_on_focus_loss = false
-	var no_rifts: Array[RiftData] = []
+	var no_rosters: Array[EndlessRoster] = []
 	var reaper_only: Array[StringName] = [&"reaper"]
-	var profile := RunProfile.endless(catalog, skin, no_rifts, reaper_only, null)
+	var profile := RunProfile.endless(catalog, skin, no_rosters, reaper_only, null)
 	profile.run_seed = 714
 	game.configure_run(profile)
 	root.add_child(game)
@@ -162,11 +152,11 @@ func _sample_snapshot() -> Dictionary:
 		&"bosses_defeated": 2,
 		&"play_time_seconds": 5480.0,
 		&"rift_points": 1320,
-		&"owned_forms": ["void", "eclipse", "ilyra"],
-		&"equipped_form": "ilyra",
+		&"owned_forms": ["patchvile", "verdant_shade", "scarlet"],
+		&"equipped_form": "scarlet",
 		# A Mythic arena equipped, so shop_arenas shows a card with the scenery grade and glow.
-		&"owned_arena_skins": ["astral_observatory", "aurora_throne"],
-		&"equipped_arena_skin": "aurora_throne",
+		&"owned_arena_skins": ["quarry_titan"],
+		&"equipped_arena_skin": "quarry_titan",
 		&"tutorial_completed": true,
 		&"challenge_state": {},
 		&"daily_state": {&"completed_dates": [], &"best_scores": {}},

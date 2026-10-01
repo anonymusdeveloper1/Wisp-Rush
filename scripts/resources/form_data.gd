@@ -2,18 +2,6 @@ class_name FormData
 extends Resource
 ## One playable character (a Wisp form or a rigged character): identity, price, art and feedback tint.
 
-## Collectible tier. Presentation only: it labels a character in the Shop and never changes
-## collision, stats, controls or scoring. Everything that shipped before the Legendary and Mythic
-## characters stays [constant TIER_STANDARD].
-enum Tier {
-	STANDARD, ## The six Wisp forms and the first three rigged characters.
-	LEGENDARY, ## A fully rigged character with a deliberately restrained animation budget.
-	MYTHIC, ## The richest rigs: many coordinated parts and layered follow-through.
-}
-
-## Player-facing label for each [enum Tier], in enum order.
-const TIER_NAMES: Array[String] = ["", "LEGENDARY", "MYTHIC"]
-
 ## Stable identifier stored in progression data.
 @export var form_id: StringName
 ## Player-facing form name.
@@ -34,9 +22,6 @@ const TIER_NAMES: Array[String] = ["", "LEGENDARY", "MYTHIC"]
 ## This character's own dash signature: the shape and colour of the streak its dash leaves.
 ## Optional — a character without one falls back to the shared dash-style trail.
 @export var dash_effect: DashEffectData
-## Collectible tier shown on the focused Shop card; never read by gameplay.
-@export var tier: Tier = Tier.STANDARD
-
 ## A whole-frame character's menu `SpriteFrames`, so the boot screen can warm it.
 ##
 ## Deliberately a **path** and not a resource reference: a reference here would pull the sheet
@@ -47,11 +32,6 @@ const TIER_NAMES: Array[String] = ["", "LEGENDARY", "MYTHIC"]
 ## for a character whose menus play a video (ADR-0016): there the sheet is only the Reduced Motion
 ## fallback, so warming it would hold it for the whole session for nothing.
 @export_file("*.tres") var menu_frames_path: String = ""
-
-
-## Player-facing tier label, empty for [constant Tier.STANDARD] so ordinary cards show no badge.
-func get_tier_name() -> String:
-	return TIER_NAMES[tier] if tier >= 0 and tier < TIER_NAMES.size() else ""
 
 
 ## Returns authoring failures so the full collection can be checked without opening the editor.

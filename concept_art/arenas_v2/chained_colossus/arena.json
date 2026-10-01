@@ -1,0 +1,9 @@
+{
+  "id": "chained_colossus",
+  "display_name": "CHAINED COLOSSUS",
+  "description": "A hooded stone colossus holds the chained arena up above the clouds.",
+  "source": "source.png",
+  "source_note": "The owner's image, sent in chat on 2026-09-30 as a 941x1672 WebP and saved here as PNG with identical pixels. 9:16: the safe zone only, no bleed. Kept exactly as sent (owner: the black sky waits for the 3D version); its floor is its own (ADR-0020; owner: every arena has a different playable area for now, while testing).",
+  "floor_rect_px": [282, 470, 667, 1277],
+  "floor_rect_note": "The tiled floor inside the stone frame, [left, top, right, bottom] in source pixels. The painted floor widens slightly downward: the frame's inner edge is at x 288 / 655 near the top and x 278 / 673 near the bottom, so the sides are the best-fit straight lines; top under the beam's strap band, bottom on the dark line above the lower beam. The floor carries a painted emblem, the hand's shadow and rubble at its lower left, and brackets and a chain reach over its edges, as painted."
+}

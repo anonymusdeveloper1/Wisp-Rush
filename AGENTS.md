@@ -4,6 +4,29 @@
 > Claude Code specifics are in [CLAUDE.md](CLAUDE.md). The project map and the documentation
 > rules are in [docs/PROJECT_CONTEXT.md](docs/PROJECT_CONTEXT.md).
 
+## 0. STRICT RULES — the owner's, above everything else in this repo
+
+These override every other instruction, workflow, skill and default (owner, 2026-09-25).
+
+1. **Not sure? Ask — do not generate.** If you are not sure what the owner wants, did not fully
+   understand the message, or are not sure what you are doing, **stop and ask the owner** for clear
+   instructions before you write, change, generate, build or delete anything. Ask a short, concrete
+   question (options plus your recommended one) and wait for the answer. Never guess and produce
+   something to fill the gap.
+2. **No bluffing. Never write anything the owner did not tell you or mention.** No invented rules,
+   requirements, values, features, plans, explanations or "facts" — in code, docs, comments, art
+   prompts or messages. Everything you write must come from the owner's words, the approved work,
+   or something you actually did or measured and can show. (The pixel-art "outline" rule was
+   invented this way; Patchvile, the approved example, never had one.)
+3. **Docs: when you are not certain, ask first.** If you are not certain whether something belongs
+   in the docs, or what it should say, **ask the owner before writing it**. The docs a requested
+   change requires (the DEVLOG entry, the registries and pages the change touched) record only
+   what was done, measured or decided by the owner — never guesses, and never an `ASSUMPTION:` the
+   owner did not approve.
+4. **Do only what was asked.** Anything beyond the request — an extra change or fix, a new file, a
+   "while I'm here" improvement — is proposed and asked about, not done.
+5. **A question gets an answer, not a change.** When the owner asks a question, answer it and wait.
+
 ## 1. Read order (before changing anything)
 
 1. This file.
@@ -11,15 +34,29 @@
 3. [docs/generated/PROJECT_MAP.md](docs/generated/PROJECT_MAP.md) — everything that exists (generated).
 4. [docs/GDD.md](docs/GDD.md) — the sections relevant to your task.
 5. `docs/systems/<system>.md` for each system you touch; [docs/CONVENTIONS.md](docs/CONVENTIONS.md) before writing code.
-5b. **Touching UI, art or feel?** [docs/systems/ui_design_system.md](docs/systems/ui_design_system.md)
-   (theme type variations, `Palette`), `concept_art/wisp_rush_redesign_v1/STYLE_GUIDE.md` (art/UX
-   authority) and its six-screen board, plus [ADR-0005](docs/decisions/0005-visual-redesign-v1.md)
+5b. **Touching UI, art or feel?** **The game is 2D pixel art**
+   ([ADR-0018](docs/decisions/0018-pixel-art-direction.md), GDD §9): every new asset sits on a pixel
+   grid with a limited palette, crisp edges and no anti-aliasing, gradients or blur (the UI is drawn
+   with nearest filtering). **Characters are drawn exactly like Patchvile** (owner, 2026-09-25): no
+   outline, and the colours and soft edges AutoSprite's pixel filter gives (character guide §3).
+   There is no painterly art, and every image prompt must say so. There is no 3D art except
+   arenas: **arenas may be 3D** and need not be pixel-rendered (owner, 2026-09-30,
+   [ADR-0023](docs/decisions/0023-3d-arenas.md)); how a 3D arena is built: arena guide §5.
+   Read [docs/systems/ui_design_system.md](docs/systems/ui_design_system.md)
+   (theme type variations, `Palette`, the pixel UI kit in `concept_art/wisp_rush_pixel_ui_v1/`),
+   `concept_art/wisp_rush_redesign_v1/STYLE_GUIDE.md` (palette and UX; its painterly style is
+   superseded) and its six-screen board, plus [ADR-0005](docs/decisions/0005-visual-redesign-v1.md)
    (redesign, generated art pipeline) and [ADR-0006](docs/decisions/0006-inset-playfield-and-larger-sprites.md)
-   (inset playfield, sprite/hitbox scale). **Adding or changing a playable character?** New characters are
-   **whole-frame sprites, not bone rigs** (owner, 2026-09-20) — read
-   [docs/guides/character_sprite_frames.md](docs/guides/character_sprite_frames.md) first: the
-   generation contract (every state and its frame count, the storefront set, wall poses, ornaments,
-   canvas and anchor rules, what the engine animates for you, the size budget). For the existing
+   (inset playfield, sprite/hitbox scale). **Adding or changing a playable character?** Start with
+   [docs/guides/character_creation.md](docs/guides/character_creation.md) — the AutoSprite recipe
+   (what to generate, packing, the states, the per-character shaders and effects; Patchvile is the
+   worked example), and its **AutoSprite rules** for prompts and settings (§3). **Every character has Patchvile's pixel count** (owner, 2026-09-24): standing,
+   194 px tall in AutoSprite's 256 px frame (776 px on Codex's 1024 first frame), every pose at one
+   scale, packed with `"roster_scale": True`, and the packer's `ROSTER CHECK` must say `ok` (guide
+   §3–§4). **Every character is the same size everywhere** (owner, 2026-09-26); Scarlet's sheets
+   were made at 166 px, so her scene draws her 1.16× larger. **Every character, new or redesigned, stands centred on Home's
+   platform** (owner, 2026-09-27): feet on the platform's centre, body centred over it; the scene's
+   `menu_offset` fixes a storefront frame that does not (guide §6). New characters are **whole-frame sprites, not bone rigs** (owner, 2026-09-20). For the existing
    rigged characters, [docs/guides/character_rig_recipe.md](docs/guides/character_rig_recipe.md)
    (layers, Bone2D chains and skinned Polygon2D ribbons, `ChainSpring`, the runtime state machine,
    the QA loop and the mistakes already made). Then
@@ -29,19 +66,40 @@
    (owner-approved recipe: rules, structures, Palmier Pro blueprint, QA), [docs/marketing/devlog_hooks.md](docs/marketing/devlog_hooks.md)
    (the hook library every episode picks from), [tools/video/README.md](tools/video/README.md)
    (commands) and [docs/marketing/devlog_video_brief.md](docs/marketing/devlog_video_brief.md) (what may be shown).
+5d. **Making an Endless arena image?** [docs/guides/arena_art.md](docs/guides/arena_art.md) — the 1080 × 2400
+   canvas, safe zone and bleed, and §2b, the rules for the playable floor (exact rectangle, plain surface,
+   nothing over it). Machine-readable: `concept_art/arenas_v2/_layout/arena_spec.json` and the floor mask.
+5e. **Adding or changing an enemy?** [docs/systems/enemies.md](docs/systems/enemies.md) — the Enemies v2
+   enemies (five in the game since 2026-09-28): `WholeFrameEnemy` (moving, the swipe, lunge and shot
+   attacks, the slice kill), `EnemyProjectile` (shots and the wall mark), what kills the Wisp, and the
+   ramp that picks them ([docs/systems/wave_director.md](docs/systems/wave_director.md)). The design and
+   the owner's decisions are in [docs/specs/enemies_v2/README.md](docs/specs/enemies_v2/README.md): the owner
+   makes enemies one at a time, and no art, prompts or code for an enemy before the owner approves it
+   there. An enemy's art is the owner's sheets (a move and an attack), copied unchanged into
+   `concept_art/enemies_v2_autosprite_v1/raw/<enemy>/`, then cleaned of AutoSprite's white leftovers and
+   packed by `python concept_art/enemies_v2_autosprite_v1/pack_enemies.py` (check its `review/`), then
+   `tools/validate.sh`.
 6. The newest 2–3 entries of [docs/DEVLOG.md](docs/DEVLOG.md) and the active milestone in [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## 2. Ground rules
 
+- **The strict rules in §0 come first**: not sure → ask; never write what the owner did not say;
+  do only what was asked. Check a documented rule against the approved work before you apply it.
+- **Portrait only** (owner, 2026-10-02): the game is played vertically, never horizontally or in
+  landscape. It is locked to portrait (`display/window/handheld/orientation=1` in `project.godot`; the
+  Android build's `screenOrientation` is portrait) and does not rotate. Design every screen, arena and
+  asset for portrait only; never add a landscape layout.
+  The steps this manual requires for a change you *were* asked to make (validate, the docs it
+  triggers, the DEVLOG entry) count as asked.
 - **Godot 4.7.2, GDScript only, static typing.** Use Godot 4 APIs; never Godot 3 syntax
   (`yield`, `onready var`, string-based `connect`). Unsure about an API? Check the 4.x class
   reference (docs.godotengine.org/en/stable) — don't guess signatures.
 - **The GDD is authoritative for design.** Don't invent mechanics. If the GDD is silent, ask the
-  owner, or choose the simplest option, mark it `ASSUMPTION:` and list it in GDD §14.
+  owner, recommending the simplest option; don't choose for them. Record the answer in GDD §14.
 - **Never** edit `.godot/`, hand-edit `*.import` files, or invent `uid://` values.
 - **Small, verifiable steps.** Run `tools/validate.sh` after each meaningful edit, not just at the end.
 - **Docs are part of the change.** Follow the update-trigger table in PROJECT_CONTEXT §7.2.
-- **Stay in scope.** Note unrelated problems in your DEVLOG entry's follow-ups or the ROADMAP backlog instead of fixing them silently.
+- **Stay in scope.** Note unrelated problems in your DEVLOG entry's follow-ups and tell the owner; don't fix them unasked.
 - **Git:** don't commit or push unless the owner asks. Commit messages follow CONVENTIONS §12.
 
 ## 3. Task workflow
@@ -97,7 +155,8 @@ MCP `run_project` and manual runs use the real save — that is playing the game
 Server **`godot`** (configured in [.mcp.json](.mcp.json)) = [Coding-Solo/godot-mcp](https://github.com/Coding-Solo/godot-mcp)
 **0.1.1**, pinned in `tools/mcp/` (why: [ADR-0002](docs/decisions/0002-godot-mcp-server.md)).
 It drives the Godot binary directly; no editor plugin is needed. `projectPath` is always the
-absolute repo root: `/Users/dimitarslezenkovski/Desktop/Wisp Rush`.
+absolute repo root: `/Users/dimitarslezenkovski/Desktop/Wisp Rush` on the Mac, `D:/Wisp Rush` on
+the Windows checkout.
 
 | Tool | Use it to |
 |---|---|
@@ -118,8 +177,14 @@ properties is easier by writing the `.gd` file and editing the `.tscn` text (see
 `tools/validate.sh`.
 
 **If the server isn't connected:** check `claude mcp list` in a terminal from the repo root. Paths
-in `.mcp.json` are absolute to this machine (node via nvm, Godot on the Desktop). Reinstall with
-`cd tools/mcp && npm install`.
+in `.mcp.json` are absolute to the Mac (node via nvm, Godot on the Desktop). The Windows checkout
+does not edit `.mcp.json`; it overrides it with a **local-scope** server of the same name, `godot`, in
+`~/.claude.json` under the `D:/Wisp Rush` project (local beats project scope):
+command `C:\Program Files\nodejs\node.exe`, argument
+`D:\Wisp Rush\tools\mcp\node_modules\@coding-solo\godot-mcp\build\index.js`, env `GODOT_PATH`
+`D:\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-stable_win64.exe`. MCP servers load when a session
+starts, so start a new one after changing either. Reinstall the server with `cd tools/mcp && npm ci`
+(`node_modules` is git-ignored, so a fresh checkout needs it).
 
 ## 5. Editing Godot text files (cheat sheet)
 
@@ -162,6 +227,8 @@ Copy of PROJECT_CONTEXT §7.8 — that section is authoritative:
 
 ## 7. Asking the owner
 
-Ask (briefly, with a recommended default) when: the design is ambiguous in a way that changes
-the player experience, an asset is missing, or a change needs a new dependency/addon. Otherwise
-decide, record it (ASSUMPTION or ADR), and keep moving.
+Ask (briefly, with a recommended default) **before** doing anything the owner did not ask for,
+whenever you are unsure what they want or what you are doing, whenever you are not certain
+something belongs in the docs (§0), and whenever the design is ambiguous, an asset is missing, or
+a change needs a new dependency/addon. Don't decide for the owner and keep moving: wait for the
+answer, then record exactly what they decided (GDD §14 or an ADR).

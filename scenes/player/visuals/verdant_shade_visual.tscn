@@ -1,15 +1,87 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scenes/player/visuals/verdant_shade_visual.gd" id="1_script"]
-[ext_resource type="Resource" path="res://data/characters/verdant_shade_menu_video.tres" id="2_video"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/verdant_shade/verdant_shade_leaves.png" id="2_leaves"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_leaves"]
+particles_animation = true
+particles_anim_h_frames = 4
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_add"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="Gradient_fade"]
+offsets = PackedFloat32Array(0, 0.65, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.85, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture_fade"]
+gradient = SubResource("Gradient_fade")
+
+[sub_resource type="Gradient" id="Gradient_mote"]
+offsets = PackedFloat32Array(0, 0.4, 1)
+colors = PackedColorArray(0.86, 1, 0.86, 0.9, 0.56, 0.95, 0.6, 0.55, 0.36, 0.88, 0.42, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture_mote"]
+gradient = SubResource("Gradient_mote")
+
+[sub_resource type="Gradient" id="Gradient_dot"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture_dot"]
+gradient = SubResource("Gradient_dot")
+width = 32
+height = 32
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_leaves"]
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 40.0
+direction = Vector3(0, 1, 0)
+spread = 50.0
+initial_velocity_min = 90.0
+initial_velocity_max = 210.0
+gravity = Vector3(0, 0, 0)
+damping_min = 60.0
+damping_max = 120.0
+angle_min = -180.0
+angle_max = 180.0
+angular_velocity_min = -420.0
+angular_velocity_max = 420.0
+scale_min = 0.55
+scale_max = 0.8
+color_ramp = SubResource("GradientTexture_fade")
+anim_offset_max = 1.0
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_motes"]
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 70.0
+direction = Vector3(0, 1, 0)
+spread = 40.0
+initial_velocity_min = 30.0
+initial_velocity_max = 110.0
+gravity = Vector3(0, 0, 0)
+damping_min = 30.0
+damping_max = 60.0
+scale_min = 0.35
+scale_max = 0.8
+color_ramp = SubResource("GradientTexture_mote")
 
 [node name="VerdantShadeVisual" type="Node2D"]
 script = ExtResource("1_script")
 gameplay_frames = "res://data/characters/verdant_shade_gameplay.tres"
 menu_frames = "res://data/characters/verdant_shade_menu.tres"
 menu_idle_animation = &"storefront_idle"
-menu_video = ExtResource("2_video")
-design_size = 384.0
+design_size = 256.0
+art_scale = 1.1875
+menu_art_scale = 1.25
+attack_contact_frame = 4
+attack_glow = Color(0.72, 1, 0.74, 1)
 heading_frequency = 7.2
 heading_damping = 0.72
 settle_frequency = 4.2
@@ -19,6 +91,30 @@ aim_lean = 0.0
 
 [node name="MotionRoot" type="Node2D" parent="."]
 unique_name_in_owner = true
+
+[node name="DashParticles" type="GPUParticles2D" parent="MotionRoot"]
+unique_name_in_owner = true
+material = SubResource("CanvasItemMaterial_leaves")
+position = Vector2(0, 40)
+emitting = false
+amount = 8
+lifetime = 0.5
+visibility_rect = Rect2(-1200, -1200, 2400, 2400)
+local_coords = false
+process_material = SubResource("ParticleProcessMaterial_leaves")
+texture = ExtResource("2_leaves")
+
+[node name="TrailParticles" type="GPUParticles2D" parent="MotionRoot"]
+unique_name_in_owner = true
+material = SubResource("CanvasItemMaterial_add")
+position = Vector2(0, 20)
+emitting = false
+amount = 12
+lifetime = 0.45
+visibility_rect = Rect2(-1200, -1200, 2400, 2400)
+local_coords = false
+process_material = SubResource("ParticleProcessMaterial_motes")
+texture = SubResource("GradientTexture_dot")
 
 [node name="Body" type="Node2D" parent="MotionRoot"]
 unique_name_in_owner = true

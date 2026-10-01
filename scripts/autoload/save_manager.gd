@@ -7,7 +7,8 @@ signal progression_changed(snapshot: Dictionary)
 ## Emitted after settings change and save, with the full validated settings.
 signal settings_changed(settings: Dictionary)
 
-const SCHEMA_VERSION: int = 8
+## v9 (2026-09-25) dropped the story Rift progress: `selected_rift`, `rift_bests`, `rift_levels`.
+const SCHEMA_VERSION: int = 9
 const DEFAULT_SAVE_PATH: String = "user://wisp_rush_save.json"
 const DEFAULT_TEMP_PATH: String = "user://wisp_rush_save.tmp.json"
 const DEFAULT_BACKUP_PATH: String = "user://wisp_rush_save.backup.json"
@@ -26,67 +27,33 @@ const DASH_STYLE_CATALOG: DashStyleCatalog = preload(
 )
 ## Form identifiers accepted from disk; must match data/forms/default_catalog.tres.
 const VALID_FORM_IDS: Array[String] = [
-	"void",
-	"eclipse",
-	"veyra",
-	"noxen",
+	"patchvile",
 	"verdant_shade",
-	"ilyra",
+	"scarlet",
 	"morrow",
 	"rook",
+	"mothmere",
 ]
-## Forms that no longer exist, and what a save that names one gets instead. `ilyra_2` was the
-## whole-frame sprite experiment; it won, so it *is* Ilyra now and anyone who owned it keeps it.
-## Ash, Venom, Bloodmoon, Frost and Bram were retired outright on 2026-09-20 and need no entry:
-## `_sanitize_cosmetic` already drops an unknown id and falls the equipped slot back to "void".
-const RETIRED_FORM_IDS: Dictionary[String, String] = {
-	"ilyra_2": "ilyra",
-}
-## Rift identifiers accepted from disk; must match data/rifts/default_catalog.tres.
-const VALID_RIFT_IDS: Array[String] = [
-	"obsidian_garden",
-	"shattered_rift",
-	"ember_hollow",
-	"frozen_choir",
-	"reapers_court",
-]
-const DEFAULT_RIFT_ID: String = "obsidian_garden"
+## The character every save owns and equips first; must match `FormCatalog.DEFAULT_FORM_ID`.
+const DEFAULT_FORM_ID: String = "patchvile"
+## Forms that no longer exist, and what a save that names one gets instead. Empty: Ash, Venom,
+## Bloodmoon, Frost and Bram (2026-09-20), Void, Eclipse, Veyra and Noxen (2026-09-25) and Ilyra
+## with her `ilyra_2` experiment (2026-09-26, replaced by Scarlet) were retired outright and need no
+## entry: `_sanitize_cosmetic` already drops an unknown id and falls the equipped slot back to
+## `DEFAULT_FORM_ID`.
+const RETIRED_FORM_IDS: Dictionary[String, String] = {}
 ## Endless arena skin ids accepted from disk, in catalog order; must match
 ## data/endless/default_endless_catalog.tres (test_endless_catalog checks it).
 const VALID_ARENA_SKIN_IDS: Array[String] = [
-	"astral_observatory",
-	"drowned_sanctum",
-	"moonpetal_shrine",
-	"monastery_yard",
-	"dusk_sandstone",
-	"slate_cliffs",
-	"cold_forge",
-	"bamboo_deck",
-	"basalt_shore",
-	"windswept_hill",
-	"rain_rooftops",
-	"rootwood_clearing",
-	"clockwork_bastion",
-	"sky_harbor",
-	"quartz_grotto",
-	"fungal_hollow",
-	"library_of_echoes",
-	"old_colosseum",
-	"storm_lighthouse",
-	"lantern_market",
-	"titans_palm",
-	"clocktower_crown",
-	"storm_anvil",
-	"world_tree_crown",
-	"galleon_wreck",
-	"eclipse_sanctum",
-	"starforged_citadel",
-	"abyssal_gate",
-	"aurora_throne",
-	"dragon_skull_throne",
+	"quarry_titan",
+	"stitched_doll_jungle",
+	"stitchwarden_vigil",
+	"chained_colossus",
+	"chained_colossus_3d",
+	"zoom_arena_3d",
 ]
 ## Skin every save owns and unknown ids fall back to (`EndlessCatalog.default_skin_id`).
-const DEFAULT_ARENA_SKIN_ID: String = "astral_observatory"
+const DEFAULT_ARENA_SKIN_ID: String = "quarry_titan"
 ## Retired arena skin ids and the skin that replaces them when a save is sanitized.
 const RETIRED_ARENA_SKIN_IDS: Dictionary[String, String] = {
 	"placeholder_void_slate": DEFAULT_ARENA_SKIN_ID,
@@ -94,7 +61,7 @@ const RETIRED_ARENA_SKIN_IDS: Dictionary[String, String] = {
 ## Consent values accepted from disk; anything else falls back to "unknown".
 const VALID_CONSENT_STATES: Array[String] = ["unknown", "granted", "denied"]
 ## Waves that pay a one-time depth reward, and the Rift Points each pays. Keyed on the lifetime
-## `highest_wave`; story runs never pass wave 4, so only Endless and daily runs reach them.
+## `highest_wave`.
 const DEPTH_MILESTONES: Array[int] = [5, 10, 15, 20, 25]
 const DEPTH_REWARDS: Array[int] = [25, 50, 100, 175, 300]
 const MAX_COUNTER: int = 2000000000
@@ -258,8 +225,7 @@ func update_settings(changes: Dictionary) -> bool:
 	return saved
 
 
-## Persists that the Tutorial screen was finished or skipped, so launches open Home from now on
-## (replays from the Rift Map never clear it).
+## Persists that the Tutorial screen was finished or skipped, so launches open Home from now on.
 func mark_tutorial_completed() -> bool:
 	if bool(_data.get(&"tutorial_completed", false)):
 		return true
@@ -303,29 +269,13 @@ func record_run(summary: Dictionary) -> bool:
 			int(_data.get(&"endless_best_wave", 0)), maxi(1, int(summary.get(&"wave", 1)))
 		)
 		_data[&"endless_runs"] = _clamped_add(int(_data.get(&"endless_runs", 0)), 1)
-	# The run's own Rift Points: pickups and boss rewards, the score-based performance bonus and the
-	# level-clear bonus. Challenge, Trial and depth rewards arrive through their own calls, so nothing
-	# is paid twice.
+	# The run's own Rift Points: pickups and boss rewards and the score-based performance bonus.
+	# Challenge, Trial and depth rewards arrive through their own calls, so nothing is paid twice.
 	_data[&"rift_points"] = _clamped_add(
 		int(_data.get(&"rift_points", 0)),
 		clampi(int(summary.get(&"rp_collected", 0)), 0, MAX_COUNTER)
-			+ clampi(int(summary.get(&"rp_performance", 0)), 0, MAX_COUNTER)
-			+ clampi(int(summary.get(&"rp_clear_bonus", 0)), 0, MAX_COUNTER),
+			+ clampi(int(summary.get(&"rp_performance", 0)), 0, MAX_COUNTER),
 	)
-	var rift_id: String = str(summary.get(&"rift", DEFAULT_RIFT_ID))
-	if rift_id in VALID_RIFT_IDS:
-		var bests: Dictionary = _data.get(&"rift_bests", {}) as Dictionary
-		bests[rift_id] = maxi(
-			int(bests.get(rift_id, 0)),
-			maxi(0, int(summary.get(&"score", 0))),
-		)
-		_data[&"rift_bests"] = bests
-		# Only a story victory banks its level; `highest_wave` above stays a lifetime statistic.
-		var cleared: int = clampi(int(summary.get(&"rift_levels_cleared", 0)), 0, MAX_COUNTER)
-		if bool(summary.get(&"level_cleared", false)) and cleared > 0:
-			var levels: Dictionary = _data.get(&"rift_levels", {}) as Dictionary
-			levels[rift_id] = maxi(int(levels.get(rift_id, 0)), cleared)
-			_data[&"rift_levels"] = levels
 	return _save_and_emit()
 
 
@@ -357,7 +307,7 @@ func apply_challenge_result(result: Dictionary) -> bool:
 ##
 ## Refused without spending when the kind or id is unknown, the item is already owned, the price is
 ## negative or above the balance, or `requirement_met` is false (the caller reads the gate from the
-## item's data, e.g. Eclipse's boss victory). Arena skins are also refused until Endless opens.
+## item's data, e.g. a boss-victory gate). Arena skins are also refused until Endless opens.
 func purchase_cosmetic(
 	kind: StringName, item_id: StringName, price: int, requirement_met: bool
 ) -> bool:
@@ -460,15 +410,6 @@ func _current_cosmetic_id(kind: StringName, id_text: String) -> String:
 	return id_text
 
 
-## Selects one known Rift as the arena the next run will use.
-func select_rift(rift_id: StringName) -> bool:
-	var id_text: String = String(rift_id)
-	if id_text not in VALID_RIFT_IDS:
-		return false
-	_data[&"selected_rift"] = id_text
-	return _save_and_emit()
-
-
 ## Whether developer unlock helpers are permitted. Always false in an exported release build.
 ##
 ## GDD §13 forbids debug panels in the release, so every `debug_*` method below refuses to do
@@ -494,19 +435,6 @@ func debug_set_trials(rank: int, progress: Dictionary) -> bool:
 	return _save_and_emit()
 
 
-## Sets the cleared Rift level for one Rift, so the map shows progress without playing.
-func debug_set_rift_level(rift_id: StringName, level: int) -> bool:
-	if not debug_tools_allowed():
-		return false
-	var id_text: String = String(rift_id)
-	if id_text not in VALID_RIFT_IDS:
-		return false
-	var levels: Dictionary = _data.get(&"rift_levels", {}) as Dictionary
-	levels[id_text] = clampi(level, 0, MAX_COUNTER)
-	_data[&"rift_levels"] = levels
-	return _save_and_emit()
-
-
 func _save_and_emit() -> bool:
 	var saved: bool = save_now()
 	if saved:
@@ -526,12 +454,9 @@ func _make_defaults() -> Dictionary:
 		&"bosses_defeated": 0,
 		&"play_time_seconds": 0.0,
 		&"rift_points": 0,
-		&"owned_forms": ["void"],
-		&"equipped_form": "void",
+		&"owned_forms": [DEFAULT_FORM_ID],
+		&"equipped_form": DEFAULT_FORM_ID,
 		&"tutorial_completed": false,
-		&"selected_rift": DEFAULT_RIFT_ID,
-		&"rift_bests": {},
-		&"rift_levels": {},
 		&"endless_best_score": 0,
 		&"endless_best_wave": 0,
 		&"endless_runs": 0,
@@ -569,7 +494,7 @@ func _validate_and_migrate(source: Dictionary) -> Dictionary:
 	if version < 6:
 		raw = _migrate_to_v6(raw)
 	# v6 -> v7 adds the Endless fields and v7 -> v8 the dash style fields; their defaults below are
-	# the migration.
+	# the migration. v8 -> v9 drops the story Rift fields: they are simply not copied below.
 	var result: Dictionary = _make_defaults()
 	for key: StringName in [
 		&"best_score",
@@ -594,17 +519,9 @@ func _validate_and_migrate(source: Dictionary) -> Dictionary:
 	result[&"tutorial_completed"] = (
 		raw[&"tutorial_completed"] if raw.get(&"tutorial_completed") is bool else false
 	)
-	_sanitize_cosmetic(raw, result, KIND_FORM, "void")
+	_sanitize_cosmetic(raw, result, KIND_FORM, DEFAULT_FORM_ID)
 	_sanitize_cosmetic(raw, result, KIND_DASH_STYLE, String(DashStyleCatalog.DEFAULT_STYLE_ID))
 	_sanitize_cosmetic(raw, result, KIND_ARENA_SKIN, DEFAULT_ARENA_SKIN_ID)
-	var selected_rift: String = str(raw.get(&"selected_rift", DEFAULT_RIFT_ID))
-	result[&"selected_rift"] = (
-		selected_rift if selected_rift in VALID_RIFT_IDS else DEFAULT_RIFT_ID
-	)
-	if raw.get(&"rift_bests") is Dictionary:
-		result[&"rift_bests"] = _sanitize_rift_bests(raw[&"rift_bests"] as Dictionary)
-	if raw.get(&"rift_levels") is Dictionary:
-		result[&"rift_levels"] = _sanitize_rift_bests(raw[&"rift_levels"] as Dictionary)
 	result[&"trial_rank"] = _safe_int(raw.get(&"trial_rank", 1), 1, 1, 999)
 	result[&"claimed_depth"] = _safe_int(raw.get(&"claimed_depth", 0), 0, 0, 9999)
 	result[&"ads_removed"] = raw[&"ads_removed"] if raw.get(&"ads_removed") is bool else false
@@ -795,23 +712,6 @@ func _sanitize_id_counts(source: Dictionary) -> Dictionary:
 	for key: Variant in source.keys():
 		var id_text: String = str(key)
 		if id_text.is_empty():
-			continue
-		result[id_text] = _safe_int(source[key], 0, 0, MAX_COUNTER)
-	return result
-
-
-## Highest level cleared in one Rift; zero means the player has not finished level 1 yet.
-func get_rift_level(rift_id: StringName) -> int:
-	var levels: Dictionary = _data.get(&"rift_levels", {}) as Dictionary
-	return maxi(0, int(levels.get(String(rift_id), 0)))
-
-
-## Keeps only known rift ids mapped to sane best scores; drops anything else.
-func _sanitize_rift_bests(source: Dictionary) -> Dictionary:
-	var result: Dictionary = {}
-	for key: Variant in source.keys():
-		var id_text: String = str(key)
-		if id_text not in VALID_RIFT_IDS:
 			continue
 		result[id_text] = _safe_int(source[key], 0, 0, MAX_COUNTER)
 	return result

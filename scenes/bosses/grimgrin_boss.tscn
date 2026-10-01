@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scenes/bosses/grimgrin_boss.gd" id="1_boss"]
+[ext_resource type="Resource" path="res://data/bosses/grimgrin_tuning.tres" id="2_tuning"]
+[ext_resource type="Resource" path="res://data/bosses/grimgrin_layout.tres" id="3_layout"]
+[ext_resource type="SpriteFrames" path="res://data/bosses/grimgrin_frames.tres" id="4_frames"]
+
+[node name="GrimgrinBoss" type="Node2D" groups=["bosses"]]
+z_index = 12
+script = ExtResource("1_boss")
+tuning = ExtResource("2_tuning")
+layout = ExtResource("3_layout")
+
+[node name="Effects" type="Node2D" parent="."]
+unique_name_in_owner = true
+z_index = 11
+z_as_relative = false
+
+[node name="Glow" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+z_index = -1
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+unique_name_in_owner = true
+sprite_frames = ExtResource("4_frames")
+animation = &"floor_idle"

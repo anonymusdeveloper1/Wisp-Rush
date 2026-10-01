@@ -4,7 +4,7 @@ extends Control
 ## game, cover-scaled under a dark Palette scrim, the Wisp Rush logo in the upper part (and the
 ## arena heading under it for a run), and near the bottom "LOADING..." over a full ProgressBar.
 ##
-## Boot: scenes load on worker threads while audio synthesizes. Run (PLAY, Rift Map ENTER): the
+## Boot: scenes load on worker threads while audio synthesizes. Run (PLAY): the
 ## arena's art loads on worker threads, then the host (Main) builds and warms the run beneath this
 ## screen in `extra_steps` steps it reports with [method complete_step]; the bar covers both and
 ## stays up at least RUN_MIN_SECONDS. The bar always visibly completes before `finished`.
@@ -21,13 +21,9 @@ const MAX_WAIT_SECONDS: float = 6.0
 ## A run loading screen stays up at least this long, so it reads as a screen, not a flash.
 const RUN_MIN_SECONDS: float = 0.9
 ## Painted backgrounds already in the game (Main keeps them loaded after boot); one is picked at
-## random. The five Rift arenas, Home and the menu background.
+## random. The arena background, Home and the menu background.
 const BACKGROUND_POOL: PackedStringArray = [
 	"res://assets/art/environment/wisp_rush_arena_background.png",
-	"res://assets/art/environment/rifts/shattered_background.png",
-	"res://assets/art/environment/rifts/ember_hollow_background.png",
-	"res://assets/art/environment/rifts/frozen_choir_background.png",
-	"res://assets/art/environment/rifts/reapers_court_background.png",
 	"res://assets/art/environment/home_background.png",
 	"res://assets/art/environment/menu_background.png",
 ]

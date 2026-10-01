@@ -69,7 +69,7 @@ func _run_checks() -> void:
 	var rows: Array[PackedStringArray] = StatisticsScreen.build_rows({
 		&"best_score": 1200,
 		&"play_time_seconds": 3725.0,
-		&"owned_forms": ["void", "eclipse"],
+		&"owned_forms": ["patchvile", "verdant_shade"],
 	})
 	var values: Dictionary[String, String] = {}
 	for row: PackedStringArray in rows:
@@ -77,7 +77,7 @@ func _run_checks() -> void:
 	var characters: String = "2 / %d" % FormCatalog.REQUIRED_FORM_COUNT
 	if (
 		values.get("BEST SCORE", "") != "001200"
-		or values.get("TIME IN THE RIFT", "") != "1h 02m"
+		or values.get("TIME PLAYED", "") != "1h 02m"
 		or values.get("CHARACTERS COLLECTED", "") != characters
 	):
 		failures += 1

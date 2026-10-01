@@ -1,6 +1,6 @@
 # System: Cosmetic forms (the character catalog)
 
-> **Status:** ✅ done · **Last updated:** 2026-09-20 · **GDD section:** §6, §9, §11
+> **Status:** ✅ done · **Last updated:** 2026-09-26 · **GDD section:** §6, §9, §11, §14 #52–53
 >
 > **Changed 2026-09-15 ([spec 04](../specs/story_and_endless/04_shop.md)):** the Forms screen is retired;
 > forms are bought and equipped in the Shop ([shop.md](shop.md)). `FormData` and `FormCatalog` stay.
@@ -17,8 +17,8 @@ every gameplay value identical.
 | Path | Role |
 |---|---|
 | `res://scripts/resources/form_data.gd` | Character identity, price, requirement, portrait, tint and optional `visual_scene` rig |
-| `res://scripts/resources/form_catalog.gd` | Ordered thirteen-character registry (`REQUIRED_FORM_COUNT`) and validation |
-| `res://data/forms/*.tres` | Void and Eclipse (Wisp forms), Veyra, Rook, Morrow and Noxen (rigs), and Ilyra (whole-frame sprite) — seven, since the 2026-09-20 cut |
+| `res://scripts/resources/form_catalog.gd` | Ordered nine-character registry (`REQUIRED_FORM_COUNT`) and validation |
+| `res://data/forms/*.tres` | Patchvile (the default), Shade, Mothmere, Scarlet and Rook (whole-frame sprites), Morrow (rig) — six: the 2026-09-25 cut left five, Mothmere was added the same day, and Scarlet replaced Ilyra on 2026-09-26. No character has a tier (GDD §14 #53) |
 | `res://scenes/screens/shop_screen.tscn` / `.gd` | CHARACTERS tab: the animated card carousel, buy/equip ([shop.md](shop.md)) |
 | `res://scripts/components/focus_carousel.gd` / `page_dots.gd` | Shared card picker + page indicator ([ui_design_system.md](ui_design_system.md)) |
 
@@ -31,15 +31,13 @@ No screen of its own since 2026-09-15: characters are cards in the Shop's CHARAC
 
 | Member | Kind | Description |
 |---|---|---|
-| `FormCatalog.load_forms()` / `get_form(id)` / `validate()` | method | Ordered forms / lookup with Void fallback / authoring checks. |
+| `FormCatalog.load_forms()` / `get_form(id)` / `validate()` | method | Ordered forms / lookup with the default-form fallback (`DEFAULT_FORM_ID`, Patchvile) / authoring checks. |
 | `SaveManagerService.purchase_cosmetic(&"form", id, price, requirement_met)` / `equip_cosmetic(&"form", id)` | method | Buy (and equip) / equip, through Main. |
 
 ## Data & tuning
 
-Prices are in Rift Points and follow the GDD: Void free; Ash 250 RP; Venom 500 RP; Bloodmoon 800 RP;
-Frost 1,200 RP; Eclipse 2,000 RP plus the first boss victory; every newer character is 0 RP while
-the owner reviews it (GDD §14 #31–33). Each resource has a portrait texture and a presentation
-tint; animated characters also name their visual scene.
+Prices are in Rift Points and follow the GDD: every character is 0 RP until the owner sets prices;
+the default (Patchvile) is always free.
 
 ## Dependencies
 
@@ -53,17 +51,17 @@ and tint; the Shop animates every card ([playable_character_visuals.md](playable
   button. Swipe or tap a side card to browse; tapping the focused card does what the main button does.
 - Each card: name, the character alive over a halo in its tint (dimmed when not owned), and a state
   row — EQUIPPED / OWNED / BOSS / price (`250 RP`), always with an icon. Rigged characters play their
-  own idle; single-image forms idle on the shared rig; Shade and Ilyra play a menu video (ADR-0016).
+  own idle; single-image forms idle on the shared rig; no character plays a menu video since 2026-09-26 (ADR-0016).
   Focus, equip and purchase play nothing — no bounce (owner, 2026-09-21).
 - `%ActionButton`: the Shop's five states (`BUY  •  250 RP`, `NEED 50 RP`, `BEAT A BOSS FIRST`, EQUIP,
   EQUIPPED); buying equips.
 - The carousel opens on the equipped form and follows it until the player picks one.
 - Portraits come from the redesign form sheet, and each form's `tint` drives gameplay VFX colour.
 - Every form can be previewed while locked.
-- Purchase is rejected without enough balance or Eclipse's boss requirement.
+- Purchase is rejected without enough balance or an unmet boss requirement (no character has one since 2026-09-25).
 - Equipping changes the look, trail particles and feedback tint only—never collision, health,
   speed, damage, XP/score.
-- Void is always owned and a corrupt equipped ID falls back to Void.
+- Patchvile, the default, is always owned and a corrupt or removed equipped ID falls back to it (Void until 2026-09-25).
 
 ## How to test
 
@@ -81,6 +79,10 @@ and tint; the Shop animates every card ([playable_character_visuals.md](playable
 
 | Date | Change |
 |---|---|
+| 2026-09-27 | Rook's form points at his whole-frame portrait (`rook_portrait.png`) and warms his menu frames (`menu_frames_path`); his rig is gone |
+| 2026-09-26 | Scarlet replaces Ilyra (removed completely; `scarlet` in `VALID_FORM_IDS`, `ilyra_2` mapping gone); tiers removed (`FormData.tier`, the Shop badge) |
+| 2026-09-25 | Mothmere added: six characters (`REQUIRED_FORM_COUNT` 6, `VALID_FORM_IDS`) |
+| 2026-09-25 | Five characters: Void, Eclipse, Veyra and Noxen removed; Patchvile is the default and the fallback |
 | 2026-09-20 | Thirteen characters: Noxen, the Veilflame added as a free-for-review Legendary rig |
 | 2026-09-18 | Eleven characters: Ilyra (Mythic) and Bram (Legendary) added with `FormData.tier`, shown as a badge on the focused card |
 | 2026-09-17 | Nine characters (Veyra, Rook, Morrow added, `visual_scene`); tab renamed CHARACTERS; animated cards |

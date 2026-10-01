@@ -41,3 +41,16 @@ const AMBER_GLOW: Color = Color(0.953, 0.659, 0.278, 0.40)
 const SCRIM: Color = Color(0.067, 0.082, 0.129, 0.72)
 ## Dark outline behind text drawn directly over artwork.
 const TEXT_OUTLINE: Color = Color(0.067, 0.082, 0.129, 0.9)
+
+## Pixel UI kit colours (concept_art/wisp_rush_pixel_ui_v1/components.json), used by the theme for
+## text and the few flat boxes the kit has no piece for. Decoration only: no information meaning.
+## Obsidian, the kit's darkest stone: hard text shadows, scroll tracks. #0B1116
+const OBSIDIAN: Color = Color("#0B1116")
+## Worn stone edge: scrollbar grabber. #536064
+const STONE_LIGHT: Color = Color("#536064")
+## Warm repair stitching: scrollbar grabber highlight. #A78768
+const STITCH: Color = Color("#A78768")
+## Light ivory: titles, the primary button's label, the active tab. #FAE5C1
+const IVORY_LIGHT: Color = Color("#FAE5C1")
+## Light amber: the danger button's label. #FFD391
+const AMBER_LIGHT: Color = Color("#FFD391")

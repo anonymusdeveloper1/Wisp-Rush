@@ -12,7 +12,7 @@ extends Node2D
 ## dash-showcase timeline (launch, kill accent, mid-dash turn, dive and landing) with a zoomed camera
 ## and an on-screen state label, for a slow-motion clip.
 ##
-## Usage (WISP_CHARACTER = veyra | rook | morrow | any form id):
+## Usage (WISP_CHARACTER = rook | morrow | any form id):
 ##   WISP_CHARACTER=rook "$GODOT" --path . --resolution 540x960 --fixed-fps 60 \
 ##     --write-movie logs/motion/rook/frame.png --quit-after 440 \
 ##     res://tools/godot/render_character_motion.tscn
@@ -33,7 +33,7 @@ var _label: Label
 var _camera: Camera2D
 ## Screen point the scripted swipe starts from; only the drag vector matters to the controller.
 var _drag_origin: Vector2 = Vector2.ZERO
-var _character: String = "veyra"
+var _character: String = "rook"
 var _slow: float = 1.0
 
 
@@ -52,7 +52,7 @@ func _ready() -> void:
 	add_child(outline)
 	var form_id := StringName(OS.get_environment("WISP_CHARACTER"))
 	if form_id.is_empty():
-		form_id = &"veyra"
+		form_id = &"rook"
 	var form: FormData = CATALOG.get_form(form_id)
 	_character = form.display_name
 	_player = PLAYER_SCENE.instantiate() as WispPlayer

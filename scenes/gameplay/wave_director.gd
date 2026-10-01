@@ -25,10 +25,11 @@ var _formation_gap_remaining: float = 0.0
 var _current_health: int = 3
 var _maximum_health: int = 3
 var _total_upgrade_levels: int = 0
-## Threat-budget multiplier for the active Rift and level (RiftData.get_threat_multiplier).
-var _rift_threat_multiplier: float = 1.0
+## Threat-budget multiplier for the current boss cycle (`ArenaRules.get_threat_multiplier`).
+var _threat_multiplier: float = 1.0
 ## Continuous spawning (Endless rules): the next formation arrives while at most this many enemies
-## are alive, and a spent wave rolls straight into the next one. -1 keeps timed waves (story Rifts).
+## are alive, and a spent wave rolls straight into the next one. -1 keeps timed waves (the neutral
+## arena).
 var _refill_live_enemies: int = -1
 
 
@@ -67,9 +68,9 @@ func advance(delta: float, live_threat: int) -> void:
 	_request_affordable_formation()
 
 
-## Scales every wave budget for the active Rift and level; call before start() and on level up.
-func set_rift_threat_multiplier(multiplier: float) -> void:
-	_rift_threat_multiplier = clampf(multiplier, 0.25, 4.0)
+## Scales every wave budget for the current boss cycle; call before start() and after each boss.
+func set_threat_multiplier(multiplier: float) -> void:
+	_threat_multiplier = clampf(multiplier, 0.25, 4.0)
 
 
 ## Turns on continuous spawning: a new formation whenever at most [param refill_live_enemies] enemies
@@ -131,7 +132,7 @@ func _begin_next_wave() -> void:
 	var base_budget: int = tuning.base_threat_budget + roundi(
 		float(_current_wave - 1) * tuning.threat_growth_per_wave
 	) + _difficulty_tier * tuning.post_boss_budget_bonus
-	_wave_budget = maxi(1, roundi(float(base_budget) * _rift_threat_multiplier))
+	_wave_budget = maxi(1, roundi(float(base_budget) * _threat_multiplier))
 	_spent_budget = 0
 	_formation_gap_remaining = 0.0
 	wave_started.emit(_current_wave, _wave_budget)

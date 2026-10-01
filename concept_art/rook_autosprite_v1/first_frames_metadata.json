@@ -1,0 +1,101 @@
+{
+  "rules": "The recipe's: 1024 px, exact 4x4 blocks of a 256 px art grid, up to 256 colours, transparent, 60 px margins, 776 px standing (the roster size); copied unchanged. The outline the sources carry is kept and the ceiling is his own (owner, 2026-09-27)",
+  "standing_delivered": 776,
+  "frames": {
+    "storefront": {
+      "source": "sources/storefront.png",
+      "alpha_bounds_delivered": [
+        288,
+        124,
+        732,
+        900
+      ],
+      "height_delivered": 776,
+      "width_delivered": 444,
+      "edge_margins_delivered": [
+        288,
+        124,
+        292,
+        124
+      ],
+      "colours": 109,
+      "alpha_levels": 1
+    },
+    "wall_bottom": {
+      "source": "sources/wall_bottom.png",
+      "alpha_bounds_delivered": [
+        84,
+        220,
+        940,
+        928
+      ],
+      "height_delivered": 708,
+      "width_delivered": 856,
+      "edge_margins_delivered": [
+        84,
+        220,
+        84,
+        96
+      ],
+      "colours": 108,
+      "alpha_levels": 1
+    },
+    "wall_right": {
+      "source": "sources/wall_right.png",
+      "alpha_bounds_delivered": [
+        544,
+        108,
+        964,
+        916
+      ],
+      "height_delivered": 808,
+      "width_delivered": 420,
+      "edge_margins_delivered": [
+        544,
+        108,
+        60,
+        108
+      ],
+      "colours": 108,
+      "alpha_levels": 1
+    },
+    "wall_top": {
+      "source": "sources/wall_top.png",
+      "alpha_bounds_delivered": [
+        284,
+        64,
+        740,
+        736
+      ],
+      "height_delivered": 672,
+      "width_delivered": 456,
+      "edge_margins_delivered": [
+        284,
+        64,
+        284,
+        288
+      ],
+      "colours": 101,
+      "alpha_levels": 1
+    },
+    "dash_attack": {
+      "source": "sources/dash_attack.png",
+      "alpha_bounds_delivered": [
+        252,
+        192,
+        960,
+        832
+      ],
+      "height_delivered": 640,
+      "width_delivered": 708,
+      "edge_margins_delivered": [
+        252,
+        192,
+        64,
+        192
+      ],
+      "colours": 90,
+      "alpha_levels": 1
+    }
+  }
+}

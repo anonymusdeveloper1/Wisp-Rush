@@ -1,6 +1,7 @@
 # ADR-0010: Rift bosses are data-driven variants of one phase machine
 
-> **Status:** Accepted · **Date:** 2026-09-12 · **Deciders:** Claude Code ·
+> **Status:** Accepted; extended by [ADR-0019](0019-bosses-with-their-own-scene.md) (bosses of the new
+> set bring their own scene, 2026-09-27) · **Date:** 2026-09-12 · **Deciders:** Claude Code ·
 > **Extends:** [ADR-0007](0007-rifts-as-rule-variant-arenas.md), [ADR-0008](0008-rift-levels-and-difficulty-ladder.md)
 
 ## Context

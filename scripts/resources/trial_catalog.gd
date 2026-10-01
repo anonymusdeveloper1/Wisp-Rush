@@ -7,7 +7,7 @@ const TRIALS_PER_TIER: int = 3
 ## Run-summary keys a trial may read. Anything else would silently never progress.
 const VALID_METRICS: Array[StringName] = [
 	&"score", &"kills", &"highest_combo", &"wave", &"multi_kill_dashes",
-	&"rapid_ricochets", &"bosses", &"rp_collected", &"run_level", &"level_clears",
+	&"rapid_ricochets", &"bosses", &"rp_collected", &"run_level",
 ]
 
 ## Trial `.tres` paths in ladder order; every consecutive group of three forms one tier.

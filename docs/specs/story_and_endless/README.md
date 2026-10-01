@@ -1,5 +1,8 @@
 # Spec: Rift story levels, Endless mode and Rift Points
 
+> **History:** the story Rifts were removed from the game on 2026-09-25 (GDD §14 #48). This work
+> order is kept as a record; Endless keeps the Rifts' enemy mixes and bosses.
+
 > **Status:** ⬜ ready for implementation · **Written:** 2026-09-14 by Claude Code (Opus 5) ·
 > **Rules:** [GDD](../../GDD.md) §3, §5.5, §6, §7, §9, §11–§14 ·
 > [ADR-0013](../../decisions/0013-rift-story-levels-endless-mode-and-rift-points.md) ·

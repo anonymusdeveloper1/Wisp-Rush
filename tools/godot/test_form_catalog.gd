@@ -1,16 +1,10 @@
 extends SceneTree
-## Validates the character catalog: every entry, prices, the Eclipse gate, rigs, tiers and save ids.
+## Validates the character catalog: every entry, prices, the default form, rigs and save ids.
 
 const CATALOG: FormCatalog = preload("res://data/forms/default_catalog.tres")
 const RIGGED: Array[StringName] = [
-	&"void", &"eclipse", &"veyra", &"rook", &"morrow", &"ilyra", &"noxen",
-	&"verdant_shade",
+	&"patchvile", &"verdant_shade", &"scarlet", &"rook", &"morrow", &"mothmere",
 ]
-## Characters that carry a collectible tier; everything else must stay STANDARD.
-const TIERS: Dictionary[StringName, FormData.Tier] = {
-	&"ilyra": FormData.Tier.MYTHIC,
-	&"noxen": FormData.Tier.LEGENDARY,
-}
 
 
 func _init() -> void:
@@ -21,8 +15,8 @@ func _init() -> void:
 		for failure: String in validation:
 			push_error("form_catalog: %s" % failure)
 	var forms: Array[FormData] = CATALOG.load_forms()
-	# Void free, Eclipse boss-gated at 2000, then every rigged/sprite character at 0.
-	var expected_prices: Array[int] = [0, 2000, 0, 0, 0, 0, 0, 0]
+	# Every character is free until the owner sets prices; the default (Patchvile) must stay free.
+	var expected_prices: Array[int] = [0, 0, 0, 0, 0, 0]
 	if forms.size() != expected_prices.size():
 		failures += 1
 		push_error("form_catalog: expected %d characters, got %d" % [
@@ -33,12 +27,9 @@ func _init() -> void:
 			if forms[index].price != expected_prices[index]:
 				failures += 1
 				push_error("form_catalog: unexpected price for %s" % forms[index].form_id)
-		if not forms[1].requires_boss_victory:
-			failures += 1
-			push_error("form_catalog: Eclipse did not require a boss victory")
-	if CATALOG.get_form(&"invalid").form_id != &"void":
+	if CATALOG.get_form(&"invalid").form_id != FormCatalog.DEFAULT_FORM_ID:
 		failures += 1
-		push_error("form_catalog: invalid id did not fall back to Void")
+		push_error("form_catalog: invalid id did not fall back to the default form")
 	for form: FormData in forms:
 		var rigged: bool = form.form_id in RIGGED
 		if rigged != (form.visual_scene != null):
@@ -50,10 +41,6 @@ func _init() -> void:
 				failures += 1
 				push_error("form_catalog: %s rig root is not a PlayableCharacterVisual" % form.form_id)
 			instance.free()
-		var expected_tier: FormData.Tier = TIERS.get(form.form_id, FormData.Tier.STANDARD)
-		if form.tier != expected_tier:
-			failures += 1
-			push_error("form_catalog: %s has the wrong tier" % form.form_id)
 		if String(form.form_id) not in SaveManagerService.VALID_FORM_IDS:
 			failures += 1
 			push_error("form_catalog: save rejects %s" % form.form_id)

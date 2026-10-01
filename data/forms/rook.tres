@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="FormData" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/form_data.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/playable/rook/preview.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/playable/rook/rook_portrait.png" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/player/visuals/rook_visual.tscn" id="3"]
 [ext_resource type="Resource" path="res://data/characters/dash_effects/rook.tres" id="4"]
 
@@ -14,4 +14,5 @@ price = 0
 texture = ExtResource("2")
 visual_scene = ExtResource("3")
 dash_effect = ExtResource("4")
+menu_frames_path = "res://data/characters/rook_menu.tres"
 tint = Color(0.93, 0.4, 1, 1)

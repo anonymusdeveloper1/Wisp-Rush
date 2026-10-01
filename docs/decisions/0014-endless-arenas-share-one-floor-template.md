@@ -1,6 +1,6 @@
 # ADR-0014: Endless arenas share one canonical floor template
 
-> **Status:** Accepted · **Date:** 2026-09-14 · **Deciders:** owner (purchasable Endless backgrounds
+> **Status:** Superseded by [ADR-0017](0017-painted-arenas-with-bleed.md) (2026-09-23) · **Date:** 2026-09-14 · **Deciders:** owner (purchasable Endless backgrounds
 > that never help the player) + Claude Code · **Relates to:**
 > [ADR-0011](0011-polygon-playfield-from-art.md) (Rifts keep art-derived walls),
 > [ADR-0006](0006-inset-playfield-and-larger-sprites.md) (design scale),

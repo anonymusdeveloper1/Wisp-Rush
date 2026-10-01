@@ -3,7 +3,7 @@ extends PlayableCharacterVisual
 ## A whole-frame sprite character on one [AnimatedSprite2D].
 ##
 ## The shared behaviour for every character built to
-## [url=res://docs/guides/character_sprite_frames.md]the whole-frame contract[/url] rather than as a
+## [url=res://docs/guides/character_creation.md]the AutoSprite recipe[/url] rather than as a
 ## bone rig. This script never steps frames by hand: it decides which animation should be playing,
 ## which way up the body is drawn, and which of the two frame sets is in memory.
 ## [PlayableCharacterVisual] still owns the state machine, heading, alpha and the squash on a state
@@ -51,6 +51,41 @@ extends PlayableCharacterVisual
 ## `preload`: see the class doc.
 @export_file("*.tres") var gameplay_frames: String = ""
 @export_file("*.tres") var menu_frames: String = ""
+## Draws the frames this much larger than their cell, in a run and on the menus alike, for a
+## character the owner wants bigger than the others. Cosmetic only: the collision radius never
+## changes with it.
+@export_range(0.5, 2.0, 0.01) var art_scale: float = 1.0
+## The same on Home and the Shop card when it should differ from the run; 0 uses [member art_scale].
+@export_range(0.0, 2.0, 0.0025) var menu_art_scale: float = 0.0
+## Moves the storefront frame on Home and the Shop card, in design units, so the character stands
+## centred on Home's platform: its feet on the platform's centre and its body centred over it
+## (owner, 2026-09-27; character guide §7). Zero when the storefront frame already does. Never
+## moves the character in a run.
+@export var menu_offset: Vector2 = Vector2.ZERO
+
+@export_group("Attack")
+## The dash frame that lands the blow: Reduced Motion holds it, and the attack flash peaks on it.
+@export_range(0, 64, 1) var attack_contact_frame: int = 2
+## Glow of the dash attack - an outline while the character dashes, a flash on the contact frame
+## and on a kill, and afterimages behind it. Alpha 0 (the default) turns all of it off.
+@export var attack_glow: Color = Color(1.0, 1.0, 1.0, 0.0)
+## Seconds between afterimages while dashing; 0 leaves none.
+@export_range(0.0, 0.2, 0.005) var afterimage_interval: float = 0.03
+## Seconds an afterimage takes to fade, and its opacity when it appears.
+@export_range(0.05, 0.6, 0.01) var afterimage_life: float = 0.18
+@export_range(0.0, 1.0, 0.01) var afterimage_alpha: float = 0.45
+## For a dash drawn from the side (flying up the frame, head to its right): mirror it on a dash with
+## a rightward component, so the turned drawing never flies upside down. Costs the drawing's
+## left-right detail on those dashes, as the mirrored right wall already does.
+@export var dash_head_up: bool = false
+## A dagger slash drawn by `character_slash.gdshader` on the contact frame: a crescent sweeping
+## across the front of the flight in [member attack_glow], edged in this colour. Alpha 0 (the
+## default) draws none.
+@export var slash_edge: Color = Color(1.0, 1.0, 1.0, 0.0)
+## The slash's size as a share of [member design_size], and how far ahead of the body it sits.
+@export_range(0.5, 3.0, 0.05) var slash_size: float = 1.3
+@export_range(-1.0, 1.0, 0.01) var slash_forward: float = 0.18
+@export_group("")
 
 ## The dash. The dash *is* the attack, so there is no separate contact animation: one of these
 ## frames is the contact frame and the accent holds the same picture.
@@ -83,18 +118,29 @@ const MENU_IDLE: StringName = &"storefront_idle"
 ## What [method get_current_animation] reports while the menu video is on screen.
 const MENU_VIDEO: StringName = &"menu_video"
 
-## The menu frames are a 448 px cell where a run uses 384, so they are drawn at 384/448 to keep the
-## character the same apparent height on a Shop card as in a run.
-const MENU_SCALE: float = 384.0 / 448.0
+## The menu frames are a 448 px cell. They are drawn at `design_size` / 448 - the run cell over the
+## menu cell, 384/448 for most characters - so a character keeps the same apparent height on a Shop
+## card as in a run whatever cell size its run sheet was packed at.
+const MENU_CELL: float = 448.0
 ## Radians per second the body rights itself when a screen-space wall animation takes over. Fast
 ## enough to look immediate, slow enough that landing under a ceiling never spins in one frame
 ## (the rig smoothness contract measures exactly that).
 const BODY_TURN_RATE: float = 24.0
-## The frame Reduced Motion holds for each animation; every other one holds its first. The dash
-## holds its contact frame, which is the one the player reads a kill from.
-const REDUCED_FRAMES: Dictionary[StringName, int] = {
-	DASH: 2,
-}
+## Outline and flash of the dash attack ([member attack_glow]).
+const ATTACK_SHADER: Shader = preload("res://assets/shaders/character_attack.gdshader")
+## Afterimages alive at once; the oldest is reused, so a long dash never grows the node count.
+const AFTERIMAGE_POOL: int = 8
+## How fast the outline comes up when a dash starts and fades when it lands, and how fast a flash
+## fades, in units per second.
+const OUTLINE_RISE: float = 14.0
+const OUTLINE_FALL: float = 6.0
+const FLASH_FADE: float = 6.0
+## How far a flash pushes the frame toward the glow: short of 1, so the character stays readable.
+const FLASH_PEAK: float = 0.75
+const SLASH_SHADER: Shader = preload("res://assets/shaders/character_slash.gdshader")
+## Seconds the slash takes to sweep across, and the moment it has faded out entirely.
+const SLASH_SWEEP: float = 0.08
+const SLASH_LIFE: float = 0.26
 
 var _animation: StringName = &""
 var _menu: bool = false
@@ -103,6 +149,23 @@ var _still: bool = false
 var _frames_path: String = ""
 ## The menu video while one is on screen; freed as soon as the character leaves the menu.
 var _video: CharacterMenuVideo
+## The attack look, when [member attack_glow] asks for one: the sprite's shader, its current
+## outline and flash, the contact frame last flashed, and the afterimage pool with each one's life.
+var _attack_material: ShaderMaterial
+var _outline: float = 0.0
+var _flash: float = 0.0
+var _flashed_frame: int = -1
+var _afterimages: Array[Sprite2D] = []
+var _afterimage_lives: Array[float] = []
+## Where each afterimage was dropped, in world space: re-applied every frame, because the pool
+## moves with the character and a trail must stay where it was left.
+var _afterimage_places: Array[Transform2D] = []
+var _next_afterimage: int = 0
+var _afterimage_wait: float = 0.0
+## The slash drawn on the contact frame, and seconds since it started (negative: not showing).
+var _slash: Sprite2D
+var _slash_material: ShaderMaterial
+var _slash_time: float = -1.0
 
 @onready var _body: Node2D = %Body
 @onready var _sprite: AnimatedSprite2D = %PoseSprite
@@ -110,6 +173,7 @@ var _video: CharacterMenuVideo
 
 func _ready() -> void:
 	super()
+	_build_attack_look()
 	# A Shop card is configured before it is added to the tree, so `set_preview_mode` and
 	# `set_reduced_motion` can both land ahead of `_ready`. Re-apply what they asked for now that
 	# the sprite exists, or every card would show the gameplay frames.
@@ -183,15 +247,40 @@ func get_layer_bounds() -> Rect2:
 	return bounds
 
 
+## A mid-dash redirect starts the attack again when the dash is a one-shot.
+func restart_dash() -> void:
+	_restart_attack()
+
+
+## Current outline and flash of the attack look (0..1 each), for the tests.
+func get_attack_look() -> Vector2:
+	return Vector2(_outline, _flash)
+
+
+## Afterimages on screen now, for the tests.
+func get_visible_afterimages() -> int:
+	var count: int = 0
+	for ghost: Sprite2D in _afterimages:
+		if ghost.visible:
+			count += 1
+	return count
+
+
 func _update_secondary_motion(delta: float) -> void:
 	_refresh(delta, false)
+	_update_attack_look(delta)
 
 
-## A new state starts its animation at once, but lets the wall counter-rotation ease in.
-func _on_state_started(_state_name: StringName) -> void:
+## A new state starts its animation at once, but lets the wall counter-rotation ease in. A launch
+## starts a one-shot dash from its first frame; a kill flashes the attack.
+func _on_state_started(state_name: StringName) -> void:
 	if not is_node_ready():
 		return
 	_refresh(0.0, false)
+	if state_name == DASH_START:
+		_restart_attack()
+	elif state_name == ATTACK and _attack_material != null and not _still:
+		_flash = FLASH_PEAK
 
 
 func _apply_reduced_pose() -> void:
@@ -207,16 +296,24 @@ func _refresh(delta: float, snap: bool) -> void:
 		_body.rotation = 0.0
 		return
 	var wanted: StringName = _target_animation()
-	var mirrored: bool = _menu == false and _mirrors(wanted)
-	if wanted != _animation or mirrored != _sprite.flip_h:
+	# Mirroring and the animation are separate: turning mid-attack must not restart it.
+	_sprite.flip_h = _menu == false and _mirrors(wanted)
+	if wanted != _animation:
 		_animation = wanted
-		_sprite.flip_h = mirrored
 		_sprite.animation = wanted
-		_sprite.frame = REDUCED_FRAMES.get(wanted, 0) if _still else 0
-	_sprite.scale = Vector2.ONE * (MENU_SCALE if _menu else 1.0)
+		# Reduced Motion holds the first frame, or the dash's contact frame: the one a kill reads from.
+		_sprite.frame = (attack_contact_frame if wanted == DASH else 0) if _still else 0
+		if not _still:
+			_sprite.play()
+	_sprite.scale = Vector2.ONE * (
+		(menu_art_scale if menu_art_scale > 0.0 else art_scale) * design_size / MENU_CELL
+		if _menu else art_scale
+	)
+	_sprite.position = menu_offset if _menu else Vector2.ZERO
 	if _still:
 		_sprite.pause()
-	elif not _sprite.is_playing():
+	elif not _sprite.is_playing() and _loops(_animation):
+		# A one-shot (a dash drawn as a single attack) holds its last frame until the next state.
 		_sprite.play()
 	# A screen-space frame is already drawn the way the player must see it, so the rotation the base
 	# applied to stand on this wall is taken off again instead of turning the picture twice.
@@ -247,7 +344,149 @@ func _target_animation() -> StringName:
 	return _nearest_wall()[0]
 
 
+func _loops(animation: StringName) -> bool:
+	var frames: SpriteFrames = _sprite.sprite_frames
+	return frames == null or not frames.has_animation(animation) or frames.get_animation_loop(animation)
+
+
+## Plays a one-shot dash from its first frame. A looping dash just keeps looping.
+func _restart_attack() -> void:
+	if not is_node_ready() or _still or _animation != DASH or _loops(DASH):
+		return
+	_sprite.frame = 0
+	_sprite.play()
+	_flashed_frame = -1
+
+
+## The attack look exists only when [member attack_glow] is visible: the sprite gets the attack
+## shader, and a pool of afterimages is laid out behind it - first child, so it draws before the
+## body. Not `top_level`: that would draw the trail over the character.
+func _build_attack_look() -> void:
+	if attack_glow.a <= 0.0 or _attack_material != null:
+		return
+	_attack_material = ShaderMaterial.new()
+	_attack_material.shader = ATTACK_SHADER
+	_attack_material.set_shader_parameter(&"glow_color", attack_glow)
+	_sprite.material = _attack_material
+	var trail := Node2D.new()
+	trail.name = "Afterimages"
+	add_child(trail)
+	move_child(trail, 0)
+	if slash_edge.a > 0.0:
+		_build_slash()
+	var additive := CanvasItemMaterial.new()
+	additive.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	for index: int in AFTERIMAGE_POOL:
+		var ghost := Sprite2D.new()
+		ghost.material = additive
+		ghost.visible = false
+		trail.add_child(ghost)
+		_afterimages.append(ghost)
+		_afterimage_lives.append(0.0)
+		_afterimage_places.append(Transform2D.IDENTITY)
+
+
+## Outline up while the character dashes and down after it lands, a flash on the contact frame,
+## and afterimages dropped along the flight. Menus and Reduced Motion get none of the motion.
+func _update_attack_look(delta: float) -> void:
+	if _attack_material == null:
+		return
+	var dashing: bool = not _menu and _animation == DASH
+	var target: float = 1.0 if dashing else 0.0
+	_outline = move_toward(_outline, target, delta * (OUTLINE_RISE if dashing else OUTLINE_FALL))
+	if dashing and not _still and _sprite.frame == attack_contact_frame \
+			and _flashed_frame != attack_contact_frame:
+		_flash = FLASH_PEAK
+		_flashed_frame = attack_contact_frame
+		_slash_time = 0.0
+	_flash = move_toward(_flash, 0.0, delta * FLASH_FADE)
+	_update_slash(delta)
+	_attack_material.set_shader_parameter(&"outline", _outline)
+	_attack_material.set_shader_parameter(&"flash", _flash)
+	for index: int in _afterimages.size():
+		if _afterimage_lives[index] <= 0.0:
+			continue
+		_afterimage_lives[index] -= delta
+		var ghost: Sprite2D = _afterimages[index]
+		ghost.global_transform = _afterimage_places[index]
+		ghost.visible = _afterimage_lives[index] > 0.0
+		ghost.modulate.a = afterimage_alpha * maxf(0.0, _afterimage_lives[index] / afterimage_life)
+	if not dashing or _still or afterimage_interval <= 0.0:
+		_afterimage_wait = 0.0
+		return
+	_afterimage_wait -= delta
+	if _afterimage_wait <= 0.0:
+		_afterimage_wait = afterimage_interval
+		_drop_afterimage()
+
+
+## The slash square sits in front of the pose, on the body, so it turns with the flight; it is a
+## child of the body drawn after the sprite, so it covers the frame's own dagger arc.
+func _build_slash() -> void:
+	_slash_material = ShaderMaterial.new()
+	_slash_material.shader = SLASH_SHADER
+	_slash_material.set_shader_parameter(&"core_color", attack_glow)
+	_slash_material.set_shader_parameter(&"edge_color", slash_edge)
+	var white := Image.create(8, 8, false, Image.FORMAT_RGBA8)
+	white.fill(Color.WHITE)
+	_slash = Sprite2D.new()
+	_slash.name = "Slash"
+	_slash.texture = ImageTexture.create_from_image(white)
+	_slash.material = _slash_material
+	_slash.visible = false
+	# A fixed transform: the rig smoothness contract samples every node on the body, so the slash
+	# never changes size or side itself - the shader does the sweep and the mirroring.
+	var side: float = design_size * slash_size * art_scale / 8.0
+	_slash.scale = Vector2(side, side)
+	_slash.position = Vector2(0.0, -design_size * slash_forward * art_scale)
+	_body.add_child(_slash)
+
+
+## Sweeps the slash across, then fades it. The sweep turns with the drawing: mirrored with it.
+func _update_slash(delta: float) -> void:
+	if _slash == null:
+		return
+	if _slash_time < 0.0 or _menu or _still or _slash_time > SLASH_LIFE:
+		_slash.visible = false
+		_slash_time = -1.0
+		return
+	_slash_time += delta
+	_slash.visible = true
+	_slash_material.set_shader_parameter(&"mirror", _sprite.flip_h)
+	_slash_material.set_shader_parameter(&"progress", clampf(_slash_time / SLASH_SWEEP, 0.0, 1.0))
+	_slash_material.set_shader_parameter(
+		&"strength", 1.0 - smoothstep(SLASH_SWEEP, SLASH_LIFE, _slash_time)
+	)
+
+
+## True while the contact slash is on screen, for the tests.
+func is_slash_showing() -> bool:
+	return _slash != null and _slash.visible
+
+
+## Leaves a copy of the frame on screen where the character is now, in the glow colour.
+func _drop_afterimage() -> void:
+	var frames: SpriteFrames = _sprite.sprite_frames
+	if frames == null or not frames.has_animation(_animation) or _afterimages.is_empty():
+		return
+	var index: int = _next_afterimage
+	_next_afterimage = (index + 1) % _afterimages.size()
+	var ghost: Sprite2D = _afterimages[index]
+	_afterimage_lives[index] = afterimage_life
+	_afterimage_places[index] = _sprite.global_transform
+	ghost.texture = frames.get_frame_texture(_animation, _sprite.frame)
+	ghost.global_transform = _sprite.global_transform
+	ghost.flip_h = _sprite.flip_h
+	ghost.offset = _sprite.offset
+	ghost.modulate = Color(attack_glow, afterimage_alpha)
+	ghost.visible = true
+
+
 func _mirrors(animation: StringName) -> bool:
+	if animation == DASH:
+		# Turned by the flight angle + 90 degrees, the drawing's head (its +X) points down exactly
+		# when the flight has a rightward component.
+		return dash_head_up and movement_direction.x > 0.0
 	return animation == WALL_LEFT and bool(_nearest_wall()[1])
 
 

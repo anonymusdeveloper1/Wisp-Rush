@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="TrialData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/trial_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+trial_id = &"t06_bosses_m"
+title = "BOSS HUNTER"
+description = "Defeat 6 bosses in total."
+metric = &"bosses"
+target = 6
+reward_points = 65
+tier = 6
+cumulative = true

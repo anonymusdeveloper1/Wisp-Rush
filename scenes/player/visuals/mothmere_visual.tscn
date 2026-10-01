@@ -1,0 +1,117 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scenes/player/visuals/mothmere_visual.gd" id="1_script"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_add"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="Gradient_ember"]
+offsets = PackedFloat32Array(0, 0.55, 1)
+colors = PackedColorArray(0.98, 0.42, 0.34, 0.95, 0.92, 0.28, 0.22, 0.8, 0.82, 0.18, 0.14, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture_ember"]
+gradient = SubResource("Gradient_ember")
+
+[sub_resource type="Gradient" id="Gradient_mote"]
+offsets = PackedFloat32Array(0, 0.4, 1)
+colors = PackedColorArray(1, 0.6, 0.52, 0.9, 0.95, 0.3, 0.25, 0.55, 0.8, 0.18, 0.14, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture_mote"]
+gradient = SubResource("Gradient_mote")
+
+[sub_resource type="Gradient" id="Gradient_dot"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture_dot"]
+gradient = SubResource("Gradient_dot")
+width = 32
+height = 32
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_embers"]
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 40.0
+direction = Vector3(0, 1, 0)
+spread = 35.0
+initial_velocity_min = 70.0
+initial_velocity_max = 170.0
+gravity = Vector3(0, 0, 0)
+damping_min = 60.0
+damping_max = 120.0
+scale_min = 0.25
+scale_max = 0.45
+color_ramp = SubResource("GradientTexture_ember")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_motes"]
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 70.0
+direction = Vector3(0, 1, 0)
+spread = 40.0
+initial_velocity_min = 30.0
+initial_velocity_max = 110.0
+gravity = Vector3(0, 0, 0)
+damping_min = 30.0
+damping_max = 60.0
+scale_min = 0.35
+scale_max = 0.8
+color_ramp = SubResource("GradientTexture_mote")
+
+[node name="MothmereVisual" type="Node2D"]
+script = ExtResource("1_script")
+gameplay_frames = "res://data/characters/mothmere_gameplay.tres"
+menu_frames = "res://data/characters/mothmere_menu.tres"
+menu_idle_animation = &"storefront_idle"
+design_size = 256.0
+art_scale = 1.1875
+menu_art_scale = 1.25
+attack_contact_frame = 4
+dash_head_up = true
+attack_glow = Color(0.95, 0.36, 0.3, 1)
+heading_frequency = 7.2
+heading_damping = 0.72
+settle_frequency = 4.2
+squash_amount = 0.35
+bounce_amount = 0.0
+aim_lean = 0.0
+
+[node name="MotionRoot" type="Node2D" parent="."]
+unique_name_in_owner = true
+
+[node name="DashParticles" type="GPUParticles2D" parent="MotionRoot"]
+unique_name_in_owner = true
+position = Vector2(0, 40)
+emitting = false
+amount = 10
+lifetime = 0.5
+visibility_rect = Rect2(-1200, -1200, 2400, 2400)
+local_coords = false
+process_material = SubResource("ParticleProcessMaterial_embers")
+texture = SubResource("GradientTexture_dot")
+
+[node name="TrailParticles" type="GPUParticles2D" parent="MotionRoot"]
+unique_name_in_owner = true
+material = SubResource("CanvasItemMaterial_add")
+position = Vector2(0, 20)
+emitting = false
+amount = 12
+lifetime = 0.45
+visibility_rect = Rect2(-1200, -1200, 2400, 2400)
+local_coords = false
+process_material = SubResource("ParticleProcessMaterial_motes")
+texture = SubResource("GradientTexture_dot")
+
+[node name="Body" type="Node2D" parent="MotionRoot"]
+unique_name_in_owner = true
+
+[node name="PoseSprite" type="AnimatedSprite2D" parent="MotionRoot/Body"]
+unique_name_in_owner = true
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+
+[node name="AnimationTree" type="AnimationTree" parent="."]
+unique_name_in_owner = true

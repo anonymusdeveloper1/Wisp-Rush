@@ -15,7 +15,7 @@ const LIFETIME: float = 14.0
 const DRAWN_SIZE: float = 96.0
 
 ## Side of the sprite's own square canvas, so a pickup drawn on a different one is the same
-## size on screen (the Soul Vessel's icon is 444 px where the shard's art is 362).
+## size on screen.
 @export var source_frame_size: float = 362.0
 
 var _target: Node2D

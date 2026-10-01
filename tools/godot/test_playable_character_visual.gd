@@ -13,8 +13,7 @@ const SHOP_SCENE: PackedScene = preload("res://scenes/screens/shop_screen.tscn")
 const ENDLESS_CATALOG: EndlessCatalog = preload("res://data/endless/default_endless_catalog.tres")
 const CATALOG: FormCatalog = preload("res://data/forms/default_catalog.tres")
 const RIGGED: Array[StringName] = [
-	&"void", &"eclipse", &"veyra", &"rook", &"morrow", &"ilyra", &"noxen",
-	&"verdant_shade",
+	&"patchvile", &"verdant_shade", &"scarlet", &"rook", &"morrow", &"mothmere",
 ]
 const ARENA := Rect2(140.0, 420.0, 800.0, 1100.0)
 ## Largest believable change in one 1/60 s frame (scaled by the real frame time); more is a snap.
@@ -39,9 +38,8 @@ func _run() -> void:
 		await _check_rig_contract(form)
 		await _check_controller_flow(form)
 	await _check_reduced_motion(CATALOG.get_form(&"morrow"))
-	await _check_reduced_motion(CATALOG.get_form(&"ilyra"))
-	await _check_reduced_motion(CATALOG.get_form(&"noxen"))
-	await _check_reduced_motion(CATALOG.get_form(&"noxen"))
+	await _check_reduced_motion(CATALOG.get_form(&"scarlet"))
+	await _check_reduced_motion(CATALOG.get_form(&"rook"))
 	await _check_home(CATALOG.get_form(&"rook"))
 	await _check_shop()
 	for form_id: StringName in RIGGED:
@@ -96,7 +94,11 @@ func _check_rig_contract(form: FormData) -> void:
 	visual.surface_normal = Vector2.UP
 	var bounds: Rect2 = visual.get_layer_bounds()
 	var largest: float = maxf(bounds.size.x, bounds.size.y)
-	if absf(largest / visual.get_design_size() - 1.0) > 0.12:
+	# A whole-frame character may be drawn deliberately larger than its cell (`art_scale`).
+	var drawn: float = visual.get_design_size()
+	if visual is WholeFrameCharacterVisual:
+		drawn *= (visual as WholeFrameCharacterVisual).art_scale
+	if absf(largest / drawn - 1.0) > 0.12:
 		_fail("%s: design_size %.0f does not fit its %.0f px silhouette" % [
 			id, visual.get_design_size(), largest,
 		])
@@ -258,8 +260,8 @@ func _check_home(form: FormData) -> void:
 func _check_shop() -> void:
 	var snapshot: Dictionary = {
 		&"rift_points": 0,
-		&"owned_forms": ["void", "veyra"],
-		&"equipped_form": "void",
+		&"owned_forms": ["patchvile", "morrow"],
+		&"equipped_form": "patchvile",
 		&"owned_dash_styles": ["soul"],
 		&"equipped_dash_style": "soul",
 		&"owned_arena_skins": [],
@@ -277,10 +279,10 @@ func _check_shop() -> void:
 		_fail("the Shop's first tab is not labelled CHARACTERS")
 	# Since 2026-09-20 only the focused card and its neighbours are live; every other card shows
 	# its still portrait, because a whole-frame character's menu sheet is far too expensive to hold
-	# once per card (docs/guides/character_sprite_frames.md §9c). The equipped character is the one
+	# once per card. The equipped character is the one
 	# the Shop opens on, so it must be alive; the far end of the roster must not be.
 	var forms: Array[FormData] = CATALOG.load_forms()
-	var focused: PlayableCharacterPreview = _card_preview(shop, &"void")
+	var focused: PlayableCharacterPreview = _card_preview(shop, &"patchvile")
 	if focused == null or focused.get_visual() == null:
 		_fail("the focused Shop card is not animated")
 	var live: int = 0
@@ -298,7 +300,7 @@ func _check_shop() -> void:
 	# Main re-reads the save after a purchase. Owner, 2026-09-21: no bounce when a character is
 	# picked, bought or equipped - the card keeps its rest instead of hopping.
 	var bought: Dictionary = snapshot.duplicate(true)
-	bought[&"owned_forms"] = ["void", "veyra", "rook"]
+	bought[&"owned_forms"] = ["patchvile", "morrow", "rook"]
 	bought[&"equipped_form"] = "rook"
 	shop.setup(bought, ShopScreen.TAB_WISPS)
 	await process_frame
@@ -311,16 +313,16 @@ func _check_shop() -> void:
 		_fail("buying Rook played the %s bounce" % rook_state)
 	# ...and an equip does not either.
 	var equipped: Dictionary = bought.duplicate(true)
-	equipped[&"equipped_form"] = "veyra"
+	equipped[&"equipped_form"] = "morrow"
 	shop.setup(equipped, ShopScreen.TAB_WISPS)
 	await process_frame
 	await process_frame
-	var veyra: PlayableCharacterPreview = _card_preview(shop, &"veyra")
-	var veyra_state: StringName = &""
-	if veyra != null:
-		veyra_state = veyra.get_visual().get_current_visual_state()
-	if veyra_state in [PlayableCharacterVisual.CHARACTER_SELECTED, PlayableCharacterVisual.CHARACTER_UNLOCKED]:
-		_fail("equipping Veyra played the %s bounce" % veyra_state)
+	var morrow: PlayableCharacterPreview = _card_preview(shop, &"morrow")
+	var morrow_state: StringName = &""
+	if morrow != null:
+		morrow_state = morrow.get_visual().get_current_visual_state()
+	if morrow_state in [PlayableCharacterVisual.CHARACTER_SELECTED, PlayableCharacterVisual.CHARACTER_UNLOCKED]:
+		_fail("equipping Morrow played the %s bounce" % morrow_state)
 	shop.queue_free()
 	await process_frame
 

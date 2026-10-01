@@ -57,7 +57,7 @@ def sheet(name: str, first: int, last: int, step: int) -> Path:
 
 
 def main() -> None:
-	name = sys.argv[1] if len(sys.argv) > 1 else "veyra"
+	name = sys.argv[1] if len(sys.argv) > 1 else "rook"
 	windows = WINDOWS
 	if len(sys.argv) > 2:
 		first, last = (int(part) for part in sys.argv[2].split("-"))

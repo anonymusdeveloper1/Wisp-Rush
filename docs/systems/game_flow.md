@@ -1,9 +1,9 @@
 # System: Game flow
 
-> **Status:** ✅ done · **Last updated:** 2026-09-17 · **GDD section:** §11
+> **Status:** ✅ done · **Last updated:** 2026-09-25 · **GDD section:** §11
 >
-> **Changed 2026-09-15:** story runs (spec 02), ENDLESS with Endless/daily Results (spec 03), and the
-> Shop replacing the Forms route ([spec 04](../specs/story_and_endless/04_shop.md), [shop.md](shop.md)).
+> **Changed 2026-09-25:** the story Rifts are removed (owner): no Rift Map, no story runs, no level
+> Results. Endless and the daily run are the only runs. Older Rift routes below are marked history.
 
 ## Purpose
 
@@ -16,19 +16,19 @@ and every Home destination, the run, Results, and consistent back handling. Scre
 |---|---|
 | `res://scenes/main/main.tscn` / `main.gd` | Composition root: screen replacement, back routing, app-lifecycle music duck, debug overlay |
 | `res://scenes/screens/loading_screen.*` | Boot: threaded scene streaming and audio readiness |
-| `res://scenes/tutorial/tutorial_screen.*` | Tutorial screen ([tutorial.md](tutorial.md)): first launch and Rift Map replay |
-| `res://scenes/screens/home_screen.*` | Home: top bar, logo, tappable hero Wisp between two button columns, Rift caption + animated PLAY + Rifts under it |
+| `res://scenes/tutorial/tutorial_screen.*` | Tutorial screen ([tutorial.md](tutorial.md)): first launch and the Settings replay |
+| `res://scenes/screens/home_screen.*` | Home: top bar, pixel-art logo, equipped character over an empty central dais between two button columns, caption + animated PLAY under it |
 | `res://scenes/screens/home_ambience.gd` | `HomeAmbience`: living background (brazier flicker, rune pulse, mist, rising motes) |
 | `res://scenes/screens/orbit_motes.gd` | `OrbitMotes`: soul sparks orbiting the hero; a back and a front instance give depth; `get_extent_ratio()` bounds them |
-| `res://scenes/screens/results_screen.*` | Run summary and Rift Points breakdown: Rush Again (primary), Return Home, Characters |
+| `res://scenes/screens/results_screen.*` | Run summary and Rift Points breakdown: PLAY AGAIN (primary), RETURN HOME |
 | `res://scripts/utils/rift_points.gd` | `RiftPoints`: `1,250 RP` / `+45 RP` formatting shared by every currency label |
-| Forms / Rift Map / Daily / Trials / Shop / Statistics / Settings | See [forms.md](forms.md), [rifts.md](rifts.md), [challenges.md](challenges.md), [meta_progression.md](meta_progression.md), [monetisation.md](monetisation.md), [settings.md](settings.md) |
+| Forms / Daily / Trials / Shop / Statistics / Settings | See [forms.md](forms.md), [challenges.md](challenges.md), [meta_progression.md](meta_progression.md), [monetisation.md](monetisation.md), [settings.md](settings.md) |
 
 ## Scene / node structure
 
 ```text
 Main (Node)
-└── exactly one: LoadingScreen, TutorialScreen, HomeScreen, ShopScreen, RiftMapScreen, DailyScreen,
+└── exactly one: LoadingScreen, TutorialScreen, HomeScreen, ShopScreen, DailyScreen,
     TrialsScreen, StatisticsScreen, SettingsScreen, GameWorld or ResultsScreen
     (+ internal CanvasLayers: NavigationVeil 100 and LoadingCover 99, which holds the run loading
     screen while a held GameWorld prewarms as get_child(0))
@@ -44,8 +44,7 @@ HomeScreen (Control)
         ├── HeroPocket · HeroGlow · OrbitBack · WispPreview (tap → Forms) · OrbitFront
         ├── LeftColumn: TrialsButton · DailyButton   (IconButton + Icon + Caption)
         ├── RightColumn: ShopButton · RemoveAdsButton (AdGlyph + RemoveAdsStrike + Caption)
-        └── ActionBlock: RiftCaption · ActionRow: ActionBalance (EndlessButton: EndlessIcon + Caption
-            + EndlessBadge) · PlayButton (PlayGlow, PlaySheenClip → PlaySheen) · RiftsButton (RiftsIcon + Caption)
+        └── ActionBlock: PlayCaption · ActionRow: PlayButton (PlayGlow, PlaySheenClip → PlaySheen)
 ```
 
 ## Public API
@@ -53,14 +52,14 @@ HomeScreen (Control)
 | Member | Kind | Description |
 |---|---|---|
 | `LoadingScreen.finished(resources)` | signal | Boot resources ready; Main shows the Tutorial (save `tutorial_completed` false) or Home. |
-| `TutorialScreen.finished(skipped)` / `RiftMapScreen.tutorial_requested` | signals | Main marks the tutorial completed and routes (Home on first launch, Rift Map on a replay) / opens a replay. |
-| `HomeScreen.play/wisps/daily/rift_map/trials/statistics/settings/shop/remove_ads_requested` | signals | Home destinations: `wisps_requested` (tap on the hero character) → Shop CHARACTERS, `shop_requested` → last Shop tab, `remove_ads_requested` → Shop NO ADS. |
+| `TutorialScreen.finished(skipped)` / `SettingsScreen.tutorial_requested` | signals | Main marks the tutorial completed and goes Home / opens a replay. |
+| `HomeScreen.play/wisps/daily/trials/statistics/settings/shop/remove_ads_requested` | signals | Home destinations: `wisps_requested` (tap on the hero character) → Shop CHARACTERS, `shop_requested` → last Shop tab, `remove_ads_requested` → Shop NO ADS. |
 | `HomeScreen.setup(snapshot, equipped_form)` | method | Best, Rift Points, equipped form, Reduced Motion, `ads_removed` and the Endless best wave for PLAY's caption. |
-| `HomeScreen.get_orbits()` / `is_animating()` / `get_rift_caption()` / `get_hero_motion_rect()` | methods | Test helpers: orbit halves, motion state, caption text, bounds of every hero animation. |
+| `HomeScreen.get_orbits()` / `is_animating()` / `get_play_caption()` / `get_hero_motion_rect()` | methods | Test helpers: orbit halves, motion state, caption text, bounds of every hero animation. |
 | `ShopScreen.setup(rift_points, ads_removed, store_available)` / `show_feedback()` / `can_buy()` | methods | See [monetisation.md](monetisation.md). |
 | `GameWorld.home_requested` / `restart_requested` / `run_ended(summary)` | signals | Leave, restart or finish a run. |
-| `ResultsScreen.restart/next_level/home/wisps_requested`, `enter_rift_requested(rift_id)` | signals | Post-run navigation; `restart_requested` replays the same profile; `wisps_requested` opens Shop CHARACTERS, whose Back re-shows these Results. |
-| `ResultsScreen.setup(summary)` / `get_displayed_rp_total()` / `get_primary_text()` | methods | Run values plus `rp_collected`, `rp_performance`, `rp_clear_bonus`, `rp_rewards`, `rp_earned`, `rift_points_total`, and Main's `rift_name`, `mastered`, `opened_rift_ids`/`names`; test helpers. |
+| `ResultsScreen.restart/home/wisps_requested` | signals | Post-run navigation; `restart_requested` replays the same profile; `wisps_requested` opens Shop CHARACTERS, whose Back re-shows these Results (its button is hidden today). |
+| `ResultsScreen.setup(summary)` / `get_displayed_rp_total()` / `get_primary_text()` | methods | Run values plus `rp_collected`, `rp_performance`, `rp_rewards`, `rp_earned`, `rift_points_total`, and Main's `mode`, `arena_name`, `best_score`, `depth_reward`; test helpers. |
 | `handle_back() -> bool` | optional method | A screen consumes back first (GameWorld, SettingsScreen, TutorialScreen → skip confirm). |
 
 ## Data & tuning
@@ -74,42 +73,46 @@ SaveManager (snapshot, runs, forms, challenges), Audio via `SoundFx` (music stat
 ChallengeTracker, FormCatalog. The run: [core_run.md](core_run.md), [game_feel.md](game_feel.md).
 
 ## Rules & behaviour
-- Every screen is styled only through the project Theme's type variations ([ui_design_system.md](ui_design_system.md)); Home uses `home_background.png`, the Rift Map the focused arena, every other menu `menu_background.png`.
+- Every screen is styled only through the project Theme's type variations ([ui_design_system.md](ui_design_system.md)); Home uses `home_background.png`, every other menu `menu_background.png`.
 - **Home layout** (owner decision 2026-09-13, GDD §11; the bottom navigation bar is gone): top bar
-  (Rift Points, best, Statistics, Settings) and logo; the equipped Wisp in the middle — **tap it for
-  Forms**; left column TRIALS · DAILY (the SANCTUM button went with the Sanctum, ADR-0013), right
+  (Rift Points, best, Statistics, Settings) and logo; the equipped character above the central stone dais — **tap it for
+  Shop CHARACTERS**; left column TRIALS · DAILY (the SANCTUM button went with the Sanctum, ADR-0013), right
   column SHOP · NO ADS; under the Wisp the
-  caption `ENDLESS` / `ENDLESS  •  BEST WAVE n` and a row of a large PLAY (560 px min, 60 px text)
-  centred between the empty `ActionBalance` slot on its left and RIFTS on its right. BEST shows
-  `endless_best_score`. (Owner 2026-09-15: PLAY = Endless; no ENDLESS button.)
+  caption `ENDLESS` / `ENDLESS  •  BEST WAVE n` and a large PLAY (560 px min, 66 px text), centred
+  on its own. BEST shows `endless_best_score`. (Owner 2026-09-15: PLAY = Endless; no ENDLESS
+  button. Owner 2026-09-24: the RIFTS button and its `ActionBalance` slot are gone and PLAY sits
+  lower — see `ACTION_DROP` below. Owner 2026-09-25: the story Rifts are removed.)
 - **Tutorial routes** (owner decision 2026-09-15): after Loading, a save with `tutorial_completed` false
   opens the Tutorial instead of Home; finishing or skipping calls `mark_tutorial_completed()` and goes
-  Home. Afterwards the only entry is the Rift Map's TUTORIAL button (Settings' REPLAY TUTORIAL is gone);
-  a replay returns to the Rift Map, finished or skipped. Main builds `RunProfile.tutorial` on the
+  Home. Afterwards the entry is Settings → REPLAY TUTORIAL (`SettingsScreen.tutorial_requested`,
+  Home-level Settings only), which returns Home. Main builds `RunProfile.tutorial` on the
   `TutorialCatalog.arena_skin_id` skin with the equipped form. The Tutorial never glides in.
-- **Run routes** (spec 02): Main builds every `RunProfile`. PLAY → `endless` profile (always open; equipped
-  skin, pool from `ContentUnlocks`, Obsidian Garden always in it). Real runs never teach.
-  RIFTS → Rift Map; ENTER selects the Rift and plays its next level — the only way to start a story run
-  besides Results' NEXT LEVEL / ENTER <RIFT> / RETRY. DAILY → `daily`
-  profile (daily pool, arena of the day). Restart (pause menu or Results) replays the same profile
-  (story first-clear eligibility and the Endless pool are re-read from the save).
+- **Run routes**: Main builds every `RunProfile`. PLAY → `endless` profile (always open; equipped
+  arena, every enemy mix and boss from `EndlessCatalog`). Real runs never teach. DAILY → `daily`
+  profile (daily pool, arena of the day). Restart (pause menu or Results) replays the same profile.
+  (History: story runs — Rift Map ENTER, Results' NEXT LEVEL / ENTER <RIFT> / RETRY — were removed with
+  the Rifts on 2026-09-25.)
 - **Buttons → signal:** TRIALS → `trials_requested`, DAILY → `daily_requested`, SHOP →
   `shop_requested`, NO ADS → `remove_ads_requested` (Main opens the
-  Shop for both; NO ADS hides once `ads_removed`), RIFTS → `rift_map_requested`.
-- **Nothing animated passes over a button.** `_layout_hero()` keeps the preview over the painted
-  Wisp, shrinks the orbit (`OrbitMotes.get_extent_ratio()`) and glow to the room between the columns
+  Shop for both; NO ADS hides once `ads_removed`). `rift_map_requested` was removed with RIFTS.
+- **Every character stands centred on the dais** (owner, 2026-09-27, GDD §14 #57): feet on the dais' centre
+  (540, 1166 in the 1080 × 1920 design), body centred over it; a whole-frame character's `menu_offset`
+  fixes a storefront frame that does not (Rook).
+- **Nothing animated passes over a button.** `_layout_hero()` keeps the preview in the empty stage pocket above the dais, shrinks the orbit (`OrbitMotes.get_extent_ratio()`) and glow to the room between the columns
   minus `HERO_SIDE_CLEARANCE` (28), and places the caption + PLAY row `HERO_BOTTOM_CLEARANCE` (64)
-  under the lowest animated pixel. `test_menu_screens.gd` asserts it at 1080×2337 and 1080×1920.
-- **Home motion:** the Wisp floats, breathes and sways and its glow (form tint) pulses; soul sparks
-  orbit it, passing behind and in front of the body; `HomeAmbience` adds brazier flicker, rune
-  pulse, drifting mist and rising motes anchored to the painted art (art unchanged). PLAY breathes
+  under the lowest animated pixel, then up to `ACTION_DROP` (80) further down, taken only from the free
+  space below it, so the hero never shrinks for it. `test_menu_screens.gd` asserts it at 1080×2337 and 1080×1920.
+- **Home motion:** the equipped character stays anchored while its authored storefront sprite loop or
+  menu video plays; its glow (form tint) pulses and soul sparks orbit behind and in front.
+  `HomeAmbience` adds brazier flicker, rune pulse, drifting mist and rising motes aligned to the
+  pixel-art stone background. PLAY breathes
   (it owns its press dip, so UiJuice skips it), pulses a cyan glow and sweeps a light band every
-  3.4 s; the Rifts portal icon turns. No entrance animation. Reduced Motion stills all of it.
+  3.4 s. No entrance animation. Reduced Motion stills all of it.
 - The Wisp tap is mouse-only (touch arrives emulated), ignores drags past `HERO_TAP_SLOP` and
   cancelled touches, and dips the Wisp while pressed.
-- **Card pickers:** Forms and Rift Map are portrait carousels (`FocusCarousel`, see
+- **Card pickers:** the Shop tabs are portrait carousels (`FocusCarousel`, see
   [ui_design_system.md](ui_design_system.md)): swipe to browse, tap a side card to focus it, tap
-  the focused card = the screen's main button. Details in [forms.md](forms.md) and [rifts.md](rifts.md).
+  the focused card = the screen's main button. Details in [shop.md](shop.md).
 - Main owns screen lifetime; replacing a screen binds UI click sounds and press feedback (`UiJuice`)
   and releases the old screen: freed, except **Home, which Main builds once and keeps** (rebuilding
   it cost ~190 ms plus ~190 ms to first draw on a Galaxy S24, on every Back).
@@ -128,7 +131,7 @@ ChallengeTracker, FormCatalog. The run: [core_run.md](core_run.md), [game_feel.m
   - The step clock takes at most 1/30 s per frame. Reduced Motion: 0.14 s reveal, no glide.
   - `Main.transitions_enabled` is off in headless runs, so tests see instant swaps;
     `test_screen_transitions.gd` turns it on.
-- **Run prewarm** (2026-09-16): Home PLAY and Rift Map ENTER show the run loading screen; once its
+- **Run prewarm** (2026-09-16): Home PLAY shows the run loading screen; once its
   art has loaded Main builds and configures the run (bar step 1), moves the loading screen onto the
   internal `LoadingCover` CanvasLayer (99, over the run's HUD) and adds the run held and frozen as
   `get_child(0)` with `GameWorld.warm_up_render()` — one of every enemy kind plus a VFX sprite (step 2),
@@ -136,10 +139,10 @@ ChallengeTracker, FormCatalog. The run: [core_run.md](core_run.md), [game_feel.m
   reveals that same run. Nothing is instantiated after the bar. Restart / Results follow-ups / Daily
   build under the veil without a loading screen.
 - **Loading screen** (boot and run share it, redesign 2026-09-16): a random painted background from
-  `LoadingScreen.BACKGROUND_POOL` (the five Rift arenas, Home, menu; shown at once if cached, else
+  `LoadingScreen.BACKGROUND_POOL` (`wisp_rush_arena_background.png`, Home, menu; shown at once if cached, else
   loaded threaded and faded in over void charcoal), cover-scaled with a slow Ken Burns zoom/drift; a
   void-charcoal gradient scrim; the logo with a soft glow in the upper part and, for a run, the
-  heading (`ENDLESS` + skin / `<RIFT>` + `LEVEL n`); near the bottom `LOADING...` with animated dots
+  heading (`ENDLESS` + the arena's name); near the bottom `LOADING...` with animated dots
   over a full-width standard `ProgressBar`. Reduced Motion stills the drift, breath and dots. The bar
   counts threaded loads + audio (boot) or loads + `RUN_PREWARM_STEPS` host steps (run), at least 0.9 s
   for a run.
@@ -148,19 +151,16 @@ ChallengeTracker, FormCatalog. The run: [core_run.md](core_run.md), [game_feel.m
   (logcat on device) — use it to find navigation hitches.
 - Back (Android) / Escape: the screen's `handle_back()` first, otherwise Home; on Home, mobile quits.
 - Returning Home clears the tree pause state and calms the music.
-- Run end records the run and challenge rewards in SaveManager before Results appears. When the
-  banked clear opens a Rift (`ContentUnlocks.get_newly_unlocked`), Main makes it `selected_rift`.
-- **Results outcome** (spec 02): victory → banner `LEVEL n CLEARED`, the Rift name, unlock banners
-  (`SHATTERED RIFT OPEN`) and primary **ENTER <NEW RIFT>** (this clear opened one), **NEXT LEVEL**, or
-  **PLAY AGAIN** (mastered). Defeat → `LEVEL n FAILED`, primary **RETRY**. Secondary RETURN HOME and CHARACTERS. Endless and daily
-  → banner `WAVE w`, `ENDLESS  •  <ARENA>` / `DAILY RUN  •  <ARENA>`, best = Endless best / today's
-  daily best, a `DEPTH REWARD` banner when one paid, primary **PLAY AGAIN**, secondary RETURN HOME only.
+- Run end records the run and challenge rewards in SaveManager before Results appears.
+- **Results outcome:** banner `WAVE w`, `ENDLESS  •  <ARENA>` / `DAILY RUN  •  <ARENA>`, best = Endless
+  best / today's daily best, a `DEPTH REWARD` banner when one paid, primary **PLAY AGAIN**, secondary
+  RETURN HOME. (History: a Rift level showed `LEVEL n CLEARED` / `FAILED`, unlock banners and
+  ENTER <NEW RIFT> / NEXT LEVEL / RETRY.)
 - **Results Rift Points** (spec 01): RP COLLECTED (`rp_collected`: pickups, multi-reaps, bosses),
-  PERFORMANCE (`rp_performance` = score ÷ `EconomyTuning.score_per_rift_point`), CLEAR BONUS
-  (`rp_clear_bonus`, victories only), REWARDS
+  PERFORMANCE (`rp_performance` = score ÷ `EconomyTuning.score_per_rift_point`), REWARDS
   (challenges + Trials + depth milestones), then TOTAL and the new BALANCE. `record_run` adds collected
-  + performance + clear bonus; each reward arrives through its own SaveManager call. Main measures the balance
-  before and after all four and shows that change as TOTAL, so the balance rises by exactly what
+  + performance; each reward arrives through its own SaveManager call. Main measures the balance
+  before and after all of them and shows that change as TOTAL, so the balance rises by exactly what
   Results displays (`test_main_progression_flow.gd`).
 - Currency text follows one rule: `RP` after numbers (`1,250 RP`), "Rift Points" in sentences,
   shard icon kept (`RiftPoints`, `test_rift_points_text.gd`).
@@ -170,13 +170,16 @@ ChallengeTracker, FormCatalog. The run: [core_run.md](core_run.md), [game_feel.m
 ## How to test
 
 - `test_game_flow.gd`, `test_main_progression_flow.gd` (mark the tutorial completed, then boot through
-  Loading → Home → flows). Tutorial routing: manual (fresh save → Tutorial → Home; Rift Map → TUTORIAL).
+  Loading → Home → flows). Tutorial routing: manual (fresh save → Tutorial → Home; Settings → REPLAY
+  TUTORIAL → Home).
 - `test_rift_points_text.gd`: no player-facing "shard" text outside the Shard Wraith; RP on Home,
   Shop, Results and the HUD.
-- `test_menu_screens.gd`: Home button signals, Wisp tap (real input) vs drag, animation clearance,
-  PLAY/portal motion, Reduced Motion, Remove Ads hiding; Rift Map gating and ENTER; Forms carousel;
-  Shop states. `test_main_progression_flow.gd`: Home → Shop (both entries) → back.
-- Phone layouts: `tools/qa_matrix.sh home results shop daily trials forms rifts rifts_locked`.
+- `test_menu_screens.gd` is currently stale: it still references the removed Forms screen and old
+  Shop setup signature, so it cannot parse. `test_main_progression_flow.gd` covers Home → Shop
+  (both entries) → back.
+- Phone layouts: `tools/qa_matrix.sh home`; `qa_capture.gd` builds Home directly from the sample
+  snapshot, with `WISP_CHARACTER=<id>` selecting the preview character. Check all five GDD §12
+  phone sizes for the full logo, top bar, central dais and unobstructed buttons.
 - Manual: every Home destination and back path with Escape (desktop) and back (Android).
 
 ## Known issues / TODO
@@ -188,8 +191,8 @@ ChallengeTracker, FormCatalog. The run: [core_run.md](core_run.md), [game_feel.m
   Seen twice on 2026-09-19. Re-run before investigating.
 
 - **The first boot after a cold `--import` logs `Parse Error` on a handful of resources** —
-  `home_screen.tscn` and two or three Rift `.tres` files, always on the line that resolves
-  `script = ExtResource(...)`. The loading screen requests every screen, Rift and form path through
+  `home_screen.tscn` and two or three `.tres` files (Rift data at the time), always on the line that
+  resolves `script = ExtResource(...)`. The loading screen requests every screen and form path through
   `ResourceLoader.load_threaded_request` at once, and the worker threads fail to parse a few of them
   while the script cache is still being built. **Not a data error:** every one of those resources
   loads cleanly with a direct `load()`, and the same failures reproduce on a worktree built at HEAD,
@@ -204,6 +207,9 @@ ChallengeTracker, FormCatalog. The run: [core_run.md](core_run.md), [game_feel.m
 
 | Date | Change |
 |---|---|
+| 2026-09-27 | Every character stands centred on the dais (owner, GDD §14 #57); Rook's `menu_offset` puts his feet on its centre |
+| 2026-09-25 | Story Rifts removed (owner): Rift Map screen and route, story runs, level Results (`next_level_requested`, `enter_rift_requested`, clear bonus, unlock banners) and `selected_rift` on unlock gone; Home's `RiftCaption` → `PlayCaption`; Results' `RiftName` → `ArenaName`; the loading pool drops the four Rift backdrops; the tutorial replay is Settings only |
+| 2026-09-23 | Pixel-art Home plate and logo, central empty dais for the equipped character, fixed preview transform while authored sprite or video motion continues; Home phone QA now builds directly, independent of the Tutorial save gate |
 | 2026-09-17 | Shop WISPS tab and Results' WISP FORMS are labelled CHARACTERS (routes unchanged) |
 | 2026-09-16 | Cover-then-build navigation (veil, latest wins), run prewarm behind the run loading screen, image-based loading screen |
 | 2026-09-15 | Tutorial screen: first-launch route after Loading, Rift Map TUTORIAL replay back to the Rift Map, no glide; Settings replay removed |

@@ -4,6 +4,7 @@ This directory preserves the approved inputs for the three animated playable cha
 ([docs/systems/playable_character_visuals.md](../../docs/systems/playable_character_visuals.md),
 [ADR-0015](../../docs/decisions/0015-animated-playable-characters.md)).
 
+- Veyra's files were removed on 2026-09-25 with the character; Rook and Morrow remain.
 - `references/{veyra,rook,morrow}_concept.jpg` are the owner-supplied identity references (the three
   character sheets attached to the 2026-09-17 request).
 - `assets/{veyra,rook,morrow}_rig_source.png` are the transparent layered source sheets generated

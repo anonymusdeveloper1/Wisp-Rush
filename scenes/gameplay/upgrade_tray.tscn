@@ -1,7 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/gameplay/upgrade_tray.gd" id="1_tray"]
-[ext_resource type="Texture2D" path="res://assets/ui/theme/textures/panel_card_selected.png" id="2_selected"]
+[ext_resource type="CanvasTexture" path="res://assets/ui/theme/textures/panel_card_selected.tres" id="2_selected"]
 
 [node name="UpgradeTray" type="Control"]
 layout_mode = 3
@@ -55,18 +55,14 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -6.0
-offset_top = -3.0
-offset_right = 4.0
-offset_bottom = 2.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("2_selected")
-patch_margin_left = 91
-patch_margin_top = 129
-patch_margin_right = 91
-patch_margin_bottom = 118
+patch_margin_left = 52
+patch_margin_top = 140
+patch_margin_right = 56
+patch_margin_bottom = 64
 
 [node name="Copy" type="VBoxContainer" parent="TrayPanel/Content/Cards/Choice0"]
 layout_mode = 1
@@ -94,7 +90,7 @@ stretch_mode = 5
 [node name="Name0" type="Label" parent="TrayPanel/Content/Cards/Choice0/Copy"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 33
 text = "WIDE REAP"
 horizontal_alignment = 1
 autowrap_mode = 3
@@ -133,18 +129,14 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -6.0
-offset_top = -3.0
-offset_right = 4.0
-offset_bottom = 2.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("2_selected")
-patch_margin_left = 91
-patch_margin_top = 129
-patch_margin_right = 91
-patch_margin_bottom = 118
+patch_margin_left = 52
+patch_margin_top = 140
+patch_margin_right = 56
+patch_margin_bottom = 64
 
 [node name="Copy" type="VBoxContainer" parent="TrayPanel/Content/Cards/Choice1"]
 layout_mode = 1
@@ -172,7 +164,7 @@ stretch_mode = 5
 [node name="Name1" type="Label" parent="TrayPanel/Content/Cards/Choice1/Copy"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 33
 text = "SOUL HUNGER"
 horizontal_alignment = 1
 autowrap_mode = 3
@@ -211,18 +203,14 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -6.0
-offset_top = -3.0
-offset_right = 4.0
-offset_bottom = 2.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("2_selected")
-patch_margin_left = 91
-patch_margin_top = 129
-patch_margin_right = 91
-patch_margin_bottom = 118
+patch_margin_left = 52
+patch_margin_top = 140
+patch_margin_right = 56
+patch_margin_bottom = 64
 
 [node name="Copy" type="VBoxContainer" parent="TrayPanel/Content/Cards/Choice2"]
 layout_mode = 1
@@ -250,7 +238,7 @@ stretch_mode = 5
 [node name="Name2" type="Label" parent="TrayPanel/Content/Cards/Choice2/Copy"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 33
 text = "DEATH PULSE"
 horizontal_alignment = 1
 autowrap_mode = 3

@@ -3,11 +3,11 @@
 [ext_resource type="Script" path="res://scenes/screens/daily_screen.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/art/environment/menu_background.png" id="2"]
 [ext_resource type="Texture2D" path="res://assets/art/environment/props/09_void_portal.png" id="3"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/system/05_play.png" id="4"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/system/16_home.png" id="5"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/system/13_daily.png" id="6"]
+[ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_play.tres" id="4"]
+[ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_home.tres" id="5"]
+[ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_daily.tres" id="6"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/system/04_high_score.png" id="7"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/system/02_soul_shards.png" id="8"]
+[ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_currency.tres" id="8"]
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/banner_top.tscn" id="9"]
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/crest_top.tscn" id="10"]
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/crest_bottom.tscn" id="11"]
@@ -81,7 +81,7 @@ theme_type_variation = &"PanelBanner"
 [node name="Title" type="Label" parent="Margin/Content/Header/TitleBanner"]
 layout_mode = 2
 theme_type_variation = &"TitleLabel"
-text = "DAILY RIFT"
+text = "DAILY RUN"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -99,10 +99,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 18.0
-offset_top = 18.0
-offset_right = -18.0
-offset_bottom = -18.0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -139,7 +139,7 @@ stretch_mode = 5
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"TitleLabel"
-theme_override_font_sizes/font_size = 38
+theme_override_font_sizes/font_size = 44
 horizontal_alignment = 1
 
 [node name="SeedLabel" type="Label" parent="Margin/Content/PortalCard/PortalContent"]
@@ -187,7 +187,7 @@ alignment = 1
 
 [node name="RewardIcon" type="TextureRect" parent="Margin/Content/PortalCard/PortalContent/RewardRow"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(40, 40)
+custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
@@ -223,17 +223,17 @@ mouse_filter = 2
 [node name="ChallengeLabel0" type="Label" parent="Margin/Content/Challenges"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 33
 
 [node name="ChallengeLabel1" type="Label" parent="Margin/Content/Challenges"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 33
 
 [node name="ChallengeLabel2" type="Label" parent="Margin/Content/Challenges"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 33
 
 [node name="BottomSpacer" type="Control" parent="Margin/Content"]
 layout_mode = 2
@@ -244,5 +244,5 @@ mouse_filter = 2
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"PrimaryButton"
-text = "PLAY TODAY'S RIFT"
+text = "PLAY TODAY'S RUN"
 icon = ExtResource("4")

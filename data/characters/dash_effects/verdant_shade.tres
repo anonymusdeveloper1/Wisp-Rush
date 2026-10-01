@@ -14,3 +14,6 @@ ribbon_width = 0.64
 ribbon_seconds = 0.26
 arc_spread = 0
 burst_scale = 0.95
+shared_trails = false
+landing = 1
+dust_tint = Color(0.52, 0.7, 0.5, 1)

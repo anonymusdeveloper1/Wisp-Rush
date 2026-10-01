@@ -1,15 +1,9 @@
 class_name ReaperBoss
-extends Node2D
+extends BossActor
 ## Runs the Reaper's deterministic three-phase attacks, exposed core and victory dissolve.
-
-## Emitted when the one-based phase changes.
-signal phase_changed(phase: int)
-## Requests a small world-space Soul Wisp formation after Teleport Hunt arrival.
-signal summon_requested(world_positions: PackedVector2Array)
-## Emitted after configuration and each valid exposed-core hit.
-signal health_changed(current_health: int, maximum_health: int)
-## Emitted after the final dissolve with the authored encounter rewards.
-signal defeated(world_position: Vector2, score_reward: int, rp_reward: int)
+##
+## Its signals come from [BossActor]: `summon_requested` is Teleport Hunt's Soul Wisp formation,
+## `health_changed` follows each valid exposed-core hit and `defeated` the final dissolve.
 
 enum Phase { SCYTHE_SWEEP = 1, TELEPORT_HUNT = 2, DEATH_CORRIDORS = 3 }
 enum CycleState { INTRO, RECOVERY, WARNING, ATTACKING, EXPOSED, DEFEATED }
@@ -107,7 +101,7 @@ func _physics_process(delta: float) -> void:
 ## Configures arena scale, encounter difficulty and deterministic phase variants.
 ## Applies a boss variant's atlas, tuning and colours. Call before configure().
 ##
-## Every Rift boss shares this phase machine; only presentation and tuning differ (ADR-0010).
+## Every boss shares this phase machine; only presentation and tuning differ (ADR-0010).
 ## A variant with no `frames` keeps the scene's own animation set, which is how the base Reaper
 ## and its Ascended recolour both work.
 func configure_variant(data: BossData) -> void:
@@ -231,6 +225,27 @@ func is_core_exposed() -> bool:
 ## Returns the current one-based phase.
 func get_phase() -> int:
 	return int(phase)
+
+
+## The boss bar's name for [param next_phase].
+func get_phase_name(next_phase: int) -> String:
+	if next_phase == Phase.TELEPORT_HUNT:
+		return "TELEPORT HUNT"
+	if next_phase == Phase.DEATH_CORRIDORS:
+		return "DEATH CORRIDORS"
+	return "SCYTHE SWEEP"
+
+
+func get_victory_duration() -> float:
+	return tuning.victory_duration if tuning != null else 1.0
+
+
+func get_experience_reward() -> int:
+	return tuning.experience_reward if tuning != null else 0
+
+
+func get_defeat_name() -> String:
+	return "REAPER"
 
 
 ## Returns current circle dangers as world x/y/radius triples.

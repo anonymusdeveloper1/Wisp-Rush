@@ -70,8 +70,8 @@ const IDLE_BREATH_PERIOD: float = 2.6
 const LANDING_WINDOW: float = 0.16
 ## Distance from the Wisp's centre to the aim arrow, in collision radii.
 const ARROW_DISTANCE: float = 2.15
-## Aim arrow size, in collision radii. It carries a dark outline so it reads on Frozen Choir's pale
-## ice as well as on dark basalt, where the bright head does the work.
+## Aim arrow size, in collision radii. It carries a dark outline so it reads on pale floors as well
+## as on dark basalt, where the bright head does the work.
 const ARROW_SCALE: float = 1.3
 ## Aim arrow pulse: amount of scale swing and its rate in radians per second.
 const ARROW_PULSE_AMOUNT: float = 0.08
@@ -135,16 +135,16 @@ var _rush_visuals: bool = false
 var _rush_warning: bool = false
 var _glow_time: float = 0.0
 var _glow_tint: Color = Palette.SOUL_CYAN
+## False for a character whose dash carries its own effects: the streak glow's art is the Wisp's cyan.
+var _streak_glow_enabled: bool = true
+## False for a character that lands in dust: the impact burst's art is the Wisp's cyan.
+var _impact_burst_enabled: bool = true
 ## Built in code at `_ready`, drawn at absolute z 0 so telegraphs and the aim arrow stay above them.
 var _streak_glow: Sprite2D
 var _rush_aura: Sprite2D
 var _speed_lines: Node2D
 ## Clock for the aim arrow pulse.
 var _arrow_time: float = 0.0
-## Frozen Choir: design-space px/s the Wisp slides along its resting edge. Zero disables drift.
-var _edge_drift_speed: float = 0.0
-## Current slide direction along the edge; flips at the corners.
-var _edge_drift_sign: float = 1.0
 ## Playable floor as a screen-space polygon. Empty falls back to the legacy rectangle.
 var _play_polygon: PackedVector2Array = PackedVector2Array()
 ## Index of the polygon edge the Wisp is resting on, tracked by identity rather than by distance:
@@ -161,9 +161,8 @@ var _cosmetic_tint: Color = Palette.SOUL_CYAN
 var _character_visual: PlayableCharacterVisual
 ## Inward normal of the wall the Wisp rests against; an animated character stands on it.
 var _resting_normal: Vector2 = Vector2.UP
-## Latest resolved aim and edge-drift headings, so an animated character leans the way it will go.
+## Latest resolved aim heading, so an animated character leans the way it will go.
 var _visual_aim_direction: Vector2 = Vector2.UP
-var _drift_direction: Vector2 = Vector2.ZERO
 var _breath_time: float = 0.0
 var _reduced_motion: bool = false
 ## Whether pointer and keyboard input steer the Wisp; the tutorial turns it off while it demonstrates.
@@ -259,11 +258,6 @@ func _physics_process(delta: float) -> void:
 		State.WAITING_AT_EDGE, State.AIMING:
 			_process_keyboard_aim()
 			_update_resting_normal()
-			var drift_start: Vector2 = global_position
-			_apply_edge_drift(delta)
-			var drifted: Vector2 = global_position - drift_start
-			if drifted.length_squared() > 0.0001:
-				_drift_direction = drifted.normalized()
 		State.WINDUP:
 			_state_time_remaining -= delta
 			if _state_time_remaining <= 0.0:
@@ -325,20 +319,6 @@ func request_dash(direction: Vector2) -> void:
 	dash_started.emit(_dash_direction, _dash_id)
 
 
-## Teleports a live dash to a new origin and re-aims it at the arena edge, same direction.
-##
-## Used by the Shattered Rift's void portals. Returns false unless a dash is actually in flight,
-## so nothing can teleport a resting or aiming Wisp.
-func teleport_dash_to(world_position: Vector2) -> bool:
-	if state != State.DASHING:
-		return false
-	global_position = world_position
-	var recast: Dictionary = _resolve_dash(_dash_direction)
-	_dash_target = recast[&"target"] as Vector2
-	_dash_target_normal = recast[&"normal"] as Vector2
-	return true
-
-
 ## Applies the playable floor as a polygon. Empty restores the legacy rectangle behaviour.
 func set_arena_polygon(polygon: PackedVector2Array) -> void:
 	_play_polygon = polygon
@@ -348,8 +328,8 @@ func set_arena_polygon(polygon: PackedVector2Array) -> void:
 	if state == State.WAITING_AT_EDGE or state == State.AIMING or state == State.SPAWNING:
 		_snap_to_polygon_edge()
 	elif not DashGeometry.is_inside_polygon_slack(position, polygon, _player_radius):
-		# A mid-dash floor change (Ember Hollow contracts as a level runs) can leave the Wisp
-		# outside; pull it back in and re-cast so it is not chasing a stale target.
+		# A mid-dash floor change (a viewport resize) can leave the Wisp outside; pull it back in and
+		# re-cast so it is not chasing a stale target.
 		position = DashGeometry.clamp_to_polygon(position, polygon, 1.0)
 		if state == State.DASHING:
 			var recast: Dictionary = _resolve_dash(_dash_direction)
@@ -490,11 +470,19 @@ func get_momentum_visual_level() -> float:
 
 ## Enables the momentum streak glow, speed lines and RUSH glow with [param feel] values, tinted
 ## [param glow_tint] (the dash style's trail tint). Null disables them.
-func set_momentum_presentation(feel: RunFeelTuning, glow_tint: Color) -> void:
+func set_momentum_presentation(
+	feel: RunFeelTuning, glow_tint: Color, streak_glow: bool = true
+) -> void:
 	_feel_tuning = feel
 	_glow_tint = glow_tint
+	_streak_glow_enabled = streak_glow
 	if is_node_ready():
 		_hide_momentum_visuals()
+
+
+## Shows or hides the burst sprite at a wall impact; a character with its own landing turns it off.
+func set_impact_burst_enabled(enabled: bool) -> void:
+	_impact_burst_enabled = enabled
 
 
 ## RUSH run modifier for dash speed (1.0 = off). Composes with momentum and mutations; the tuning
@@ -558,13 +546,10 @@ func redirect_dash(direction: Vector2) -> bool:
 	_sprite.play(&"dash_left" if faces_left else &"dash_right")
 	_sprite.rotation = _dash_direction.angle() - (PI if faces_left else 0.0)
 	_sprite.scale = _base_sprite_scale
+	if _character_visual != null:
+		_character_visual.restart_dash()
 	dash_started.emit(_dash_direction, _dash_id)
 	return true
-
-
-## Sets the Frozen Choir slide, in design-space px/s. Zero restores normal resting behaviour.
-func set_edge_drift(design_speed: float) -> void:
-	_edge_drift_speed = maxf(0.0, design_speed)
 
 
 ## Applies the live viewport rectangle and safely rescales/repositions the Wisp.
@@ -867,63 +852,6 @@ func _snap_to_polygon_edge() -> void:
 		return
 	position = DashGeometry.nearest_polygon_point(position, _play_polygon)
 	_resting_edge = DashGeometry.nearest_polygon_edge(position, _play_polygon)
-
-
-## Slides the resting Wisp along its edge so a Rift can make footing unreliable.
-##
-## Only the tangent moves - the Wisp stays locked to its edge, so the dash model is untouched.
-func _apply_edge_drift(delta: float) -> void:
-	if _edge_drift_speed <= 0.0 or not _arena_initialized:
-		return
-	if _play_polygon.size() >= 3:
-		_apply_polygon_edge_drift(delta)
-		return
-	var bounds: Rect2 = _play_bounds
-	if bounds.size.x <= 1.0 or bounds.size.y <= 1.0:
-		return
-	# Pick the tangent of whichever edge the Wisp is currently resting against.
-	var to_left: float = absf(global_position.x - bounds.position.x)
-	var to_right: float = absf(global_position.x - bounds.end.x)
-	var to_top: float = absf(global_position.y - bounds.position.y)
-	var to_bottom: float = absf(global_position.y - bounds.end.y)
-	var nearest: float = minf(minf(to_left, to_right), minf(to_top, to_bottom))
-	var tangent := Vector2.RIGHT if (nearest == to_top or nearest == to_bottom) else Vector2.DOWN
-	var step: float = _edge_drift_speed * _viewport_scale * _edge_drift_sign * delta
-	var moved: Vector2 = global_position + tangent * step
-	var clamped: Vector2 = moved.clamp(bounds.position, bounds.end)
-	if not clamped.is_equal_approx(moved):
-		_edge_drift_sign = -_edge_drift_sign
-	global_position = clamped
-
-
-## Slides the resting Wisp along the polygon edge it is standing on.
-##
-## Walks the edge tangent and hands off to the neighbouring edge at a vertex, so the Wisp follows
-## the painted wall around a corner instead of bouncing off an invisible axis.
-func _apply_polygon_edge_drift(delta: float) -> void:
-	if _resting_edge < 0:
-		_resting_edge = DashGeometry.nearest_polygon_edge(position, _play_polygon)
-		if _resting_edge < 0:
-			return
-	var count: int = _play_polygon.size()
-	var start: Vector2 = _play_polygon[_resting_edge]
-	var end: Vector2 = _play_polygon[(_resting_edge + 1) % count]
-	var edge: Vector2 = end - start
-	if edge.is_zero_approx():
-		return
-	var step: float = _edge_drift_speed * _viewport_scale * delta
-	var along: float = (position - start).dot(edge.normalized()) + step * _edge_drift_sign
-	var length: float = edge.length()
-	if along > length:
-		# Carry the overshoot onto the next edge rather than stopping at the vertex.
-		_resting_edge = (_resting_edge + 1) % count
-		position = _play_polygon[_resting_edge]
-		return
-	if along < 0.0:
-		_resting_edge = (_resting_edge - 1 + count) % count
-		position = _play_polygon[(_resting_edge + 1) % count]
-		return
-	position = start + edge.normalized() * along
 
 
 func _take_damage(safe_edge_position: Vector2) -> bool:
@@ -1245,7 +1173,7 @@ func _finish_dash() -> void:
 func _play_impact_feedback(inward_normal: Vector2) -> void:
 	if _impact_tween != null and _impact_tween.is_valid():
 		_impact_tween.kill()
-	_impact_burst.visible = true
+	_impact_burst.visible = _impact_burst_enabled
 	_impact_burst.modulate = Color(_cosmetic_tint.r, _cosmetic_tint.g, _cosmetic_tint.b, 0.9)
 	_impact_burst.rotation = inward_normal.angle()
 	_impact_burst.scale = Vector2.ONE * (_player_radius * 2.4 / SOURCE_FRAME_SIZE)
@@ -1348,7 +1276,7 @@ func _get_landing_progress() -> float:
 	return clampf(1.0 - position.distance_to(_dash_target) / speed / LANDING_WINDOW, 0.0, 1.0)
 
 
-## Re-reads the wall the Wisp is resting against (it slides along edges on Frozen Choir).
+## Re-reads the wall the Wisp is resting against.
 func _update_resting_normal() -> void:
 	if not _arena_initialized:
 		return
@@ -1358,29 +1286,24 @@ func _update_resting_normal() -> void:
 		_resting_normal = DashGeometry.inward_edge_normal(position, _play_bounds)
 
 
-## Dash heading while launching, flying or landing; slide heading on a drifting edge; aim otherwise.
+## Dash heading while launching, flying or landing; aim otherwise.
 func _get_character_visual_direction() -> Vector2:
 	match state:
 		State.WINDUP, State.DASHING, State.WALL_IMPACT:
 			if not _dash_direction.is_zero_approx():
 				return _dash_direction
-		State.WAITING_AT_EDGE:
-			if _edge_drift_speed > 0.0 and not _drift_direction.is_zero_approx():
-				return _drift_direction
 		State.AIMING:
 			return _visual_aim_direction
 	return _dash_direction if not _dash_direction.is_zero_approx() else _visual_aim_direction
 
 
-## 0 at rest, a slow drift on Frozen Choir edges, a coiled windup, 1 in full flight.
+## 0 at rest, a coiled windup, 1 in full flight.
 func _get_character_speed_amount() -> float:
 	match state:
 		State.DASHING:
 			return 1.0
 		State.WINDUP:
 			return 0.6
-		State.WAITING_AT_EDGE, State.AIMING:
-			return 0.35 if _edge_drift_speed > 0.0 else 0.0
 	return 0.0
 
 
@@ -1389,22 +1312,13 @@ func _get_character_visual_state() -> StringName:
 		State.SPAWNING:
 			return PlayableCharacterVisual.REVIVE_SPAWN
 		State.WAITING_AT_EDGE:
-			return (
-				PlayableCharacterVisual.MOVE_FLY
-				if _edge_drift_speed > 0.0
-				else PlayableCharacterVisual.IDLE_HOVER
-			)
+			return PlayableCharacterVisual.IDLE_HOVER
 		State.AIMING:
 			# Owner decision 2026-09-19: holding the aim arrow must not change the character at all.
-			# The equipped character keeps doing exactly what it was doing — resting against its wall,
-			# or drifting along it — so the arrow is the only thing that appears. Nothing in the run
-			# asks for AIM_CHARGE any more; the state itself stays in the vocabulary for the rigs,
-			# the menus and the visual QA boards.
-			return (
-				PlayableCharacterVisual.MOVE_FLY
-				if _edge_drift_speed > 0.0
-				else PlayableCharacterVisual.IDLE_HOVER
-			)
+			# The equipped character keeps resting against its wall, so the arrow is the only thing
+			# that appears. Nothing in the run asks for AIM_CHARGE any more; the state itself stays in
+			# the vocabulary for the rigs, the menus and the visual QA boards.
+			return PlayableCharacterVisual.IDLE_HOVER
 		State.WINDUP:
 			return PlayableCharacterVisual.DASH_START
 		State.DASHING:
@@ -1535,7 +1449,7 @@ func _update_momentum_visuals(delta: float) -> void:
 	var dashing: bool = alive and state == State.DASHING
 	var level: float = get_momentum_visual_level()
 	_glow_time += delta
-	_streak_glow.visible = dashing
+	_streak_glow.visible = dashing and _streak_glow_enabled
 	if dashing:
 		var size_radii: float = lerpf(
 			_feel_tuning.streak_glow_size, _feel_tuning.streak_glow_size_at_max, level

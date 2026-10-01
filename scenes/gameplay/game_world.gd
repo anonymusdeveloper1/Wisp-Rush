@@ -2,10 +2,8 @@ class_name GameWorld
 extends Control
 ## Coordinates one run: waves, combat, mutations, bosses, rewards and the run summary.
 ##
-## Main configures it with a `RunProfile`, whose `ArenaRules` decide the backdrop, floor, rule
-## twist, roster, bosses and difficulty. A story run plays exactly one Rift level and ends in victory
-## when that level's final boss falls; Endless and the daily run cycle bosses, harder each cycle,
-## until death. Level-ups never interrupt: they bank silently and a bottom card tray slides up,
+## Main configures it with a `RunProfile`, whose `ArenaRules` decide the backdrop, floor, roster,
+## bosses and difficulty. Endless and the daily run cycle bosses, harder each cycle, until death. Level-ups never interrupt: they bank silently and a bottom card tray slides up,
 ## with the world in slow motion, only at a calm moment (docs/systems/mutations.md). A scripted
 ## profile (`RunProfile.MODE_TUTORIAL`) starts no waves, never ends and never pauses itself: the
 ## Tutorial screen's director drives it through the scripted-run hooks and the run event signals below
@@ -13,7 +11,7 @@ extends Control
 
 ## Emitted after the paused run requests a return to the Home screen.
 signal home_requested
-## Emitted with the run statistics after the Wisp death dissolve, or after a story level's victory beat.
+## Emitted with the run statistics after the Wisp death dissolve.
 signal run_ended(summary: Dictionary)
 ## Emitted when the player confirms restarting the run from the pause menu.
 signal restart_requested
@@ -34,39 +32,19 @@ signal rush_started
 ## A boss encounter was won (after its dissolve).
 signal boss_defeated
 
+## The Enemies v2 set (owner, 2026-09-28). Which of them a run meets, and when, is the `EnemyRamp`'s
+## pick; formations only say where they arrive.
 const ENEMY_SCENES: Dictionary = {
-	&"soul_wisp": preload("res://scenes/enemies/soul_wisp.tscn"),
-	&"shard_wraith": preload("res://scenes/enemies/shard_wraith.tscn"),
-	&"bone_mote": preload("res://scenes/enemies/bone_mote.tscn"),
-	&"cinder_shade": preload("res://scenes/enemies/cinder_shade.tscn"),
-	&"warden": preload("res://scenes/enemies/warden.tscn"),
-	&"rift_spawn": preload("res://scenes/enemies/rift_spawn.tscn"),
-	&"echo": preload("res://scenes/enemies/echo.tscn"),
-	&"slag_hulk": preload("res://scenes/enemies/slag_hulk.tscn"),
-	&"frost_wisp": preload("res://scenes/enemies/frost_wisp.tscn"),
-	&"court_shade": preload("res://scenes/enemies/court_shade.tscn"),
+	&"bone_witch": preload("res://scenes/enemies/bone_witch.tscn"),
+	&"claw_ghost": preload("res://scenes/enemies/claw_ghost.tscn"),
+	&"hooded_scribe": preload("res://scenes/enemies/hooded_scribe.tscn"),
+	&"root_mask": preload("res://scenes/enemies/root_mask.tscn"),
+	&"stone_golem": preload("res://scenes/enemies/stone_golem.tscn"),
 }
 ## Children spawned by a splitter never split again, so a chain cannot run away.
 const SPLIT_SPREAD: float = 68.0
 ## Hard ceiling on concurrent enemies; splits are refused above it.
 const MAX_LIVE_ENEMIES: int = 60
-## Ember Hollow: the playfield contracts to this fraction by the last wave of a level.
-const SHRINK_FLOOR_MINIMUM: float = 0.74
-## Reaper's Court: boss rewards are doubled to pay for the doubled boss cadence.
-const BOSS_RUSH_REWARD_SCALE: float = 2.0
-## Frozen Choir: the Wisp slides along the edge it is resting on, in design px/s.
-const DRIFT_EDGE_SPEED: float = 110.0
-## Shattered Rift portal pair, in normalised playfield coordinates.
-const PORTAL_A_UV := Vector2(0.26, 0.34)
-const PORTAL_B_UV := Vector2(0.74, 0.66)
-## Portal mouth radius in design pixels; a dash passing within this is swallowed.
-const PORTAL_RADIUS: float = 74.0
-const PORTAL_ENTRANCE_TEXTURE: Texture2D = preload(
-	"res://assets/art/environment/props/10_void_portal_entrance_active.png"
-)
-const PORTAL_EXIT_TEXTURE: Texture2D = preload(
-	"res://assets/art/environment/props/11_void_portal_exit_active.png"
-)
 const HAZARD_SCENES: Dictionary = {
 	&"split_crystal": preload("res://scenes/hazards/split_void_crystal.tscn"),
 	&"spike_bloom": preload("res://scenes/hazards/spike_bloom.tscn"),
@@ -75,17 +53,15 @@ const HAZARD_SCENES: Dictionary = {
 ## The Rift Points pickup; its scene keeps the soul shard name (the art is a shard).
 const RP_PICKUP_SCENE: PackedScene = preload("res://scenes/pickups/soul_shard_pickup.tscn")
 ## The rare Soul Fragment pickup.
-const VESSEL_PICKUP_SCENE: PackedScene = preload(
-	"res://scenes/pickups/soul_vessel_pickup.tscn"
-)
 const REAPER_SCENE: PackedScene = preload("res://scenes/bosses/reaper_boss.tscn")
-## Boss variants keyed by boss id (`RiftData.boss_id`, Endless pools); every pick resolves to one.
+## Boss variants keyed by boss id (`EndlessRoster.boss_id`, the Endless pool); every pick resolves to one.
 const BOSS_VARIANTS: Dictionary = {
 	&"reaper": preload("res://data/bosses/reaper.tres"),
 	&"the_fracture": preload("res://data/bosses/the_fracture.tres"),
 	&"cinder_maw": preload("res://data/bosses/cinder_maw.tres"),
 	&"hollow_choir": preload("res://data/bosses/hollow_choir.tres"),
 	&"reaper_ascended": preload("res://data/bosses/reaper_ascended.tres"),
+	&"grimgrin": preload("res://data/bosses/grimgrin.tres"),
 }
 const DEATH_PULSE_TEXTURE: Texture2D = preload("res://assets/art/vfx/06_death_pulse.png")
 const COMBO_TIMEOUT: float = 2.2
@@ -139,26 +115,28 @@ const REDIRECT_HAPTIC_MS: int = 10
 const REDIRECT_HAPTIC_AMPLITUDE: float = 0.4
 ## Design pixels the backdrop extends past the viewport so shake never reveals its edges.
 const BACKGROUND_OVERSCAN: float = 16.0
+## Seconds the Wisp and the HUD take to fade in when an arena's opening shot ends.
+const INTRO_FADE_SECONDS: float = 0.35
 ## HUD geometry in design pixels (1080-wide canvas), measured from the safe-area insets.
-## Header metrics. Owner decision 2026-09-20: the run header was eating the top of the arena, so
-## the character portrait ring is gone (the character is already on screen, a few hundred pixels
-## below it), the boss readout is a line rather than a framed plate, and RUSH moved to the bottom
-## edge where the thumb already is. What is left of the header is the score, the run readouts and
-## the two buttons, and it ends well clear of the playfield.
-const HUD_STATS_HEIGHT: float = 108.0
+## Header (owner decision 2026-09-24): pause, with UPGRADE under it, on the left; Rift Points with
+## the icon on its right and the score under it, unframed, on the right; the soul level bar and
+## RUSH centred at the very top, and the boss line under them. There is no lives readout (a run has
+## one Soul Fragment and nothing adds another) and no wave line (owner, 2026-09-24: no "ENDLESS ·
+## WAVE n · THREAT n"); the wave and boss beats are the centre callouts.
 const HUD_PAUSE_SIZE: float = 112.0
-const HUD_PLATE_TOP: float = 22.0
-const HUD_WAVE_TOP: float = 136.0
-const HUD_XP_TOP: float = 176.0
-const HUD_LEVEL_TOP: float = 198.0
-## RUSH row (label + slim bar) under the soul level; the boss panel and callouts sit below it.
+## Width the Rift Points / score column reserves on the right; it grows leftward past this.
+const HUD_STATS_WIDTH: float = 260.0
+const HUD_XP_TOP: float = 14.0
+const HUD_LEVEL_TOP: float = 38.0
+## RUSH row (label + slim bar) under the soul level.
+const HUD_RUSH_TOP: float = 80.0
 const HUD_RUSH_HEIGHT: float = 32.0
-## How far above the bottom safe edge the RUSH meter sits.
-const HUD_RUSH_BOTTOM_GAP: float = 26.0
-const HUD_BOSS_TOP: float = 240.0
+## Clear of the Rift Points / score column on the right, which ends ~137 px down.
+const HUD_BOSS_TOP: float = 150.0
 const HUD_CALLOUT_TOP: float = 474.0
 const HUD_FOCUS_TOP: float = 564.0
-## UPGRADE button (tappable, shown while a level-up is banked): size and gap under the pause button.
+## UPGRADE button (tappable, shown while a level-up is banked): size and gap under the pause button,
+## on the left.
 const HUD_UPGRADE_BUTTON_SIZE: float = 132.0
 const HUD_UPGRADE_BUTTON_GAP: float = 18.0
 ## Time-scale hold key of the upgrade card tray (`_hold_time_scale`).
@@ -186,7 +164,6 @@ var _multi_kill_dashes: int = 0
 var _rapid_ricochets: int = 0
 ## Rift Points collected this run: pickups, multi-reap and boss rewards (not the performance bonus).
 var _rp_collected: int = 0
-var _kill_streak: int = 0
 var _bosses_defeated: int = 0
 var _current_wave: int = 1
 var _combo_remaining: float = 0.0
@@ -197,11 +174,18 @@ var _run_over: bool = false
 var _waves_started: bool = false
 var _boss_pending: bool = false
 var _post_boss_remaining: float = -1.0
-var _boss: ReaperBoss
+var _boss: BossActor
 ## Main's cover/prewarm: the arena is built and drawn but the run waits for `release_start()`.
 var _start_held: bool = false
 ## `_begin_run` arrived while held and runs on release.
 var _start_pending: bool = false
+## Whether the run opens with the arena's opening shot (a 3D arena's zoom, ADR-0023). Main turns it
+## off for a run started again from the run's own dialogs, so playing again goes straight back in
+## (owner, 2026-10-02). Set before the node enters the tree.
+var play_arena_intro: bool = true
+## The arena's opening shot is playing: the Wisp and the HUD are hidden, steering is off, a tap
+## skips it, and the waves start when it ends.
+var _intro_playing: bool = false
 ## Throwaway nodes `warm_up_render()` draws once under the cover; freed on release.
 var _warm_nodes: Array[Node] = []
 ## Tutorial arena (`RunProfile.is_scripted`): no waves, no self-pause, the host owns back.
@@ -219,34 +203,21 @@ var _callout_tween: Tween
 var _cosmetic_form: FormData
 ## Equipped dash style: tints the dash trail and launch burst only; null plays the SOUL look.
 var _dash_style: DashStyleData
-## The arena this run plays under: a Rift level, or Endless rules. Never null.
+## The arena this run plays under: Endless rules, or the neutral arena. Never null.
 var _arena_rules: ArenaRules = ArenaRules.new()
-## Rule twist for the active arena; `&"none"` is the baseline (always, on Endless rules).
-var _rift_rule: StringName = &"none"
 ## Animated scenery of Legendary/Mythic Endless skins: shader on the backdrop + glow particles.
 var _ambience: ArenaAmbience
-## `RunProfile.MODE_STORY`, `MODE_DAILY` or `MODE_ENDLESS`.
-var _mode: StringName = RunProfile.MODE_STORY
-## One-based story level being played (1 on Endless rules).
-var _rift_level: int = 1
-## Whether a story victory here would be this level's first clear (from the profile).
-var _first_clear_possible: bool = false
-## Set when the story level's final boss falls; the run then ends in victory after the beat.
-var _level_cleared: bool = false
+## A layered or 3D arena's scene, shown instead of the painted backdrop (ADR-0021, ADR-0023); null
+## otherwise.
+var _arena_visual: ArenaVisual
+## `RunProfile.MODE_ENDLESS`, `MODE_DAILY` or `MODE_TUTORIAL`.
+var _mode: StringName = RunProfile.MODE_ENDLESS
 ## Waves between boss encounters, from the arena rules.
 var _boss_wave_interval: int = REAPER_WAVE_INTERVAL
-## Playfield contraction from the `shrinking_floor` rule; 1.0 is the full painted floor.
-var _arena_shrink: float = 1.0
-## The active Rift's painted floor in screen space. Empty means fall back to the rectangle.
+## The arena's floor in screen space. Empty means fall back to the rectangle.
 var _arena_polygon: PackedVector2Array = PackedVector2Array()
 ## `_arena_polygon` inset by the Wisp's radius: the wall a dash actually lands on.
 var _landing_polygon: PackedVector2Array = PackedVector2Array()
-## Boss reward multiplier from the `boss_rush` rule.
-var _rift_reward_multiplier: float = 1.0
-## The Shattered Rift's linked portal sprites; empty in every other Rift.
-var _portals: Array[Sprite2D] = []
-## Dash id already teleported, so one dash can never loop between the pair.
-var _portal_used_dash_id: int = -1
 var _daily_date_key: String = ""
 var _vfx: VfxPool
 ## Splash played where the Wisp hits a wall.
@@ -255,6 +226,14 @@ var _wall_splash: WallSplashFx
 ## that has none, which then keeps the shared dash-style trail alone.
 var _dash_effect: DashEffectData
 var _dash_effect_fx: DashEffectFx
+## The strike drawn where a dash lands a hit on an enemy or a boss.
+var _strike_fx: StrikeFx
+## Shots enemies loosed, and the Bone Witch's wall marks; the run owns them, so they outlive the
+## enemy that fired them.
+var _projectile_layer: Node2D
+## Which enemy each spawn slot gets (Enemies v2 ramp), shuffled from the run seed on first use.
+var _enemy_ramp := EnemyRamp.new()
+var _enemy_ramp_ready: bool = false
 ## Aim preview path line and ×N count, fed by `WispPlayer.aim_preview_changed`.
 var _aim_guide: AimGuide
 ## Whether any enemy may still be lit by the aim preview, so clearing walks the layer only once.
@@ -308,15 +287,13 @@ var _rush_edge_glow: TextureRect
 @onready var _pickup_layer: Node2D = %PickupLayer
 @onready var _effects_layer: Node2D = %EffectsLayer
 @onready var _player: WispPlayer = %WispPlayer
+@onready var _safe_hud: Control = %SafeHud
 @onready var _wave_director: WaveDirector = %WaveDirector
 @onready var _run_progression: RunProgression = %RunProgression
 @onready var _world_shade: ColorRect = %WorldShade
-@onready var _health_row: HBoxContainer = %HealthRow
-@onready var _life_count: Label = %LifeCount
 @onready var _rift_points_count: Label = %RiftPointsCount
 @onready var _score_label: Label = %ScoreLabel
-@onready var _score_plate: PanelContainer = %ScorePlate
-@onready var _wave_label: Label = %WaveLabel
+@onready var _stats_column: VBoxContainer = %StatsColumn
 @onready var _xp_bar: ProgressBar = %XPBar
 @onready var _run_level_label: Label = %RunLevelLabel
 @onready var _rush_row: HBoxContainer = %RushRow
@@ -355,7 +332,6 @@ func _ready() -> void:
 	_player.wall_impacted.connect(_on_player_wall_impacted)
 	_player.obstacle_impacted.connect(_on_player_obstacle_impacted)
 	_player.focus_started.connect(_on_player_focus_started)
-	_player.health_changed.connect(_on_player_health_changed)
 	_player.damaged.connect(_on_player_damaged)
 	_player.died.connect(_on_player_died)
 	_player.aim_preview_changed.connect(_on_player_aim_preview_changed)
@@ -396,6 +372,14 @@ func _ready() -> void:
 	_dash_effect_fx.name = "DashEffectFx"
 	# Another persistent pool, so a sibling of EffectsLayer for the same reason.
 	_effects_layer.add_sibling(_dash_effect_fx)
+	_strike_fx = StrikeFx.new()
+	_strike_fx.name = "StrikeFx"
+	# The same again.
+	_effects_layer.add_sibling(_strike_fx)
+	_projectile_layer = Node2D.new()
+	_projectile_layer.name = "ProjectileLayer"
+	# Right after the enemies, so their shots draw over them.
+	_enemy_layer.add_sibling(_projectile_layer)
 	_aim_guide = AimGuide.new()
 	_aim_guide.name = "AimGuide"
 	# Under enemies and hazards (lit rings and crystals read on top of the line), above the floor.
@@ -423,14 +407,16 @@ func _ready() -> void:
 		)
 	_apply_arena()
 	_update_player_mutation_stats()
-	_player.set_momentum_presentation(feel_tuning, _get_dash_trail_tint())
+	_player.set_momentum_presentation(
+		feel_tuning, _get_dash_trail_tint(), _dash_effect == null or _dash_effect.shared_trails
+	)
+	_player.set_impact_burst_enabled(_uses_splash_landing())
 	_rush_bar.max_value = feel_tuning.meter_max
 	_refresh_rush_hud()
 	# Clears per-run rewarded placement locks; a no-op on the shipped build (ADR-0009).
 	var monetisation := get_node_or_null(^"/root/Monetisation") as MonetisationService
 	if monetisation != null:
 		monetisation.begin_run()
-	_life_count.text = str(_player.get_current_health())
 	_rift_points_count.text = "0"
 	_layout_for_viewport()
 	_run_progression.start(run_seed + 41)
@@ -445,6 +431,8 @@ func _process(delta: float) -> void:
 		return
 	_update_enemy_targets()
 	_update_boss_target()
+	if is_instance_valid(_arena_visual):
+		_arena_visual.set_focus_point(_player.global_position)
 	_update_combo(delta)
 	_update_focus(delta)
 	_update_rush(delta)
@@ -476,6 +464,10 @@ func _physics_process(_delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	# A scripted arena's host screen owns back and Escape (the tutorial's skip confirm).
 	if _scripted:
+		return
+	if _intro_playing and _is_press(event):
+		get_viewport().set_input_as_handled()
+		_arena_visual.skip_intro()
 		return
 	if event.is_action_pressed(&"pause"):
 		get_viewport().set_input_as_handled()
@@ -619,7 +611,7 @@ func release_start() -> void:
 
 ## Applies a run profile built by Main: mode, arena rules, seed, daily identity and cosmetic form.
 ##
-## Call before adding the node to the tree so the seed applies; later calls still swap the Rift and
+## Call before adding the node to the tree so the seed applies; later calls still swap the arena and
 ## form (fixtures do this).
 func configure_run(profile: RunProfile) -> void:
 	if profile == null:
@@ -632,8 +624,6 @@ func configure_run(profile: RunProfile) -> void:
 	_dash_effect = _cosmetic_form.dash_effect if _cosmetic_form != null else null
 	_daily_date_key = profile.daily_date_key
 	_arena_rules = profile.create_arena_rules()
-	_rift_level = maxi(1, profile.level) if profile.is_story() else 1
-	_first_clear_possible = profile.first_clear_possible
 	if profile.run_seed != 0 and not is_node_ready():
 		run_seed = profile.run_seed
 	if is_node_ready() and _cosmetic_form != null:
@@ -643,7 +633,10 @@ func configure_run(profile: RunProfile) -> void:
 			_cosmetic_form.visual_scene,
 		)
 	if is_node_ready():
-		_player.set_momentum_presentation(feel_tuning, _get_dash_trail_tint())
+		_player.set_momentum_presentation(
+			feel_tuning, _get_dash_trail_tint(), _dash_effect == null or _dash_effect.shared_trails
+		)
+		_player.set_impact_burst_enabled(_uses_splash_landing())
 		_apply_arena()
 		_layout_for_viewport()
 
@@ -653,15 +646,9 @@ func get_arena_ambience() -> ArenaAmbience:
 	return _ambience
 
 
-## Run mode from the profile: `RunProfile.MODE_STORY`, `MODE_DAILY`, `MODE_ENDLESS` or
-## `MODE_TUTORIAL`.
+## Run mode from the profile: `RunProfile.MODE_ENDLESS`, `MODE_DAILY` or `MODE_TUTORIAL`.
 func get_run_mode() -> StringName:
 	return _mode
-
-
-## One-based Rift level this run plays.
-func get_rift_level() -> int:
-	return _rift_level
 
 
 ## Boss cycles completed: bosses beaten this run, which drives Endless difficulty.
@@ -674,135 +661,53 @@ func get_arena_rules() -> ArenaRules:
 	return _arena_rules
 
 
-## Whether this story run's level has been cleared (its final boss beaten).
-func is_level_cleared() -> bool:
-	return _level_cleared
-
-
-## Swaps in the arena's backdrop and latches its rule twist and boss cadence.
+## Swaps in the arena's backdrop and latches its boss cadence.
 ##
-## Every arena background (Rifts and Endless skins) shares the native 941x1672 size, so
-## ARENA_FLOOR_UV stays valid and _compute_arena_rect() derives the playfield from the texture.
+## The playfield comes from the texture and the arena's own floor: the neutral arena uses
+## ARENA_FLOOR_UV, an Endless arena brings its catalog's floor rect (ADR-0017). A layered arena
+## shows its scene instead of the texture and gives the floor itself (ADR-0021).
 func _apply_arena() -> void:
-	_rift_rule = _arena_rules.get_rule_key()
-	var backdrop: Texture2D = _arena_rules.get_background()
-	if backdrop != null:
-		_background.texture = backdrop
+	_set_arena_visual(_arena_rules.get_visual_scene())
+	if _arena_visual == null:
+		var backdrop: Texture2D = _arena_rules.get_background()
+		if backdrop != null:
+			_background.texture = backdrop
 	if _ambience != null:
 		_ambience.configure(_arena_rules.get_scenery(), _background)
 	_boss_wave_interval = maxi(1, _arena_rules.get_boss_wave_interval())
-	_rift_reward_multiplier = 1.0
-	_arena_shrink = 1.0
-	_build_portals()
-	# Reaper's Court trades twice the boss cadence (in its rules) for twice the boss payout.
-	if _rift_rule == &"boss_rush":
-		_rift_reward_multiplier = BOSS_RUSH_REWARD_SCALE
-	# Frozen Choir: the Wisp never quite stands still between dashes.
-	_player.set_edge_drift(DRIFT_EDGE_SPEED if _rift_rule == &"drift" else 0.0)
 	_apply_arena_difficulty()
 
 
-## Creates or clears the Shattered Rift's linked portal pair.
-func _build_portals() -> void:
-	for portal: Sprite2D in _portals:
-		if is_instance_valid(portal):
-			portal.queue_free()
-	_portals.clear()
-	if _rift_rule != &"portals":
+## Shows [param scene] (a layered or 3D arena, ADR-0021, ADR-0023) in place of the painted backdrop,
+## or the backdrop again when it is null. Keeps the one already shown when it is the same scene.
+func _set_arena_visual(scene: PackedScene) -> void:
+	var wanted: String = scene.resource_path if scene != null else ""
+	if is_instance_valid(_arena_visual) and _arena_visual.scene_file_path == wanted:
 		return
-	for texture: Texture2D in [PORTAL_ENTRANCE_TEXTURE, PORTAL_EXIT_TEXTURE]:
-		var portal := Sprite2D.new()
-		portal.texture = texture
-		portal.z_index = -1
-		_hazard_layer.add_child(portal)
-		_portals.append(portal)
-	_layout_portals()
-
-
-## Places the portal pair inside the current playfield and scales it to the viewport.
-func _layout_portals() -> void:
-	if _portals.size() != 2 or _arena_rect.size.x <= 0.0:
-		return
-	var scale_factor: float = _arena_rect.size.x / 1080.0
-	var uvs: Array[Vector2] = [PORTAL_A_UV, PORTAL_B_UV]
-	for index: int in _portals.size():
-		var portal: Sprite2D = _portals[index]
-		portal.global_position = _place_on_floor(
-			_arena_rect.position + uvs[index] * _arena_rect.size,
-			PORTAL_RADIUS * scale_factor * 1.4,
-		)
-		portal.scale = Vector2.ONE * (PORTAL_RADIUS * 2.4 / VFX_SOURCE_SIZE) * scale_factor
-
-
-## Teleports a dash that crosses one portal to its pair, once per dash.
-##
-## Returns true when the dash was moved, so the caller stops applying this segment: everything
-## beyond the portal mouth belongs to the new segment emitted from the exit.
-func _try_portal_transit(segment_start: Vector2, segment_end: Vector2, dash_id: int) -> bool:
-	if _portals.size() != 2 or dash_id == _portal_used_dash_id:
-		return false
-	var radius: float = PORTAL_RADIUS * (_arena_rect.size.x / 1080.0)
-	for index: int in _portals.size():
-		var portal: Sprite2D = _portals[index]
-		if not is_instance_valid(portal):
-			continue
-		if DashGeometry.distance_to_segment(
-			portal.global_position, segment_start, segment_end
-		) > radius:
-			continue
-		var exit_portal: Sprite2D = _portals[1 - index]
-		if not is_instance_valid(exit_portal):
-			continue
-		# Leave the exit mouth immediately so the pair cannot swallow the dash again.
-		var direction: Vector2 = (segment_end - segment_start).normalized()
-		var exit_point: Vector2 = exit_portal.global_position + direction * (radius * 1.15)
-		if _player.teleport_dash_to(exit_point):
-			_portal_used_dash_id = dash_id
-			var flare: float = radius * 3.0 / VFX_SOURCE_SIZE
-			_vfx.play(
-				PORTAL_ENTRANCE_TEXTURE,
-				portal.global_position,
-				0.0,
-				Vector2.ONE * flare,
-				Vector2.ONE * flare * 1.7,
-				0.24,
-				Color(Palette.SOUL_CYAN, 0.9),
-			)
-			_vfx.play(
-				PORTAL_EXIT_TEXTURE,
-				exit_portal.global_position,
-				0.0,
-				Vector2.ONE * flare * 1.7,
-				Vector2.ONE * flare,
-				0.24,
-				Color(Palette.RIFT_MAGENTA, 0.9),
-			)
-			SoundFx.play(&"dash")
-			return true
-	return false
-
-
-## Applies per-wave rule effects for the active Rift.
-##
-## Only `shrinking_floor` varies within a level; the other rules are latched once at run start.
-func _update_rift_rules(wave: int) -> void:
-	if _rift_rule != &"shrinking_floor":
-		return
-	# Contract smoothly across the level (or across each boss cycle under boss rush).
-	var step: int = posmod(wave - 1, maxi(1, _boss_wave_interval))
-	var progress: float = float(step) / float(maxi(1, _boss_wave_interval))
-	var shrink: float = lerpf(1.0, SHRINK_FLOOR_MINIMUM, progress)
-	if is_equal_approx(shrink, _arena_shrink):
-		return
-	_arena_shrink = shrink
-	_layout_for_viewport()
+	if is_instance_valid(_arena_visual):
+		_arena_visual.queue_free()
+	_arena_visual = null
+	if scene != null:
+		var node: Node = scene.instantiate()
+		_arena_visual = node as ArenaVisual
+		if _arena_visual == null:
+			push_error("[GameWorld] %s is not an ArenaVisual" % wanted)
+			node.free()
+		else:
+			_arena_visual.name = "ArenaVisual"
+			_arena_visual.set_reduced_motion(_reduced_motion)
+			# Right over the painted backdrop, so the ambience and WorldShade still draw over it.
+			_background.add_sibling(_arena_visual)
+			if not play_arena_intro:
+				_arena_visual.skip_intro()
+	_background.visible = _arena_visual == null
 
 
 ## Pushes the arena's difficulty for the current cycle into the wave director and live enemies.
 ##
 ## Called at run start, and after each Endless-rules boss, whose cycle raises threat and speed.
 func _apply_arena_difficulty() -> void:
-	_wave_director.set_rift_threat_multiplier(_arena_rules.get_threat_multiplier(_bosses_defeated))
+	_wave_director.set_threat_multiplier(_arena_rules.get_threat_multiplier(_bosses_defeated))
 	var speed_scale: float = _arena_rules.get_enemy_speed_scale(_bosses_defeated)
 	for child: Node in _enemy_layer.get_children():
 		if child is EnemyActor:
@@ -818,31 +723,12 @@ func _get_boss_variant() -> BossData:
 	return BOSS_VARIANTS[id] as BossData
 
 
-## Waves between boss encounters in the active arena (half a level under `boss_rush`).
+## Waves between boss encounters in the active arena.
 func get_boss_wave_interval() -> int:
 	return _boss_wave_interval
 
 
-## Current playfield contraction from the `shrinking_floor` rule; 1.0 is the full floor.
-func get_arena_shrink() -> float:
-	return _arena_shrink
-
-
-## Boss reward multiplier from the `boss_rush` rule.
-func get_reward_multiplier() -> float:
-	return _rift_reward_multiplier
-
-
-## World positions of the active Rift's portal pair; empty when the Rift has none.
-func get_portal_positions() -> PackedVector2Array:
-	var points := PackedVector2Array()
-	for portal: Sprite2D in _portals:
-		if is_instance_valid(portal):
-			points.append(portal.global_position)
-	return points
-
-
-## The active Rift's painted floor in screen space; empty when running on the legacy rectangle.
+## The arena's floor in screen space; empty when running on the legacy rectangle.
 func get_arena_polygon() -> PackedVector2Array:
 	return _arena_polygon
 
@@ -874,11 +760,11 @@ func debug_quiet_arena() -> void:
 	_clear_hazards()
 
 
-## Test hook: spawns one enemy of an exact kind, bypassing the Rift roster remap.
+## Test hook: spawns one stationary enemy of an exact kind (it neither moves nor attacks).
 func debug_spawn_enemy(kind: StringName, world_position: Vector2) -> EnemyActor:
 	if not ENEMY_SCENES.has(kind):
 		return null
-	return _spawn_enemy(kind, world_position, false, false)
+	return _spawn_enemy(kind, world_position, false)
 
 
 ## Live enemies currently tracked by the wave accounting.
@@ -893,11 +779,6 @@ func debug_enemy_layer_count() -> int:
 		if child is EnemyActor:
 			total += 1
 	return total
-
-
-## Test hook: applies the per-wave rule effects for an arbitrary wave without waiting for it.
-func debug_apply_rift_rules(wave: int) -> void:
-	_update_rift_rules(wave)
 
 
 # --- Scripted-run hooks: the Tutorial screen's director drives a `MODE_TUTORIAL` arena. ---
@@ -1051,11 +932,10 @@ func sweep_shards() -> void:
 	_sweep_floor_shards()
 
 
-## Screen rect of a HUD element to point at: `&"health"`, `&"xp"` or `&"rush"`; empty otherwise.
+## Screen rect of a HUD element to point at: `&"xp"` or `&"rush"`; empty otherwise. There is no
+## `&"health"` since the lives readout left the HUD (2026-09-24).
 func get_hud_rect(element: StringName) -> Rect2:
 	match element:
-		&"health":
-			return _health_row.get_global_rect()
 		&"xp":
 			return _xp_bar.get_global_rect().merge(_run_level_label.get_global_rect())
 		&"rush":
@@ -1191,54 +1071,51 @@ func _layout_for_viewport() -> void:
 			var enemy := child as EnemyActor
 			enemy.set_arena_rect(_arena_rect)
 			enemy.set_arena_polygon(_arena_polygon)
+	if _projectile_layer != null:
+		for child: Node in _projectile_layer.get_children():
+			if child is EnemyProjectile:
+				(child as EnemyProjectile).set_arena(_arena_rect, _arena_polygon)
 	for child: Node in _hazard_layer.get_children():
 		if child is HazardActor:
 			(child as HazardActor).set_viewport_width(_arena_rect.size.x)
 	if is_instance_valid(_boss):
 		_boss.set_arena_rect(_arena_rect)
 		_boss.set_arena_polygon(_arena_polygon)
-	_layout_portals()
 	_update_pickup_attraction()
 	_layout_safe_hud()
 
 
 func _layout_safe_hud() -> void:
-	# Header: lives / Rift Points top-left, score plate centred, pause and upgrade top-right; wave,
-	# slim XP bar and soul level stacked under the plate; the boss line below that. RUSH is anchored
-	# to the bottom edge instead, so nothing in the header reaches down into the arena.
+	# Header: pause and UPGRADE on the left, Rift Points and score on the right, and the soul level
+	# bar, RUSH and the boss line stacked in the middle (owner, 2026-09-24).
 	var margins: Vector4 = _get_safe_margins()
 	var top: float = margins.y
-	_health_row.offset_left = margins.x
-	_health_row.offset_top = top
-	_health_row.offset_right = margins.x + 260.0
-	_health_row.offset_bottom = top + HUD_STATS_HEIGHT
-	var plate_height: float = _score_plate.get_combined_minimum_size().y
-	_score_plate.offset_top = top + HUD_PLATE_TOP
-	_score_plate.offset_bottom = top + HUD_PLATE_TOP + plate_height
-	_wave_label.offset_top = top + HUD_WAVE_TOP
-	_wave_label.offset_bottom = top + HUD_WAVE_TOP + 38.0
+	_pause_button.offset_left = margins.x
+	_pause_button.offset_top = top
+	_pause_button.offset_right = margins.x + HUD_PAUSE_SIZE
+	_pause_button.offset_bottom = top + HUD_PAUSE_SIZE
+	var upgrade_top: float = top + HUD_PAUSE_SIZE + HUD_UPGRADE_BUTTON_GAP
+	_upgrade_button.offset_left = margins.x
+	_upgrade_button.offset_top = upgrade_top
+	_upgrade_button.offset_right = margins.x + HUD_UPGRADE_BUTTON_SIZE
+	_upgrade_button.offset_bottom = upgrade_top + HUD_UPGRADE_BUTTON_SIZE
+	_stats_column.offset_left = -(margins.z + HUD_STATS_WIDTH)
+	_stats_column.offset_top = top
+	_stats_column.offset_right = -margins.z
+	_stats_column.offset_bottom = top + _stats_column.get_combined_minimum_size().y
 	_xp_bar.offset_top = top + HUD_XP_TOP
-	_xp_bar.offset_bottom = top + HUD_XP_TOP + 18.0
+	# The kit's slim track is 20 px (five art pixels); any other height would drop or repeat a row.
+	_xp_bar.offset_bottom = top + HUD_XP_TOP + 20.0
 	_run_level_label.offset_top = top + HUD_LEVEL_TOP
 	_run_level_label.offset_bottom = top + HUD_LEVEL_TOP + 34.0
-	# RUSH rides the bottom edge now, clear of the playfield and next to the thumb.
-	_rush_row.offset_top = -(margins.w + HUD_RUSH_BOTTOM_GAP + HUD_RUSH_HEIGHT)
-	_rush_row.offset_bottom = -(margins.w + HUD_RUSH_BOTTOM_GAP)
+	_rush_row.offset_top = top + HUD_RUSH_TOP
+	_rush_row.offset_bottom = top + HUD_RUSH_TOP + HUD_RUSH_HEIGHT
 	_boss_hud.offset_top = top + HUD_BOSS_TOP
 	_boss_hud.offset_bottom = top + HUD_BOSS_TOP + _boss_hud.get_combined_minimum_size().y
 	_combo_label.offset_top = top + HUD_CALLOUT_TOP
 	_combo_label.offset_bottom = top + HUD_CALLOUT_TOP + 80.0
 	_focus_label.offset_top = top + HUD_FOCUS_TOP
 	_focus_label.offset_bottom = top + HUD_FOCUS_TOP + 44.0
-	_pause_button.offset_left = -(margins.z + HUD_PAUSE_SIZE)
-	_pause_button.offset_top = top
-	_pause_button.offset_right = -margins.z
-	_pause_button.offset_bottom = top + HUD_PAUSE_SIZE
-	var upgrade_top: float = top + HUD_PAUSE_SIZE + HUD_UPGRADE_BUTTON_GAP
-	_upgrade_button.offset_left = -(margins.z + HUD_UPGRADE_BUTTON_SIZE)
-	_upgrade_button.offset_top = upgrade_top
-	_upgrade_button.offset_right = -margins.z
-	_upgrade_button.offset_bottom = upgrade_top + HUD_UPGRADE_BUTTON_SIZE
 	_instruction_label.offset_top = -(margins.w + 150.0)
 	_instruction_label.offset_bottom = -(margins.w + 96.0)
 	_upgrade_tray.set_bottom_inset(
@@ -1249,7 +1126,7 @@ func _layout_safe_hud() -> void:
 ## Maps the painted floor of the cover-scaled backdrop into screen space and keeps it on screen.
 ## Screen-space rectangle the cover-scaled backdrop image occupies.
 ##
-## Shared by the legacy floor rect and the Rift floor polygon so both are mapped through exactly
+## Shared by the legacy floor rect and the arena floor polygon so both are mapped through exactly
 ## the same transform; if they diverged, the wall and the art would disagree.
 func _backdrop_image_rect() -> Rect2:
 	var view: Rect2 = get_viewport_rect()
@@ -1307,38 +1184,36 @@ func _get_reform_candidates() -> Array[Vector2]:
 	return candidates
 
 
-## The arena's floor (a Rift's painted floor or the Endless template) in screen space, contracted by
-## the current shrink.
+## The arena's floor (the Endless template) in screen space. A layered arena's is its drawn floor,
+## the arena rect itself.
 func _compute_arena_polygon() -> PackedVector2Array:
+	if is_instance_valid(_arena_visual):
+		var floor_rect: Rect2 = _arena_rect
+		return PackedVector2Array([
+			floor_rect.position,
+			Vector2(floor_rect.end.x, floor_rect.position.y),
+			floor_rect.end,
+			Vector2(floor_rect.position.x, floor_rect.end.y),
+		])
 	var floor_uv: PackedVector2Array = _arena_rules.get_floor_polygon()
 	if floor_uv.size() < 3:
 		return PackedVector2Array()
-	var polygon: PackedVector2Array = DashGeometry.polygon_from_uv(floor_uv, _backdrop_image_rect())
-	if is_equal_approx(_arena_shrink, 1.0):
-		return polygon
-	# Ember Hollow's floor burns away; scale about the centroid so the shape is preserved.
-	var centre: Vector2 = DashGeometry.polygon_centroid(polygon)
-	var scaled := PackedVector2Array()
-	for point: Vector2 in polygon:
-		scaled.append(centre + (point - centre) * _arena_shrink)
-	return scaled
+	return DashGeometry.polygon_from_uv(floor_uv, _backdrop_image_rect())
 
 
 func _compute_arena_rect() -> Rect2:
 	var view: Rect2 = get_viewport_rect()
+	if is_instance_valid(_arena_visual):
+		# The floor exactly as the layered arena drew it: no minimum size widens it (ADR-0021).
+		return _arena_visual.fit(view.size, _get_safe_margins().y).intersection(view)
 	var texture: Texture2D = _background.texture
 	var rect: Rect2 = view
 	if texture != null and texture.get_size().x > 0.0 and texture.get_size().y > 0.0:
 		var image: Rect2 = _backdrop_image_rect()
-		rect = Rect2(
-			image.position + ARENA_FLOOR_UV.position * image.size,
-			ARENA_FLOOR_UV.size * image.size,
-		)
-	# Ember Hollow's floor burns away: contract around the centre, before the safety floor below.
-	if not is_equal_approx(_arena_shrink, 1.0):
-		var centre: Vector2 = rect.get_center()
-		rect.size *= _arena_shrink
-		rect.position = centre - rect.size * 0.5
+		var floor_uv: Rect2 = _arena_rules.get_floor_rect_uv() if _arena_rules != null else Rect2()
+		if not floor_uv.has_area():
+			floor_uv = ARENA_FLOOR_UV
+		rect = Rect2(image.position + floor_uv.position * image.size, floor_uv.size * image.size)
 	var minimum: Vector2 = view.size * ARENA_MIN_VIEWPORT_FRACTION
 	rect.size = rect.size.max(minimum)
 	rect.position = rect.position.clamp(view.position, view.end - rect.size)
@@ -1383,18 +1258,52 @@ func _begin_run() -> void:
 		# The Tutorial screen drives this arena: no waves, no pause button, its own instructions.
 		_instruction_label.visible = false
 		_pause_button.visible = false
-		_wave_label.text = _hud_run_prefix()
 		print("[GameWorld] scripted arena ready")
-	else:
+	elif not _play_arena_intro():
 		_start_waves()
 	_refresh_rush_hud()
+
+
+## Plays the arena's opening shot (a 3D arena's zoom into its floor, ADR-0023) with the Wisp and the
+## HUD hidden and steering off; the waves start when it ends. False when the arena has none.
+func _play_arena_intro() -> bool:
+	if not play_arena_intro or not is_instance_valid(_arena_visual) or not _arena_visual.has_intro():
+		return false
+	_intro_playing = true
+	_player.visible = false
+	_safe_hud.visible = false
+	_player.set_input_enabled(false)
+	_arena_visual.intro_finished.connect(_on_arena_intro_finished, CONNECT_ONE_SHOT)
+	print("[GameWorld] arena intro")
+	_arena_visual.play_intro()
+	return true
+
+
+func _on_arena_intro_finished() -> void:
+	if not _intro_playing:
+		return
+	_intro_playing = false
+	_player.set_input_enabled(true)
+	for item: CanvasItem in [_player, _safe_hud]:
+		item.modulate.a = 0.0
+		item.visible = true
+		create_tween().tween_property(item, ^"modulate:a", 1.0, INTRO_FADE_SECONDS)
+	print("[GameWorld] arena intro done")
+	_start_waves()
+
+
+static func _is_press(event: InputEvent) -> bool:
+	return (
+		(event is InputEventScreenTouch and (event as InputEventScreenTouch).pressed)
+		or (event is InputEventMouseButton and (event as InputEventMouseButton).pressed)
+	)
 
 
 func _start_waves() -> void:
 	if _waves_started or _run_over:
 		return
 	_waves_started = true
-	# Endless rules spawn continuously (never a quiet wait); story Rift levels keep timed waves.
+	# Endless rules spawn continuously (never a quiet wait); the neutral arena keeps timed waves.
 	var endless_rules := _arena_rules as EndlessArenaRules
 	var endless_tuning: EndlessTuning = endless_rules.get_tuning() if endless_rules != null else null
 	_wave_director.set_continuous(
@@ -1428,7 +1337,7 @@ func _update_boss_target() -> void:
 		_boss.set_target_position(_player.global_position)
 
 
-func _on_wave_started(wave: int, threat_budget: int) -> void:
+func _on_wave_started(wave: int, _threat_budget: int) -> void:
 	_current_wave = wave
 	_sweep_floor_shards()
 	_update_music_state()
@@ -1436,21 +1345,12 @@ func _on_wave_started(wave: int, threat_budget: int) -> void:
 	if wave >= _boss_wave_interval and wave % _boss_wave_interval == 0:
 		_wave_director.suspend_for_boss()
 		_boss_pending = true
-		_wave_label.text = "%s  •  REAPER APPROACHING" % _hud_run_prefix()
-		_show_callout("THE REAPER APPROACHES")
+		var approach: String = _get_boss_variant().approach_callout
+		_show_callout(approach if not approach.is_empty() else "THE REAPER APPROACHES")
 		return
-	_update_rift_rules(wave)
-	if _mode == RunProfile.MODE_STORY:
-		_wave_label.text = "LEVEL %d  •  WAVE %d / %d" % [_rift_level, wave, _get_waves_per_level()]
-	else:
-		_wave_label.text = "%s  •  WAVE %02d  •  THREAT %02d" % [
-			_hud_run_prefix(), wave, threat_budget,
-		]
-	var roster_name: String = _arena_rules.get_roster_name(wave, run_seed)
-	if not roster_name.is_empty():
-		_show_callout("%s WAVE" % roster_name.to_upper())
-	elif wave > 1:
-		_show_callout("RIFT %02d" % wave)
+	# The enemy mixes' "<NAME> WAVE" callouts went with the mixes (Enemies v2).
+	if wave > 1:
+		_show_callout("WAVE %02d" % wave)
 	_mark_calm_moment(&"wave_start")
 
 
@@ -1463,14 +1363,17 @@ func _start_boss_encounter(health_override: int = 0) -> void:
 	_sweep_floor_shards()
 	_clear_enemies()
 	_clear_hazards()
-	_boss = REAPER_SCENE.instantiate() as ReaperBoss
 	var variant: BossData = _get_boss_variant()
+	var boss_scene: PackedScene = variant.scene if variant.scene != null else REAPER_SCENE
+	_boss = boss_scene.instantiate() as BossActor
 	_boss_layer.add_child(_boss)
 	_boss.configure_variant(variant)
 	_boss.health_changed.connect(_on_reaper_health_changed)
 	_boss.phase_changed.connect(_on_reaper_phase_changed)
 	_boss.summon_requested.connect(_on_reaper_summon_requested)
+	_boss.spawn_requested.connect(_on_boss_spawn_requested)
 	_boss.defeated.connect(_on_reaper_defeated)
+	_boss.set_player_radius(_player.get_collision_radius())
 	_boss.set_arena_polygon(_arena_polygon)
 	_boss.configure(
 		_arena_rect,
@@ -1504,11 +1407,7 @@ func _on_reaper_health_changed(current_health: int, maximum_health: int) -> void
 
 
 func _on_reaper_phase_changed(next_phase: int) -> void:
-	var phase_name: String = "SCYTHE SWEEP"
-	if next_phase == ReaperBoss.Phase.TELEPORT_HUNT:
-		phase_name = "TELEPORT HUNT"
-	elif next_phase == ReaperBoss.Phase.DEATH_CORRIDORS:
-		phase_name = "DEATH CORRIDORS"
+	var phase_name: String = _boss.get_phase_name(next_phase) if is_instance_valid(_boss) else ""
 	_boss_phase_label.text = "PHASE %d  •  %s" % [next_phase, phase_name]
 	if next_phase > 1:
 		_show_callout("PHASE %d  •  %s" % [next_phase, phase_name])
@@ -1516,8 +1415,38 @@ func _on_reaper_phase_changed(next_phase: int) -> void:
 
 func _on_reaper_summon_requested(world_positions: PackedVector2Array) -> void:
 	for world_position: Vector2 in world_positions:
-		var enemy: EnemyActor = _spawn_enemy(&"soul_wisp", world_position, true)
+		var enemy: EnemyActor = _spawn_enemy(_pick_enemy_kind(), world_position, true)
 		enemy.set_last_edge_position(_player.global_position)
+
+
+## A boss asks for random regular enemies (Grimgrin: they spawn at random through his fight), at random
+## floor points away from the Wisp and the boss, never more than [param max_live] alive.
+func _on_boss_spawn_requested(count: int, max_live: int) -> void:
+	var alive: int = 0
+	for child: Node in _enemy_layer.get_children():
+		if child is EnemyActor and not child.is_queued_for_deletion():
+			alive += 1
+	var room: int = mini(count, max_live - alive)
+	if room <= 0:
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = run_seed + _current_wave * 313 + alive * 17 + Time.get_ticks_msec()
+	var clearance: float = _player.get_collision_radius() * 4.0
+	var spawn_rect: Rect2 = _arena_rect.grow(-_player.get_collision_radius() * 2.0)
+	for _index: int in room:
+		var point: Vector2 = spawn_rect.get_center()
+		for _attempt: int in 12:
+			point = Vector2(
+				rng.randf_range(spawn_rect.position.x, spawn_rect.end.x),
+				rng.randf_range(spawn_rect.position.y, spawn_rect.end.y),
+			)
+			var boss_clear: bool = (
+				not is_instance_valid(_boss)
+				or point.distance_to(_boss.global_position) >= clearance
+			)
+			if point.distance_to(_player.global_position) >= clearance and boss_clear:
+				break
+		_spawn_enemy(_pick_enemy_kind(), point, true)
 
 
 func _on_reaper_defeated(
@@ -1527,94 +1456,31 @@ func _on_reaper_defeated(
 	) -> void:
 	var victory_duration: float = 1.0
 	var experience_reward: int = 0
+	var defeat_name: String = "REAPER"
 	if is_instance_valid(_boss):
-		victory_duration = _boss.tuning.victory_duration
-		experience_reward = _boss.tuning.experience_reward
+		victory_duration = _boss.get_victory_duration()
+		experience_reward = _boss.get_experience_reward()
+		defeat_name = _boss.get_defeat_name()
 	_boss = null
 	_bosses_defeated += 1
 	_sweep_floor_shards()
 	_update_music_state()
-	_score += _apply_velocity_score_bonus(roundi(float(score_reward) * _rift_reward_multiplier))
+	_score += _apply_velocity_score_bonus(score_reward)
 	_score_label.text = "%06d" % _score
-	_award_rift_points(roundi(float(rp_reward) * _rift_reward_multiplier))
+	_award_rift_points(rp_reward)
 	_grant_experience(experience_reward)
 	_clear_enemies()
 	_clear_hazards()
 	_boss_hud.visible = false
 	_set_world_shade(SHADE_VICTORY)
 	_player.play_victory(victory_duration)
-	_show_callout("REAPER VANQUISHED  +%d" % score_reward)
-	print("[GameWorld] Reaper defeated | count=%d" % _bosses_defeated)
-	if _is_final_boss_wave():
-		_begin_level_victory(victory_duration)
-		return
+	_show_callout("%s VANQUISHED  +%d" % [defeat_name, score_reward])
+	print("[GameWorld] %s defeated | count=%d" % [defeat_name.capitalize(), _bosses_defeated])
 	boss_defeated.emit()
-	if _scripted:
-		_wave_label.text = "%s  •  BOSS DEFEATED" % _hud_run_prefix()
-	elif _mode != RunProfile.MODE_STORY:
+	if not _scripted:
 		# Endless rules never end on a boss: each victory starts a harder cycle.
 		_apply_arena_difficulty()
-		_wave_label.text = "CYCLE %d CLEARED  •  RIFT DEEPENS" % _bosses_defeated
-	else:
-		# Boss rush's mid-level boss: the level carries on.
-		_wave_label.text = "LEVEL %d  •  BOSS DEFEATED" % _rift_level
 	_post_boss_remaining = victory_duration
-
-
-## Waves in one story level; the boss on the last one is the level's final boss.
-func _get_waves_per_level() -> int:
-	var waves: int = _arena_rules.get_level_waves()
-	return waves if waves > 0 else _boss_wave_interval
-
-
-## Whether the boss of the current wave is a story level's final boss (boss rush's mid boss is not).
-func _is_final_boss_wave() -> bool:
-	return _mode == RunProfile.MODE_STORY and _arena_rules.is_final_boss_wave(_current_wave)
-
-
-## HUD prefix naming the run: the story level, Endless or the daily run.
-func _hud_run_prefix() -> String:
-	match _mode:
-		RunProfile.MODE_STORY:
-			return "LEVEL %d" % _rift_level
-		RunProfile.MODE_ENDLESS:
-			return "ENDLESS"
-		RunProfile.MODE_TUTORIAL:
-			return "TUTORIAL"
-	return "DAILY"
-
-
-## Clears the story level: the run is over at once (no input, pause or contact), and the summary is
-## emitted through `run_ended` after the Wisp's victory beat.
-func _begin_level_victory(victory_duration: float) -> void:
-	_level_cleared = true
-	_run_over = true
-	_clear_aim_preview()
-	_boss_pending = false
-	_waves_start_remaining = -1.0
-	_post_boss_remaining = -1.0
-	_focus_remaining = 0.0
-	_set_world_speed(1.0)
-	_close_upgrade_tray(&"run_end", true)
-	# Banked but unpicked level-ups are lost with the run.
-	_refresh_upgrade_button()
-	_clear_time_scale_requests()
-	_end_rush(false)
-	_player.cancel_active_aim()
-	_pause_button.disabled = true
-	_wave_label.text = "LEVEL %d CLEARED" % _rift_level
-	_update_music_state()
-	print("[GameWorld] level cleared | rift=%s level=%d" % [
-		_arena_rules.get_rift_id(), _rift_level,
-	])
-	get_tree().create_timer(maxf(0.1, victory_duration)).timeout.connect(_finish_level_victory)
-
-
-func _finish_level_victory() -> void:
-	if not is_inside_tree():
-		return
-	SoundFx.music_state(0.0, false)
-	_emit_run_end()
 
 
 func _on_formation_requested(
@@ -1632,7 +1498,8 @@ func _on_formation_requested(
 		var placed: Vector2 = _place_on_floor(
 			_ensure_spawn_clear(world_position), _floor_margin()
 		)
-		_spawn_enemy(formation.enemy_kinds[index], placed, true)
+		# A formation says where enemies arrive; the ramp says which (Enemies v2).
+		_spawn_enemy(_pick_enemy_kind(), placed, true)
 	if not formation.hazard_kind.is_empty():
 		var hazard_normalized: Vector2 = formation.get_transformed_hazard_position(
 			mirrored,
@@ -1658,23 +1525,30 @@ func _ensure_spawn_clear(world_position: Vector2) -> Vector2:
 	return _place_on_floor(opposite, _floor_margin())
 
 
-## Spawns one enemy, optionally remapped onto the arena's roster for the current wave.
-##
-## `apply_rift_roster` must be false for split children: the roster remap is what turns a harmless
-## `split_kind` into a splitter. In Ember Hollow `soul_wisp` maps to `cinder_shade`, whose own
-## `split_kind` is `soul_wisp` — remapping a child there spawns two more splitters per death, which
-## is an unbounded chain reaction.
+## One enemy kind for a spawn slot now: the Enemies v2 ramp's pick for the current wave.
+func _pick_enemy_kind() -> StringName:
+	if not _enemy_ramp_ready:
+		_enemy_ramp_ready = true
+		var kinds: Array[StringName] = []
+		for kind: StringName in ENEMY_SCENES:
+			kinds.append(kind)
+		_enemy_ramp.configure(
+			kinds,
+			run_seed,
+			_wave_director.tuning.enemy_kinds_at_start,
+			_wave_director.tuning.waves_per_new_enemy_kind,
+		)
+	return _enemy_ramp.pick(maxi(1, _current_wave))
+
+
+## Spawns one enemy of exactly [param kind].
 func _spawn_enemy(
 		kind: StringName,
 		world_position: Vector2,
 		movement_enabled: bool,
-		apply_rift_roster: bool = true,
 	) -> EnemyActor:
-	var resolved: StringName = kind
-	if apply_rift_roster:
-		resolved = _arena_rules.substitute_enemy(kind, _current_wave, run_seed)
-	assert(ENEMY_SCENES.has(resolved), "Unknown enemy kind: %s" % resolved)
-	var scene := ENEMY_SCENES[resolved] as PackedScene
+	assert(ENEMY_SCENES.has(kind), "Unknown enemy kind: %s" % kind)
+	var scene := ENEMY_SCENES[kind] as PackedScene
 	var enemy := scene.instantiate() as EnemyActor
 	enemy.movement_enabled = movement_enabled
 	_enemy_layer.add_child(enemy)
@@ -1686,15 +1560,24 @@ func _spawn_enemy(
 	enemy.set_world_speed(0.32 if _focus_remaining > 0.0 else 1.0)
 	enemy.set_speed_scale(_arena_rules.get_enemy_speed_scale(_bosses_defeated))
 	enemy.killed.connect(_on_enemy_killed)
+	enemy.projectile_fired.connect(_on_enemy_projectile_fired)
 	_remaining_live_enemies += 1
 	return enemy
 
 
-## Spawns a splitter's children around its death point, clamped inside the playfield.
-##
-## Children are spawned with the Rift roster remap DISABLED, so `split_kind` is taken literally and
-## a split can never produce another splitter. `test_rift_enemies.gd` also asserts that no Rift maps
-## a `split_kind` onto a splitting enemy, so the invariant is checked from both directions.
+## An enemy loosed a shot: the run owns it from here, so it outlives the enemy that fired it.
+func _on_enemy_projectile_fired(projectile: EnemyProjectile) -> void:
+	if _run_over or not is_inside_tree():
+		projectile.free()
+		return
+	_projectile_layer.add_child(projectile)
+	projectile.set_arena(_arena_rect, _arena_polygon)
+	projectile.set_target_position(_player.global_position)
+	projectile.set_world_speed(0.32 if _focus_remaining > 0.0 else 1.0)
+
+
+## Spawns a splitter's children around its death point, clamped inside the playfield. No Enemies v2
+## enemy splits (none has a `split_kind`), so today this spawns nothing.
 func _spawn_split_children(enemy: EnemyActor, world_position: Vector2) -> void:
 	if enemy == null or enemy.tuning == null:
 		return
@@ -1716,7 +1599,7 @@ func _spawn_split_children(enemy: EnemyActor, world_position: Vector2) -> void:
 			clampf(world_position.y + offset.y - _arena_rect.position.y, 0.0, _arena_rect.size.y),
 		)
 		spawn_point = _place_on_floor(spawn_point, _floor_margin())
-		var child: EnemyActor = _spawn_enemy(kind, spawn_point, true, false)
+		var child: EnemyActor = _spawn_enemy(kind, spawn_point, true)
 		child.scale = Vector2.ONE * enemy.tuning.split_scale
 
 
@@ -1736,6 +1619,9 @@ func _clear_enemies() -> void:
 		if child is EnemyActor:
 			child.queue_free()
 	_remaining_live_enemies = 0
+	if _projectile_layer != null:
+		for child: Node in _projectile_layer.get_children():
+			child.queue_free()
 
 
 func _clear_hazards() -> void:
@@ -1748,6 +1634,9 @@ func _update_enemy_targets() -> void:
 	for child: Node in _enemy_layer.get_children():
 		if child is EnemyActor:
 			(child as EnemyActor).set_target_position(_player.global_position)
+	for child: Node in _projectile_layer.get_children():
+		if child is EnemyProjectile:
+			(child as EnemyProjectile).set_target_position(_player.global_position)
 
 
 func _check_world_contacts() -> void:
@@ -1780,6 +1669,24 @@ func _check_world_contacts() -> void:
 			):
 				print("[GameWorld] hazard contact | health=%d" % _player.get_current_health())
 				return
+	# Enemies v2 attacks reach the Wisp even mid-dash (owner, 2026-09-27): a strike, a shot, a mark.
+	for child: Node in _enemy_layer.get_children():
+		if not child is EnemyActor:
+			continue
+		for circle: Vector3 in (child as EnemyActor).get_attack_circles():
+			if _circle_touches_player(circle) and _player.take_hazard_damage(_find_safest_edge_position()):
+				print("[GameWorld] enemy attack | health=%d" % _player.get_current_health())
+				return
+	for child: Node in _projectile_layer.get_children():
+		if not child is EnemyProjectile:
+			continue
+		var shot := child as EnemyProjectile
+		var danger: Vector3 = shot.get_danger_circle()
+		if danger.z > 0.0 and _circle_touches_player(danger) \
+				and _player.take_hazard_damage(_find_safest_edge_position()):
+			shot.on_hit_player()
+			print("[GameWorld] enemy shot | health=%d" % _player.get_current_health())
+			return
 	if is_instance_valid(_boss):
 		for circle: Vector3 in _boss.get_dangerous_circles():
 			var centre := Vector2(circle.x, circle.y)
@@ -1798,6 +1705,12 @@ func _check_world_contacts() -> void:
 			):
 				print("[GameWorld] Reaper corridor | health=%d" % _player.get_current_health())
 				return
+
+
+## Whether the Wisp's collision circle overlaps [param circle] (world x/y/radius).
+func _circle_touches_player(circle: Vector3) -> bool:
+	var radius: float = circle.z + _player.get_collision_radius()
+	return _player.global_position.distance_squared_to(Vector2(circle.x, circle.y)) <= radius * radius
 
 
 func _find_safest_edge_position() -> Vector2:
@@ -1869,6 +1782,9 @@ func _set_world_speed(multiplier: float) -> void:
 	for child: Node in _hazard_layer.get_children():
 		if child is HazardActor:
 			(child as HazardActor).set_world_speed(multiplier)
+	for child: Node in _projectile_layer.get_children():
+		if child is EnemyProjectile:
+			(child as EnemyProjectile).set_world_speed(multiplier)
 
 
 func _on_viewport_size_changed() -> void:
@@ -1942,9 +1858,6 @@ func _on_player_dash_segment_swept(
 	var travel: Vector2 = segment_end - segment_start
 	if travel.length_squared() > 0.01:
 		_dash_direction = travel.normalized()
-	# Portals consume the rest of this segment; the exit emits its own segments from next frame.
-	if _try_portal_transit(segment_start, segment_end, dash_id):
-		return
 	var hazard_event: Dictionary = _find_dash_hazard_event(segment_start, segment_end)
 	var hit_end: Vector2 = hazard_event.get(&"point", segment_end)
 	var cold_level: int = _run_progression.get_mutation_level(&"cold_wake")
@@ -1965,33 +1878,44 @@ func _on_player_dash_segment_swept(
 					* _run_progression.tuning.cold_wake_duration_per_level,
 					_run_progression.tuning.cold_wake_speed,
 				)
-		enemy.try_dash_hit(
+		var enemy_position: Vector2 = enemy.global_position
+		if enemy.try_dash_hit(
 			segment_start,
 			hit_end,
 			corridor_radius,
 			_player.dash_damage,
 			dash_id,
-		)
+		):
+			_play_strike(enemy_position, segment_start, hit_end)
 	for child: Node in _pickup_layer.get_children():
 		if child is SoulShardPickup:
 			(child as SoulShardPickup).try_dash_collect(segment_start, hit_end, corridor_radius)
 	if is_instance_valid(_boss):
-		_boss.try_dash_hit(
+		var boss_position: Vector2 = _boss.global_position
+		if _boss.try_dash_hit(
 			segment_start,
 			hit_end,
 			corridor_radius,
 			_player.dash_damage,
 			dash_id,
-		)
+		):
+			_play_strike(boss_position, segment_start, hit_end)
 	if hazard_event.is_empty():
+		return
+	var source: Object = hazard_event.get(&"source")
+	if is_instance_valid(source) and source is EnemyActor \
+			and not (source as EnemyActor).is_contact_active():
+		# This dash killed the striking enemy before it reached the strike.
 		return
 	var event_kind: StringName = hazard_event[&"kind"]
 	var event_point: Vector2 = hazard_event[&"point"]
 	var event_normal: Vector2 = hazard_event[&"normal"]
 	if event_kind == &"block":
 		_player.interrupt_dash_at(event_point, event_normal)
-	else:
-		_player.take_hazard_damage(_find_safest_edge_position())
+	elif _player.take_hazard_damage(_find_safest_edge_position()):
+		var shot: Object = hazard_event.get(&"shot")
+		if is_instance_valid(shot) and shot is EnemyProjectile:
+			(shot as EnemyProjectile).on_hit_player()
 
 
 ## The Wisp's aim preview changed: draw the path and light every enemy that dash would slice.
@@ -2081,13 +2005,6 @@ func _aim_stop_point(origin: Vector2, landing: Vector2) -> Vector2:
 		earliest_t = minf(earliest_t, _segment_circle_entry_t(
 			origin, landing, hazard.global_position, hazard.get_blocking_radius() + player_radius
 		))
-	if _portals.size() == 2:
-		var portal_radius: float = PORTAL_RADIUS * (_arena_rect.size.x / 1080.0)
-		for portal: Sprite2D in _portals:
-			if is_instance_valid(portal):
-				earliest_t = minf(earliest_t, _segment_circle_entry_t(
-					origin, landing, portal.global_position, portal_radius
-				))
 	return origin.lerp(landing, earliest_t)
 
 
@@ -2130,6 +2047,44 @@ func _find_dash_hazard_event(segment_start: Vector2, segment_end: Vector2) -> Di
 					&"point": point,
 					&"normal": (point - centre).normalized(),
 				}
+	# Enemies v2 strikes, shots and wall marks, which reach the Wisp mid-dash. A strike's event names
+	# its enemy: a dash that kills the enemy first escapes its strike (see the segment sweep).
+	for child: Node in _enemy_layer.get_children():
+		if not child is EnemyActor:
+			continue
+		for circle: Vector3 in (child as EnemyActor).get_attack_circles():
+			var strike_centre := Vector2(circle.x, circle.y)
+			var strike_t: float = _segment_circle_entry_t(
+				segment_start, segment_end, strike_centre, circle.z + _player.get_collision_radius()
+			)
+			if strike_t < earliest_t:
+				earliest_t = strike_t
+				var strike_point: Vector2 = segment_start.lerp(segment_end, strike_t)
+				result = {
+					&"kind": &"damage",
+					&"point": strike_point,
+					&"normal": (strike_point - strike_centre).normalized(),
+					&"source": child,
+				}
+	for child: Node in _projectile_layer.get_children():
+		if not child is EnemyProjectile:
+			continue
+		var danger: Vector3 = (child as EnemyProjectile).get_danger_circle()
+		if danger.z <= 0.0:
+			continue
+		var shot_centre := Vector2(danger.x, danger.y)
+		var shot_t: float = _segment_circle_entry_t(
+			segment_start, segment_end, shot_centre, danger.z + _player.get_collision_radius()
+		)
+		if shot_t < earliest_t:
+			earliest_t = shot_t
+			var shot_point: Vector2 = segment_start.lerp(segment_end, shot_t)
+			result = {
+				&"kind": &"damage",
+				&"point": shot_point,
+				&"normal": (shot_point - shot_centre).normalized(),
+				&"shot": child,
+			}
 	if is_instance_valid(_boss):
 		for circle: Vector3 in _boss.get_dangerous_circles():
 			var centre := Vector2(circle.x, circle.y)
@@ -2326,7 +2281,6 @@ func _on_enemy_killed(
 	_combo += 1
 	_highest_combo = maxi(_highest_combo, _combo)
 	_total_kills += 1
-	_kill_streak += 1
 	_combo_remaining = COMBO_TIMEOUT
 	_score += _apply_velocity_score_bonus(score_reward * _combo)
 	var dash_kill_index: int = 0
@@ -2350,9 +2304,6 @@ func _on_enemy_killed(
 	_combo_label.visible = _combo >= 2
 	if _random.randf() <= enemy.get_shard_drop_chance():
 		_spawn_rp_pickup(world_position)
-	if _random.randf() < _run_progression.tuning.soul_vessel_drop_chance:
-		_spawn_soul_vessel(world_position)
-	_try_reapers_gift()
 	_try_soul_link(enemy, world_position, damage_event_id)
 	enemy_defeated.emit(world_position, dash_kill_index)
 	print(
@@ -2410,24 +2361,6 @@ func _spawn_rp_pickup(world_position: Vector2) -> void:
 	_pickup_layer.add_child(pickup)
 
 
-## Drops a Soul Vessel: the only Soul Fragment a run can find on the floor.
-func _spawn_soul_vessel(world_position: Vector2) -> void:
-	var pickup := VESSEL_PICKUP_SCENE.instantiate() as SoulVesselPickup
-	pickup.configure(_player, _get_pickup_attraction_radius(), _arena_rect.size.x)
-	pickup.position = world_position
-	pickup.collected.connect(_on_soul_vessel_collected.bind(pickup))
-	_pickup_layer.add_child(pickup)
-
-
-## A collected Soul Vessel raises the maximum by one and fills it; there is no cap.
-func _on_soul_vessel_collected(_amount: int, pickup: SoulVesselPickup) -> void:
-	_player.increase_maximum_health(1, 1)
-	if not is_instance_valid(pickup) or not pickup.is_auto_collected():
-		# A deeper chime than a Rift Points shard, so a fragment never sounds like currency.
-		SoundFx.play(&"shard_pickup", 0.62)
-	_show_callout("SOUL VESSEL")
-
-
 func _on_rp_pickup_collected(amount: int, pickup: SoulShardPickup) -> void:
 	_award_rift_points(amount)
 	# Swept shards share one capped chime run (`_play_sweep_chimes`), never a sound each.
@@ -2468,20 +2401,6 @@ func _update_pickup_attraction() -> void:
 				_get_pickup_attraction_radius(),
 				_arena_rect.size.x,
 			)
-
-
-func _try_reapers_gift() -> void:
-	var gift_level: int = _run_progression.get_mutation_level(&"reapers_gift")
-	if gift_level <= 0:
-		return
-	var threshold: int = maxi(
-		_run_progression.tuning.gift_minimum_streak,
-		_run_progression.tuning.gift_base_streak
-		- gift_level * _run_progression.tuning.gift_reduction_per_level,
-	)
-	if _kill_streak >= threshold and _player.heal(1):
-		_kill_streak = 0
-		_show_callout("REAPER'S GIFT  +1")
 
 
 func _on_experience_changed(current_xp: int, threshold: int, run_level: int) -> void:
@@ -2663,10 +2582,6 @@ func _update_player_mutation_stats() -> void:
 	)
 
 
-func _on_player_health_changed(current_health: int, _maximum_health: int) -> void:
-	_life_count.text = str(current_health)
-
-
 func _on_player_damaged(current_health: int, _maximum_health: int) -> void:
 	if not is_rush_active():
 		_rush_meter = maxf(0.0, _rush_meter - feel_tuning.damage_drain)
@@ -2675,7 +2590,6 @@ func _on_player_damaged(current_health: int, _maximum_health: int) -> void:
 		_sweep_floor_shards()
 	_combo = 0
 	_combo_remaining = 0.0
-	_kill_streak = 0
 	_combo_label.visible = false
 	_show_callout("SOUL FRACTURED")
 	SoundFx.play(&"player_damage")
@@ -2703,15 +2617,10 @@ func _on_player_died() -> void:
 	_emit_run_end()
 
 
-## Builds the run summary (story fields included) and emits `run_ended` once.
+## Builds the run summary and emits `run_ended` once.
 func _emit_run_end() -> void:
 	# Right before the summary: every shard still on the floor or in flight counts, once.
 	_sweep_floor_shards(true)
-	var victory: bool = _level_cleared
-	var first_clear: bool = victory and _first_clear_possible
-	var clear_bonus: int = 0
-	if victory and economy_tuning != null:
-		clear_bonus = economy_tuning.get_level_clear_bonus(_rift_level, first_clear)
 	var summary: Dictionary = {
 		&"score": _score,
 		&"kills": _total_kills,
@@ -2726,27 +2635,15 @@ func _emit_run_end() -> void:
 		&"daily_date": _daily_date_key,
 		&"is_daily": _mode == RunProfile.MODE_DAILY,
 		&"mode": String(_mode),
-		# Empty on Endless rules, so Rift bests and level clears are never touched by those runs.
-		&"rift": String(_arena_rules.get_rift_id()),
 		&"skin_id": String(_arena_rules.get_skin_id()),
 		&"cycle": _bosses_defeated,
-		&"rift_rule": String(_rift_rule),
-		&"level": _rift_level,
-		&"victory": victory,
-		&"level_cleared": victory,
-		&"first_clear": first_clear,
-		&"rp_clear_bonus": clear_bonus,
-		# Trials read this cumulative count; one story run clears at most one level.
-		&"level_clears": 1 if victory else 0,
-		&"rift_levels_cleared": _rift_level if victory else 0,
 		# RUSH activations this run, for future goals (no save field).
 		&"rush_count": _rush_count,
 	}
 	print(
-		"[GameWorld] run ended | mode=%s victory=%s score=%d kills=%d wave=%d rp_collected=%d rp_performance=%d rp_clear=%d%s"
+		"[GameWorld] run ended | mode=%s score=%d kills=%d wave=%d rp_collected=%d rp_performance=%d%s"
 		% [
-			_mode, victory, _score, _total_kills, _current_wave, _rp_collected, get_rp_performance(),
-			clear_bonus,
+			_mode, _score, _total_kills, _current_wave, _rp_collected, get_rp_performance(),
 			" (economy placeholder)" if economy_tuning != null and economy_tuning.placeholder else "",
 		]
 	)
@@ -2780,6 +2677,11 @@ func _style_callout(is_reward: bool) -> void:
 	_combo_label.theme_type_variation = &"AmberValueLabel" if is_reward else &"TitleLabel"
 
 
+## True unless the equipped character lands in dust: the Wisp's splash and impact burst are cyan art.
+func _uses_splash_landing() -> bool:
+	return _dash_effect == null or _dash_effect.landing == DashEffectData.Landing.SPLASH
+
+
 ## Plays the splash where the Wisp hit the wall. No wall highlight: the effect lives only at impact.
 func _play_wall_splash(world_position: Vector2, inward_normal: Vector2, dash_kills: int) -> void:
 	_wall_splash.play(
@@ -2791,6 +2693,7 @@ func _play_wall_splash(world_position: Vector2, inward_normal: Vector2, dash_kil
 		_reduced_motion,
 		# The Wisp's centre rests LANDING_INSET radii from the wall; this lands the splash on it.
 		_player.get_collision_radius() * (LANDING_INSET - 0.1),
+		_dash_effect,
 	)
 
 
@@ -2895,6 +2798,8 @@ func _close_settings_overlay() -> void:
 func _apply_feel_settings(settings: Dictionary) -> void:
 	_reduced_motion = bool(settings.get(&"reduced_motion", false))
 	_ambience.set_active(not _reduced_motion)
+	if is_instance_valid(_arena_visual):
+		_arena_visual.set_reduced_motion(_reduced_motion)
 	_player.set_reduced_motion(_reduced_motion)
 	_player.set_aim_arrow_enabled(bool(settings.get(&"aim_arrow", true)))
 	_player.set_aim_assist_enabled(bool(settings.get(&"aim_assist", true)))
@@ -3033,6 +2938,8 @@ func _get_dash_trail_tint() -> Color:
 ## a dash starts, and the long trail ([param long_trail_end] set) where a long dash lands. Tints stay
 ## the dash style's.
 func _play_dash_trail(long_trail_end: Variant = null) -> void:
+	if _dash_effect != null and not _dash_effect.shared_trails:
+		return
 	var radius: float = _player.get_collision_radius()
 	var level: float = _player.get_momentum_visual_level()
 	var length: float = lerpf(1.0, feel_tuning.trail_length_at_max, level)
@@ -3100,6 +3007,21 @@ func _play_impact_feedback(world_position: Vector2, inward_normal: Vector2, dash
 		Haptics.pulse(Haptics.MEDIUM_MS, 0.5)
 	else:
 		add_trauma(0.45)
+
+
+## A dash landed a hit on the enemy or boss at [param target] (owner, 2026-09-28: a hit animation
+## whenever the character hits something): the strike plays halfway between the dash's path and the
+## target's centre, so it sits on the target's body where the dash crossed it.
+func _play_strike(target: Vector2, segment_start: Vector2, segment_end: Vector2) -> void:
+	var on_path: Vector2 = Geometry2D.get_closest_point_to_segment(target, segment_start, segment_end)
+	_strike_fx.play(
+		on_path.lerp(target, 0.5),
+		_dash_direction,
+		_get_form_tint(),
+		_player.get_collision_radius(),
+		_arena_rect.size.x,
+		_reduced_motion,
+	)
 
 
 func _play_kill_effects(world_position: Vector2) -> void:

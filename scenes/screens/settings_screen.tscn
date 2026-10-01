@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" path="res://scenes/screens/settings_screen.gd" id="1_settings"]
 [ext_resource type="Texture2D" path="res://assets/art/environment/menu_background.png" id="2_background"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/system/16_home.png" id="3_home"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/system/15_settings.png" id="4_settings"]
+[ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_home.tres" id="3_home"]
+[ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_settings.tres" id="4_settings"]
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/banner_top.tscn" id="5_banner_top"]
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/card_top.tscn" id="6_card_top"]
 
@@ -95,45 +95,59 @@ texture = ExtResource("4_settings")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="TopSpacer" type="Control" parent="Margin/Content"]
+[node name="Scroll" type="ScrollContainer" parent="Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 3
+
+[node name="Body" type="VBoxContainer" parent="Margin/Content/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="TopSpacer" type="Control" parent="Margin/Content/Scroll/Body"]
 custom_minimum_size = Vector2(0, 16)
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
 
-[node name="Groups" type="VBoxContainer" parent="Margin/Content"]
+[node name="Groups" type="VBoxContainer" parent="Margin/Content/Scroll/Body"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 40
 
-[node name="AudioCard" type="PanelContainer" parent="Margin/Content/Groups"]
+[node name="AudioCard" type="PanelContainer" parent="Margin/Content/Scroll/Body/Groups"]
 layout_mode = 2
+mouse_filter = 1
 theme_type_variation = &"PanelCard"
 
-[node name="CardOrnament" parent="Margin/Content/Groups/AudioCard" instance=ExtResource("6_card_top")]
+[node name="CardOrnament" parent="Margin/Content/Scroll/Body/Groups/AudioCard" instance=ExtResource("6_card_top")]
 layout_mode = 2
 
-[node name="Rows" type="VBoxContainer" parent="Margin/Content/Groups/AudioCard"]
+[node name="Rows" type="VBoxContainer" parent="Margin/Content/Scroll/Body/Groups/AudioCard"]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="Caption" type="Label" parent="Margin/Content/Groups/AudioCard/Rows"]
+[node name="Caption" type="Label" parent="Margin/Content/Scroll/Body/Groups/AudioCard/Rows"]
 layout_mode = 2
 theme_type_variation = &"CaptionLabel"
 text = "AUDIO"
 
-[node name="MusicRow" type="HBoxContainer" parent="Margin/Content/Groups/AudioCard/Rows"]
+[node name="MusicRow" type="HBoxContainer" parent="Margin/Content/Scroll/Body/Groups/AudioCard/Rows"]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="MusicLabel" type="Label" parent="Margin/Content/Groups/AudioCard/Rows/MusicRow"]
+[node name="MusicLabel" type="Label" parent="Margin/Content/Scroll/Body/Groups/AudioCard/Rows/MusicRow"]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 33
 text = "MUSIC"
 vertical_alignment = 1
 
-[node name="MusicSlider" type="HSlider" parent="Margin/Content/Groups/AudioCard/Rows/MusicRow"]
+[node name="MusicSlider" type="HSlider" parent="Margin/Content/Scroll/Body/Groups/AudioCard/Rows/MusicRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 96)
 layout_mode = 2
@@ -143,28 +157,28 @@ max_value = 1.0
 step = 0.05
 value = 0.8
 
-[node name="MusicValue" type="Label" parent="Margin/Content/Groups/AudioCard/Rows/MusicRow"]
+[node name="MusicValue" type="Label" parent="Margin/Content/Scroll/Body/Groups/AudioCard/Rows/MusicRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(116, 0)
 layout_mode = 2
 theme_type_variation = &"ValueLabel"
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 33
 text = "80%"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="SfxRow" type="HBoxContainer" parent="Margin/Content/Groups/AudioCard/Rows"]
+[node name="SfxRow" type="HBoxContainer" parent="Margin/Content/Scroll/Body/Groups/AudioCard/Rows"]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="SfxLabel" type="Label" parent="Margin/Content/Groups/AudioCard/Rows/SfxRow"]
+[node name="SfxLabel" type="Label" parent="Margin/Content/Scroll/Body/Groups/AudioCard/Rows/SfxRow"]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 33
 text = "SOUND FX"
 vertical_alignment = 1
 
-[node name="SfxSlider" type="HSlider" parent="Margin/Content/Groups/AudioCard/Rows/SfxRow"]
+[node name="SfxSlider" type="HSlider" parent="Margin/Content/Scroll/Body/Groups/AudioCard/Rows/SfxRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 96)
 layout_mode = 2
@@ -174,44 +188,45 @@ max_value = 1.0
 step = 0.05
 value = 0.9
 
-[node name="SfxValue" type="Label" parent="Margin/Content/Groups/AudioCard/Rows/SfxRow"]
+[node name="SfxValue" type="Label" parent="Margin/Content/Scroll/Body/Groups/AudioCard/Rows/SfxRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(116, 0)
 layout_mode = 2
 theme_type_variation = &"ValueLabel"
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 33
 text = "90%"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="FeelCard" type="PanelContainer" parent="Margin/Content/Groups"]
+[node name="FeelCard" type="PanelContainer" parent="Margin/Content/Scroll/Body/Groups"]
 layout_mode = 2
+mouse_filter = 1
 theme_type_variation = &"PanelCard"
 
-[node name="CardOrnament" parent="Margin/Content/Groups/FeelCard" instance=ExtResource("6_card_top")]
+[node name="CardOrnament" parent="Margin/Content/Scroll/Body/Groups/FeelCard" instance=ExtResource("6_card_top")]
 layout_mode = 2
 
-[node name="Rows" type="VBoxContainer" parent="Margin/Content/Groups/FeelCard"]
+[node name="Rows" type="VBoxContainer" parent="Margin/Content/Scroll/Body/Groups/FeelCard"]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="Caption" type="Label" parent="Margin/Content/Groups/FeelCard/Rows"]
+[node name="Caption" type="Label" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows"]
 layout_mode = 2
 theme_type_variation = &"CaptionLabel"
 text = "FEEL & COMFORT"
 
-[node name="ShakeRow" type="HBoxContainer" parent="Margin/Content/Groups/FeelCard/Rows"]
+[node name="ShakeRow" type="HBoxContainer" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows"]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="ShakeLabel" type="Label" parent="Margin/Content/Groups/FeelCard/Rows/ShakeRow"]
+[node name="ShakeLabel" type="Label" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows/ShakeRow"]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 33
 text = "SCREEN SHAKE"
 vertical_alignment = 1
 
-[node name="ShakeSlider" type="HSlider" parent="Margin/Content/Groups/FeelCard/Rows/ShakeRow"]
+[node name="ShakeSlider" type="HSlider" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows/ShakeRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 96)
 layout_mode = 2
@@ -221,172 +236,186 @@ max_value = 1.0
 step = 0.05
 value = 1.0
 
-[node name="ShakeValue" type="Label" parent="Margin/Content/Groups/FeelCard/Rows/ShakeRow"]
+[node name="ShakeValue" type="Label" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows/ShakeRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(116, 0)
 layout_mode = 2
 theme_type_variation = &"ValueLabel"
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 33
 text = "100%"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="HapticsRow" type="HBoxContainer" parent="Margin/Content/Groups/FeelCard/Rows"]
+[node name="HapticsRow" type="HBoxContainer" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows"]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="HapticsText" type="VBoxContainer" parent="Margin/Content/Groups/FeelCard/Rows/HapticsRow"]
+[node name="HapticsText" type="VBoxContainer" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows/HapticsRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 theme_override_constants/separation = 0
 
-[node name="HapticsLabel" type="Label" parent="Margin/Content/Groups/FeelCard/Rows/HapticsRow/HapticsText"]
+[node name="HapticsLabel" type="Label" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows/HapticsRow/HapticsText"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 33
 text = "HAPTICS"
 
-[node name="HapticsCaption" type="Label" parent="Margin/Content/Groups/FeelCard/Rows/HapticsRow/HapticsText"]
+[node name="HapticsCaption" type="Label" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows/HapticsRow/HapticsText"]
 layout_mode = 2
 theme_type_variation = &"CaptionLabel"
 text = "Vibration feedback"
 
-[node name="HapticsToggle" type="Button" parent="Margin/Content/Groups/FeelCard/Rows/HapticsRow"]
+[node name="HapticsToggle" type="Button" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows/HapticsRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(230, 0)
 layout_mode = 2
 size_flags_vertical = 4
+mouse_filter = 1
 theme_type_variation = &"SecondaryButton"
 toggle_mode = true
 button_pressed = true
 text = "ON"
 
-[node name="AimArrowRow" type="HBoxContainer" parent="Margin/Content/Groups/FeelCard/Rows"]
+[node name="AimArrowRow" type="HBoxContainer" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows"]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="AimArrowText" type="VBoxContainer" parent="Margin/Content/Groups/FeelCard/Rows/AimArrowRow"]
+[node name="AimArrowText" type="VBoxContainer" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows/AimArrowRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 theme_override_constants/separation = 0
 
-[node name="AimArrowLabel" type="Label" parent="Margin/Content/Groups/FeelCard/Rows/AimArrowRow/AimArrowText"]
+[node name="AimArrowLabel" type="Label" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows/AimArrowRow/AimArrowText"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 33
 text = "AIM ARROW"
 
-[node name="AimArrowCaption" type="Label" parent="Margin/Content/Groups/FeelCard/Rows/AimArrowRow/AimArrowText"]
+[node name="AimArrowCaption" type="Label" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows/AimArrowRow/AimArrowText"]
 layout_mode = 2
 theme_type_variation = &"CaptionLabel"
 text = "Show the aim arrow and lit targets"
 
-[node name="AimArrowToggle" type="Button" parent="Margin/Content/Groups/FeelCard/Rows/AimArrowRow"]
+[node name="AimArrowToggle" type="Button" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows/AimArrowRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(230, 0)
 layout_mode = 2
 size_flags_vertical = 4
+mouse_filter = 1
 theme_type_variation = &"SecondaryButton"
 toggle_mode = true
 text = "OFF"
 
-[node name="AimAssistRow" type="HBoxContainer" parent="Margin/Content/Groups/FeelCard/Rows"]
+[node name="AimAssistRow" type="HBoxContainer" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows"]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="AimAssistText" type="VBoxContainer" parent="Margin/Content/Groups/FeelCard/Rows/AimAssistRow"]
+[node name="AimAssistText" type="VBoxContainer" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows/AimAssistRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 theme_override_constants/separation = 0
 
-[node name="AimAssistLabel" type="Label" parent="Margin/Content/Groups/FeelCard/Rows/AimAssistRow/AimAssistText"]
+[node name="AimAssistLabel" type="Label" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows/AimAssistRow/AimAssistText"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 33
 text = "AIM ASSIST"
 
-[node name="AimAssistCaption" type="Label" parent="Margin/Content/Groups/FeelCard/Rows/AimAssistRow/AimAssistText"]
+[node name="AimAssistCaption" type="Label" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows/AimAssistRow/AimAssistText"]
 layout_mode = 2
 theme_type_variation = &"CaptionLabel"
 text = "Gently bends a dash into more enemies"
 
-[node name="AimAssistToggle" type="Button" parent="Margin/Content/Groups/FeelCard/Rows/AimAssistRow"]
+[node name="AimAssistToggle" type="Button" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows/AimAssistRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(230, 0)
 layout_mode = 2
 size_flags_vertical = 4
+mouse_filter = 1
 theme_type_variation = &"SecondaryButton"
 toggle_mode = true
 button_pressed = true
 text = "ON"
 
-[node name="ReducedMotionRow" type="HBoxContainer" parent="Margin/Content/Groups/FeelCard/Rows"]
+[node name="ReducedMotionRow" type="HBoxContainer" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows"]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="ReducedMotionText" type="VBoxContainer" parent="Margin/Content/Groups/FeelCard/Rows/ReducedMotionRow"]
+[node name="ReducedMotionText" type="VBoxContainer" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows/ReducedMotionRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 theme_override_constants/separation = 0
 
-[node name="ReducedMotionLabel" type="Label" parent="Margin/Content/Groups/FeelCard/Rows/ReducedMotionRow/ReducedMotionText"]
+[node name="ReducedMotionLabel" type="Label" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows/ReducedMotionRow/ReducedMotionText"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 33
 text = "REDUCED MOTION"
 
-[node name="ReducedMotionCaption" type="Label" parent="Margin/Content/Groups/FeelCard/Rows/ReducedMotionRow/ReducedMotionText"]
+[node name="ReducedMotionCaption" type="Label" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows/ReducedMotionRow/ReducedMotionText"]
 layout_mode = 2
 theme_type_variation = &"CaptionLabel"
 text = "Calmer camera and effects"
 
-[node name="ReducedMotionToggle" type="Button" parent="Margin/Content/Groups/FeelCard/Rows/ReducedMotionRow"]
+[node name="ReducedMotionToggle" type="Button" parent="Margin/Content/Scroll/Body/Groups/FeelCard/Rows/ReducedMotionRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(230, 0)
 layout_mode = 2
 size_flags_vertical = 4
+mouse_filter = 1
 theme_type_variation = &"SecondaryButton"
 toggle_mode = true
 text = "OFF"
 
-[node name="MoreCard" type="PanelContainer" parent="Margin/Content/Groups"]
+[node name="MoreCard" type="PanelContainer" parent="Margin/Content/Scroll/Body/Groups"]
 layout_mode = 2
+mouse_filter = 1
 theme_type_variation = &"PanelCard"
 
-[node name="CardOrnament" parent="Margin/Content/Groups/MoreCard" instance=ExtResource("6_card_top")]
+[node name="CardOrnament" parent="Margin/Content/Scroll/Body/Groups/MoreCard" instance=ExtResource("6_card_top")]
 layout_mode = 2
 
-[node name="Rows" type="VBoxContainer" parent="Margin/Content/Groups/MoreCard"]
+[node name="Rows" type="VBoxContainer" parent="Margin/Content/Scroll/Body/Groups/MoreCard"]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="Caption" type="Label" parent="Margin/Content/Groups/MoreCard/Rows"]
+[node name="Caption" type="Label" parent="Margin/Content/Scroll/Body/Groups/MoreCard/Rows"]
 layout_mode = 2
 theme_type_variation = &"CaptionLabel"
 text = "MORE"
 
-[node name="AboutButton" type="Button" parent="Margin/Content/Groups/MoreCard/Rows"]
+[node name="AboutButton" type="Button" parent="Margin/Content/Scroll/Body/Groups/MoreCard/Rows"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 1
 theme_type_variation = &"SecondaryButton"
 text = "PRIVACY & ABOUT"
 
-[node name="ResetButton" type="Button" parent="Margin/Content/Groups/MoreCard/Rows"]
+[node name="ReplayTutorialButton" type="Button" parent="Margin/Content/Scroll/Body/Groups/MoreCard/Rows"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 1
+theme_type_variation = &"SecondaryButton"
+text = "REPLAY TUTORIAL"
+
+[node name="ResetButton" type="Button" parent="Margin/Content/Scroll/Body/Groups/MoreCard/Rows"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 1
 theme_type_variation = &"DangerButton"
 text = "RESET PROGRESS"
 
-[node name="FeedbackLabel" type="Label" parent="Margin/Content"]
+[node name="FeedbackLabel" type="Label" parent="Margin/Content/Scroll/Body"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 33
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
 
-[node name="BottomSpacer" type="Control" parent="Margin/Content"]
+[node name="BottomSpacer" type="Control" parent="Margin/Content/Scroll/Body"]
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
@@ -437,7 +466,7 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(860, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 33
 autowrap_mode = 3
 
 [node name="AboutCloseButton" type="Button" parent="AboutPanel/Center/Card/Content"]
@@ -491,7 +520,7 @@ horizontal_alignment = 1
 [node name="ResetText" type="Label" parent="ResetPanel/Center/Card/Content"]
 custom_minimum_size = Vector2(860, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 33
 text = "Best scores, statistics, Rift Points, owned forms, challenge progress and settings will be erased from this device. This cannot be undone."
 horizontal_alignment = 1
 autowrap_mode = 3
