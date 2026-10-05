@@ -1,7 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/screens/shop_screen.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/art/environment/menu_background.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/menu_screens/shop_background.png" id="2_bg"]
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/banner_top.tscn" id="3_banner"]
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/crest_top.tscn" id="4_crest_top"]
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/crest_bottom.tscn" id="5_crest_bottom"]
@@ -23,6 +23,7 @@ form_catalog = ExtResource("7_forms")
 endless_catalog = ExtResource("9_endless")
 
 [node name="Background" type="TextureRect" parent="."]
+texture_filter = 1
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

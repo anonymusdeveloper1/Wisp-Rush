@@ -1,6 +1,6 @@
 # System: Trials and depth milestones
 
-> **Status:** ✅ done · **Last updated:** 2026-09-25 · **GDD section:** §6 ·
+> **Status:** ✅ done · **Last updated:** 2026-10-05 · **GDD section:** §6 ·
 > **ADR:** [0013](../decisions/0013-rift-story-levels-endless-mode-and-rift-points.md) (Rift Points, no
 > permanent power)
 >
@@ -82,6 +82,7 @@ keyed on the lifetime best wave.
 
 | Date | Change |
 |---|---|
+| 2026-10-05 | Trials gets the dedicated nearest-filtered ascending-ruin background ([game_flow.md](game_flow.md)); goal rows and rank behavior unchanged |
 | 2026-09-25 | Rift wording replaced (owner): Trials REAP THE RIFT → REAP THE HORDE (`t01`–`t12_kills`), RIFT BREAKER → BOSS BREAKER (`t07_bosses_m`), RIFT SOVEREIGN → ARENA SOVEREIGN (`t12_score_m`) |
 | 2026-09-25 | Story Rifts removed (owner): the note on Trials points at their removal; `level_clears` is no longer a Trial metric |
 | 2026-09-15 | Story audit: level-clear trials replace deep-wave and multi-level goals in tiers 2, 3, 6, 7 (spec 02) |

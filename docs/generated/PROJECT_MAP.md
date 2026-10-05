@@ -7,7 +7,7 @@
 
 **Main scene:** `res://scenes/main/main.tscn` · **Features:** `4.7, Forward Plus`
 
-**Counts:** 42 scenes · 113 scripts · 210 resources · 16 shaders · 430 asset files
+**Counts:** 43 scenes · 114 scripts · 211 resources · 16 shaders · 501 asset files
 
 ## Autoloads
 
@@ -51,6 +51,7 @@ _None._
 | `res://scenes/arenas/board_01.tscn` | `Board01` (Control) | `res://scenes/arenas/board_arena_visual.gd` | 1 | — | — |
 | `res://scenes/arenas/board_01_light.tscn` | `Board01Light` (inherits res://scenes/arenas/board_01.tscn) | — | 1 | `res://scenes/arenas/board_01.tscn` | — |
 | `res://scenes/arenas/chained_colossus_3d.tscn` | `ChainedColossus3D` (Control) | `res://scenes/arenas/chained_colossus_3d.gd` | 9 | `res://assets/art/environment/arenas/chained_colossus_3d/chained_colossus.glb` | — |
+| `res://scenes/arenas/sci_fi_simulation_v1.tscn` | `SciFiSimulationV1` (Control) | `res://scenes/arenas/sci_fi_board_visual.gd` | 1 | — | — |
 | `res://scenes/arenas/stitchwarden_vigil.tscn` | `StitchwardenVigil` (Control) | `res://scenes/arenas/stitchwarden_vigil.gd` | 27 | — | — |
 | `res://scenes/arenas/zoom_arena_3d.tscn` | `ZoomArena3D` (inherits res://scenes/arenas/chained_colossus_3d.tscn) | — | 1 | `res://scenes/arenas/chained_colossus_3d.tscn` | — |
 | `res://scenes/bosses/grimgrin_boss.tscn` | `GrimgrinBoss` (Node2D) | `res://scenes/bosses/grimgrin_boss.gd` | 4 | — | `bosses` |
@@ -95,15 +96,16 @@ _None._
 | Script | class_name | extends | Summary (`##` brief) | Signals | Exports | Public methods |
 |---|---|---|---|---|---|---|
 | `res://assets/ui/theme/tools/build_wisp_theme.gd` | — | `SceneTree` | Generates res://assets/ui/theme/wisp_theme.tres, the ornament scenes, the nearest-filtered texture wrappers and the pixel font from the pixel UI kit. | — | — | — |
-| `res://scenes/arenas/arena_visual.gd` | `ArenaVisual` | `Control` | An Endless arena drawn as a scene instead of one painting: layered sprites, a 3D model or a board. | `intro_finished`, `hud_pause_pressed` | `backdrop_overscan` | `fit`, `get_floor_rect`, `get_drawn_floor_rect`, `has_intro`, `play_intro`, `skip_intro`, `has_board_hud`, `set_board_hud`, `set_focus_point`, `set_reduced_motion` |
+| `res://scenes/arenas/arena_visual.gd` | `ArenaVisual` | `Control` | An Endless arena drawn as a scene instead of one painting: layered sprites, a 3D model or a board. | `intro_finished`, `hud_pause_pressed` | `backdrop_overscan` | `fit`, `get_floor_rect`, `get_drawn_floor_rect`, `has_intro`, `play_intro`, `skip_intro`, `has_board_hud`, `set_board_hud`, `set_focus_point`, `set_safe_bottom`, `show_enemy_arrival`, `show_boss_appearance`, `clear_spawn_effects`, `set_reduced_motion` |
 | `res://scenes/arenas/board_arena_visual.gd` | `BoardArenaVisual` | `ArenaVisual` | A board arena: a full-screen pixel-art board whose frame holds the run's HUD (owner 2026-10-02, | — | `art_dir`, `light_floor`, `bottom_cap`, `lantern_frame_seconds`, `layout_seed`, `score_font_size`, `small_font_size`, `tag_font_size` | `fit`, `has_board_hud`, `set_board_hud` |
 | `res://scenes/arenas/chained_colossus_3d.gd` | — | `ModelArenaVisual` | CHAINED COLOSSUS 3D: the owner's model of a hooded stone colossus holding the arena board, | — | — | — |
 | `res://scenes/arenas/layered_arena_visual.gd` | `LayeredArenaVisual` | `ArenaVisual` | An Endless arena drawn as a scene of layers instead of one painting (ADR-0021). | — | `floor_texels`, `content_rect`, `head_top`, `head_clear`, `bottom_margin`, `side_margin`, `max_scale` | `fit`, `get_group_scale` |
 | `res://scenes/arenas/model_arena_visual.gd` | `ModelArenaVisual` | `ArenaVisual` | An Endless arena drawn live in 3D: a model holding the playable floor (ADR-0023). | — | `layout`, `floor_width_share`, `eye_clear`, `bottom_margin`, `fov_degrees`, `zoom_intro`, `intro_hold`, `intro_seconds`, `intro_fill`, `play_fills_screen`, `play_hud_clear`, `play_side_margin`, `play_bottom_margin`, `breath_period`, `breath_degrees`, `breath_rise` | `fit`, `get_drawn_floor_rect`, `has_intro`, `play_intro`, `skip_intro` |
+| `res://scenes/arenas/sci_fi_board_visual.gd` | `SciFiBoardVisual` | `ArenaVisual` | The sci-fi simulation board: a portrait screen in a graphite frame that holds the run's HUD and | — | `art_dir` | `fit`, `has_board_hud`, `set_board_hud`, `show_enemy_arrival`, `show_boss_appearance`, `clear_spawn_effects` |
 | `res://scenes/arenas/stitchwarden_vigil.gd` | — | `LayeredArenaVisual` | Stitchwarden's Vigil: the stitched doll holds the board up over the moonlit jungle (owner | — | — | `set_focus_point` |
-| `res://scenes/bosses/boss_actor.gd` | `BossActor` | `Node2D` | The one interface `GameWorld` drives every boss through. | `phase_changed`, `summon_requested`, `spawn_requested`, `health_changed`, `defeated` | — | `configure_variant`, `configure`, `set_target_position`, `set_arena_rect`, `set_arena_polygon`, `set_last_edge_position`, `set_player_radius`, `skip_intro`, `get_current_health`, `get_maximum_health`, `is_core_exposed`, `get_phase`, `get_phase_name`, `get_dangerous_circles`, `get_dangerous_lanes`, `get_lane_radius`, `try_dash_hit`, `get_victory_duration`, `get_experience_reward`, `get_defeat_name` |
-| `res://scenes/bosses/grimgrin_boss.gd` | `GrimgrinBoss` | `BossActor` | Grimgrin, the Hollow Ronin: the melee boss of the new set (owner's design, | — | `tuning`, `layout` | `configure`, `set_target_position`, `set_arena_rect`, `set_last_edge_position`, `set_player_radius`, `skip_intro`, `get_current_health`, `get_maximum_health`, `is_core_exposed`, `get_phase`, `get_phase_name`, `is_planted`, `is_marking`, `is_fast_attack`, `get_dangerous_circles`, `get_wall`, `get_dangerous_lanes`, `get_lane_radius`, `try_dash_hit`, `get_victory_duration`, `get_experience_reward`, `get_defeat_name` |
-| `res://scenes/bosses/reaper_boss.gd` | `ReaperBoss` | `BossActor` | Runs the Reaper's deterministic three-phase attacks, exposed core and victory dissolve. | — | `tuning` | `configure_variant`, `configure`, `set_target_position`, `set_arena_polygon`, `set_arena_rect`, `set_last_edge_position`, `skip_intro`, `get_current_health`, `get_maximum_health`, `is_core_exposed`, `get_phase`, `get_phase_name`, `get_victory_duration`, `get_experience_reward`, `get_defeat_name`, `get_dangerous_circles`, `get_dangerous_lanes`, `get_lane_radius`, `try_dash_hit` |
+| `res://scenes/bosses/boss_actor.gd` | `BossActor` | `Node2D` | The one interface `GameWorld` drives every boss through. | `phase_changed`, `summon_requested`, `spawn_requested`, `health_changed`, `defeated` | — | `configure_variant`, `configure`, `set_target_position`, `set_arena_rect`, `set_arena_polygon`, `set_last_edge_position`, `set_player_radius`, `skip_intro`, `get_intro_progress`, `get_current_health`, `get_maximum_health`, `is_core_exposed`, `get_phase`, `get_phase_name`, `get_dangerous_circles`, `get_dangerous_lanes`, `get_lane_radius`, `try_dash_hit`, `get_victory_duration`, `get_experience_reward`, `get_defeat_name` |
+| `res://scenes/bosses/grimgrin_boss.gd` | `GrimgrinBoss` | `BossActor` | Grimgrin, the Hollow Ronin: the melee boss of the new set (owner's design, | — | `tuning`, `layout` | `configure`, `set_target_position`, `set_arena_rect`, `set_last_edge_position`, `set_player_radius`, `skip_intro`, `get_intro_progress`, `get_current_health`, `get_maximum_health`, `is_core_exposed`, `get_phase`, `get_phase_name`, `is_planted`, `is_marking`, `is_fast_attack`, `get_dangerous_circles`, `get_wall`, `get_dangerous_lanes`, `get_lane_radius`, `try_dash_hit`, `get_victory_duration`, `get_experience_reward`, `get_defeat_name` |
+| `res://scenes/bosses/reaper_boss.gd` | `ReaperBoss` | `BossActor` | Runs the Reaper's deterministic three-phase attacks, exposed core and victory dissolve. | — | `tuning` | `configure_variant`, `configure`, `set_target_position`, `set_arena_polygon`, `set_arena_rect`, `set_last_edge_position`, `skip_intro`, `get_intro_progress`, `get_current_health`, `get_maximum_health`, `is_core_exposed`, `get_phase`, `get_phase_name`, `get_victory_duration`, `get_experience_reward`, `get_defeat_name`, `get_dangerous_circles`, `get_dangerous_lanes`, `get_lane_radius`, `try_dash_hit` |
 | `res://scenes/debug/debug_overlay.gd` | `DebugOverlay` | `CanvasLayer` | Debug-build-only performance overlay (toggle with F3): FPS, frame/physics time, draw calls, | — | — | `build_report` |
 | `res://scenes/debug/theme_gallery.gd` | — | `Control` | Debug screen showing every Wisp theme type variation (pixel UI kit) on the menu background. | — | — | — |
 | `res://scenes/gameplay/aim_guide.gd` | `AimGuide` | `Node2D` | The ×N combo count shown just past the aim arrow while two or more enemies are lit. | — | — | `show_path`, `clear`, `is_showing`, `get_count`, `get_end_point`, `get_count_text` |
@@ -140,7 +142,7 @@ _None._
 | `res://scenes/screens/daily_screen.gd` | `DailyScreen` | `Control` | Offline daily-run screen: today's portal, arena and seed, best, three local goal rows and Play. | `play_daily_requested`, `back_requested` | — | `setup` |
 | `res://scenes/screens/home_ambience.gd` | `HomeAmbience` | `Control` | Living background for the Home screen: flickering braziers, pulsing runes, drifting mist and | — | — | `set_active`, `is_active`, `uv_to_local`, `get_cover_scale` |
 | `res://scenes/screens/home_screen.gd` | `HomeScreen` | `Control` | Home: top bar and wordmark, a living hero Wisp between two button columns, then PLAY. | `play_requested`, `wisps_requested`, `daily_requested`, `trials_requested`, `statistics_requested`, `settings_requested`, `shop_requested`, `remove_ads_requested` | — | `setup`, `get_orbits`, `is_animating`, `get_play_caption`, `get_hero_motion_rect` |
-| `res://scenes/screens/loading_screen.gd` | `LoadingScreen` | `Control` | Boot and run loading screen (redesign 2026-09-16): a random painted background already in the | `resources_loaded`, `finished` | — | `begin`, `begin_run`, `complete_step`, `get_background_path`, `is_loaded` |
+| `res://scenes/screens/loading_screen.gd` | `LoadingScreen` | `Control` | Boot and run loading screen: a random portrait character or boss pixel-art scene, | `resources_loaded`, `finished` | — | `begin`, `begin_run`, `complete_step`, `get_background_path`, `is_loaded` |
 | `res://scenes/screens/orbit_motes.gd` | `OrbitMotes` | `Node2D` | Soul sparks circling the Home hero Wisp on tilted ellipses, in the equipped form's colour. | — | `side` | `get_spark_count`, `sync_time`, `get_time`, `get_extent_ratio` |
 | `res://scenes/screens/results_screen.gd` | `ResultsScreen` | `Control` | End-of-run summary of a finished Endless or daily run. | `restart_requested`, `home_requested`, `wisps_requested` | — | `setup`, `get_primary_text`, `get_displayed_rp_total` |
 | `res://scenes/screens/settings_screen.gd` | `SettingsScreen` | `Control` | Player settings: volumes, haptics, reduced motion, shake, tutorial replay, about and reset. | `back_requested`, `progress_reset`, `tutorial_requested` | `allow_progress_reset` | `setup`, `handle_back`, `build_about_text` |
@@ -153,7 +155,7 @@ _None._
 | `res://scripts/autoload/audio_service.gd` | `AudioService` | `Node` | Plays synthesized SFX through a voice pool and mixes three synced adaptive music layers. | `sounds_ready` | — | `is_ready`, `play_sfx`, `play_multi_kill`, `start_music`, `stop_music`, `set_music_intensity`, `set_boss_music`, `set_interrupted`, `apply_settings`, `generate_now`, `get_sfx_stream`, `get_music_stream` |
 | `res://scripts/autoload/monetisation_service.gd` | `MonetisationService` | `Node` | Provider-agnostic monetisation: opt-in rewarded video and a single Remove Ads purchase. | `rewarded_granted`, `rewarded_failed`, `ads_removed_changed`, `consent_changed` | — | `set_provider`, `set_save_manager`, `is_available`, `has_removed_ads`, `get_consent_state`, `set_consent`, `needs_consent_prompt`, `can_offer`, `show_rewarded`, `begin_run`, `is_store_available`, `can_purchase_remove_ads`, `purchase_remove_ads`, `restore_purchases` |
 | `res://scripts/autoload/save_manager.gd` | `SaveManagerService` | `Node` | Owns versioned local progression with validation, migration and atomic backup rotation. | `progression_changed`, `settings_changed` | — | `uses_isolated_storage`, `configure_storage_paths`, `reload`, `get_snapshot`, `save_now`, `reset_save`, `get_settings`, `update_settings`, `mark_tutorial_completed`, `record_run`, `add_rift_points`, `get_rift_points`, `apply_challenge_result`, `purchase_cosmetic`, `equip_cosmetic`, `owns_cosmetic`, `debug_tools_allowed`, `debug_unlock_all_forms`, `debug_set_trials`, `has_removed_ads`, `grant_remove_ads`, `get_consent_state`, `set_consent_state`, `claim_depth_milestones`, `get_claimed_depth`, `get_trial_rank`, `get_trial_progress`, `apply_trial_result` |
-| `res://scripts/components/enemy_actor.gd` | `EnemyActor` | `Node2D` | Shared telegraph, health, swept-hit, focus, slow and dissolve behavior for regular enemies. | `killed`, `projectile_fired` | `tuning`, `movement_enabled` | `set_target_position`, `set_last_edge_position`, `set_world_speed`, `set_speed_scale`, `set_viewport_width`, `set_arena_polygon`, `set_arena_rect`, `apply_slow`, `is_contact_active`, `get_collision_radius`, `get_current_health`, `get_threat_cost`, `get_shard_drop_chance`, `is_slowed`, `try_dash_hit`, `would_dash_hit`, `set_targeted`, `is_targeted`, `try_direct_hit`, `get_attack_circles` |
+| `res://scripts/components/enemy_actor.gd` | `EnemyActor` | `Node2D` | Shared telegraph, health, swept-hit, focus, slow and dissolve behavior for regular enemies. | `killed`, `projectile_fired` | `tuning`, `movement_enabled` | `set_target_position`, `set_last_edge_position`, `set_world_speed`, `set_speed_scale`, `set_viewport_width`, `set_arena_polygon`, `set_arena_rect`, `apply_slow`, `is_contact_active`, `get_arrival_progress`, `set_arrival_ring_enabled`, `get_collision_radius`, `get_current_health`, `get_threat_cost`, `get_shard_drop_chance`, `is_slowed`, `try_dash_hit`, `would_dash_hit`, `set_targeted`, `is_targeted`, `try_direct_hit`, `get_attack_circles` |
 | `res://scripts/components/enemy_projectile.gd` | `EnemyProjectile` | `Node2D` | A shot fired by an Enemies v2 shooter, and the mark a wall shot leaves (owner, 2026-09-28). | — | — | `setup`, `set_target_position`, `set_world_speed`, `set_arena`, `get_danger_circle`, `is_mark`, `on_hit_player` |
 | `res://scripts/components/focus_carousel.gd` | `FocusCarousel` | `Control` | Portrait card picker: one large focused card in the centre, its neighbours peeking in dimmed. | `selection_changed`, `activated` | `focus_width_share`, `max_width_share`, `card_aspect`, `max_card_aspect`, `pitch_share`, `side_scale`, `side_brightness`, `lift_share`, `snap_speed`, `tap_slop`, `flick_speed` | `set_cards`, `select`, `get_selected_index`, `get_card_count`, `get_card`, `get_scroll`, `is_settled`, `get_focus_card_size` |
 | `res://scripts/components/hazard_actor.gd` | `HazardActor` | `Node2D` | Shared arrival, scaling, focus and collision-query contract for sparse arena hazards. | — | `tuning`, `telegraph_texture`, `active_texture` | `set_world_speed`, `set_viewport_width`, `blocks_dash`, `get_blocking_radius`, `get_dangerous_circles`, `get_threat_cost` |
@@ -329,6 +331,7 @@ _None._
 | `res://data/endless/skins/chained_colossus.tres` | `Resource` | `ArenaSkinData` |
 | `res://data/endless/skins/chained_colossus_3d.tres` | `Resource` | `ArenaSkinData` |
 | `res://data/endless/skins/quarry_titan.tres` | `Resource` | `ArenaSkinData` |
+| `res://data/endless/skins/sci_fi_simulation_v1.tres` | `Resource` | `ArenaSkinData` |
 | `res://data/endless/skins/stitched_doll_jungle.tres` | `Resource` | `ArenaSkinData` |
 | `res://data/endless/skins/stitchwarden_vigil.tres` | `Resource` | `ArenaSkinData` |
 | `res://data/endless/skins/zoom_arena_3d.tres` | `Resource` | `ArenaSkinData` |
@@ -450,7 +453,7 @@ _None._
 
 ## Assets
 
-`.gd` × 1 · `.gdshader` × 16 · `.gdshaderinc` × 1 · `.glb` × 1 · `.jpg` × 3 · `.json` × 1 · `.png` × 338 · `.py` × 1 · `.pyc` × 1 · `.res` × 1 · `.tres` × 61 · `.tscn` × 5
+`.gd` × 1 · `.gdshader` × 16 · `.gdshaderinc` × 1 · `.glb` × 1 · `.jpg` × 3 · `.json` × 1 · `.png` × 409 · `.py` × 1 · `.pyc` × 1 · `.res` × 1 · `.tres` × 61 · `.tscn` × 5
 
 - `res://assets/art/branding/app_icon/adaptive_background_432.png`
 - `res://assets/art/branding/app_icon/adaptive_foreground_432.png`
@@ -579,6 +582,7 @@ _None._
 - `res://assets/art/environment/arenas/chained_colossus_3d/chained_colossus_layout.tres`
 - `res://assets/art/environment/arenas/chained_colossus_3d.png`
 - `res://assets/art/environment/arenas/quarry_titan.png`
+- `res://assets/art/environment/arenas/sci_fi_simulation_v1.png`
 - `res://assets/art/environment/arenas/stitched_doll_jungle.png`
 - `res://assets/art/environment/arenas/stitchwarden_vigil/backplate.png`
 - `res://assets/art/environment/arenas/stitchwarden_vigil/bat_1.png`
@@ -605,6 +609,7 @@ _None._
 - `res://assets/art/environment/arenas/thumbnails/chained_colossus.png`
 - `res://assets/art/environment/arenas/thumbnails/chained_colossus_3d.png`
 - `res://assets/art/environment/arenas/thumbnails/quarry_titan.png`
+- `res://assets/art/environment/arenas/thumbnails/sci_fi_simulation_v1.png`
 - `res://assets/art/environment/arenas/thumbnails/stitched_doll_jungle.png`
 - `res://assets/art/environment/arenas/thumbnails/stitchwarden_vigil.png`
 - `res://assets/art/environment/arenas/thumbnails/wisp_bearer.png`
@@ -670,8 +675,77 @@ _None._
 - `res://assets/art/environment/boards/board_01/hud/soul_gauge_segment.png`
 - `res://assets/art/environment/boards/board_01/hud/soul_gauge_top.png`
 - `res://assets/art/environment/boards/board_01/hud/upgrade_count_tag.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/boss_corner_signal.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/boss_edge_signal.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/boss_scan_streak.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/boss_spawn/frame_00.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/boss_spawn/frame_01.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/boss_spawn/frame_02.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/boss_spawn/frame_03.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/boss_spawn/frame_04.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/boss_spawn/frame_05.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/boss_spawn/frame_06.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/boss_spawn/frame_07.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/boss_spawn/frame_08.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/boss_spawn/frame_09.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/boss_spawn/frame_10.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/boss_spawn/frame_11.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/boss_spawn_sheet.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/enemy_spawn/frame_00.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/enemy_spawn/frame_01.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/enemy_spawn/frame_02.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/enemy_spawn/frame_03.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/enemy_spawn/frame_04.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/enemy_spawn/frame_05.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/enemy_spawn/frame_06.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/enemy_spawn/frame_07.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/anim/enemy_spawn_sheet.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/deco/core_housing.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/deco/core_wisp.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/deco/screen_data_left.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/deco/screen_data_right.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/floor/screen_tile.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/frame/bottom_segment.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/frame/cap_bottom_band.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/frame/cap_bottom_join.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/frame/cap_top_band.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/frame/cap_top_join.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/frame/corner_bottom_left.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/frame/corner_bottom_right.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/frame/corner_top_left.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/frame/corner_top_right.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/frame/outer_cap_segment.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/frame/screen_rim_bottom.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/frame/screen_rim_left.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/frame/screen_rim_right.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/frame/screen_rim_top.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/frame/side_left_segment.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/frame/side_right_segment.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/frame/top_segment.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/hud/boss_meter_fill.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/hud/boss_meter_track.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/hud/level_badge.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/hud/pause_button.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/hud/rp_plate.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/hud/rush_meter_fill.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/hud/rush_meter_track.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/hud/score_plate.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/hud/soul_gauge_fill.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/hud/soul_gauge_track.png`
+- `res://assets/art/environment/boards/sci_fi_simulation_v1/hud/upgrade_badge.png`
 - `res://assets/art/environment/home_background.png`
+- `res://assets/art/environment/loading_screens/loading_grimgrin.png`
+- `res://assets/art/environment/loading_screens/loading_mothmere.png`
+- `res://assets/art/environment/loading_screens/loading_new_boss.png`
+- `res://assets/art/environment/loading_screens/loading_patchvile_grove.png`
+- `res://assets/art/environment/loading_screens/loading_rook.png`
+- `res://assets/art/environment/loading_screens/loading_scarlet.png`
+- `res://assets/art/environment/loading_screens/loading_shade.png`
 - `res://assets/art/environment/menu_background.png`
+- `res://assets/art/environment/menu_screens/daily_background.png`
+- `res://assets/art/environment/menu_screens/results_background.png`
+- `res://assets/art/environment/menu_screens/shop_background.png`
+- `res://assets/art/environment/menu_screens/trials_background.png`
 - `res://assets/art/environment/props/01_soul_shard.png`
 - `res://assets/art/environment/props/02_soul_shard_cluster.png`
 - `res://assets/art/environment/props/03_soul_spark_life.png`
@@ -781,78 +855,7 @@ _None._
 - `res://assets/ui/theme/icons/ornament_diamond_warm.png`
 - `res://assets/ui/theme/icons/ornament_diamond_warm.tres`
 - `res://assets/ui/theme/icons/page_diamond_active.png`
-- `res://assets/ui/theme/icons/page_diamond_active.tres`
-- `res://assets/ui/theme/icons/page_diamond_idle.png`
-- `res://assets/ui/theme/icons/page_diamond_idle.tres`
-- `res://assets/ui/theme/icons/page_diamond_locked.png`
-- `res://assets/ui/theme/icons/page_diamond_locked.tres`
-- `res://assets/ui/theme/ornaments/amber_top.tscn`
-- `res://assets/ui/theme/ornaments/banner_top.tscn`
-- `res://assets/ui/theme/ornaments/card_top.tscn`
-- `res://assets/ui/theme/ornaments/crest_bottom.tscn`
-- `res://assets/ui/theme/ornaments/crest_top.tscn`
-- `res://assets/ui/theme/textures/button_danger_normal.png`
-- `res://assets/ui/theme/textures/button_danger_normal.tres`
-- `res://assets/ui/theme/textures/button_danger_pressed.png`
-- `res://assets/ui/theme/textures/button_danger_pressed.tres`
-- `res://assets/ui/theme/textures/button_primary_disabled.png`
-- `res://assets/ui/theme/textures/button_primary_disabled.tres`
-- `res://assets/ui/theme/textures/button_primary_focus_ring.png`
-- `res://assets/ui/theme/textures/button_primary_focus_ring.tres`
-- `res://assets/ui/theme/textures/button_primary_hover.png`
-- `res://assets/ui/theme/textures/button_primary_hover.tres`
-- `res://assets/ui/theme/textures/button_primary_normal.png`
-- `res://assets/ui/theme/textures/button_primary_normal.tres`
-- `res://assets/ui/theme/textures/button_primary_pressed.png`
-- `res://assets/ui/theme/textures/button_primary_pressed.tres`
-- `res://assets/ui/theme/textures/button_secondary_disabled.png`
-- `res://assets/ui/theme/textures/button_secondary_disabled.tres`
-- `res://assets/ui/theme/textures/button_secondary_focus_ring.png`
-- `res://assets/ui/theme/textures/button_secondary_focus_ring.tres`
-- `res://assets/ui/theme/textures/button_secondary_hover.png`
-- `res://assets/ui/theme/textures/button_secondary_hover.tres`
-- `res://assets/ui/theme/textures/button_secondary_normal.png`
-- `res://assets/ui/theme/textures/button_secondary_normal.tres`
-- `res://assets/ui/theme/textures/button_secondary_pressed.png`
-- `res://assets/ui/theme/textures/button_secondary_pressed.tres`
-- `res://assets/ui/theme/textures/caption_tile_disabled.png`
-- `res://assets/ui/theme/textures/caption_tile_disabled.tres`
-- `res://assets/ui/theme/textures/caption_tile_focus_ring.png`
-- `res://assets/ui/theme/textures/caption_tile_focus_ring.tres`
-- `res://assets/ui/theme/textures/caption_tile_normal.png`
-- `res://assets/ui/theme/textures/caption_tile_normal.tres`
-- `res://assets/ui/theme/textures/divider.png`
-- `res://assets/ui/theme/textures/divider.tres`
-- `res://assets/ui/theme/textures/hud_alert_plate.png`
-- `res://assets/ui/theme/textures/hud_alert_plate.tres`
-- `res://assets/ui/theme/textures/hud_slim_fill_rush.png`
-- `res://assets/ui/theme/textures/hud_slim_fill_rush.tres`
-- `res://assets/ui/theme/textures/hud_slim_fill_xp.png`
-- `res://assets/ui/theme/textures/hud_slim_fill_xp.tres`
-- `res://assets/ui/theme/textures/hud_slim_track.png`
-- `res://assets/ui/theme/textures/hud_slim_track.tres`
-- `res://assets/ui/theme/textures/icon_tile_disabled.png`
-- `res://assets/ui/theme/textures/icon_tile_disabled.tres`
-- `res://assets/ui/theme/textures/icon_tile_focus_ring.png`
-- `res://assets/ui/theme/textures/icon_tile_focus_ring.tres`
-- `res://assets/ui/theme/textures/icon_tile_normal.png`
-- `res://assets/ui/theme/textures/icon_tile_normal.tres`
-- `res://assets/ui/theme/textures/nav_dock.png`
-- `res://assets/ui/theme/textures/nav_dock.tres`
-- `res://assets/ui/theme/textures/panel_banner.png`
-- `res://assets/ui/theme/textures/panel_banner.tres`
-- `res://assets/ui/theme/textures/panel_card.png`
-- `res://assets/ui/theme/textures/panel_card.tres`
-- `res://assets/ui/theme/textures/panel_card_locked.png`
-- `res://assets/ui/theme/textures/panel_card_locked.tres`
-- `res://assets/ui/theme/textures/panel_card_selected.png`
-- `res://assets/ui/theme/textures/panel_card_selected.tres`
-- `res://assets/ui/theme/textures/panel_crest.png`
-- `res://assets/ui/theme/textures/panel_crest.tres`
-- `res://assets/ui/theme/textures/panel_default.png`
-- `res://assets/ui/theme/textures/panel_default.tres`
-- `res://assets/ui/theme/textures/plate_small.png`
-- _…and 30 more (list capped at 400)._
+- _…and 101 more (list capped at 400)._
 
 ## Documentation index
 
@@ -907,6 +910,7 @@ _None._
 | decisions | [ADR-0022: Revise Stitchwarden's Vigil art and floor](../decisions/0022-vigil-art-and-floor-revision.md) |
 | decisions | [ADR-0023: 3D arenas](../decisions/0023-3d-arenas.md) |
 | decisions | [ADR-0024: Board arenas — a full-screen board with the HUD in its frame](../decisions/0024-board-arenas.md) |
+| decisions | [ADR-0025: The sci-fi board — a board with its own layout, and spawn effects drawn by the arena](../decisions/0025-sci-fi-board-and-arena-spawn-effects.md) |
 
 ## Documentation gaps
 

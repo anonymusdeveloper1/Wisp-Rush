@@ -1,0 +1,33 @@
+{
+  "generator": "Codex built-in image generator",
+  "outputs": [
+    {
+      "name": "loading_new_boss",
+      "generated_original": "C:\\Users\\marti\\.codex\\generated_images\\01a0e98f-81b7-75b1-aa49-7e70c8da3a5c\\exec-24a27381-324f-4316-97a8-355f322edf0b.png",
+      "raw_path": "raw/loading_new_boss_source_v2.png",
+      "prompt": "prompts/loading_new_boss_refinement.md",
+      "reason": "Lower the focal figure to clear the existing boot and run loading interface"
+    },
+    {
+      "name": "loading_shade",
+      "generated_original": "C:\\Users\\marti\\.codex\\generated_images\\01a0e98f-81b7-75b1-aa49-7e70c8da3a5c\\exec-2f4bdc56-3f62-44d5-998f-2451b6a696a5.png",
+      "raw_path": "raw/loading_shade_source_v2.png",
+      "prompt": "prompts/loading_shade_refinement.md",
+      "reason": "Lower the focal figure to clear the existing boot and run loading interface"
+    },
+    {
+      "name": "loading_scarlet",
+      "generated_original": "C:\\Users\\marti\\.codex\\generated_images\\01a0e98f-81b7-75b1-aa49-7e70c8da3a5c\\exec-a6c637f7-e057-4d73-b774-a45d2b26d38c.png",
+      "raw_path": "raw/loading_scarlet_source_v2.png",
+      "prompt": "prompts/loading_scarlet_refinement.md",
+      "reason": "Lower the focal figure to clear the existing boot and run loading interface"
+    },
+    {
+      "name": "loading_rook",
+      "generated_original": "C:\\Users\\marti\\.codex\\generated_images\\01a0e98f-81b7-75b1-aa49-7e70c8da3a5c\\exec-7eb00f7e-c7ab-4aa9-ab6b-7ea31c78e0a8.png",
+      "raw_path": "raw/loading_rook_source_v2.png",
+      "prompt": "prompts/loading_rook_refinement.md",
+      "reason": "Lower the focal figure to clear the existing boot and run loading interface"
+    }
+  ]
+}

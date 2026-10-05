@@ -1,0 +1,50 @@
+[
+  {
+    "piece": "frame/cap_top_join.png",
+    "source": "source/cap_top_join_raw.png",
+    "prompt": "prompts/cap_top_join.md",
+    "reference": "reference/approved_board.png",
+    "generator": "Codex built-in image_gen",
+    "original_output": "C:/Users/marti/.codex/generated_images/01a0e98f-81b7-75b1-aa49-7e70c8da3a5c/exec-f50f1ee0-71a2-44a4-b608-8d7d4cbd38ac.png",
+    "raw_size": [
+      1456,
+      1080
+    ]
+  },
+  {
+    "piece": "frame/cap_top_band.png",
+    "source": "source/cap_top_band_raw.png",
+    "prompt": "prompts/cap_top_band.md",
+    "reference": "reference/approved_board.png",
+    "generator": "Codex built-in image_gen",
+    "original_output": "C:/Users/marti/.codex/generated_images/01a0e98f-81b7-75b1-aa49-7e70c8da3a5c/exec-9a6bea4b-5f3c-4196-bcc7-700d814ea8fe.png",
+    "raw_size": [
+      1879,
+      837
+    ]
+  },
+  {
+    "piece": "frame/cap_bottom_join.png",
+    "source": "source/cap_bottom_join_raw.png",
+    "prompt": "prompts/cap_bottom_join.md",
+    "reference": "reference/approved_board.png",
+    "generator": "Codex built-in image_gen",
+    "original_output": "C:/Users/marti/.codex/generated_images/01a0e98f-81b7-75b1-aa49-7e70c8da3a5c/exec-e164967e-d9bc-4320-aeaf-70e4fb720f29.png",
+    "raw_size": [
+      1629,
+      965
+    ]
+  },
+  {
+    "piece": "frame/cap_bottom_band.png",
+    "source": "source/cap_bottom_band_raw.png",
+    "prompt": "prompts/cap_bottom_band.md",
+    "reference": "reference/approved_board.png",
+    "generator": "Codex built-in image_gen",
+    "original_output": "C:/Users/marti/.codex/generated_images/01a0e98f-81b7-75b1-aa49-7e70c8da3a5c/exec-80a158aa-7427-42c6-ab59-efc7f0850099.png",
+    "raw_size": [
+      1881,
+      836
+    ]
+  }
+]

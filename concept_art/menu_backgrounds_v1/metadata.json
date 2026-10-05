@@ -1,0 +1,134 @@
+{
+  "generator": "Codex built-in image_gen",
+  "art_size": [
+    270,
+    600
+  ],
+  "output_size": [
+    1080,
+    2400
+  ],
+  "palette_entries": 256,
+  "palette_method": "per image: 217 adaptive shades, 32 source accents, 7 GDD anchors",
+  "processing": "center cover crop, BOX reduction, no dithering, 4x nearest enlargement",
+  "outputs": [
+    {
+      "file": "shop_background.png",
+      "label": "Shop",
+      "raw_path": "raw/shop_background_source.png",
+      "raw_size": [
+        841,
+        1870
+      ],
+      "raw_sha256": "565eddf88ff18eaff26d52a4118700063fb406b758e317e7ceb4b81cbdbc537c",
+      "center_cover_crop": [
+        0,
+        0.556,
+        841,
+        1869.444
+      ],
+      "size": [
+        1080,
+        2400
+      ],
+      "mode": "RGB",
+      "colors": 205,
+      "opaque": true,
+      "exact_4_px_grid": true,
+      "sha256": "dd35331c2976182d6e2dbe96d3169caa191ae509be620c6b4bf56b87a69ac3ae",
+      "prompt": "prompts/shop_background.md",
+      "composition_refinement": null,
+      "runtime_path": "res://assets/art/environment/menu_screens/shop_background.png",
+      "runtime_matches_source": true
+    },
+    {
+      "file": "daily_background.png",
+      "label": "Daily Run",
+      "raw_path": "raw/daily_background_source.png",
+      "raw_size": [
+        841,
+        1870
+      ],
+      "raw_sha256": "d0a0f7b5617e3ce0a5b8caf43c8048035264d492c8908e491aad45e3b02ec6c5",
+      "center_cover_crop": [
+        0,
+        0.556,
+        841,
+        1869.444
+      ],
+      "size": [
+        1080,
+        2400
+      ],
+      "mode": "RGB",
+      "colors": 188,
+      "opaque": true,
+      "exact_4_px_grid": true,
+      "sha256": "afd5d96ddfbb844790fc42dbc0aa064e2f22adea09dc2a6d8adcfe7b0269c561",
+      "prompt": "prompts/daily_background.md",
+      "composition_refinement": null,
+      "runtime_path": "res://assets/art/environment/menu_screens/daily_background.png",
+      "runtime_matches_source": true
+    },
+    {
+      "file": "trials_background.png",
+      "label": "Trials",
+      "raw_path": "raw/trials_background_source.png",
+      "raw_size": [
+        841,
+        1870
+      ],
+      "raw_sha256": "f54f026c79e0df64c669f9bd846d40f26161429abbef99c18e7bd8aca2228fda",
+      "center_cover_crop": [
+        0,
+        0.556,
+        841,
+        1869.444
+      ],
+      "size": [
+        1080,
+        2400
+      ],
+      "mode": "RGB",
+      "colors": 208,
+      "opaque": true,
+      "exact_4_px_grid": true,
+      "sha256": "7f35958e8ec792f87c25e97da97fc81e666a6eded448e9adcb877055d4a73de4",
+      "prompt": "prompts/trials_background.md",
+      "composition_refinement": null,
+      "runtime_path": "res://assets/art/environment/menu_screens/trials_background.png",
+      "runtime_matches_source": true
+    },
+    {
+      "file": "results_background.png",
+      "label": "Results",
+      "raw_path": "raw/results_background_source.png",
+      "raw_size": [
+        842,
+        1869
+      ],
+      "raw_sha256": "8bd5b1babe0024f8e1ca601ef0e756976485b80de986f2a186637e4159994ac5",
+      "center_cover_crop": [
+        0.475,
+        0,
+        841.525,
+        1869
+      ],
+      "size": [
+        1080,
+        2400
+      ],
+      "mode": "RGB",
+      "colors": 171,
+      "opaque": true,
+      "exact_4_px_grid": true,
+      "sha256": "c3d5895e367b10a905120e33993e4fe612cbb85c61e9012ab1720b73e78d266d",
+      "prompt": "prompts/results_background.md",
+      "composition_refinement": null,
+      "runtime_path": "res://assets/art/environment/menu_screens/results_background.png",
+      "runtime_matches_source": true
+    }
+  ],
+  "review": "preview_all.png (labels only on the review sheet)",
+  "runtime_integration": true
+}

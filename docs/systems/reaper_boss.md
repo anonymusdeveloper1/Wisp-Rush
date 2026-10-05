@@ -1,6 +1,6 @@
 # System: Reaper boss
 
-> **Status:** ✅ done · **Last updated:** 2026-09-28 · **GDD section:** §5.5, §7–8
+> **Status:** ✅ done · **Last updated:** 2026-10-04 · **GDD section:** §5.5, §7–8
 
 ## Purpose
 
@@ -36,6 +36,7 @@ GameWorld
 | `health_changed(current, maximum)` | signal | Refresh boss-only health UI. |
 | `defeated(position, score, rp_reward)` | signal | Final dissolve completed and rewards are ready. |
 | `configure(rect, target, encounter, seed)` | method | Start a scaled deterministic encounter. |
+| `get_intro_progress()` | method | 0..1 through the intro hold, 1 after (`BossActor`: −1 when a boss does not say); an arena draws the appearance from it (SIMULATION, ADR-0025). |
 | `try_dash_hit(from, to, radius, damage, dash_id)` | method | Damage exposed core at most once per dash. |
 | `get_dangerous_circles()` / `get_dangerous_lanes()` | method | Current telegraphed attack geometry. |
 | `get_phase_name(phase)` · `get_victory_duration()` · `get_experience_reward()` · `get_defeat_name()` | method | What `GameWorld` shows and grants: TELEPORT HUNT / DEATH CORRIDORS / SCYTHE SWEEP, the tuning's victory time and experience, "REAPER" |
@@ -76,6 +77,7 @@ GameWorld suspends WaveDirector, routes player sweeps/damage and realizes reques
 
 | Date | Change |
 |---|---|
+| 2026-10-04 | `get_intro_progress()` for an arena's appearance effect (ADR-0025) |
 | 2026-09-28 | Teleport Hunt summons the Enemies v2 ramp's picks (the Soul Wisp is gone) |
 | 2026-09-27 | `ReaperBoss` extends `BossActor` (shared with Grimgrin); `GameWorld` reads its phase name, victory time, experience and callout name through it. Behaviour unchanged |
 | 2026-09-25 | Story Rifts removed (owner): no level-ending boss; the pool is every Endless mix's boss |

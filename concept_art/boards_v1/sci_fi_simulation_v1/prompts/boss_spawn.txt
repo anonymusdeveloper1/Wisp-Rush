@@ -1,0 +1,25 @@
+Create a production sprite animation sheet for Wisp Rush's approved sci-fi simulation arena. Use the image just shown as the visual reference. Its large MAGENTA boss materialisation has circular scanning rings, angular brackets, square data fragments and horizontal scan streaks. Generate only that isolated effect, without the arena, background, gauges, enemies or boss body.
+
+IMPORTANT CHROMA WORKFLOW: temporarily draw this effect in CYAN, TEAL and near-white, with absolutely no pink, magenta or purple in the actual artwork. The final asset will be deterministically recolored to the reference's magenta after the solid magenta background is removed. Preserve the reference's shapes and motion language; the cyan is solely for safe chroma cleanup.
+
+Exactly TWELVE sequential frames, FOUR columns and THREE rows. Equal invisible square cells, landscape sheet ideally 1536 by 1152 pixels. One coherent ONE-SHOT boss materialisation action, read left to right then continue next row. Straight front-facing screen graphics, not a perspective floor, not a fantasy magic rune, no smoke. Fixed center at EXACTLY 50 percent width and 50 percent height of every cell, same pixel scale, no automatic zoom.
+
+Crisp 2D pixel art, no painterly art, no antialiasing, no smooth gradient, no blur or bloom. Limited flat palette: deep teal #184952, teal #2D8290, cyan #62E8F2, pale cyan #B7F7FA and white #EAFDFF. Segmented concentric scan rings, four corner-like registration brackets within the rings, small triangular registration arrows at the cardinal directions, thin data ticks, a small luminous center and a few short horizontal digital scan fragments near the rings. Detached squares tightly grouped. Preserve clean negative space so a boss can still be read on top of the effect.
+
+Sequence:
+1: four compact dim registration ticks around a tiny center.
+2: four brackets extend; sparse pixels gather toward center.
+3: one small broken scanning ring forms.
+4: second larger segmented ring expands; short scanning streaks appear.
+5: brackets and inner rings brighten, outer ring grows.
+6: the large signature circle and four brackets nearly complete, contained data fragments.
+7: peak materialisation, sharp bright center and two strong broken rings, one readable large scan pattern.
+8: peak begins to release, ring sections peel into squares, no explosion.
+9: outer ring breaks into shorter scan segments; center reduces.
+10: brackets fade and most scan fragments disappear.
+11: a few small ring ticks and scattered tiny data squares remain.
+12: just a handful of dim residual pixels near the SAME center, almost extinguished but not empty.
+
+All marks fit fully inside the central 76 percent of width and height. Circle growth is real animation, do NOT scale each frame to the same bounding box. Entire effect, every fragment and arrow stays in its own cell with generous magenta padding on all four sides. No marks touch cell edges.
+
+Background is 100 percent SOLID FLAT MAGENTA #FF00FF across the whole canvas. No shadows, ground plates, background patterns or texture. No text, labels, numbers, UI, lettering, logos, watermark, drawn cell borders, separator lines or gutters. Only twelve effect frames in an exact four-column three-row grid.

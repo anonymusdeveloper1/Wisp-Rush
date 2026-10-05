@@ -1,0 +1,64 @@
+{
+  "generator": "Codex built-in image generator",
+  "art_size": [
+    270,
+    600
+  ],
+  "output_size": [
+    1080,
+    2400
+  ],
+  "palette_entries": 256,
+  "palette_method": "233 adaptive world colors, 16 source cyan/amber accent colors, 7 GDD palette anchors",
+  "processing": "center cover crop, BOX reduction, shared palette without dithering, 4x nearest enlargement",
+  "outputs": [
+    {
+      "file": "loading_patchvile.png",
+      "size": [
+        1080,
+        2400
+      ],
+      "mode": "RGB",
+      "colors": 170,
+      "opaque": true,
+      "exact_4_px_grid": true,
+      "sha256": "2441eab98e1897499002ea0a1ad258a39a4943a159606d7b8901f06ae7a73712",
+      "raw_path": "raw/loading_patchvile_source_v3.png",
+      "raw_size": [
+        841,
+        1870
+      ],
+      "center_cover_crop": [
+        0,
+        0.556,
+        841,
+        1869.444
+      ],
+      "palette_source": "raw/loading_patchvile_source_v2.png"
+    },
+    {
+      "file": "shop_gallery.png",
+      "size": [
+        1080,
+        2400
+      ],
+      "mode": "RGB",
+      "colors": 184,
+      "opaque": true,
+      "exact_4_px_grid": true,
+      "sha256": "316f5ec2ad5c4600fcd330a5df23fe345173958fd084997f8a7f8945903a41cb",
+      "raw_path": "raw/shop_gallery_source.png",
+      "raw_size": [
+        921,
+        1707
+      ],
+      "center_cover_crop": [
+        76.425,
+        0,
+        844.575,
+        1707
+      ]
+    }
+  ],
+  "runtime_integration": false
+}

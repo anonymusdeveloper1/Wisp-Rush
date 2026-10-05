@@ -1,6 +1,6 @@
 # System: Core run
 
-> **Status:** ✅ done · **Last updated:** 2026-09-28 · **GDD section:** §3, §5–7, §11
+> **Status:** ✅ done · **Last updated:** 2026-10-04 · **GDD section:** §3, §5–7, §11
 
 ## Purpose
 
@@ -146,6 +146,13 @@ windows and presentation constants that coordinate multiple systems.
   `hud_pause_pressed`. While upgrades are ready an `UpgradeGlow` lights the character, and `_input`
   opens the cards on a tap that starts on him (within 2.4 × his radius, under the minimum swipe
   distance and 450 ms).
+- **Spawn effects drawn by the arena** (owner 2026-10-04, GDD §14 #73, ADR-0025): `_spawn_enemy`
+  hands every new enemy to `ArenaVisual.show_enemy_arrival(enemy, enemy.get_arrival_progress)`; when
+  the arena draws it (SIMULATION) the enemy's amber ring is turned off
+  (`set_arrival_ring_enabled(false)`). `_start_boss_encounter` calls `show_boss_appearance(boss,
+  boss.get_intro_progress)` once the boss is configured, and the Wisp's death calls
+  `clear_spawn_effects()`. Before `fit()`, `_compute_arena_rect` gives the arena the bottom safe
+  margin (`set_safe_bottom`).
 - Focus changes enemy and hazard simulation only, never input or UI speed.
 - Pause consumes input, freezes gameplay and always restores normal tree state on navigation; it
   hides an open upgrade tray and drops its slow motion, and Resume brings both back. Back/Escape
@@ -169,6 +176,7 @@ windows and presentation constants that coordinate multiple systems.
 
 | Date | Change |
 |---|---|
+| 2026-10-04 | Spawn effects drawn by the arena (ADR-0025): `_spawn_enemy`, `_start_boss_encounter` and the death hand enemies and bosses to the arena; the arena gets the bottom safe margin |
 | 2026-09-25 | Story Rifts removed (owner): no `story` mode, level victory or clear bonus; the summary loses `level`, `victory`, `level_cleared`, `first_clear`, `rp_clear_bonus`, `level_clears`, `rift_levels_cleared` and `rift`; `get_rift_level()` / `is_level_cleared()` and `RiftArenaRules` removed; `RunProfile.rosters` (`EndlessRoster`) replaces `roster_rifts` |
 | 2026-09-15 | Upgrades bank and offer a slow-motion bottom `UpgradeTray` at calm moments; no pause; tray hooks for the tutorial |
 | 2026-09-15 | Aim help: `AimGuide`, enemy highlights, aim-assist counter, `cancel_player_aim` |

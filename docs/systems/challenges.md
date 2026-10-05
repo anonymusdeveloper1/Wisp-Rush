@@ -1,6 +1,6 @@
 # System: Daily run and local challenges
 
-> **Status:** ✅ done · **Last updated:** 2026-09-25 · **GDD section:** §6, §20
+> **Status:** ✅ done · **Last updated:** 2026-10-05 · **GDD section:** §6, §20
 >
 > **Endless rules (spec 03, 2026-09-15):** the daily run plays on Endless rules — the shared floor
 > template, `EndlessTuning.daily_roster_ids` / `daily_boss_ids` (Obsidian Garden roster, the Reaper)
@@ -72,6 +72,7 @@ Main supplies completed GameWorld summaries and persists the returned state thro
 
 | Date | Change |
 |---|---|
+| 2026-10-05 | Daily Run gets the dedicated nearest-filtered moonlit gate background ([game_flow.md](game_flow.md)); seed, goals and Play behavior unchanged |
 | 2026-09-25 | Rift wording replaced (owner): DAILY RUN title, PLAY TODAY'S RUN, DAILY SEED line, "… TODAY'S RUN" reward line; challenge RIFT DIVER → DEEP DIVER (id `rift_diver` kept) |
 | 2026-09-25 | Story Rifts removed (owner): `daily_roster_rift_ids` → `daily_roster_ids`; story-run note dropped |
 | 2026-09-15 | Rewards in Rift Points (`reward_points`, `+15 RP`); SHARD SEEKER → POINT SEEKER on `rp_collected` (spec 01) |

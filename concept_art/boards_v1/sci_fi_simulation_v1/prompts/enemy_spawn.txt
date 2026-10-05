@@ -1,0 +1,18 @@
+Create a production animation sprite sheet for Wisp Rush's approved SCI-FI SIMULATION DISPLAY arena. Use the image just shown as the visual reference: reference image is the approved small AMBER enemy materialisation on a dark sci-fi screen. Generate ONLY its isolated animated effect, no arena, no enemy body, no meter and no UI.
+
+Exactly EIGHT frames, FOUR columns and TWO rows, read left to right then next row. Equal invisible square cells, landscape sheet, ideally 1536 by 768 pixels. ONE coherent one-shot enemy arrival animation. Camera straight forward, effects are drawn on the face of the screen, no isometric floor ellipses or baked ground shadow.
+
+The effect identity is an amber segmented circular scan ring with short cardinal scanning ticks, a tiny white-gold center and a tightly contained column of rising square digital pixels. Small clean graphic pieces, not a fireball, fantasy spell, explosion or smoke. Crisp 2D pixel art on one visible pixel grid, limited stepped amber/gold/cream palette, no painterly art, no antialiasing, no blur, no smooth gradients, no bloom. Colors approximately dark amber #7A4319, warning amber #F3A847, gold #FFD275 and pale core #FFF1C3. No cyan, no pink, no green in the effect.
+
+Keep the exact scan-ring center at 50 percent of width and 57 percent of height in EVERY cell. Fixed camera and pixel scale, NEVER enlarge the effect to fill a cell; the actual circle grows and contracts as animated motion. All marks stay within the middle 68 percent of cell width and 76 percent of cell height. Generous solid magenta margins on all four sides; detached pixels remain tightly near the ring.
+
+Frame 1: four tiny amber ticks and one dim central pixel start the materialisation.
+Frame 2: thin broken ring appears and two square scan pixels rise.
+Frame 3: ring extends to six bright short segments, horizontal scanning streak crosses its center.
+Frame 4: stronger amber ring, compact square pixels rise, center gathers.
+Frame 5: bright arrival peak, a small cream core, four clear ring quadrants, a short digital pixel column.
+Frame 6: core reduces while ring breaks into smaller segments and pixels drift upward.
+Frame 7: just a few fading amber segments and small pixels, no large flare.
+Frame 8: tiny dim remaining amber pixels near the SAME anchor; nearly extinguished but not empty.
+
+Background is 100 percent SOLID FLAT MAGENTA #FF00FF throughout, no gradient, no shadows. This is a chroma-key background, not part of the effect. Absolutely no magenta or purple pixels in the artwork. No text, numbers, labels, borders, gutters, boxes, separators, game objects, logos or watermark. No effect crosses its invisible cell boundary. The raw sheet itself must contain exactly four columns by two rows and nothing else.

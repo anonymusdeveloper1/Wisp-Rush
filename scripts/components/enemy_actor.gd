@@ -61,6 +61,9 @@ var _effect_scale: Vector2 = Vector2.ONE
 var _last_hit_direction: Vector2 = Vector2.RIGHT
 
 var _telegraph_remaining: float = 0.0
+## Whether the amber arrival ring shows while the enemy arrives; off when the arena draws the arrival
+## itself ([method set_arrival_ring_enabled]).
+var _arrival_ring_enabled: bool = true
 var _slow_remaining: float = 0.0
 var _slow_multiplier: float = 1.0
 var _last_damage_event_id: int = -1
@@ -87,7 +90,7 @@ func _ready() -> void:
 	_sprite.modulate.a = 0.22
 	_sprite.play(_loop_animation())
 	_sprite.animation_finished.connect(_on_sprite_animation_finished)
-	_arrival_ring.visible = true
+	_arrival_ring.visible = _arrival_ring_enabled
 	_hit_flash.visible = false
 	_hit_flash.material = VfxPool.get_additive_material()
 	_arrival_ring.material = VfxPool.get_additive_material()
@@ -161,6 +164,22 @@ func apply_slow(duration: float, multiplier: float) -> void:
 ## Returns whether this enemy currently participates in player contact checks.
 func is_contact_active() -> bool:
 	return state == State.ACTIVE
+
+
+## How far the arrival telegraph has run, 0..1 (1 once the enemy is active). It is the countdown that
+## makes the enemy active, so it follows Wisp Focus and stops while the run is paused.
+func get_arrival_progress() -> float:
+	if state != State.TELEGRAPH:
+		return 1.0
+	return 1.0 - clampf(_telegraph_remaining / maxf(tuning.telegraph_duration, 0.001), 0.0, 1.0)
+
+
+## Shows (true) or hides the amber arrival ring while the enemy arrives; an arena that draws the arrival
+## itself hides it (ADR-0025). The ring still shows the enemy's later action warnings.
+func set_arrival_ring_enabled(enabled: bool) -> void:
+	_arrival_ring_enabled = enabled
+	if is_node_ready() and state == State.TELEGRAPH:
+		_arrival_ring.visible = enabled
 
 
 ## Returns the live collision radius in viewport pixels.
@@ -319,11 +338,7 @@ func _clamp_to_arena() -> void:
 
 func _update_telegraph(delta: float) -> void:
 	_telegraph_remaining -= delta * _world_speed
-	var progress: float = 1.0 - clampf(
-		_telegraph_remaining / maxf(tuning.telegraph_duration, 0.001),
-		0.0,
-		1.0,
-	)
+	var progress: float = get_arrival_progress()
 	_sprite.modulate.a = lerpf(0.22, 1.0, progress)
 	# The amber ring converges on the spawn point and blinks faster as the enemy arrives.
 	_arrival_ring.modulate.a = lerpf(0.55, 1.0, VfxPool.countdown_blink(progress))

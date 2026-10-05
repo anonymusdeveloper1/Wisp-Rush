@@ -1,10 +1,11 @@
 # System: Endless mode
 
-> **Status:** ✅ three painted arenas, the Quarry Titan (2026-09-23; the thirty generated skins were removed), the Stitched Doll Jungle and the Chained Colossus (2026-09-30, each its own floor), one layered arena, Stitchwarden's Vigil (2026-09-30), one 3D arena, the Chained Colossus 3D (2026-09-30, ADR-0023), the 3D ZOOM ARENA test slot, which opens with a zoom (2026-10-01), and two board slots, BOARD 01 and BOARD 01 LIGHT, the full-screen pixel-art board with the HUD in its frame (2026-10-02, ADR-0024) · the Quarry Titan's 1080×2400 re-delivery and a device pass pending · **Last updated:** 2026-09-30 · **GDD section:** §6, §7, §11 ·
+> **Status:** ✅ three painted arenas, the Quarry Titan (2026-09-23; the thirty generated skins were removed), the Stitched Doll Jungle and the Chained Colossus (2026-09-30, each its own floor), one layered arena, Stitchwarden's Vigil (2026-09-30), one 3D arena, the Chained Colossus 3D (2026-09-30, ADR-0023), the 3D ZOOM ARENA test slot, which opens with a zoom (2026-10-01), two board slots, BOARD 01 and BOARD 01 LIGHT, the full-screen pixel-art board with the HUD in its frame (2026-10-02, ADR-0024), and SIMULATION, the sci-fi board with the meters in its screen and its own spawn effects (2026-10-04, ADR-0025) · the Quarry Titan's 1080×2400 re-delivery and a device pass pending · **Last updated:** 2026-10-04 · **GDD section:** §6, §7, §11 ·
 > **ADR:** [0013](../decisions/0013-rift-story-levels-endless-mode-and-rift-points.md),
 > [0017](../decisions/0017-painted-arenas-with-bleed.md) (supersedes [0014](../decisions/0014-endless-arenas-share-one-floor-template.md)),
 > [0020](../decisions/0020-an-arena-may-bring-its-own-floor.md), [0021](../decisions/0021-layered-arenas.md),
-> [0023](../decisions/0023-3d-arenas.md), [0024](../decisions/0024-board-arenas.md) ·
+> [0023](../decisions/0023-3d-arenas.md), [0024](../decisions/0024-board-arenas.md),
+> [0025](../decisions/0025-sci-fi-board-and-arena-spawn-effects.md) ·
 > **Guide:** [arena_art.md](../guides/arena_art.md) — the arena image contract · **Specs:** [03](../specs/story_and_endless/03_endless_mode.md)
 
 ## Purpose
@@ -23,7 +24,7 @@ bosses into the pool.)
 | `res://scripts/resources/arena_skin_data.gd` | `ArenaSkinData`: one arena — background path, thumbnail, price, its own floor when it has one (ADR-0020), a layered or 3D arena's scene path (ADR-0021, ADR-0023) |
 | `res://scripts/resources/endless_tuning.gd` | `EndlessTuning`: boss cadence, per-cycle threat and speed, daily pool, the opening boss |
 | `res://data/endless/default_endless_catalog.tres` · `default_endless_tuning.tres` | The catalog and tuning instances |
-| `res://data/endless/skins/<id>.tres` | One `ArenaSkinData` per arena (hand-authored): `quarry_titan`, `stitched_doll_jungle`, `stitchwarden_vigil`, `chained_colossus`, `chained_colossus_3d`, `zoom_arena_3d`, `board_01`, `board_01_light` |
+| `res://data/endless/skins/<id>.tres` | One `ArenaSkinData` per arena (hand-authored): `quarry_titan`, `stitched_doll_jungle`, `stitchwarden_vigil`, `chained_colossus`, `chained_colossus_3d`, `zoom_arena_3d`, `board_01`, `board_01_light`, `sci_fi_simulation_v1` |
 | `res://assets/art/environment/arenas/<id>.png` · `thumbnails/<id>.png` | Runtime background (loaded only when a run or a near Shop card needs it) and the 0.3× Shop thumbnail, from `tools/art/make_arena.py` |
 | `concept_art/arenas_v2/<id>/` | Source image and `arena.json` (name, description, measured `floor_rect_px`); `_layout/arena_layout_guide.png` is the contract drawn out |
 | `tools/art/make_arena.py` | Source → background + thumbnail, prints the floor in UV; `--guide` draws the layout guide |
@@ -31,6 +32,7 @@ bosses into the pool.)
 | `res://scenes/arenas/layered_arena_visual.gd` | `LayeredArenaVisual`: a layered arena's scene root (ADR-0021) — `fit()` covers the screen with its backdrop, scales its centre group and returns the drawn floor |
 | `res://scenes/arenas/model_arena_visual.gd` · `res://scripts/resources/model_arena_layout.gd` | `ModelArenaVisual`: a 3D arena's scene root (ADR-0023) — a SubViewport 3D world, the camera placed so the model's floor is the returned rectangle, the head bone's breathing; `ModelArenaLayout`: the model's measured floor, eye, flame and skull points |
 | `res://scenes/arenas/board_arena_visual.gd` · `board_01.tscn` · `board_01_light.tscn` | `BoardArenaVisual` (ADR-0024): the full-screen board built from its pieces at run time, the HUD drawn in its frame (`set_board_hud`, `hud_pause_pressed`); the two slots differ only by `light_floor` |
+| `res://scenes/arenas/sci_fi_board_visual.gd` · `sci_fi_simulation_v1.tscn` | `SciFiBoardVisual` (ADR-0025): the sci-fi board built from its kit as the kit's manifest lays it out, the HUD in its frame, the magenta boss and amber RUSH meters in its screen, and the enemy-arrival and boss-appearance effects clipped to its floor |
 | `res://scenes/gameplay/upgrade_glow.gd` | `UpgradeGlow`: the light on the character while upgrades are ready on a board; tap him to open them |
 | `tools/art/make_board.py` | Copies a board's pieces from `concept_art/boards_v1/<board>/` (checked against its manifest) to `assets/art/environment/boards/<board>/` |
 | `res://scenes/arenas/zoom_arena_3d.tscn` | The 3D ZOOM ARENA (2026-10-01): the Chained Colossus 3D scene with `zoom_intro` on |
@@ -45,7 +47,7 @@ bosses into the pool.)
 | `res://scenes/gameplay/endless_arena_rules.gd` | `EndlessArenaRules`: the catalog floor, the arena, seeded roster/boss picks with no immediate repeat, per-cycle tuning |
 | `res://scripts/resources/arena_scenery_data.gd` · `arena_scenery_zone.gd` · `arena_particle_emitter.gd` · `res://scenes/gameplay/arena_ambience.gd` · `res://assets/shaders/arena_scenery*.gdshader` | Animated scenery over an arena's painting — **no arena uses it since 2026-09-23** (see Rules) |
 | `tools/godot/test_endless_enemies.gd` | Stale since 2026-09-28: it checks the removed Rift enemies and mixes |
-| `tools/godot/test_endless_catalog.gd` | Catalog validation, arena ids vs save ids, each arena's measured floor vs the floor the game uses for it (shared or its own), arena scenes (scene loads, floor on screen at four portrait sizes; the Vigil's smaller than the jungle's on 1080 × 2340; the Colossus 3D's a little bigger than the Vigil's on 1080-wide phones; the zoom arena has its opening shot, a skipped one ends on the play floor, and its zoomed-in floor is bigger than the Colossus 3D's; only the two boards draw the HUD), backgrounds and thumbnails, arena of the day, rules' floor, sanitizing saves that held retired arenas |
+| `tools/godot/test_endless_catalog.gd` | Catalog validation, arena ids vs save ids, each arena's measured floor vs the floor the game uses for it (shared or its own), arena scenes (scene loads, floor on screen at four portrait sizes; the Vigil's smaller than the jungle's on 1080 × 2340; the Colossus 3D's a little bigger than the Vigil's on 1080-wide phones; the zoom arena has its opening shot, a skipped one ends on the play floor, and its zoomed-in floor is bigger than the Colossus 3D's; only the three boards draw the HUD), backgrounds and thumbnails, arena of the day, rules' floor, sanitizing saves that held retired arenas |
 | `tools/godot/render_arena_tab.*` | The Shop ARENAS pager, for review |
 | `tools/godot/test_endless_mode.gd` | Behaviour checks (**not written yet**) |
 
@@ -62,7 +64,7 @@ bosses into the pool.)
 | `ArenaSkinData.floor_rect` / `has_own_floor()` | export / method | An arena's own floor in UV (ADR-0020); zero size = the shared floor. `EndlessArenaRules.get_floor_rect_uv()` / `get_floor_polygon()` return it while that arena is equipped. |
 | `ArenaSkinData.visual_scene_path` / `has_visual_scene()` / `load_visual_scene()` | export / methods | A layered arena's scene (ADR-0021), loaded when a run starts; `ArenaRules.get_visual_scene()` hands it to GameWorld (null for a painted arena). |
 | `LayeredArenaVisual.fit(view_size, safe_top)` → `Rect2` | method | Lays a layered arena out for the screen and returns its floor as drawn, which GameWorld uses as the arena rect and walls. Also `get_floor_rect()`, `get_group_scale()`, `set_focus_point()`, `set_reduced_motion()`. |
-| `ArenaVisual` (base of layered, 3D and board arenas) | class | `fit()`, `get_floor_rect()`, `get_drawn_floor_rect()`, `set_focus_point()`, `set_reduced_motion()`; the opening shot `has_intro()`, `play_intro()`, `skip_intro()`, signal `intro_finished` (ADR-0023); a board's HUD `has_board_hud()`, `set_board_hud(state)`, signal `hud_pause_pressed` (ADR-0024). |
+| `ArenaVisual` (base of layered, 3D and board arenas) | class | `fit()`, `get_floor_rect()`, `get_drawn_floor_rect()`, `set_focus_point()`, `set_reduced_motion()`; the opening shot `has_intro()`, `play_intro()`, `skip_intro()`, signal `intro_finished` (ADR-0023); a board's HUD `has_board_hud()`, `set_board_hud(state)`, signal `hud_pause_pressed` (ADR-0024); `set_safe_bottom(inset)` before `fit()`; spawn effects `show_enemy_arrival(enemy, progress) -> bool` (true: the arena draws it, and the enemy's amber ring is turned off), `show_boss_appearance(boss, progress)`, `clear_spawn_effects()`, each `progress` the actor's own reader (ADR-0025). |
 | `GameWorld.play_arena_intro` | var | Off for a restart from the run's dialogs (Main), so the arena starts zoomed in. |
 | `ArenaRules.get_floor_rect_uv()` | method | The rectangle formations, hazards and the playfield's scale use; empty = `GameWorld.ARENA_FLOOR_UV` (the neutral arena). `EndlessArenaRules` returns `floor_rect`. |
 | `ArenaSkinData.load_background()` / `get_tier_name()` | method | Lazy full-size background; `SIMPLE`…`MYTHIC`. |
@@ -79,7 +81,7 @@ bosses into the pool.)
 | `speed_scale_start` / `speed_scale_per_cycle` / `speed_scale_cap` | 1.0 / 0.04 / 1.3 | Enemy speed per cycle |
 | `daily_roster_ids` / `daily_boss_ids` | `[obsidian_garden]` / `[reaper]` | Fixed daily pool |
 | `opening_boss_id` | `grimgrin` | The first boss of every Endless run (Claude's choice for the phone test, 2026-09-27); Main copies it into the Endless `RunProfile` only, so the daily run and the Tutorial ignore it |
-| Arenas | `quarry_titan` — QUARRY TITAN, Simple, free, the default · `stitched_doll_jungle` — STITCHED DOLL JUNGLE, Simple, free for now (owner), its own floor x 265–679, y 450–1266 · `stitchwarden_vigil` — STITCHWARDEN'S VIGIL, Simple, free, a layered arena (ADR-0021, ADR-0022) whose floor is about 453 × 996 on a 1080 × 2340 phone · `chained_colossus` — CHAINED COLOSSUS, Simple, free for now (owner), its own floor x 282–667, y 470–1277 · `chained_colossus_3d` — CHAINED COLOSSUS 3D, Simple, free for now, a 3D arena (ADR-0023) whose floor is 498 × 1078 on a 1080 × 2340 phone · `zoom_arena_3d` — 3D ZOOM ARENA, Simple, free, the same scene zoomed in until its floor (about 1080 × 2338 there) fills the whole screen · `board_01` / `board_01_light` — BOARD 01 / BOARD 01 LIGHT, Simple, free, the full-screen board (floor 936 × 1990 on 1080 × 2340), mid-dark or light floor | Owner's images, 2026-09-23 and 2026-09-30; the Vigil's kit made with Codex, 2026-09-30; the Colossus 3D's model the owner's (Meshy), 2026-09-30 |
+| Arenas | `quarry_titan` — QUARRY TITAN, Simple, free, the default · `stitched_doll_jungle` — STITCHED DOLL JUNGLE, Simple, free for now (owner), its own floor x 265–679, y 450–1266 · `stitchwarden_vigil` — STITCHWARDEN'S VIGIL, Simple, free, a layered arena (ADR-0021, ADR-0022) whose floor is about 453 × 996 on a 1080 × 2340 phone · `chained_colossus` — CHAINED COLOSSUS, Simple, free for now (owner), its own floor x 282–667, y 470–1277 · `chained_colossus_3d` — CHAINED COLOSSUS 3D, Simple, free for now, a 3D arena (ADR-0023) whose floor is 498 × 1078 on a 1080 × 2340 phone · `zoom_arena_3d` — 3D ZOOM ARENA, Simple, free, the same scene zoomed in until its floor (about 1080 × 2338 there) fills the whole screen · `board_01` / `board_01_light` — BOARD 01 / BOARD 01 LIGHT, Simple, free, the full-screen board (floor 936 × 1990 on 1080 × 2340), mid-dark or light floor · `sci_fi_simulation_v1` — SIMULATION, Simple, free, cyan accent, the sci-fi board (floor 888 × 2028 in a 1080 × 2340 desktop window, desktop safe margins) | Owner's images, 2026-09-23 and 2026-09-30; the Vigil's kit made with Codex, 2026-09-30; the Colossus 3D's model the owner's (Meshy), 2026-09-30 |
 | `EndlessCatalog.BACKGROUND_SIZE` | 941 × 1672 | The Quarry Titan as delivered; the contract canvas is 1080 × 2400 ([guide](../guides/arena_art.md) §4) |
 | `floor_rect` = `floor_polygon` bounds | UV (0.1615, 0.2183)–(0.8374, 0.7853) | The painted floor inside the stone rim: x 152–788, y 365–1313 of 941 × 1672 |
 
@@ -130,6 +132,15 @@ bosses into the pool.)
   frame holds the HUD (pause, boss plate or crest, score, Rift Points, soul gauge, RUSH gauge,
   lanterns that glow for upgrades); GameWorld hides its own HUD and feeds the board, and tapping the
   glowing character opens the upgrades.
+- **The sci-fi board** (ADR-0025, owner 2026-10-04: SIMULATION) is a board with its own layout:
+  `SciFiBoardVisual` lays out the kit's pieces as its manifest says, with the floor
+  `[48, top + 64, 444, H − top − bottom − 128]` art pixels (`set_safe_bottom` gives the bottom); the
+  safe insets above and below are filled with the kit's caps (owner, GDD §14 #74),
+  the boss meter (only in a fight) and the RUSH meter inside the screen, and the other counters in
+  the top hardware. It draws each enemy's arrival (amber, its frame from
+  `EnemyActor.get_arrival_progress()`) and the boss's appearance (magenta, with patches at the
+  floor's edges and corners, its frame from `BossActor.get_intro_progress()`), clipped to the floor
+  and cleared when the arrival or the intro ends, the actor is gone, or the run ends.
 - **Fit on every phone** (ADR-0017): the background is cover-scaled; an arena painted to the
   1080 × 2400 contract is drawn 1:1 on every phone from 16:9 to 20:9, losing only bleed.
 - No rule twist: no portals, shrinking floor, drift or boss rush (those were the story Rifts', removed).
@@ -167,6 +178,8 @@ bosses into the pool.)
 ## Change history
 | Date | Change |
 |---|---|
+| 2026-10-05 | SIMULATION's top and bottom caps (GDD §14 #74): the kit's joins and bands fill the safe insets instead of the flat cap colour |
+| 2026-10-04 | SIMULATION, the sci-fi board (owner, GDD §14 #73, ADR-0025): `SciFiBoardVisual`, `sci_fi_simulation_v1` slot, `ArenaVisual.set_safe_bottom` and the spawn-effect hooks; `test_endless_catalog` counts it as a board |
 | 2026-10-02 | Board arenas (owner, GDD §14 #71–#72, ADR-0024): `BoardArenaVisual`, BOARD 01 and BOARD 01 LIGHT, `ArenaVisual.has_board_hud` / `set_board_hud` / `hud_pause_pressed`, `make_board.py`; `test_endless_catalog` checks which arenas draw the HUD |
 | 2026-10-02 | The zoom arena's floor fills the whole screen (`play_fills_screen`); a restart from the run's dialogs skips the zoom (`GameWorld.play_arena_intro`, Main) (owner, GDD §14 #70) |
 | 2026-10-01 | The zoom intro (owner, GDD §14 #69): `ArenaVisual`'s opening shot (`has_intro`, `play_intro`, `skip_intro`, `intro_finished`, `get_drawn_floor_rect`), `ModelArenaVisual.zoom_intro`, GameWorld plays it before the waves; the 3D ZOOM ARENA slot (`zoom_arena_3d`); `render_arena_still.gd` prints the drawn floor; the cloud banks fade at their bottom edge |

@@ -169,16 +169,23 @@ still is the opening shot, and `render_arena_still.gd` prints the floor drawn th
 ## 6. Board arenas
 
 A board arena fills the screen with a pixel-art board whose frame holds the HUD (owner 2026-10-02,
-[ADR-0024](../decisions/0024-board-arenas.md)). The worked example is BOARD 01.
+[ADR-0024](../decisions/0024-board-arenas.md)). The worked example is BOARD 01. There are two layouts:
+BOARD 01's (`BoardArenaVisual`) and the sci-fi screen's, SIMULATION (`SciFiBoardVisual`, owner
+2026-10-04, [ADR-0025](../decisions/0025-sci-fi-board-and-arena-spawn-effects.md): 48 px rails,
+64 / 64 px hardware, the boss and RUSH meters inside the screen, its own enemy-arrival and
+boss-appearance sheets; kit `concept_art/boards_v1/sci_fi_simulation_v1/`, its `manifest.json`
+the layout).
 
 1. **The pieces** come from Codex, by a prompt like `concept_art/boards_v1/board_01/CODEX_PROMPT.md`:
    1 art pixel = 2 design pixels (540 art pixels across), posts 36 and beams 64 / 28 art pixels, a
    96-pixel floor tile and its variants, every frame, HUD, lantern and decoration piece at its listed
    size, a `manifest.json` with the empty text, icon and fill rectangles, and previews. A new board keeps
-   the same pieces, sizes and slots; only the art changes.
+   the pieces, sizes and slots of one of the two layouts; only the art changes. A kit with other sizes
+   or slots needs its own `ArenaVisual` (ADR-0025).
 2. `python tools/art/make_board.py <board>` checks the pieces against the manifest and copies them to
    `assets/art/environment/boards/<board>/`.
-3. **The scene** is a `BoardArenaVisual` with `art_dir` pointing there (`scenes/arenas/board_01.tscn`).
+3. **The scene** is a `BoardArenaVisual` (or a `SciFiBoardVisual`) with `art_dir` pointing there
+   (`scenes/arenas/board_01.tscn`, `scenes/arenas/sci_fi_simulation_v1.tscn`).
 4. **The Shop still:** `render_arena_still.gd` as in §5 step 4 (the HUD is empty in it), then
    `arena.json` (floor rounded to whole pixels), `make_arena.py <id>` and the skin.
 5. `tools/validate.sh` and `tools/run_tests.sh endless_catalog`.

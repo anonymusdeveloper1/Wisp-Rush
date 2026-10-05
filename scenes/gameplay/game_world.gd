@@ -1317,7 +1317,9 @@ func _compute_arena_rect() -> Rect2:
 	var view: Rect2 = get_viewport_rect()
 	if is_instance_valid(_arena_visual):
 		# The floor exactly as the layered arena drew it: no minimum size widens it (ADR-0021).
-		return _arena_visual.fit(view.size, _get_safe_margins().y).intersection(view)
+		var margins: Vector4 = _get_safe_margins()
+		_arena_visual.set_safe_bottom(margins.w)
+		return _arena_visual.fit(view.size, margins.y).intersection(view)
 	var texture: Texture2D = _background.texture
 	var rect: Rect2 = view
 	if texture != null and texture.get_size().x > 0.0 and texture.get_size().y > 0.0:
@@ -1494,6 +1496,8 @@ func _start_boss_encounter(health_override: int = 0) -> void:
 		run_seed + _current_wave * 101,
 		health_override,
 	)
+	if is_instance_valid(_arena_visual):
+		_arena_visual.show_boss_appearance(_boss, _boss.get_intro_progress)
 	_set_world_shade(SHADE_BOSS)
 	_boss_hud.visible = true
 	_boss_warning.text = variant.display_name
@@ -1673,6 +1677,12 @@ func _spawn_enemy(
 	enemy.set_speed_scale(_arena_rules.get_enemy_speed_scale(_bosses_defeated))
 	enemy.killed.connect(_on_enemy_killed)
 	enemy.projectile_fired.connect(_on_enemy_projectile_fired)
+	# An arena with its own arrival effect draws the arrival instead of the amber ring (ADR-0025).
+	if (
+		is_instance_valid(_arena_visual)
+		and _arena_visual.show_enemy_arrival(enemy, enemy.get_arrival_progress)
+	):
+		enemy.set_arrival_ring_enabled(false)
 	_remaining_live_enemies += 1
 	return enemy
 
@@ -2727,6 +2737,8 @@ func _on_player_died() -> void:
 	_focus_remaining = 0.0
 	_set_world_speed(0.1)
 	_pause_button.disabled = true
+	if is_instance_valid(_arena_visual):
+		_arena_visual.clear_spawn_effects()
 	_emit_run_end()
 
 

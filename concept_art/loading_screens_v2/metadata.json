@@ -1,0 +1,221 @@
+{
+  "generator": "Codex built-in image generator",
+  "art_size": [
+    270,
+    600
+  ],
+  "output_size": [
+    1080,
+    2400
+  ],
+  "palette_entries": 256,
+  "palette_method": "per image: 217 adaptive shades, 32 source accents, 7 GDD anchors",
+  "processing": "center cover crop, BOX reduction, no dithering, 4x nearest enlargement",
+  "outputs": [
+    {
+      "file": "loading_new_boss.png",
+      "label": "New boss",
+      "raw_path": "raw/loading_new_boss_source_v2.png",
+      "raw_size": [
+        841,
+        1870
+      ],
+      "raw_sha256": "97123650a5d0a22b76d9b50ba7de8d16e17a9ba3c69e0529b50c92700a75e249",
+      "center_cover_crop": [
+        0,
+        0.556,
+        841,
+        1869.444
+      ],
+      "size": [
+        1080,
+        2400
+      ],
+      "mode": "RGB",
+      "colors": 201,
+      "opaque": true,
+      "exact_4_px_grid": true,
+      "sha256": "a103901e616957bcb594ed135039af600a00d923340041cc58bb78636ef97bda",
+      "prompt": "prompts/loading_new_boss.md",
+      "composition_refinement": "prompts/loading_new_boss_refinement.md",
+      "runtime_path": "res://assets/art/environment/loading_screens/loading_new_boss.png",
+      "runtime_matches_source": true
+    },
+    {
+      "file": "loading_grimgrin.png",
+      "label": "Grimgrin",
+      "raw_path": "raw/loading_grimgrin_source.png",
+      "raw_size": [
+        841,
+        1870
+      ],
+      "raw_sha256": "8a999eb0e630e16dccbd2c6ace4449a61b46d416157a08bf37df8336fcef0626",
+      "center_cover_crop": [
+        0,
+        0.556,
+        841,
+        1869.444
+      ],
+      "size": [
+        1080,
+        2400
+      ],
+      "mode": "RGB",
+      "colors": 201,
+      "opaque": true,
+      "exact_4_px_grid": true,
+      "sha256": "9a16b43dd3df7ed11b0bfb4891784779b492d89e60ac1de40cc4d940b5b98347",
+      "prompt": "prompts/loading_grimgrin.md",
+      "composition_refinement": null,
+      "runtime_path": "res://assets/art/environment/loading_screens/loading_grimgrin.png",
+      "runtime_matches_source": true
+    },
+    {
+      "file": "loading_patchvile_grove.png",
+      "label": "Patchvile",
+      "raw_path": "raw/loading_patchvile_grove_source.png",
+      "raw_size": [
+        841,
+        1870
+      ],
+      "raw_sha256": "0a91402827ae460be0b47ea71d33335c041c30c85e52d5f80bed6a7cdc542e98",
+      "center_cover_crop": [
+        0,
+        0.556,
+        841,
+        1869.444
+      ],
+      "size": [
+        1080,
+        2400
+      ],
+      "mode": "RGB",
+      "colors": 218,
+      "opaque": true,
+      "exact_4_px_grid": true,
+      "sha256": "3e86b2a7f710590e1202cb0386a26324d98045c4fc69de045ba1b692845cf83d",
+      "prompt": "prompts/loading_patchvile_grove.md",
+      "composition_refinement": null,
+      "runtime_path": "res://assets/art/environment/loading_screens/loading_patchvile_grove.png",
+      "runtime_matches_source": true
+    },
+    {
+      "file": "loading_shade.png",
+      "label": "Shade",
+      "raw_path": "raw/loading_shade_source_v2.png",
+      "raw_size": [
+        842,
+        1869
+      ],
+      "raw_sha256": "a523053233e38289589c98e08c568f5926520883bf2e3aa2e8b4575457903863",
+      "center_cover_crop": [
+        0.475,
+        0,
+        841.525,
+        1869
+      ],
+      "size": [
+        1080,
+        2400
+      ],
+      "mode": "RGB",
+      "colors": 203,
+      "opaque": true,
+      "exact_4_px_grid": true,
+      "sha256": "13afd131c02d1eb4a14f9c5f0e34e91351c6a6b7390f30736ff6e7f8fcedb8d2",
+      "prompt": "prompts/loading_shade.md",
+      "composition_refinement": "prompts/loading_shade_refinement.md",
+      "runtime_path": "res://assets/art/environment/loading_screens/loading_shade.png",
+      "runtime_matches_source": true
+    },
+    {
+      "file": "loading_scarlet.png",
+      "label": "Scarlet",
+      "raw_path": "raw/loading_scarlet_source_v2.png",
+      "raw_size": [
+        841,
+        1870
+      ],
+      "raw_sha256": "3e20a8a9a9b0198092a9566f04e23d9c629dedbafd3acf8eeeab68771df86bcf",
+      "center_cover_crop": [
+        0,
+        0.556,
+        841,
+        1869.444
+      ],
+      "size": [
+        1080,
+        2400
+      ],
+      "mode": "RGB",
+      "colors": 225,
+      "opaque": true,
+      "exact_4_px_grid": true,
+      "sha256": "33312a3f69a677bba494c58700eb43898dd6db1ff96f9a5cd2814d96ff47c9db",
+      "prompt": "prompts/loading_scarlet.md",
+      "composition_refinement": "prompts/loading_scarlet_refinement.md",
+      "runtime_path": "res://assets/art/environment/loading_screens/loading_scarlet.png",
+      "runtime_matches_source": true
+    },
+    {
+      "file": "loading_rook.png",
+      "label": "Rook",
+      "raw_path": "raw/loading_rook_source_v2.png",
+      "raw_size": [
+        841,
+        1870
+      ],
+      "raw_sha256": "0fa341c4c9f91084410a5535126259c52414e9597e68c04cdbccbdf7dbeda8e7",
+      "center_cover_crop": [
+        0,
+        0.556,
+        841,
+        1869.444
+      ],
+      "size": [
+        1080,
+        2400
+      ],
+      "mode": "RGB",
+      "colors": 208,
+      "opaque": true,
+      "exact_4_px_grid": true,
+      "sha256": "61504d43108ddd73c6300e208a51b0b538d5eb786850ffdb21553bceb5061a66",
+      "prompt": "prompts/loading_rook.md",
+      "composition_refinement": "prompts/loading_rook_refinement.md",
+      "runtime_path": "res://assets/art/environment/loading_screens/loading_rook.png",
+      "runtime_matches_source": true
+    },
+    {
+      "file": "loading_mothmere.png",
+      "label": "Mothmere",
+      "raw_path": "raw/loading_mothmere_source.png",
+      "raw_size": [
+        841,
+        1870
+      ],
+      "raw_sha256": "677a61c2553e7e072ad47c4326c5b37c5c1fd902a75c02287eeedb228b00d1cb",
+      "center_cover_crop": [
+        0,
+        0.556,
+        841,
+        1869.444
+      ],
+      "size": [
+        1080,
+        2400
+      ],
+      "mode": "RGB",
+      "colors": 230,
+      "opaque": true,
+      "exact_4_px_grid": true,
+      "sha256": "61023a8034b0b78107cc138b233f64f8f99c9ea419ecaa99d0185361e9c76cdf",
+      "prompt": "prompts/loading_mothmere.md",
+      "composition_refinement": null,
+      "runtime_path": "res://assets/art/environment/loading_screens/loading_mothmere.png",
+      "runtime_matches_source": true
+    }
+  ],
+  "review": "preview_all.png (labels only on the review sheet)",
+  "runtime_integration": true
+}

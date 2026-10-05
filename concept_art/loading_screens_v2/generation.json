@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-04",
+  "generator": "Codex built-in image generator",
+  "outputs": [
+    {
+      "name": "loading_new_boss",
+      "generated_original": "C:\\Users\\marti\\.codex\\generated_images\\01a0e98f-81b7-75b1-aa49-7e70c8da3a5c\\exec-f13d9396-3107-4838-9f9d-d47c1a742945.png",
+      "references": [
+        ".codex-remote-attachments/01a0e98f-81b7-75b1-aa49-7e70c8da3a5c/9164adb8-80a4-4db7-802c-f1de8c139d51/1-1000013911.jpg",
+        "concept_art/loading_and_shop_v1/loading_patchvile.png"
+      ]
+    },
+    {
+      "name": "loading_grimgrin",
+      "generated_original": "C:\\Users\\marti\\.codex\\generated_images\\01a0e98f-81b7-75b1-aa49-7e70c8da3a5c\\exec-98fcd8b5-a45d-4b2d-a4ca-86126caba5d2.png",
+      "references": [
+        "logs/loading_screens_v2_review/grimgrin_reference.png",
+        "concept_art/loading_and_shop_v1/loading_patchvile.png"
+      ]
+    },
+    {
+      "name": "loading_patchvile_grove",
+      "generated_original": "C:\\Users\\marti\\.codex\\generated_images\\01a0e98f-81b7-75b1-aa49-7e70c8da3a5c\\exec-b6d411dc-ae99-4b58-941e-cbaf36a41403.png",
+      "references": [
+        "concept_art/patchvile_autosprite_v1/references/patchvile.png",
+        "concept_art/patchvile_autosprite_v1/references/dagger.png",
+        "concept_art/loading_and_shop_v1/loading_patchvile.png"
+      ]
+    },
+    {
+      "name": "loading_shade",
+      "generated_original": "C:\\Users\\marti\\.codex\\generated_images\\01a0e98f-81b7-75b1-aa49-7e70c8da3a5c\\exec-531045af-6411-4664-8748-52143c9db09e.png",
+      "references": [
+        "concept_art/verdant_shade_autosprite_v1/storefront_first_frame.png",
+        "concept_art/loading_and_shop_v1/loading_patchvile.png"
+      ]
+    },
+    {
+      "name": "loading_scarlet",
+      "generated_original": "C:\\Users\\marti\\.codex\\generated_images\\01a0e98f-81b7-75b1-aa49-7e70c8da3a5c\\exec-a7dbbb43-01ba-48f7-a879-5149be879ca7.png",
+      "references": [
+        "concept_art/scarlet_autosprite_v1/storefront_first_frame.png",
+        "concept_art/loading_and_shop_v1/loading_patchvile.png"
+      ]
+    },
+    {
+      "name": "loading_rook",
+      "generated_original": "C:\\Users\\marti\\.codex\\generated_images\\01a0e98f-81b7-75b1-aa49-7e70c8da3a5c\\exec-f50cad65-6317-430f-a423-23d5e29a170e.png",
+      "references": [
+        "concept_art/rook_autosprite_v1/storefront_first_frame.png",
+        "concept_art/loading_and_shop_v1/loading_patchvile.png"
+      ]
+    },
+    {
+      "name": "loading_mothmere",
+      "generated_original": "C:\\Users\\marti\\.codex\\generated_images\\01a0e98f-81b7-75b1-aa49-7e70c8da3a5c\\exec-a77e3910-5f1c-44ad-975f-6323864e1c1c.png",
+      "references": [
+        "concept_art/mothmere_autosprite_v1/storefront_first_frame.png",
+        "concept_art/loading_and_shop_v1/loading_patchvile.png"
+      ]
+    }
+  ]
+}

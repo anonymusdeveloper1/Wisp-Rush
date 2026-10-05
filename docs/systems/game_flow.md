@@ -1,6 +1,6 @@
 # System: Game flow
 
-> **Status:** ✅ done · **Last updated:** 2026-09-25 · **GDD section:** §11
+> **Status:** ✅ done · **Last updated:** 2026-10-05 · **GDD section:** §11
 >
 > **Changed 2026-09-25:** the story Rifts are removed (owner): no Rift Map, no story runs, no level
 > Results. Endless and the daily run are the only runs. Older Rift routes below are marked history.
@@ -15,7 +15,7 @@ and every Home destination, the run, Results, and consistent back handling. Scre
 | Path | Role |
 |---|---|
 | `res://scenes/main/main.tscn` / `main.gd` | Composition root: screen replacement, back routing, app-lifecycle music duck, debug overlay |
-| `res://scenes/screens/loading_screen.*` | Boot: threaded scene streaming and audio readiness |
+| `res://scenes/screens/loading_screen.*` | Boot/PLAY: threaded streaming, progress and a random character/boss loading illustration |
 | `res://scenes/tutorial/tutorial_screen.*` | Tutorial screen ([tutorial.md](tutorial.md)): first launch and the Settings replay |
 | `res://scenes/screens/home_screen.*` | Home: top bar, pixel-art logo, equipped character over an empty central dais between two button columns, caption + animated PLAY under it |
 | `res://scenes/screens/home_ambience.gd` | `HomeAmbience`: living background (brazier flicker, rune pulse, mist, rising motes) |
@@ -73,7 +73,7 @@ SaveManager (snapshot, runs, forms, challenges), Audio via `SoundFx` (music stat
 ChallengeTracker, FormCatalog. The run: [core_run.md](core_run.md), [game_feel.md](game_feel.md).
 
 ## Rules & behaviour
-- Every screen is styled only through the project Theme's type variations ([ui_design_system.md](ui_design_system.md)); Home uses `home_background.png`, every other menu `menu_background.png`.
+- Every screen is styled through the project Theme's type variations ([ui_design_system.md](ui_design_system.md)). Home uses `home_background.png`; Shop, Daily Run, Trials and Results use their dedicated nearest-filtered pixel-art images in `assets/art/environment/menu_screens/` ([source pack](../../concept_art/menu_backgrounds_v1/README.md)). Other menus retain `menu_background.png`.
 - **Home layout** (owner decision 2026-09-13, GDD §11; the bottom navigation bar is gone): top bar
   (Rift Points, best, Statistics, Settings) and logo; the equipped character above the central stone dais — **tap it for
   Shop CHARACTERS**; left column TRIALS · DAILY (the SANCTUM button went with the Sanctum, ADR-0013), right
@@ -138,9 +138,12 @@ ChallengeTracker, FormCatalog. The run: [core_run.md](core_run.md), [game_feel.m
   lets it draw 3 frames covered (step 3), and only when the bar completes covers with the veil and
   reveals that same run. Nothing is instantiated after the bar. Restart / Results follow-ups / Daily
   build under the veil without a loading screen.
-- **Loading screen** (boot and run share it, redesign 2026-09-16): a random painted background from
-  `LoadingScreen.BACKGROUND_POOL` (`wisp_rush_arena_background.png`, Home, menu; shown at once if cached, else
-  loaded threaded and faded in over void charcoal), cover-scaled with a slow Ken Burns zoom/drift; a
+- **Loading screen** (boot and run share it, redesign 2026-09-16): a random portrait pixel-art illustration from
+  `LoadingScreen.BACKGROUND_POOL` (five playable characters except Morrow, Grimgrin and the supplied new
+  lantern boss; [source pack](../../concept_art/loading_screens_v2/README.md)). Runtime files are generated
+  in `assets/art/environment/loading_screens/`, nearest-filtered, shown at once if cached, otherwise
+  loaded threaded and faded in over void charcoal, then cover-scaled with the existing slow Ken Burns
+  zoom/drift; a
   void-charcoal gradient scrim; the logo with a soft glow in the upper part and, for a run, the
   heading (`ENDLESS` + the arena's name); near the bottom `LOADING...` with animated dots
   over a full-width standard `ProgressBar`. Reduced Motion stills the drift, breath and dots. The bar
@@ -207,6 +210,8 @@ ChallengeTracker, FormCatalog. The run: [core_run.md](core_run.md), [game_feel.m
 
 | Date | Change |
 |---|---|
+| 2026-10-05 | Owner-requested Shop, Daily Run, Trials and death/results pixel-art backgrounds connected to the existing scenes, with nearest filtering and aspect-preserving cover |
+| 2026-10-04 | Owner-requested loading illustrations implemented: seven character/boss pixel-art scenes in the existing random boot/PLAY pool, nearest filtering; source generation and runtime copies through the loading pack builder |
 | 2026-09-27 | Every character stands centred on the dais (owner, GDD §14 #57); Rook's `menu_offset` puts his feet on its centre |
 | 2026-09-25 | Story Rifts removed (owner): Rift Map screen and route, story runs, level Results (`next_level_requested`, `enter_rift_requested`, clear bonus, unlock banners) and `selected_rift` on unlock gone; Home's `RiftCaption` → `PlayCaption`; Results' `RiftName` → `ArenaName`; the loading pool drops the four Rift backdrops; the tutorial replay is Settings only |
 | 2026-09-23 | Pixel-art Home plate and logo, central empty dais for the equipped character, fixed preview transform while authored sprite or video motion continues; Home phone QA now builds directly, independent of the Tutorial save gate |

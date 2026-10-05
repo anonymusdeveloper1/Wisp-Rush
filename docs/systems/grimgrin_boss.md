@@ -1,7 +1,7 @@
 # System: Grimgrin, the Hollow Ronin (melee boss)
 
 > **Status:** 🔄 in the game (2026-09-27) · the first boss of the new set (Enemies v2) · the owner's
-> phone test pending · **Last updated:** 2026-09-28 · **GDD section:** §5.5, §14 #58–61 ·
+> phone test pending · **Last updated:** 2026-10-04 · **GDD section:** §5.5, §14 #58–61 ·
 > **Design:** [specs/enemies_v2/boss_melee.md](../specs/enemies_v2/boss_melee.md) (the owner's decisions)
 
 ## Purpose
@@ -44,7 +44,8 @@ counts from the canvas, not from the boss, and at −3 the rot drew under the fl
 `BossActor` (shared with `ReaperBoss`): the signals `phase_changed`, `summon_requested`,
 `spawn_requested(count, max_live)`, `health_changed`, `defeated`; `configure_variant`, `configure`,
 `set_target_position`, `set_arena_rect`, `set_arena_polygon`, `set_last_edge_position`,
-`set_player_radius`, `skip_intro`, `get_current_health`, `get_maximum_health`, `is_core_exposed`,
+`set_player_radius`, `skip_intro`, `get_intro_progress` (0..1 through his intro, 1 after; an arena
+draws his appearance from it, ADR-0025), `get_current_health`, `get_maximum_health`, `is_core_exposed`,
 `get_phase`, `get_phase_name`, `get_dangerous_circles`, `get_dangerous_lanes`, `get_lane_radius`,
 `try_dash_hit`, `get_victory_duration`, `get_experience_reward`, `get_defeat_name`.
 His own queries: `is_planted`, `is_marking`, `is_fast_attack` (its warning or flight), `get_wall`.
@@ -119,6 +120,7 @@ reused).
 
 | Date | Change |
 |---|---|
+| 2026-10-04 | `get_intro_progress()` for an arena's appearance effect (SIMULATION, ADR-0025) |
 | 2026-09-28 | His random spawns are the Enemies v2 enemies (the ramp's picks) |
 | 2026-09-28 | The fast attack (owner, GDD §14 #61): a longer crimson warning, then a fast flight in which he cannot be hit and touching him kills the Wisp even mid-dash; the slow dash stays. `test_grimgrin_boss` keeps the fast attack off (its checks hit him at any moment); not run, and the fast attack is not in it (the owner tests on the phone). Verified: `validate.sh` OK; APK installed and launched on the owner's phone |
 | 2026-09-27 | After the owner's phone test (owner): his dash no longer hurts the Wisp; he can be hit in flight as well as on his walls; a 0.5 s flaring warning before each dash and a glow through each flight; dash speed halved to 750. Verified: `test_grimgrin_boss`, `test_boss_variants`, `test_reaper_boss` pass |

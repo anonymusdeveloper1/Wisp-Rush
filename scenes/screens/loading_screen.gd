@@ -1,7 +1,7 @@
 class_name LoadingScreen
 extends Control
-## Boot and run loading screen (redesign 2026-09-16): a random painted background already in the
-## game, cover-scaled under a dark Palette scrim, the Wisp Rush logo in the upper part (and the
+## Boot and run loading screen: a random portrait character or boss pixel-art scene,
+## cover-scaled under a dark Palette scrim, the Wisp Rush logo in the upper part (and the
 ## arena heading under it for a run), and near the bottom "LOADING..." over a full ProgressBar.
 ##
 ## Boot: scenes load on worker threads while audio synthesizes. Run (PLAY): the
@@ -20,12 +20,16 @@ signal finished(resources: Dictionary)
 const MAX_WAIT_SECONDS: float = 6.0
 ## A run loading screen stays up at least this long, so it reads as a screen, not a flash.
 const RUN_MIN_SECONDS: float = 0.9
-## Painted backgrounds already in the game (Main keeps them loaded after boot); one is picked at
-## random. The arena background, Home and the menu background.
+## Seven portrait illustrations: the five playable characters other than Morrow, Grimgrin and
+## the owner's new lantern boss. One is chosen at random for boot or run loading.
 const BACKGROUND_POOL: PackedStringArray = [
-	"res://assets/art/environment/wisp_rush_arena_background.png",
-	"res://assets/art/environment/home_background.png",
-	"res://assets/art/environment/menu_background.png",
+	"res://assets/art/environment/loading_screens/loading_new_boss.png",
+	"res://assets/art/environment/loading_screens/loading_grimgrin.png",
+	"res://assets/art/environment/loading_screens/loading_patchvile_grove.png",
+	"res://assets/art/environment/loading_screens/loading_shade.png",
+	"res://assets/art/environment/loading_screens/loading_scarlet.png",
+	"res://assets/art/environment/loading_screens/loading_rook.png",
+	"res://assets/art/environment/loading_screens/loading_mothmere.png",
 ]
 ## Seconds a background that had to load on a worker thread takes to fade in over void charcoal.
 const BACKGROUND_FADE_SECONDS: float = 0.35
@@ -152,7 +156,7 @@ func complete_step() -> void:
 	_steps_done = mini(_steps_done + 1, _extra_steps)
 
 
-## The painted background on screen (res:// path), or empty before one is chosen.
+## The chosen loading illustration (res:// path), or empty before one is chosen.
 func get_background_path() -> String:
 	return _background_path
 

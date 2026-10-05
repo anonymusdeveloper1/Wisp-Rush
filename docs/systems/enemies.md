@@ -1,7 +1,7 @@
 # System: Enemies
 
 > **Status:** 🔄 Enemies v2 in the game (2026-09-28) · owner phone test pending · **Last updated:**
-> 2026-09-28 · **GDD section:** §5.4, §14 #58, #62 · **Design:** [specs/enemies_v2/](../specs/enemies_v2/README.md)
+> 2026-10-04 · **GDD section:** §5.4, §14 #58, #62 · **Design:** [specs/enemies_v2/](../specs/enemies_v2/README.md)
 
 ## Purpose
 
@@ -43,6 +43,7 @@ GameWorld/…/ProjectileLayer       the shots and wall marks, next to EnemyLayer
 | `projectile_fired(projectile)` | signal | A shot was loosed; `GameWorld` adds it to its projectile layer. |
 | `get_attack_circles() -> Array[Vector3]` | method | The strike that kills right now (x, y, radius); empty otherwise. |
 | `set_target_position` / `set_last_edge_position` / `set_world_speed` / `set_speed_scale` / `set_arena_rect` / `set_arena_polygon` / `apply_slow` | method | Run inputs, as before. |
+| `get_arrival_progress() -> float` / `set_arrival_ring_enabled(enabled)` | method | How far the arrival telegraph has run, 0..1 (1 once active), the countdown that makes the enemy active; and the amber arrival ring on or off while it arrives (off when the arena draws the arrival itself, SIMULATION, ADR-0025; action warnings still use the ring). |
 | `movement_enabled` | export | Off: the enemy stands still and never attacks (Tutorial targets, `debug_spawn_enemy`). |
 | `try_dash_hit` / `would_dash_hit` / `try_direct_hit` / `set_targeted` / `is_contact_active` / `get_collision_radius` | method | Hits and aim preview, unchanged. |
 | `WholeFrameEnemy.is_attacking()` | method | In its attack animation. |
@@ -106,6 +107,7 @@ shots and checks every danger; `DashGeometry` for the floor.
 
 | Date | Change |
 |---|---|
+| 2026-10-04 | `get_arrival_progress()` and `set_arrival_ring_enabled()`: an arena can draw the arrival (SIMULATION, ADR-0025) |
 | 2026-09-28 | Enemies v2 (owner): Bone Witch, Claw Ghost, Hooded Scribe, Root Mask, Stone Golem from the owner's AutoSprite sheets (cleaned of white leftovers), `WholeFrameEnemy`, `EnemyProjectile`, slice kill; every old enemy removed (to the Recycle Bin) |
 | 2026-09-15 | `would_dash_hit` pure query + `set_targeted` aim-preview ring (aim help) |
 | 2026-09-12 | Redesign v1 art; sprites and hitboxes ×1.45 (ADR-0006) |

@@ -1,0 +1,33 @@
+{
+  "generator": "Codex built-in image_gen",
+  "references": [
+    "concept_art/loading_and_shop_v1/shop_gallery.png",
+    "concept_art/loading_screens_v2/preview_all.png"
+  ],
+  "outputs": [
+    {
+      "name": "shop_background",
+      "raw": "raw/shop_background_source.png",
+      "prompt": "prompts/shop_background.md",
+      "original_output": "C:/Users/marti/.codex/generated_images/01a0e98f-81b7-75b1-aa49-7e70c8da3a5c/exec-159e152f-0852-463e-8fb9-e1adc02442a9.png"
+    },
+    {
+      "name": "daily_background",
+      "raw": "raw/daily_background_source.png",
+      "prompt": "prompts/daily_background.md",
+      "original_output": "C:/Users/marti/.codex/generated_images/01a0e98f-81b7-75b1-aa49-7e70c8da3a5c/exec-cfe02d16-7c13-46a6-994b-2432aae197db.png"
+    },
+    {
+      "name": "trials_background",
+      "raw": "raw/trials_background_source.png",
+      "prompt": "prompts/trials_background.md",
+      "original_output": "C:/Users/marti/.codex/generated_images/01a0e98f-81b7-75b1-aa49-7e70c8da3a5c/exec-424b6dae-b0f0-4e0e-8ef5-fcc121fc0cef.png"
+    },
+    {
+      "name": "results_background",
+      "raw": "raw/results_background_source.png",
+      "prompt": "prompts/results_background.md",
+      "original_output": "C:/Users/marti/.codex/generated_images/01a0e98f-81b7-75b1-aa49-7e70c8da3a5c/exec-dccad4ac-085f-4ef6-923f-723db5e7a545.png"
+    }
+  ]
+}

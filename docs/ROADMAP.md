@@ -280,6 +280,9 @@
       delivered 2026-09-27)
 - 🔄 Grimgrin, the melee boss: in the game 2026-09-27 as the first boss of every Endless run
       ([grimgrin_boss.md](systems/grimgrin_boss.md)); owner phone test pending
+- ✅ Green ranged boss: central ranged fight, own green wisps and healing recall documented;
+      six source poses and AutoSprite prompts prepared 2026-10-05
+      ([boss_ranged.md](specs/enemies_v2/boss_ranged.md)); animation sheets and runtime still pending
 - 🔄 Build the new enemies, bosses and the random ramp; remove the current enemies, bosses and mixes in
       the same step: **five enemies, the ramp and the removal of every old enemy done 2026-09-28**
       ([enemies.md](systems/enemies.md), GDD §14 #62; the mixes no longer change the enemies); owner phone

@@ -30,8 +30,9 @@ const COLOSSUS_3D_MAX_GROWTH: float = 1.25
 ## The zoom test arena (owner, GDD §14 #69): it opens with a zoom, and once zoomed in its floor fills
 ## the screen under the HUD, so it is bigger than the Colossus 3D's on every screen.
 const ZOOM_ARENA_ID: StringName = &"zoom_arena_3d"
-## The board arenas (owner 2026-10-02, ADR-0024): they draw the run's HUD in their own frame.
-const BOARD_IDS: Array[StringName] = [&"board_01", &"board_01_light"]
+## The board arenas (owner 2026-10-02, ADR-0024; the sci-fi board 2026-10-04, ADR-0025): they draw
+## the run's HUD in their own frame.
+const BOARD_IDS: Array[StringName] = [&"board_01", &"board_01_light", &"sci_fi_simulation_v1"]
 
 var _failures: int = 0
 

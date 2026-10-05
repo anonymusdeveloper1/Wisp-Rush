@@ -2,7 +2,7 @@
 
 > **Status:** 🔄 five enemies and the first boss, Grimgrin, in the game (2026-09-28 and 2026-09-27;
 > owner phone test pending) · the sixth enemy and two bosses still to make ·
-> **GDD:** §5.3, §5.4, §5.5, §14 #58, #62 · **Replaced:** every old enemy and the enemy mixes' enemies
+> **GDD:** §5.3, §5.4, §5.5, §14 #58, #62, #75 · **Replaced:** every old enemy and the enemy mixes' enemies
 > (2026-09-28); the old bosses stay until the new ones exist
 >
 > **For every agent:** this folder is where the new enemies are being designed with the owner. Read
@@ -11,6 +11,10 @@
 > make art, prompts or code for an enemy until the owner has approved it here.
 
 ## Where we are (2026-09-28)
+
+> **Update 2026-10-05:** the green ranged boss stays in the centre, summons his own green wisps,
+> casts Green Flame Volley and Lantern Sweep, and recalls surviving wisps to heal. Six pose images
+> and AutoSprite prompts are prepared in [boss_ranged.md](boss_ranged.md); no runtime implementation.
 
 - **Now:** the melee boss, **Grimgrin, the Hollow Ronin** ([boss_melee.md](boss_melee.md)), a hooded
   ninja hunter with two katanas. Name, look and fight decided; **his base is generated and picked** in
@@ -191,16 +195,18 @@ never uploaded — [autosprite_workflow.md](autosprite_workflow.md) §7).
 | # | Role | Owner's reference | Summons? | Regular enemies during the fight | Status |
 |---|---|---|---|---|---|
 | 1 | **Melee: Grimgrin, the Hollow Ronin** — dashes fast and unpredictably from wall to wall, swiping (after the first phone test his dash no longer kills: it is the time to hit him, with a warning flare before it and a glow through it); sometimes makes the Wisp's wall "ill" (leave it or die); Death's Grin (effects only); no throw animation; hit any time, harder while his katanas are planted; **keeps his legs** (owner, 2026-09-27) | a hooded **ninja hunter with two katanas** (owner: "not a reaper ... more like a ninja feel or a hunter with two katanas"): crimson hood and tattered cape, black face with round glowing orange eyes and a jagged glowing grin, glowing orange ribcage and spine, limbs wrapped in off-white bandages with crimson guards and boots, curved katanas with jagged dark teal blades. Claude first misread him as a reaper with a scythe | no | **spawn at random** (no summon animation; owner, 2026-09-27) | in the game 2026-09-27; owner phone test pending |
-| 2 | **Ranged** — attacks from a distance | a hooded skeleton necromancer in a long tattered dark robe with green-glowing armour, a staff topped with a lantern of green fire, green ghost skulls around him ("the green guy") | no | none may spawn | description drafted |
+| 2 | **Ranged: the green lantern boss** — stays in the centre; Green Flame Volley, Lantern Sweep and healing Soul Recall | the owner's hooded skeleton in tattered charcoal/teal robes, bone armour with emerald gems and a caged green-fire lantern staff | **yes — his own green wisps** (owner, 2026-10-05; replaces the earlier no-summons draft) | his own wisps; ordinary enemy spawning remains excluded by the earlier draft | design and six poses prepared; [boss_ranged.md](boss_ranged.md), AutoSprite sheets and runtime pending |
 | 3 | **Spawner** — spawns enemies | a black stone humanoid with tall cat-like ears and glowing orange cracks, one heavy rune-block arm ("like the cat"), **really redesigned so it feels like a boss that spawns enemies** | yes — any enemy, at random | the ones it summons | description drafted |
 
 The owner makes them **one at a time** (2026-09-27). Boss 1's full package — a proposed name, the
 fight, and every AutoSprite prompt — is in [boss_melee.md](boss_melee.md).
 
 Every boss has its own, different animations (owner, 2026-09-27). The owner tested the first three
-descriptions in AutoSprite and they were not what they wanted; the melee one was redone in detail,
-the other two are kept as drafts in [prompt_drafts.md](prompt_drafts.md). Still to define for each: name, its attacks (two or three), when it can be hit
-(`stunned`), and its sheets.
+descriptions in AutoSprite and they were not what they wanted; the melee one was redone in detail.
+The ranged boss now has [its own design and pose pack](boss_ranged.md) (2026-10-05); its old description
+and the spawner draft remain in [prompt_drafts.md](prompt_drafts.md) as history. The ranged boss's
+name, tuning, vulnerability and AutoSprite sheets are still open; its four casts, idle and death
+are documented, with no separate recovery pose. The spawner's attack and sheet list is still open.
 
 ## 7. Open questions for the owner
 
@@ -213,6 +219,7 @@ the other two are kept as drafts in [prompt_drafts.md](prompt_drafts.md). Still 
 
 | Date | Change |
 |---|---|
+| 2026-10-05 | Green ranged boss: central ranged casts, own green wisps, healing Soul Recall, idle and slumped death; six pose images and AutoSprite prompts prepared, no extra recovery pose or runtime changes |
 | 2026-09-28 | Five enemies in the game from the owner's sheets (cleaned); every old enemy removed, the mixes' enemies with them; the old bosses stay for now (owner) |
 | 2026-09-27 | Grimgrin in the game from the owner's six AutoSprite sheets (`GrimgrinBoss`), the first boss of every Endless run |
 | 2026-09-27 | Grimgrin: the throw is gone, Death's Grin in the second half (owner); his six pose and six animation prompts written |

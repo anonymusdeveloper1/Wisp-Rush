@@ -1,7 +1,7 @@
 # System: UI design system (pixel UI kit theme)
 
 > **Status:** ✅ done (pixel kit integrated 2026-09-24; owner phone review pending) ·
-> **Last updated:** 2026-09-25 · **GDD section:** §9 UI, §11
+> **Last updated:** 2026-10-05 · **GDD section:** §9 UI, §11
 >
 > Source of the look: the pixel-art component kit `concept_art/wisp_rush_pixel_ui_v1/` (README,
 > `components.json`, review boards in `previews/`), ADR-0018 (the game is pixel art). Palette meaning
@@ -118,7 +118,8 @@ enemy/boss/selection only. Never communicate meaning by hue alone — pair with 
 
 ## Art to use
 - **Backgrounds:** `home_background.png` for Home only (animated over by `HomeAmbience`);
-  `menu_background.png` for every other menu; the arena for
+  dedicated pixel-art backgrounds for Shop, Daily Run, Trials and Results ([game_flow.md](game_flow.md));
+  `menu_background.png` for the other menus; the arena for
   gameplay (pause sits over the frozen arena with a `Palette.SCRIM` ColorRect). `TextureRect` with
   `expand_mode = 1`, `stretch_mode = 6`.
 - **Icons:** kit glyphs in `res://assets/ui/theme/icons/` (`icon_play`, `icon_pause`, `icon_home`,
@@ -178,6 +179,7 @@ pixel, and `variation_embolden` smears them. Titles get one font pixel of letter
 ## Change history
 | Date | Change |
 |---|---|
+| 2026-10-05 | Four dedicated menu backgrounds use nearest-filtered Background TextureRects; Theme components and behavior unchanged |
 | 2026-09-25 | Story Rifts removed (owner): the Rift Map no longer uses `FocusCarousel` or its arena background |
 | 2026-09-24 | Pixel font: Pixelify Sans as the theme default (crisp FontFile built by the theme builder), every size on the 11 grid (theme and all per-node overrides), no embolden on titles |
 | 2026-09-24 | Pixel UI kit integrated: theme rebuilt from `concept_art/wisp_rush_pixel_ui_v1/` with nearest `CanvasTexture` wrappers; new `CaptionTile` (Home tiles) and `RewardPlate` (Results/Daily rewards); kit glyphs replace painted ones where the kit has them; `PageDots` draws kit diamonds; hard shadows instead of glows |

@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scenes/screens/trials_screen.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/art/environment/menu_background.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/menu_screens/trials_background.png" id="2_bg"]
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/banner_top.tscn" id="3_banner"]
 [ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_currency.tres" id="4_shards"]
 
@@ -15,6 +15,7 @@ grow_vertical = 2
 script = ExtResource("1_script")
 
 [node name="Background" type="TextureRect" parent="."]
+texture_filter = 1
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

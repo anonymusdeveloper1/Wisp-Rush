@@ -1,0 +1,14 @@
+{
+  "id": "sci_fi_simulation_v1",
+  "display_name": "SIMULATION",
+  "description": "A close-up simulation screen: a navy display in a graphite frame, with the HUD built in.",
+  "source": "source.png",
+  "source_note": "The Shop still of the sci-fi board arena (owner 2026-10-04, GDD §14 #73, ADR-0025): res://scenes/arenas/sci_fi_simulation_v1.tscn rendered by tools/godot/render_arena_still.gd at 941x1672 with no safe top and an empty HUD. A run shows the live board with the HUD in its frame and screen. The pieces are Codex's, from concept_art/boards_v1/sci_fi_simulation_v1/.",
+  "floor_rect_px": [
+    84,
+    112,
+    857,
+    1560
+  ],
+  "floor_rect_note": "The floor inside the rim as the scene drew it in the still (SciFiBoardVisual.fit returns it: 83.6, 111.5 to 857.4, 1559.6), rounded to whole pixels, [left, top, right, bottom]."
+}

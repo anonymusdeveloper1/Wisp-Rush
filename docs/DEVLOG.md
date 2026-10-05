@@ -4,6 +4,175 @@
 > [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) §7.6. Keep entries short — details belong in the docs
 > they changed.
 
+## 2026-10-05 — Dedicated Shop, Daily, Trials and Results backgrounds
+- **Who:** Codex
+- **Did:**
+  - Generated four portrait pixel-art environments matching the loading artwork: a warm Shop gallery, moonlit Daily gate, ascending Trials terraces and quiet Results shrine. Saved unchanged sources, exact prompts, normalization/rebuild script, measured metadata and art/in-game review sheets in `concept_art/menu_backgrounds_v1/`.
+  - Installed generated runtime copies in `assets/art/environment/menu_screens/` and connected the four existing screen scenes with nearest filtering and aspect-preserving cover. Updated the asset registry, game-flow/UI background rules and the affected system histories.
+  - Reviewed and staged the pending project changes for the owner's requested commit/push, including the SIMULATION board/caps, loading artwork and green lantern boss source designs.
+- **Files/systems:** source/runtime background folders, `scenes/screens/{shop,daily,trials,results}_screen.tscn`, `docs/ASSETS.md`, `game_flow.md`, `ui_design_system.md`, `shop.md`, `challenges.md`, `meta_progression.md` and generated project map.
+- **Verified:** four opaque 1080×2400 RGB finals on the exact 4 px grid, 205/188/208/171 colors; source/runtime copies match byte-for-byte. The production QA capture rendered CHARACTERS/ARENAS/NO ADS, Daily, Trials and Results at five phone shapes (30 captures), all without script/render errors; visually reviewed all six sheets and the four-screen 390×844 composite. `tools/validate.sh`: `VALIDATE: OK`, 114 scripts checked, 0 failed, main boot OK and map regenerated. Full `tools/run_tests.sh`: 29 passed, 11 failed, matching the existing baseline; game flow, screen transitions, Trials and Endless catalog passed.
+- **Follow-ups:** the 11 stale tests still reference removed enemy/Forms/dev-unlock/save APIs, including the mutation/save timeouts. They were not changed in this background task.
+
+## 2026-10-05 — SIMULATION's caps in the game
+- **Who:** Claude Code (Opus 5.5)
+- **Owner:** "Launch the game on my phone and for the arena top and bottom sides codex has generated
+  images you can fix that" (GDD §14 #74).
+- **Did:** `make_board.py` copied the kit's four cap pieces (58 pieces; the other 54 byte-identical to
+  the game's). `SciFiBoardVisual._build_caps()` draws each join against the hardware and repeats its
+  band away from the board past the screen's edge and the shake overscan, so the last repeat is
+  cropped there. The flat `outer_cap_segment` stays behind everything for the overscan at the sides.
+  The Shop still was re-rendered and `make_arena.py` re-run: only its bottom pixel row changed (the
+  bottom join now shows there); the floor is the same.
+- **Files/systems:** `scenes/arenas/sci_fi_board_visual.gd`,
+  `assets/art/environment/boards/sci_fi_simulation_v1/frame/cap_*`, `assets/art/environment/arenas/`
+  (+ thumbnail), `concept_art/arenas_v2/sci_fi_simulation_v1/source.png`; docs: GDD §14 #74, endless_mode,
+  ASSETS.
+- **Verified:** `validate.sh` OK. A render at 1080 × 2340 with a 137 px safe top shows the top cap in
+  place of the flat band; a live GameWorld at 1080 × 2340 and 1440 × 1920 shows both caps and passes the
+  scratch layout check (floor = walls, rim, meters, pieces on screen). APK built, installed and launched
+  on the owner's phone (`RFCX2035YHT`): boot ok, loading done in 1.17 s, Home ready.
+- **Follow-ups:** the owner's look at the caps on the phone.
+
+## 2026-10-05 — SIMULATION kit: top and bottom cap pieces
+- **Who:** Codex
+- **Did:**
+  - Followed `CODEX_CAP_PROMPT.md`: generated four cap sources with the built-in image generator and saved their exact prompts. Packed opaque 540×8 joins and 540×48 y-repeating bands through the existing kit builder; reused rail pixels and conditioned attachment rows against the corners, beams and top core housing.
+  - Added manifest entries and `layout.caps`, original-file hash protection, cap checks, two HUD cap previews with the requested 137/96 game-pixel safe bands, and updated the component/tiling reviews and kit README.
+  - Kept the work in the source kit; no runtime copies, game code, scenes or data were changed.
+- **Files/systems:** `concept_art/boards_v1/sci_fi_simulation_v1/`, `docs/ASSETS.md`, generated project map; kit art and its packing/review pipeline only.
+- **Verified:** `build_kit.py` → `verify()` passes: 58 PNGs in the unchanged 37-colour palette, fully opaque caps, exact dimensions/hashes, equal two-row band edges, matching hardware attachment rows and rail columns; every cap height from 0–128 checked on both sides. Original 54 PNGs and their manifest hashes remain byte-identical; a snapshot comparison also confirms all 1526 game files unchanged with no runtime additions. Inspected both cap HUD previews (1080×2340 and 1536×2048 portrait) and the updated component/tiling sheets. `tools/validate.sh`: `VALIDATE: OK`, 114 scripts checked, 0 failed, main boot OK and map regenerated. Full `tools/run_tests.sh`: 29 passed, 11 failed, matching the existing baseline; the Endless catalog and screen-transition tests passed.
+- **Follow-ups:** Claude copies the four new pieces with `make_board.py sci_fi_simulation_v1` and draws them as `manifest.json` → `layout.caps` specifies; this task does not integrate them. The 11 existing stale tests (removed enemy/Forms/dev-unlock/save APIs, including two timeouts) remain unchanged.
+
+## 2026-10-05 — Green lantern boss design, six poses and AutoSprite prompts
+- **Who:** Codex
+- **Did:** recorded the owner's central ranged boss with his own green wisps, Green Flame Volley, Lantern Sweep and healing Soul Recall; confirmed idle, slumped death with lantern extinguished and no extra recovery pose. Generated six separate pixel-art body poses, using idle as the identity reference for the other five; saved the unchanged images, supplied reference, exact image prompts and six copy-ready AutoSprite motion prompts. Updated the Enemies v2 design index, asset registry, GDD decision #75 and M14 progress.
+- **Files/systems:** `concept_art/green_lantern_boss_v1/`, `docs/specs/enemies_v2/boss_ranged.md`, `README.md`, `prompt_drafts.md`, `docs/ASSETS.md`, `docs/GDD.md`, `docs/PROJECT_CONTEXT.md`, `docs/ROADMAP.md`; design and source artwork only.
+- **Verified:** visually inspected the six generated images; read their PNG dimensions, all 1254×1254; counted the AutoSprite motion prompts, 543–589 characters each. Checked the official AutoSprite guides/API for first/last frame support and export settings. No tests, validation, builds or game runs, as the owner instructed; no runtime files changed in this task.
+- **Follow-ups:** owner review of poses; AutoSprite sheets and gameplay implementation remain separate work. Name, tuning, vulnerability and final on-screen scale remain undecided.
+
+## 2026-10-04 — Seven character and boss loading scenes implemented
+- **Who:** Codex
+- **Did:**
+  - Created seven portrait pixel-art loading scenes from the approved references: Patchvile, Shade, Scarlet, Rook and Mothmere, Grimgrin, and the owner's supplied green lantern boss. Morrow is excluded as requested.
+  - Refined four compositions after reviewing them under the production logo and run heading; the final phone previews keep every face clear. Saved unchanged generations, exact prompts, references, finals, a review sheet, measured metadata and the rebuild script in `concept_art/loading_screens_v2/`.
+  - Generated byte-identical runtime copies in `assets/art/environment/loading_screens/` and connected all seven to the existing random boot/PLAY loading pool with nearest filtering.
+  - Completed the preceding Patchvile knife-grip correction in `concept_art/loading_and_shop_v1/`: the hand grips the handle, with cloth below it. That corrected final has 170 colors; the shop image remains byte-identical.
+- **Files/systems:** the two source packs above, runtime loading images, `scenes/screens/loading_screen.*`, `docs/ASSETS.md`, `docs/systems/game_flow.md` and the generated project map.
+- **Verified:** all seven finals are opaque 1080×2400 RGB on an exact 4 px grid, with 201–230 colors; source/runtime pairs match byte-for-byte. A runtime check loaded every image through the real LoadingScreen worker path, verified its fade, host-step gate, finished signal and full progress bar: `LOADING ART QA: OK (seven runtime scenes)`. Inspected all seven production-interface previews at 1080×1920, plus face placement with tall-phone and portrait-tablet logical viewports. `tools/validate.sh`: `VALIDATE: OK`, 114 scripts checked, 0 failed, main boot OK and map regenerated. Full `tools/run_tests.sh`: 29 passed, 11 failed, matching the existing baseline; game-flow and screen-transition tests passed.
+- **Follow-ups:** the 11 stale tests still reference removed enemy/Forms APIs or old dev-unlock/save calls; mutation/save tests time out. They were not changed in this artwork task.
+
+## 2026-10-04 — Patchvile loading artwork and matching shop background
+- **Who:** Codex
+- **Did:**
+  - Created two portrait pixel-art backgrounds for the owner's loading/shop request: Patchvile with his approved curved dagger on floating ruins, and an empty stone gallery with stitched banners, lanterns and cyan side wisps.
+  - Refined the loading composition after the existing logo covered the hood tip; the final preview leaves a gap above the hood and keeps the face clear.
+  - Saved the unchanged generations, three exact prompts, final PNGs, a rebuild script and measured metadata in `concept_art/loading_and_shop_v1/`; registered the source pack in `docs/ASSETS.md`. Existing runtime backgrounds and screens are unchanged.
+- **Files/systems:** `concept_art/loading_and_shop_v1/`, `docs/ASSETS.md`; loading/Shop art sources only. Temporary interface review fixtures and screenshots are in ignored `logs/`.
+- **Verified:** finals are opaque 1080×2400 RGB on an exact 4 px grid, 174/184 colors, with source cyan/amber accents retained. Viewed the final art and `tools/screenshot.sh` reviews using the production loading/Shop interfaces at 1080×1920; expected `[Loading] ready`, `[Shop] ready` and review logs, no rendering errors. Final `tools/validate.sh`: `VALIDATE: OK`, 114 scripts checked, 0 failed, main boot OK and map regenerated. Full `tools/run_tests.sh`: 29 passed, 11 failed, matching the existing baseline (removed enemy/Forms APIs and old dev-unlock/save calls; mutation/save tests time out).
+- **Follow-ups:** these images are source artwork, not connected to the live scenes. The 11 existing stale tests remain.
+
+## 2026-10-04 — SIMULATION's flat top band: a Codex prompt for caps
+- **Who:** Claude Code (Opus 5.5)
+- **Owner:** on the phone, the top of the screen above the board is "just background color"; fill it
+  as the arena is, and Codex can generate the images. From Claude's options: top and bottom (GDD §14 #74).
+- **Did:** confirmed it in a render at 1080 × 2340 with a 137 px safe top: the band above the top
+  hardware is the kit's flat `outer_cap_segment` (#29323F), and the strip under the bottom hardware is
+  too. The kit has no piece made to repeat out there (the rails and segments carry the rim and vents
+  on their edges). Wrote `concept_art/boards_v1/sci_fi_simulation_v1/CODEX_CAP_PROMPT.md`: four 540-wide
+  pieces (8 px joins and 48 px y-repeating bands for the top and bottom), added through the kit's
+  `build_kit.py`, with previews and checks.
+- **Claude's choices in the prompt:** listed in GDD §14 #74.
+- **Files/systems:** `concept_art/boards_v1/sci_fi_simulation_v1/CODEX_CAP_PROMPT.md`; GDD §14 #74.
+- **Verified:** a prompt only; no game change. The phone was not connected, so the band was reproduced
+  in a render, not read from the device.
+- **Follow-ups:** Codex makes the caps; then Claude copies them (`make_board.py`), draws them in
+  `SciFiBoardVisual` (the join against the hardware, the band repeated out to the screen edge,
+  cropped there) and installs the build.
+
+## 2026-10-04 — SIMULATION: the sci-fi board in the game
+- **Who:** Claude Code (Opus 5.5)
+- **Owner:** "Read … CLAUDE_IMPLEMENTATION_PROMPT.md and implement the supplied sci-fi board kit.
+  Connect the embedded meters and spawn animations, preserve existing arenas, and verify the new arena
+  in playable runs." From Claude's options: the name SIMULATION, the Shop line, the upgrade badge with
+  no number at 0, the kit's cyan accent (GDD §14 #73).
+- **Did:** ADR-0025. The kit's `build_kit.py` rebuilt it byte-identical (all 54 manifest hashes), and
+  `make_board.py` copied the 54 pieces. `SciFiBoardVisual` (`scenes/arenas/sci_fi_simulation_v1.tscn`)
+  builds the board as the manifest and `build_kit.py` lay it out, with the HUD fed by GameWorld's
+  board path (ADR-0024), the boss and RUSH meters in the screen and the fills cropped. Spawn effects:
+  `ArenaVisual.show_enemy_arrival` / `show_boss_appearance` / `clear_spawn_effects` /
+  `set_safe_bottom`, `EnemyActor.get_arrival_progress` / `set_arrival_ring_enabled`, and
+  `BossActor.get_intro_progress` (Grimgrin, the Reaper). GameWorld calls them from `_spawn_enemy`,
+  `_start_boss_encounter` and the Wisp's death. Shop still and thumbnail, skin (free, Simple),
+  catalog, save id; `test_endless_catalog` counts it as a board.
+- **Claude's choices:** the values in ADR-0025's Consequences (Reduced Motion frames, boss patches and
+  corner marks, counter font sizes and the amber count, the pause touch target, the bottom safe
+  margin, the fallback clock, tier and catalog place). The arena gets the actors as `Node2D` +
+  `Callable`: naming `EnemyActor` / `BossActor` in the arena scripts left a resource in use at exit
+  in `check_scripts.gd` (found by reverting each file in turn).
+- **Files/systems:** `scenes/arenas/{arena_visual,sci_fi_board_visual}.gd`,
+  `scenes/arenas/sci_fi_simulation_v1.tscn`, `scripts/components/enemy_actor.gd`,
+  `scenes/bosses/{boss_actor,grimgrin_boss,reaper_boss}.gd`, `scenes/gameplay/game_world.gd`,
+  `assets/art/environment/boards/sci_fi_simulation_v1/`, `assets/art/environment/arenas/` (+ thumbnail),
+  `concept_art/arenas_v2/sci_fi_simulation_v1/`, `data/endless/`, `scripts/autoload/save_manager.gd`,
+  `tools/godot/test_endless_catalog.gd`. Docs: ADR-0025, GDD §4, §6, §14 #73, endless_mode, core_run,
+  enemies, grimgrin_boss, reaper_boss, arena_art §6, ASSETS, PROJECT_CONTEXT.
+- **Verified:** `validate.sh` OK (114 scripts); `test_endless_catalog` passes; full suite 29 passed,
+  11 failed — the same 11 stale tests as the kit's baseline. A scratch check on real GameWorlds (not in
+  the repo):
+  - **Layout** at 1080 × 1920, 2340, 2560 and 1440 × 1920: floor = arena rect = walls, the rim on all
+    four sides, the meters in the screen, every piece on screen; the tablet's board is larger.
+  - **Enemy arrivals:** the frame = floor(progress × 8) on every sample, cleared on the frame the enemy
+    becomes active, the old ring never shown. In step under Wisp Focus (110 frames vs 37), frozen while
+    paused, frame 4 under Reduced Motion.
+  - **Boss appearance:** Grimgrin (on a wall) and a Reaper variant (centre) — the frame =
+    floor(intro × 12) on every sample, centred on the boss, the patches at the manifest's opacity, all
+    cleared after the intro. The boss meter shows only in the fight and its fill = health; a boss
+    summon gets the amber arrival.
+  - **Play:** dashes in six directions land 1.35 radii inside the cyan boundary, also after a window
+    resize; a swipe starting over the RUSH meter dashes; the badge shows the banked count, the
+    character glows and a tap on him opens the cards; death clears the arrivals.
+  - **Through Main:** bought and equipped (the save keeps it), Play, the board's pause, resume,
+    restart, Home; the Quarry Titan, BOARD 01 and Stitchwarden's Vigil still play.
+  - **Bot run:** a 45 s run (`render_gameplay_clip.gd skin=sci_fi_simulation_v1`) had 32 kills, two
+    RUSHes, a boss and a death, with no script errors. Its exit leak (6 objects) shows on the Quarry
+    Titan too (8).
+  - **Game and phone:** MCP: the game boots to Home, and the new scene raises only the codebase-wide
+    Variant-conversion warnings. APK built, installed and launched on the owner's phone
+    (`RFCX2035YHT`): boot ok, Home ready.
+- **Follow-ups:**
+  - The owner's phone test. Equip it in the Shop's ARENAS tab (BUY • 0 RP, then EQUIP), then check the
+    look, the meters, the counter sizes, the arrival and appearance effects and Reduced Motion.
+  - The instruction line ("DRAG TO AIM · RELEASE TO RUSH") sits on the bottom rim, as on BOARD 01.
+  - From the code, on both boards: the board's pause button stays live after the Wisp dies, while the
+    floating one is disabled.
+  - The capture tools don't set the opening boss, so their boss is a Reaper variant, not Grimgrin.
+  - Not committed.
+
+## 2026-10-04 — Sci-fi screen board component kit and Claude handoff
+- **Who:** Codex
+- **Did:** built the owner's requested component kit from the approved sci-fi screen concepts:
+  54 pixel-art PNGs for the frame, seamless navy scanline floor, separate core/decorations, textless
+  magenta boss and amber RUSH tracks/fills, and the existing supporting HUD functions. Generated
+  eight enemy-spawn frames and twelve boss-spawn frames, plus separate boss screen scan patches.
+  Stored raw sources, exact generation prompts, a rebuild script, layout/animation manifest,
+  contact sheets, four portrait layouts and animation GIFs. Wrote the Claude implementation prompt
+  against the current ArenaVisual, GameWorld HUD, EnemyActor telegraph and boss appearance code.
+- **Files/systems:** `concept_art/boards_v1/sci_fi_simulation_v1/`, `docs/ASSETS.md`.
+  Delivery is source-only; runtime scenes, gameplay, catalog and existing arenas were not changed.
+- **Verified:** kit builder reports 54 PNGs, exact dimensions, binary alpha, a 37-colour palette,
+  matching repeat-edge bands and nonempty, unclipped animation frames. Both raw animation grids
+  passed the generate2dsprite processor's strict QC. Inspected component/tiling sheets, phone and
+  portrait-tablet assemblies, and spawn sheets/stills. `tools/validate.sh` reports `VALIDATE: OK`
+  (113 scripts checked, main booted); an earlier Windows run exited 139 after the successful script
+  check and was clean on retry. Full tests: 29 passed, 11 failed on existing removed-enemy,
+  Forms/DevUnlock and old save API references (two timeouts). Godot MCP is unavailable in this
+  session; the kit is not integrated, so these are source-art checks and an unchanged-project boot,
+  not a playable sci-fi arena verification.
+- **Follow-ups:** Claude implements the new layout, HUD and synchronized spawn effects, generates
+  its catalog still/thumbnail and tests it in the actual game using the supplied prompt. Existing
+  stale tests remain a separate task.
+
 ## 2026-10-02 — The full-screen board in the game: BOARD 01
 - **Who:** Claude Code (Opus 5.5), working on while the owner was away
 - **Owner:** Codex built the board's pieces; "implement", then commit and push everything to GitHub

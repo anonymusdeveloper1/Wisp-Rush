@@ -67,6 +67,12 @@ func skip_intro() -> void:
 	pass
 
 
+## How far the boss's appearance (its introductory hold) has run, 0..1, and 1 once it is over; for an
+## arena that draws the appearance (ADR-0025). Negative when the boss does not say.
+func get_intro_progress() -> float:
+	return -1.0
+
+
 func get_current_health() -> int:
 	return 0
 

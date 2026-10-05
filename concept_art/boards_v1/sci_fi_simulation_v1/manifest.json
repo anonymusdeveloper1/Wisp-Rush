@@ -1,0 +1,1370 @@
+{
+  "board": "sci_fi_simulation_v1",
+  "source_only": true,
+  "art_pixel_to_game_pixel": 2,
+  "board_width_art": 540,
+  "floor_width_art": 444,
+  "floor_x_art": 48,
+  "side_width_art": 48,
+  "top_beam_height_art": 64,
+  "bottom_beam_height_art": 64,
+  "corner_size_art": [
+    72,
+    72
+  ],
+  "palette": {
+    "screen": [
+      "#030A12",
+      "#07111D",
+      "#091B2D",
+      "#0B2335",
+      "#0E2B43",
+      "#12354E",
+      "#164158"
+    ],
+    "metal": [
+      "#121820",
+      "#1B2430",
+      "#29323F",
+      "#394555",
+      "#4A596A",
+      "#637382",
+      "#80939E",
+      "#A7BCC5",
+      "#CAD7D5"
+    ],
+    "cyan": [
+      "#093847",
+      "#125568",
+      "#188FA3",
+      "#28BCD2",
+      "#62E8F2",
+      "#B8F7FC",
+      "#EAFDFF"
+    ],
+    "amber": [
+      "#4E2713",
+      "#7A4319",
+      "#BA6D22",
+      "#F3A847",
+      "#FFD275",
+      "#FFF1C3"
+    ],
+    "boss": [
+      "#2B143A",
+      "#512860",
+      "#883BA7",
+      "#B14CD9",
+      "#EB39B1",
+      "#FF5FCB",
+      "#FFA5E5",
+      "#FFF1FA"
+    ]
+  },
+  "layout": {
+    "unit": "view_width / 540",
+    "top_cap_art": "ceil(safe_top / unit)",
+    "bottom_cap_art": "ceil(safe_bottom / unit)",
+    "caps": {
+      "height_range_art": [
+        0,
+        128
+      ],
+      "width_art": 540,
+      "join_height_art": 8,
+      "band_height_art": 48,
+      "cap_top_join": {
+        "path": "frame/cap_top_join.png",
+        "anchor": "directly_above_top_hardware",
+        "attachment_edge": "bottom",
+        "touches": [
+          "frame/corner_top_left.png",
+          "frame/top_segment.png",
+          "deco/core_housing.png",
+          "frame/corner_top_right.png"
+        ]
+      },
+      "cap_top_band": {
+        "path": "frame/cap_top_band.png",
+        "anchor": "above_top_join",
+        "repeat": "y_upward",
+        "crop": "at_screen_top"
+      },
+      "cap_bottom_join": {
+        "path": "frame/cap_bottom_join.png",
+        "anchor": "directly_below_bottom_hardware",
+        "attachment_edge": "top",
+        "touches": [
+          "frame/corner_bottom_left.png",
+          "frame/bottom_segment.png",
+          "frame/corner_bottom_right.png"
+        ]
+      },
+      "cap_bottom_band": {
+        "path": "frame/cap_bottom_band.png",
+        "anchor": "below_bottom_join",
+        "repeat": "y_downward",
+        "crop": "at_screen_bottom"
+      },
+      "short_caps": "If less than 8 art pixels high, crop the join at the screen edge; keep its hardware-facing edge.",
+      "side_columns_art": {
+        "left": [
+          0,
+          48
+        ],
+        "right": [
+          492,
+          540
+        ]
+      },
+      "opaque": true
+    },
+    "floor_rect_art": "[48, top_cap_art + 64, 444, floor(view_height / unit) - top_cap_art - bottom_cap_art - 128]",
+    "floor_is_rectangular": true,
+    "boss_meter": {
+      "anchor": "floor_top_center",
+      "offset": [
+        -178,
+        56
+      ],
+      "fill_rect": [
+        55,
+        12,
+        248,
+        11
+      ],
+      "color": "magenta",
+      "baked_text": false,
+      "show_only_with_boss": true
+    },
+    "rush_meter": {
+      "anchor": "floor_top_center",
+      "offset": [
+        -178,
+        98
+      ],
+      "fill_rect": [
+        55,
+        12,
+        248,
+        11
+      ],
+      "color": "amber",
+      "baked_text": false,
+      "segments": 6
+    },
+    "core_housing": {
+      "anchor": "board_top_center",
+      "offset": [
+        -42,
+        0
+      ]
+    },
+    "support_hud": {
+      "pause": [
+        12,
+        9
+      ],
+      "score": [
+        352,
+        1
+      ],
+      "rift_points": [
+        372,
+        35
+      ],
+      "level": [
+        107,
+        2
+      ],
+      "soul": [
+        104,
+        40
+      ],
+      "upgrade_count": [
+        180,
+        5
+      ],
+      "coordinates": "art pixels from board top-left after safe-area cap; preview placement, keep all existing control behavior"
+    },
+    "geometry_note": "This new screen has its own measured layout; it is not a drop-in BoardArenaVisual reskin. Follow the owner-approved in-screen meter placement."
+  },
+  "animations": {
+    "enemy_spawn": {
+      "sheet": "anim/enemy_spawn_sheet.png",
+      "rows": 2,
+      "columns": 4,
+      "frame_size": [
+        128,
+        128
+      ],
+      "frame_count": 8,
+      "origin": [
+        64,
+        77
+      ],
+      "order": "row_major",
+      "loop": false,
+      "preview_duration_ms_per_frame": 75,
+      "runtime_timing": "sample by EnemyActor telegraph progress, which already multiplies delta by world speed; no new spawn delay",
+      "preview_scale_art": 1
+    },
+    "boss_spawn": {
+      "sheet": "anim/boss_spawn_sheet.png",
+      "rows": 3,
+      "columns": 4,
+      "frame_size": [
+        256,
+        256
+      ],
+      "frame_count": 12,
+      "origin": [
+        128,
+        128
+      ],
+      "order": "row_major",
+      "loop": false,
+      "preview_duration_ms_per_frame": 75,
+      "runtime_timing": "one cosmetic appearance sequence at _start_boss_encounter; 0.9 s is the exported preview duration, not a new gameplay lockout",
+      "preview_scale_art": 2
+    },
+    "boss_screen_disturbance": {
+      "pieces": [
+        "anim/boss_scan_streak.png",
+        "anim/boss_edge_signal.png",
+        "anim/boss_corner_signal.png"
+      ],
+      "timing": "same phase and cleanup as boss_spawn",
+      "preview_alpha_by_frame": [
+        0.12,
+        0.22,
+        0.4,
+        0.65,
+        0.85,
+        1.0,
+        1.0,
+        0.75,
+        0.55,
+        0.35,
+        0.18,
+        0.06
+      ],
+      "clip": "floor rectangle",
+      "layer": "below actors and combat telegraphs",
+      "use": "repeat/position patches at the edges; do not stretch one phone screenshot to another aspect ratio"
+    }
+  },
+  "preview_layouts": [
+    {
+      "size": [
+        1080,
+        1920
+      ],
+      "art_size": [
+        540,
+        960
+      ],
+      "safe_top_art": 32,
+      "safe_bottom_art": 0,
+      "floor_rect_art": [
+        48,
+        96,
+        444,
+        800
+      ]
+    },
+    {
+      "size": [
+        1080,
+        2340
+      ],
+      "art_size": [
+        540,
+        1170
+      ],
+      "safe_top_art": 62,
+      "safe_bottom_art": 0,
+      "floor_rect_art": [
+        48,
+        126,
+        444,
+        980
+      ]
+    },
+    {
+      "size": [
+        1080,
+        2560
+      ],
+      "art_size": [
+        540,
+        1280
+      ],
+      "safe_top_art": 64,
+      "safe_bottom_art": 0,
+      "floor_rect_art": [
+        48,
+        128,
+        444,
+        1088
+      ]
+    },
+    {
+      "size": [
+        1536,
+        2048
+      ],
+      "art_size": [
+        540,
+        720
+      ],
+      "safe_top_art": 24,
+      "safe_bottom_art": 0,
+      "floor_rect_art": [
+        48,
+        88,
+        444,
+        568
+      ]
+    }
+  ],
+  "cap_preview_layouts": [
+    {
+      "path": "preview/caps_1080x2340.png",
+      "size": [
+        1080,
+        2340
+      ],
+      "art_size": [
+        540,
+        1170
+      ],
+      "safe_top_game": 137,
+      "safe_bottom_game": 96,
+      "safe_top_art": 69,
+      "safe_bottom_art": 48,
+      "floor_rect_art": [
+        48,
+        133,
+        444,
+        925
+      ],
+      "hardware_top_game": 137,
+      "hardware_bottom_game": 2244,
+      "outer_cap_excess_cropped_game": [
+        1,
+        0
+      ],
+      "quiet_floor_rows_extended_game": 1
+    },
+    {
+      "path": "preview/caps_1536x2048.png",
+      "size": [
+        1536,
+        2048
+      ],
+      "art_size": [
+        540,
+        720
+      ],
+      "safe_top_game": 137,
+      "safe_bottom_game": 96,
+      "safe_top_art": 49,
+      "safe_bottom_art": 34,
+      "floor_rect_art": [
+        48,
+        113,
+        444,
+        509
+      ],
+      "hardware_top_game": 137,
+      "hardware_bottom_game": 1952,
+      "outer_cap_excess_cropped_game": [
+        2,
+        1
+      ],
+      "quiet_floor_rows_extended_game": 3
+    }
+  ],
+  "files": [
+    {
+      "path": "frame/corner_top_left.png",
+      "size": [
+        72,
+        72
+      ],
+      "tiles": null,
+      "sha256": "63800965208916c2a82bd9077085f340b7bc4f9700228c6356626c0f237194f3",
+      "source": "reference/approved_board.png",
+      "source_crop_art": [
+        0,
+        0,
+        72,
+        72
+      ]
+    },
+    {
+      "path": "frame/corner_top_right.png",
+      "size": [
+        72,
+        72
+      ],
+      "tiles": null,
+      "sha256": "0f09f2d5058f386be2057eb4c85fb9db6c8d87aba09bd667bd27725fbb4bcce7",
+      "source": "reference/approved_board.png",
+      "source_crop_art": [
+        468,
+        0,
+        540,
+        72
+      ]
+    },
+    {
+      "path": "frame/corner_bottom_left.png",
+      "size": [
+        72,
+        72
+      ],
+      "tiles": null,
+      "sha256": "b3bf86468c4095fe2cbf8ac0a0cd7dadfa83e95675de4c8b11b75e01cee0bf94",
+      "source": "reference/approved_board.png",
+      "source_crop_art": [
+        0,
+        1098,
+        72,
+        1170
+      ]
+    },
+    {
+      "path": "frame/corner_bottom_right.png",
+      "size": [
+        72,
+        72
+      ],
+      "tiles": null,
+      "sha256": "4991f33872b43c9611a8a4d55459a2a40b6eee78d86deeead3312e7c9781da4e",
+      "source": "reference/approved_board.png",
+      "source_crop_art": [
+        468,
+        1098,
+        540,
+        1170
+      ]
+    },
+    {
+      "path": "frame/side_left_segment.png",
+      "size": [
+        48,
+        192
+      ],
+      "tiles": "y",
+      "sha256": "0a13a228b7079b2e7399875f71c3bfa19dee8dcae40d5b89b5e46de312e2b0f0",
+      "source": "reference/approved_board.png",
+      "source_crop_art": [
+        0,
+        216,
+        48,
+        408
+      ]
+    },
+    {
+      "path": "frame/side_right_segment.png",
+      "size": [
+        48,
+        192
+      ],
+      "tiles": "y",
+      "sha256": "9ecc86b58e208460e4c04c92911f482a954224b1f176b0977bdb2528bd74c4fc",
+      "source": "reference/approved_board.png",
+      "source_crop_art": [
+        492,
+        216,
+        540,
+        408
+      ]
+    },
+    {
+      "path": "frame/top_segment.png",
+      "size": [
+        72,
+        64
+      ],
+      "tiles": "x",
+      "sha256": "0f0e7aba5052d4e60e3eaadec3ee16fdaa0149a4876cc1960ad83fef8e07c068",
+      "source": "reference/approved_board.png",
+      "source_crop_art": [
+        132,
+        0,
+        204,
+        64
+      ]
+    },
+    {
+      "path": "frame/bottom_segment.png",
+      "size": [
+        72,
+        64
+      ],
+      "tiles": "x",
+      "sha256": "800cdb6933b48385957bbfd5ffbc0ff814729b37c10015b43ae2f2d34beb3d60",
+      "source": "reference/approved_board.png",
+      "source_crop_art": [
+        132,
+        1106,
+        204,
+        1170
+      ]
+    },
+    {
+      "path": "frame/screen_rim_left.png",
+      "size": [
+        6,
+        24
+      ],
+      "tiles": "y",
+      "sha256": "c14ef48e14532f7f05b898438567bc240f287191ba6974a46fe75f1762ab6e62",
+      "source": "reference/approved_board.png",
+      "source_crop_art": [
+        42,
+        240,
+        48,
+        264
+      ]
+    },
+    {
+      "path": "frame/screen_rim_right.png",
+      "size": [
+        6,
+        24
+      ],
+      "tiles": "y",
+      "sha256": "2b6ad83871fb0bdeb7b5250b2d32bd7d19288c640dc1656435afe7f72d46555b",
+      "source": "reference/approved_board.png",
+      "source_crop_art": [
+        492,
+        240,
+        498,
+        264
+      ]
+    },
+    {
+      "path": "frame/screen_rim_top.png",
+      "size": [
+        24,
+        6
+      ],
+      "tiles": "x",
+      "sha256": "6e1e31f85de993cf631ce83cf91da1ba997176e69c3b4aac27ec93838acb9966",
+      "source": "reference/approved_board.png",
+      "source_crop_art": [
+        200,
+        57,
+        224,
+        63
+      ]
+    },
+    {
+      "path": "frame/screen_rim_bottom.png",
+      "size": [
+        24,
+        6
+      ],
+      "tiles": "x",
+      "sha256": "1e4245bb494760fc3d014eed6177e1fa4708ec783a2554088d52a214f7920023",
+      "source": "reference/approved_board.png",
+      "source_crop_art": [
+        200,
+        1096,
+        224,
+        1102
+      ]
+    },
+    {
+      "path": "frame/outer_cap_segment.png",
+      "size": [
+        16,
+        8
+      ],
+      "tiles": "xy",
+      "sha256": "8213337e120d1638046ab6735e93bec3333f96df738f90ded621f6cc701a9f5c",
+      "source": "reference/approved_board.png",
+      "source_crop_art": [
+        39,
+        0,
+        40,
+        1
+      ]
+    },
+    {
+      "path": "deco/core_housing.png",
+      "size": [
+        84,
+        68
+      ],
+      "tiles": null,
+      "sha256": "c3f85553676bac4390dbfdbb4a627cf8f7fa4cbee365021197d943fb2d488fd1",
+      "source": "reference/approved_board.png",
+      "origin": [
+        42,
+        0
+      ],
+      "wisp_position": [
+        24,
+        9
+      ]
+    },
+    {
+      "path": "deco/core_wisp.png",
+      "size": [
+        32,
+        43
+      ],
+      "tiles": null,
+      "sha256": "845168bf837265853eb45576a6108cc8fa4012b963fb454064dca473b9b73f46",
+      "source": "reference/approved_board.png",
+      "origin": [
+        16,
+        26
+      ],
+      "placement_in_housing": [
+        24,
+        9
+      ]
+    },
+    {
+      "path": "floor/screen_tile.png",
+      "size": [
+        96,
+        96
+      ],
+      "tiles": "xy",
+      "sha256": "0338d5fc3e2fc9414dbdb891e9697aba472031d86eab629a35cb69afcb8fefbd",
+      "source": "source/screen_tile_raw.png"
+    },
+    {
+      "path": "deco/screen_data_left.png",
+      "size": [
+        36,
+        144
+      ],
+      "tiles": null,
+      "sha256": "d900de6d8899a9fe3dedf353b5dc7dd2435c877074161334cafda0772a4bc263",
+      "source": "reference/approved_board.png"
+    },
+    {
+      "path": "deco/screen_data_right.png",
+      "size": [
+        36,
+        144
+      ],
+      "tiles": null,
+      "sha256": "1463f03cf9d3683780f6f94acb08b2dc9a31403fae3179716db0805be2565ce5",
+      "source": "reference/approved_board.png"
+    },
+    {
+      "path": "hud/boss_meter_track.png",
+      "size": [
+        356,
+        34
+      ],
+      "tiles": null,
+      "sha256": "1fb1b8d94171b38c4bb3713297bc6080b8735b6a0367101f0fc58e0bd2934fa8",
+      "fill_rect": [
+        55,
+        12,
+        248,
+        11
+      ],
+      "source": "reference/approved_board.png"
+    },
+    {
+      "path": "hud/boss_meter_fill.png",
+      "size": [
+        248,
+        11
+      ],
+      "tiles": null,
+      "sha256": "4ae03662ab8464a378eee8850ddeec749eb52b9fd408decfa56ee19a76ffa522",
+      "source": "reference/approved_board.png",
+      "clip_axis": "x",
+      "segments": null
+    },
+    {
+      "path": "hud/rush_meter_track.png",
+      "size": [
+        356,
+        36
+      ],
+      "tiles": null,
+      "sha256": "8a4483b59b943879b15b4d8e76a38870e34cfd570357c7901220b858cd37c5ed",
+      "fill_rect": [
+        55,
+        12,
+        248,
+        11
+      ],
+      "source": "reference/approved_board.png"
+    },
+    {
+      "path": "hud/rush_meter_fill.png",
+      "size": [
+        248,
+        11
+      ],
+      "tiles": null,
+      "sha256": "8094f3fea686dc4608ad4c6bc46d23f3fe7cb6ccc56e6b48738cbaa952e9edb0",
+      "source": "reference/approved_board.png",
+      "clip_axis": "x",
+      "segments": 6
+    },
+    {
+      "path": "hud/pause_button.png",
+      "size": [
+        36,
+        36
+      ],
+      "tiles": null,
+      "sha256": "ebdc2f08bcb12102f1499588b2d95d547ccfaf53b4c45b8914a37ef68a32dd29",
+      "source": "source/support_hud_raw.png",
+      "source_crop": [
+        64,
+        175,
+        364,
+        468
+      ]
+    },
+    {
+      "path": "hud/score_plate.png",
+      "size": [
+        128,
+        36
+      ],
+      "tiles": null,
+      "sha256": "498dbde12536b5c6f1eb6cdf0bc5fe0e03555bf25686a7bb00c4da95404b6c73",
+      "source": "source/support_hud_raw.png",
+      "source_crop": [
+        435,
+        228,
+        1024,
+        425
+      ],
+      "text_rect": [
+        12,
+        11,
+        104,
+        17
+      ]
+    },
+    {
+      "path": "hud/rp_plate.png",
+      "size": [
+        108,
+        32
+      ],
+      "tiles": null,
+      "sha256": "a553a3ebe0c6c0e25b94c599503d92ec23f1f520e0f6be2d1fc3eae90b18c973",
+      "source": "source/support_hud_raw.png",
+      "source_crop": [
+        1078,
+        244,
+        1494,
+        415
+      ],
+      "text_rect": [
+        36,
+        10,
+        60,
+        16
+      ],
+      "icon_socket": [
+        12,
+        10,
+        17,
+        16
+      ]
+    },
+    {
+      "path": "hud/level_badge.png",
+      "size": [
+        36,
+        36
+      ],
+      "tiles": null,
+      "sha256": "602f6c86f0c3a530275688063798ef192969655ab8a4193833f691da7efab981",
+      "source": "source/support_hud_raw.png",
+      "source_crop": [
+        80,
+        600,
+        344,
+        862
+      ],
+      "text_rect": [
+        8,
+        8,
+        20,
+        20
+      ]
+    },
+    {
+      "path": "hud/soul_gauge_track.png",
+      "size": [
+        108,
+        16
+      ],
+      "tiles": null,
+      "sha256": "44d668a25d1e26c82d36ca5089870744a8e3f8dd0ca090a967d97b32c660a18a",
+      "source": "source/support_hud_raw.png",
+      "source_crop": [
+        439,
+        682,
+        1083,
+        784
+      ],
+      "fill_rect": [
+        10,
+        5,
+        88,
+        6
+      ]
+    },
+    {
+      "path": "hud/upgrade_badge.png",
+      "size": [
+        24,
+        24
+      ],
+      "tiles": null,
+      "sha256": "1f9f5f72b63d5a754b20e5cc47f24c0dd93abde070fbbc4a99e0fe45332d7484",
+      "source": "source/support_hud_raw.png",
+      "source_crop": [
+        1202,
+        640,
+        1392,
+        832
+      ],
+      "text_rect": [
+        8,
+        8,
+        8,
+        9
+      ]
+    },
+    {
+      "path": "hud/soul_gauge_fill.png",
+      "size": [
+        88,
+        6
+      ],
+      "tiles": null,
+      "sha256": "bcc1fe017c3d1bd75e8a3c2fd0811c5c5fc4835fa9bfdee312bb4e1a4ec6daa4",
+      "clip_axis": "x",
+      "source": "reference/approved_board.png"
+    },
+    {
+      "path": "anim/boss_scan_streak.png",
+      "size": [
+        132,
+        28
+      ],
+      "tiles": null,
+      "sha256": "d80d4f3bbd047cb7ff46f36e7ab4be6c12ef952ac984f447b81a37e78064dd9c",
+      "source": "reference/approved_boss_spawn.png",
+      "source_crop_art": [
+        48,
+        266,
+        180,
+        294
+      ]
+    },
+    {
+      "path": "anim/boss_edge_signal.png",
+      "size": [
+        18,
+        30
+      ],
+      "tiles": null,
+      "sha256": "514ce5ec63b506b6fdc9186975b7425b0ead562aed5275172a2d8af2258c9092",
+      "source": "reference/approved_boss_spawn.png",
+      "source_crop_art": [
+        53,
+        180,
+        71,
+        210
+      ]
+    },
+    {
+      "path": "anim/boss_corner_signal.png",
+      "size": [
+        42,
+        35
+      ],
+      "tiles": null,
+      "sha256": "7f21aea2b5ac0c20b9b5c425cd333e7578c1bcb6e2e783b44a946e6c4dbde25a",
+      "source": "reference/approved_boss_spawn.png",
+      "source_crop_art": [
+        55,
+        64,
+        97,
+        99
+      ]
+    },
+    {
+      "path": "anim/enemy_spawn/frame_00.png",
+      "size": [
+        128,
+        128
+      ],
+      "tiles": null,
+      "sha256": "b2d40c77e1a1e1e3b27ce73e82d634f490bb2f9e3c4e04d1b0b5571e9f138777",
+      "origin": [
+        64,
+        77
+      ],
+      "frame": 0,
+      "source": "source/enemy_spawn_raw.png"
+    },
+    {
+      "path": "anim/enemy_spawn/frame_01.png",
+      "size": [
+        128,
+        128
+      ],
+      "tiles": null,
+      "sha256": "5de12e3d8fca85f94c3adf9018e871e72721aae31620fc304c1f122878924c91",
+      "origin": [
+        64,
+        77
+      ],
+      "frame": 1,
+      "source": "source/enemy_spawn_raw.png"
+    },
+    {
+      "path": "anim/enemy_spawn/frame_02.png",
+      "size": [
+        128,
+        128
+      ],
+      "tiles": null,
+      "sha256": "39984b0b276da475d778f4c4325a8547586f5560f210b23338850727d80a2d65",
+      "origin": [
+        64,
+        77
+      ],
+      "frame": 2,
+      "source": "source/enemy_spawn_raw.png"
+    },
+    {
+      "path": "anim/enemy_spawn/frame_03.png",
+      "size": [
+        128,
+        128
+      ],
+      "tiles": null,
+      "sha256": "15ade6942408b1a1382efd22d0f92a823fd6081b62507b9147dbce6f4896209b",
+      "origin": [
+        64,
+        77
+      ],
+      "frame": 3,
+      "source": "source/enemy_spawn_raw.png"
+    },
+    {
+      "path": "anim/enemy_spawn/frame_04.png",
+      "size": [
+        128,
+        128
+      ],
+      "tiles": null,
+      "sha256": "a1077075453717f021fecafffab0a14aeb84c18bc9945dad5ac2c43d31e29432",
+      "origin": [
+        64,
+        77
+      ],
+      "frame": 4,
+      "source": "source/enemy_spawn_raw.png"
+    },
+    {
+      "path": "anim/enemy_spawn/frame_05.png",
+      "size": [
+        128,
+        128
+      ],
+      "tiles": null,
+      "sha256": "2c330221083bb765801d4c24d4f07d68f973a0fa55014b0ab32f8f8f597ece90",
+      "origin": [
+        64,
+        77
+      ],
+      "frame": 5,
+      "source": "source/enemy_spawn_raw.png"
+    },
+    {
+      "path": "anim/enemy_spawn/frame_06.png",
+      "size": [
+        128,
+        128
+      ],
+      "tiles": null,
+      "sha256": "0ce5955afd70ec4494bb156c6486691284d2d9ae751e7bf189bcc2a5e0384c94",
+      "origin": [
+        64,
+        77
+      ],
+      "frame": 6,
+      "source": "source/enemy_spawn_raw.png"
+    },
+    {
+      "path": "anim/enemy_spawn/frame_07.png",
+      "size": [
+        128,
+        128
+      ],
+      "tiles": null,
+      "sha256": "9f4af96c872ee9cdcd9eceb12627c74cf93c039a85e28dc560b5ee7d72a06e3a",
+      "origin": [
+        64,
+        77
+      ],
+      "frame": 7,
+      "source": "source/enemy_spawn_raw.png"
+    },
+    {
+      "path": "anim/enemy_spawn_sheet.png",
+      "size": [
+        512,
+        256
+      ],
+      "tiles": null,
+      "sha256": "7efde7f33094e775fd5b78bf0435cec97613cfbb6c7ff28d4fe1dae12b02d668",
+      "frame_size": [
+        128,
+        128
+      ],
+      "rows": 2,
+      "columns": 4,
+      "frame_count": 8,
+      "origin": [
+        64,
+        77
+      ],
+      "loop": false
+    },
+    {
+      "path": "anim/boss_spawn/frame_00.png",
+      "size": [
+        256,
+        256
+      ],
+      "tiles": null,
+      "sha256": "9d80b4175de0e0634471a9d48e0a5248a83cf2a22a953a8d43d72ee783060976",
+      "origin": [
+        128,
+        128
+      ],
+      "frame": 0,
+      "source": "source/boss_spawn_raw.png"
+    },
+    {
+      "path": "anim/boss_spawn/frame_01.png",
+      "size": [
+        256,
+        256
+      ],
+      "tiles": null,
+      "sha256": "3e4f30623a9b47fc7d3e3b4fa85e1245c917c5b99028bfe047138b82b6c0d085",
+      "origin": [
+        128,
+        128
+      ],
+      "frame": 1,
+      "source": "source/boss_spawn_raw.png"
+    },
+    {
+      "path": "anim/boss_spawn/frame_02.png",
+      "size": [
+        256,
+        256
+      ],
+      "tiles": null,
+      "sha256": "112bc0191f632400b9327c80f2d369a4f70c5303871a267b9f8fa2c60a62118d",
+      "origin": [
+        128,
+        128
+      ],
+      "frame": 2,
+      "source": "source/boss_spawn_raw.png"
+    },
+    {
+      "path": "anim/boss_spawn/frame_03.png",
+      "size": [
+        256,
+        256
+      ],
+      "tiles": null,
+      "sha256": "4d339e732be48cdb70895437b18d35c2d21822af6ec1d33891c4a410b920daab",
+      "origin": [
+        128,
+        128
+      ],
+      "frame": 3,
+      "source": "source/boss_spawn_raw.png"
+    },
+    {
+      "path": "anim/boss_spawn/frame_04.png",
+      "size": [
+        256,
+        256
+      ],
+      "tiles": null,
+      "sha256": "854470aeaf378b10a5bef9bc211d5c617d8892385963e10902582abac9e4013e",
+      "origin": [
+        128,
+        128
+      ],
+      "frame": 4,
+      "source": "source/boss_spawn_raw.png"
+    },
+    {
+      "path": "anim/boss_spawn/frame_05.png",
+      "size": [
+        256,
+        256
+      ],
+      "tiles": null,
+      "sha256": "fd85325e62b9ae486e859ed5061b0769b9d1d83ab3f1c40f099e1038ae75521d",
+      "origin": [
+        128,
+        128
+      ],
+      "frame": 5,
+      "source": "source/boss_spawn_raw.png"
+    },
+    {
+      "path": "anim/boss_spawn/frame_06.png",
+      "size": [
+        256,
+        256
+      ],
+      "tiles": null,
+      "sha256": "235a589af6f9e034ea6812736bd2db2d6e5d6f7e4a25bd1789a476209e586bd3",
+      "origin": [
+        128,
+        128
+      ],
+      "frame": 6,
+      "source": "source/boss_spawn_raw.png"
+    },
+    {
+      "path": "anim/boss_spawn/frame_07.png",
+      "size": [
+        256,
+        256
+      ],
+      "tiles": null,
+      "sha256": "93f9a4723a9a090e598d8e0fa46d45f87507e1fa2dc9e55caf9dfac6ee6ac368",
+      "origin": [
+        128,
+        128
+      ],
+      "frame": 7,
+      "source": "source/boss_spawn_raw.png"
+    },
+    {
+      "path": "anim/boss_spawn/frame_08.png",
+      "size": [
+        256,
+        256
+      ],
+      "tiles": null,
+      "sha256": "2dbc4bfc1e5a0f69c1a0fe6d3c537b067931f5973c64bfed00d075298a9bc74f",
+      "origin": [
+        128,
+        128
+      ],
+      "frame": 8,
+      "source": "source/boss_spawn_raw.png"
+    },
+    {
+      "path": "anim/boss_spawn/frame_09.png",
+      "size": [
+        256,
+        256
+      ],
+      "tiles": null,
+      "sha256": "725c65f4baa839c6bab202473a0fbf2773473d39bf0665a384a4f79c2a4b0a4a",
+      "origin": [
+        128,
+        128
+      ],
+      "frame": 9,
+      "source": "source/boss_spawn_raw.png"
+    },
+    {
+      "path": "anim/boss_spawn/frame_10.png",
+      "size": [
+        256,
+        256
+      ],
+      "tiles": null,
+      "sha256": "b086a32e0fbc7797f2eb4ca2f13dbed8d3c0ca98637e2cd58a361ff84ac9abe9",
+      "origin": [
+        128,
+        128
+      ],
+      "frame": 10,
+      "source": "source/boss_spawn_raw.png"
+    },
+    {
+      "path": "anim/boss_spawn/frame_11.png",
+      "size": [
+        256,
+        256
+      ],
+      "tiles": null,
+      "sha256": "e5758afab07708c2f32a2078ec1fdb06c667f59f96842a9a47279791210f6dc8",
+      "origin": [
+        128,
+        128
+      ],
+      "frame": 11,
+      "source": "source/boss_spawn_raw.png"
+    },
+    {
+      "path": "anim/boss_spawn_sheet.png",
+      "size": [
+        1024,
+        768
+      ],
+      "tiles": null,
+      "sha256": "2c0486bcd1615b0726b7f4f0cf11959bdc8107c84ddc372e276b98f1d3ad7223",
+      "frame_size": [
+        256,
+        256
+      ],
+      "rows": 3,
+      "columns": 4,
+      "frame_count": 12,
+      "origin": [
+        128,
+        128
+      ],
+      "loop": false
+    },
+    {
+      "path": "frame/cap_top_join.png",
+      "size": [
+        540,
+        8
+      ],
+      "tiles": null,
+      "sha256": "0b390e71f4ab7fbe9afc28431990a15cefdeb1bfd5718d8edf52357da6b2a9a8",
+      "source": "source/cap_top_join_raw.png",
+      "source_crop": [
+        0,
+        0,
+        1456,
+        116
+      ],
+      "prompt": "prompts/cap_top_join.md",
+      "opaque": true,
+      "rail_sources": [
+        "frame/side_left_segment.png",
+        "frame/side_right_segment.png"
+      ],
+      "rail_source_crop_art": [
+        0,
+        64,
+        48,
+        112
+      ],
+      "attachment_edge": "bottom"
+    },
+    {
+      "path": "frame/cap_top_band.png",
+      "size": [
+        540,
+        48
+      ],
+      "tiles": "y",
+      "sha256": "b7e451a494acd5be772c0e2477e56097589fdf505ae1e32f9485d4b528c28f32",
+      "source": "source/cap_top_band_raw.png",
+      "source_crop": [
+        0,
+        0,
+        1879,
+        837
+      ],
+      "prompt": "prompts/cap_top_band.md",
+      "opaque": true,
+      "rail_sources": [
+        "frame/side_left_segment.png",
+        "frame/side_right_segment.png"
+      ],
+      "rail_source_crop_art": [
+        0,
+        64,
+        48,
+        112
+      ],
+      "attachment_edge": null
+    },
+    {
+      "path": "frame/cap_bottom_join.png",
+      "size": [
+        540,
+        8
+      ],
+      "tiles": null,
+      "sha256": "bfc96915921150d8a871c81e5a748a1e5c9341822c0ff0f0c170be476c102b14",
+      "source": "source/cap_bottom_join_raw.png",
+      "source_crop": [
+        0,
+        848,
+        1629,
+        960
+      ],
+      "prompt": "prompts/cap_bottom_join.md",
+      "opaque": true,
+      "rail_sources": [
+        "frame/side_left_segment.png",
+        "frame/side_right_segment.png"
+      ],
+      "rail_source_crop_art": [
+        0,
+        64,
+        48,
+        112
+      ],
+      "attachment_edge": "top"
+    },
+    {
+      "path": "frame/cap_bottom_band.png",
+      "size": [
+        540,
+        48
+      ],
+      "tiles": "y",
+      "sha256": "5995412c08715f6bced0f453588d98720c3574a56824d0f0dedb522d5e6d2c53",
+      "source": "source/cap_bottom_band_raw.png",
+      "source_crop": [
+        0,
+        0,
+        1881,
+        836
+      ],
+      "prompt": "prompts/cap_bottom_band.md",
+      "opaque": true,
+      "rail_sources": [
+        "frame/side_left_segment.png",
+        "frame/side_right_segment.png"
+      ],
+      "rail_source_crop_art": [
+        0,
+        64,
+        48,
+        112
+      ],
+      "attachment_edge": null
+    }
+  ]
+}

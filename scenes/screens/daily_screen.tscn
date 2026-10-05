@@ -1,7 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/screens/daily_screen.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/art/environment/menu_background.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/menu_screens/daily_background.png" id="2"]
 [ext_resource type="Texture2D" path="res://assets/art/environment/props/09_void_portal.png" id="3"]
 [ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_play.tres" id="4"]
 [ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_home.tres" id="5"]
@@ -22,6 +22,7 @@ grow_vertical = 2
 script = ExtResource("1")
 
 [node name="Background" type="TextureRect" parent="."]
+texture_filter = 1
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

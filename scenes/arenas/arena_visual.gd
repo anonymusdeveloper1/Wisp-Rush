@@ -6,9 +6,14 @@ extends Control
 ## ([member ArenaSkinData.visual_scene_path]; ADR-0021, ADR-0023, ADR-0024). [method fit] lays it out
 ## for the screen and returns the floor exactly as drawn, and GameWorld takes the walls, enemy
 ## placement and dash collision from that rectangle, so play never leaves the drawn floor.
-## Subclasses: [LayeredArenaVisual] (sprites on a texel grid), [ModelArenaVisual] (a 3D model) and
-## [BoardArenaVisual] (a full-screen pixel-art board with the HUD built in). Pausable; the arena
+## Subclasses: [LayeredArenaVisual] (sprites on a texel grid), [ModelArenaVisual] (a 3D model),
+## [BoardArenaVisual] (a full-screen pixel-art board with the HUD built in) and [SciFiBoardVisual] (a
+## sci-fi screen with the HUD built in and its own spawn effects, ADR-0025). Pausable; the arena
 ## stills its motion under Reduced Motion ([method set_reduced_motion]).
+##
+## An arena may draw enemy arrivals and a boss's appearance itself ([method show_enemy_arrival],
+## [method show_boss_appearance]); GameWorld hands it each spawn, and the arena only reads the actor's
+## own progress, so the effect never changes when anything arrives.
 ##
 ## An arena may have an opening shot before play ([method has_intro]): GameWorld then plays it with
 ## the Wisp and the HUD hidden and starts the run on [signal intro_finished] (the zoom of a 3D arena,
@@ -26,6 +31,9 @@ signal hud_pause_pressed
 
 var _floor_rect: Rect2 = Rect2()
 var _reduced_motion: bool = false
+## Design pixels kept clear at the bottom of the screen (the phone's gesture bar), for an arena that
+## lays itself out against it ([method set_safe_bottom]).
+var _safe_bottom: float = 0.0
 
 
 ## Lays the arena out for a [param view_size] screen whose HUD starts [param safe_top] below its top,
@@ -76,6 +84,34 @@ func set_board_hud(_state: Dictionary) -> void:
 
 ## Where the Wisp is, in this node's coordinates, for scenery that reacts to play.
 func set_focus_point(_point: Vector2) -> void:
+	pass
+
+
+## The screen's bottom safe inset in design pixels, given before [method fit]; an arena that keeps
+## its frame above the gesture bar uses it (0 = none).
+func set_safe_bottom(inset: float) -> void:
+	_safe_bottom = maxf(0.0, inset)
+
+
+## An enemy has just spawned at [param enemy]'s position and is arriving; [param progress] returns how
+## far its arrival has run, 0..1, and 1 once it is over ([method EnemyActor.get_arrival_progress]).
+## Returns true when this arena draws the arrival itself: GameWorld then hides the enemy's own arrival
+## ring. The default draws nothing. (The arena reads the actors only through these arguments: naming
+## the actor classes in the arena scripts left a resource in use at exit in `check_scripts.gd`,
+## 2026-10-04.)
+func show_enemy_arrival(_enemy: Node2D, _progress: Callable) -> bool:
+	return false
+
+
+## A boss has just been placed and configured at [param boss]'s position; [param progress] returns how
+## far its appearance has run, 0..1, 1 once it is over, or a negative value when the boss does not say
+## ([method BossActor.get_intro_progress]). The default draws nothing.
+func show_boss_appearance(_boss: Node2D, _progress: Callable) -> void:
+	pass
+
+
+## Clears every spawn effect now (the run ended).
+func clear_spawn_effects() -> void:
 	pass
 
 

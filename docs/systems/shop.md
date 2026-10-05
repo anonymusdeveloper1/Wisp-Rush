@@ -3,7 +3,7 @@
 > **Status:** ✅ Rift Points (spec 01) and the Shop (spec 04) built 2026-09-15 · **three tabs since
 > 2026-09-19**: the DASHES tab is gone and each character now carries its own dash signature
 > ([player_dash.md](player_dash.md)) ·
-> **Last updated:** 2026-09-26 · **GDD section:** §6, §11, §14 #16, #31 ·
+> **Last updated:** 2026-10-05 · **GDD section:** §6, §11, §14 #16, #31 ·
 > **ADR:** [0013](../decisions/0013-rift-story-levels-endless-mode-and-rift-points.md),
 > [0012](../decisions/0012-store-surface-before-billing.md) ·
 > **Specs:** [01](../specs/story_and_endless/01_rift_points.md), [04](../specs/story_and_endless/04_shop.md) (both built)
@@ -148,6 +148,7 @@ calibration** (`EconomyTuning.placeholder = true`).
 ## Change history
 | Date | Change |
 |---|---|
+| 2026-10-05 | All three Shop tabs share the dedicated pixel-art gallery background ([game_flow.md](game_flow.md)); nearest filtering on the background |
 | 2026-09-26 | Scarlet replaces Ilyra in the CHARACTERS tab, free like the rest; the tier badge (`%TierLabel`) is removed with the character tiers (GDD §14 #53) |
 | 2026-09-25 | Mothmere joins the CHARACTERS tab, free like the rest of the roster |
 | 2026-09-25 | Story Rifts removed (owner): the dash tint check covers the Endless arenas only |

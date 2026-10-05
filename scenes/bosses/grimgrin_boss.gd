@@ -191,6 +191,12 @@ func skip_intro() -> void:
 		_state_remaining = 0.0
 
 
+func get_intro_progress() -> float:
+	if state != State.INTRO:
+		return 1.0
+	return 1.0 - clampf(_state_remaining / maxf(tuning.intro_duration, 0.001), 0.0, 1.0)
+
+
 func get_current_health() -> int:
 	return _health
 

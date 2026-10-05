@@ -1,0 +1,10 @@
+# Loading background — knife grip correction
+
+Edit image 1, the existing Patchvile loading artwork. Fix ONLY the leather-gloved hand holding the curved knife on the LEFT side of the image, and the knife handle where it passes through that hand. Image 2 is a supporting reference for the approved dagger design.
+
+The current grip is malformed and looks as if he is holding the loose cloth near the blade. Redraw a clear, anatomically believable closed-fist grip: the brown cylindrical handle passes firmly through his palm; four gloved fingers curl UNDER and around the handle; the thumb crosses over the index finger and presses onto the TOP/SIDE of the handle. Give the glove a readable thumb, connected knuckles and natural wrist alignment with the wrapped forearm. His hand holds the brown handle BEHIND the blade's small guard, never the blade or the hanging cloth. A short section of the brown handle and its capped pommel should emerge beyond the other side of his fist. The curved blade remains pointing to the viewer's left with its tip slightly raised. Keep the blade shape, size and curved silhouette closely matching the existing image and image 2. Its ivory fabric ties are attached near the guard and hang freely BELOW the knife, outside his fingers. Make the grasp look secure, with real overlap between fingers and handle.
+
+Preserve the complete rest of image 1: exactly the same portrait framing, character placement and crouching body pose, face, hood, button eye, amber eye, scarf, costume, boots, other hand resting on the ledge, stone platform, sky, floating ruins, wisps and lantern. Do not move, shrink or enlarge Patchvile, change his expression, or change any background detail. No new objects, effects or text.
+
+Rendering: preserve the existing 2D PIXEL ART and limited palette. Crisp square pixel clusters, no added character outline, no anti-aliasing, gradients, blur, painterly shading or 3D rendering. Keep the original 841x1870 canvas and tall portrait aspect. This is a small precise grip correction, not a new scene.
+

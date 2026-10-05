@@ -1,0 +1,14 @@
+Make a component sheet for the approved Wisp Rush sci-fi simulation display. Use the image just shown as the visual reference for graphite and silver hardware, modest cyan circuit accents and tiny amber lamps. These are SMALL HUD HARDWARE COMPONENTS, not an entire arena.
+
+Exactly SIX isolated objects in a THREE column by TWO row grid of equal square invisible cells, landscape sheet ideally 1536 by 1024 pixels. Each object is centered in its slot and fits entirely inside the central 75 percent, with solid flat magenta empty padding. No object touches another or a cell edge.
+
+Top row, left: one square graphite sci-fi pause button, beveled silver edges, a restrained cyan corner light, TWO simple ivory vertical pause bars only. A compact game-ready device.
+Top row, middle: one wide horizontal graphite/silver score display plate. Empty dark navy rectangular screen socket inside. Socket entirely blank, no symbols or text. Only slim bevels and one tiny amber status lamp outside the socket. Ratio around 3.5 to 1.
+Top row, right: one smaller wide horizontal graphite/silver resource-counter display plate, blank dark navy screen socket. Leave one blank small icon socket at its left. No icon is baked. Ratio around 3 to 1.
+Bottom row, left: one square slim graphite/silver level badge, blank dark navy center for a number rendered in code, small cyan accent. No number.
+Bottom row, middle: one very slim horizontal cyan-energy XP gauge housing with a completely EMPTY dark navy interior, NOT filled. Thin graphite rim, tiny cyan end lights. Ratio around 5 to 1, no ornament, no words.
+Bottom row, right: one tiny square graphite upgrade-count badge, blank dark navy center, restrained amber accent. No symbol, number or text.
+
+This is clean crisp 2D PIXEL ART on a fixed pixel grid with flat palette steps and no painterly art. Grey metal, dark navy sockets, cyan friendly accents, amber small lamp/upgrade accents. Absolutely no wood, stone, cloth, bone or fantasy filigree. No antialiasing, blur, bloom or smooth gradients. Do not illustrate an arena or background; only these six small components.
+
+Background 100 percent SOLID FLAT MAGENTA #FF00FF. No pink or magenta in the components, no floor shadows. No lettering, numbers, words, arrows, labels, watermark, logo, grid lines, borders or separators. The only graphic icon is the pause button's two bars. All other sockets are blank.

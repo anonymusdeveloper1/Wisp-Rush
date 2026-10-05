@@ -207,6 +207,12 @@ func skip_intro() -> void:
 		_state_remaining = 0.0
 
 
+func get_intro_progress() -> float:
+	if cycle_state != CycleState.INTRO:
+		return 1.0
+	return 1.0 - clampf(_timer_progress(), 0.0, 1.0)
+
+
 ## Returns the current health.
 func get_current_health() -> int:
 	return _current_health

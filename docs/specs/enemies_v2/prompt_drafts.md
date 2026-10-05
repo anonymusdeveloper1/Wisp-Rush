@@ -63,7 +63,8 @@ A floating skeleton witch with a tall crooked pointed hat, a tattered dark robe 
 ## The three bosses — first drafts
 
 The owner tested these three in AutoSprite: "not exactly what I want". The melee boss was redone in
-detail ([boss_melee.md](boss_melee.md)); the ranged and spawner bosses are redone when their turn comes.
+detail ([boss_melee.md](boss_melee.md)); the ranged boss now has [boss_ranged.md](boss_ranged.md)
+and six pose images with AutoSprite prompts (2026-10-05). The spawner is redone when its turn comes.
 The melee boss keeps his legs (owner); for the other two, Claude suggested the ranged one floats and
 the spawner keeps its legs (it never walks: it is planted, pouring out enemies) — not decided.
 
@@ -75,9 +76,9 @@ Written from the two-swords demon, not the owner's melee reference; replaced by 
 A towering demon swordsman boss in dark steel samurai-like armour: broad angular shoulder plates, a horned helmet mask with two burning red horns, a thick red rope tied at the waist, dark baggy trousers and clawed armoured feet. In each hand a huge jagged blade of glowing red crystal, held low at his sides. Thin glowing red cracks run through the armour, and a small trapped soul flame burns in his chest. Standing tall and menacing, facing the viewer, full body. Dark fantasy pixel art, bold silhouette, limited palette.
 ```
 
-### Ranged — first draft
+### Ranged — first draft (superseded 2026-10-05)
 
-From the owner's fifth boss reference ("the green guy"). Tested by the owner with the other two: "not exactly what I want". To be redone, with more detail, when this boss's turn comes. 486 characters.
+From the owner's fifth boss reference ("the green guy"). Tested by the owner with the other two: "not exactly what I want". Retained as history; the current design and pose prompts are in [boss_ranged.md](boss_ranged.md). 486 characters.
 
 ```text
 A tall hooded skeleton necromancer boss in a long tattered dark robe, with ornate dark armour on the shoulders and chest set with glowing green gems. A bone-white skull face with burning green eyes. He holds a tall staff topped with a caged lantern full of swirling green soul fire, and two small glowing green ghost skulls float beside him. The torn robe ends fade into green mist. Standing still, facing the viewer, full body. Dark fantasy pixel art, bold silhouette, limited palette.

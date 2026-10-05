@@ -1,0 +1,12 @@
+# loading_new_boss
+
+Built-in Codex image generator. Input references are listed in generation.json in the same order.
+
+Use case: illustration-story.
+Asset: one finished portrait loading-screen background for Wisp Rush, 1080 x 2400 composition, no text or interface.
+References: Image 1 is the exact identity of the NEW BOSS. Image 2 gives the established pixel-art rendering and dark floating-ruin world, not its character or composition.
+Create a beautifully staged emerald lantern-boss scene. The tall skeletal boss from image 1 floats above a broken circular stone threshold suspended in a dark abyss. Preserve his grey skull face, green eyes, pointed dark-green hood, ornate spiked bronze-and-bone shoulder armor, black/deep-green layered robes, green chest and belt gems, hanging crystal chains, skeletal hands, and spectral green tail. His tall lantern staff is held securely at screen left, and the other open hand cradles a curling emerald flame. His ragged robes spread in the wind, lit from below by his spectral tail.
+Scenery: a large broken arch curves in from the far side edges, a few ruined suspended bridges recede far behind him, green flame wisps drift near the lower side pillars and reflect onto their stone. The boss is the only character. Set the main action in the lower-middle of the composition. Give the scene a clear foreground, middle ground and quiet distant background, strong readable silhouette, frightening ceremonial stillness, convincing physical grip on the staff.
+Loading layout: central upper 35 percent must remain dark, calm negative space with only distant low-contrast shapes; the boss's hood begins around 41 percent of the canvas height, his full long robe and tail end around 77 percent. The lantern may rise at the outer left edge, never in the upper center. Bottom 18 percent is dark receding stone/abyss, visually quiet for a separate loading bar. Keep the full staff, hands, hood and tail inside the frame, safe from side cropping.
+Style: polished 2D PIXEL ART only. Match image 2's crisp visible pixel clusters, limited palette, hand-placed-looking staircase edges, discrete shaded color bands. No painterly art, no 3D rendering, no anti-aliasing, no smooth gradients or blur. Preserve image 1's boss design and emerald green rather than turning him blue. Opaque full-bleed scenery, no white background. No words, lettering, logo, progress bar, buttons, panels, collage, or watermark. This is a single coherent complete scene.
+

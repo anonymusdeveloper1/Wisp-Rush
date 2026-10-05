@@ -1,0 +1,30 @@
+Source kit preparation — 2026-10-04
+
+build_kit.py: 54 exported runtime PNG components; exact dimensions, binary alpha,
+37-colour palette, repeat-edge bands and fixed-cell frame containment checked.
+Enemy raw processor: strict QC passed, 8 frames.
+Boss raw processor: strict QC passed, 12 frames.
+
+tools/validate.sh: VALIDATE: OK, 113 scripts checked, 0 failed, main booted.
+One preceding Windows script-check process exited 139 after reporting 0 failed;
+the retry completed cleanly. No game fix was made.
+
+tools/run_tests.sh: TESTS: 29 passed, 11 failed.
+Existing stale failures:
+test_dev_unlock — removed DevUnlock API.
+test_endless_enemies — removed CinderShade/Warden/RiftSpawn scenes and types.
+test_enemy_families — removed SoulWisp/ShardWraith/BoneMote scenes.
+test_main_progression_flow — removed FormsScreen.
+test_menu_screens — removed FormsScreen/old setup signature.
+test_mutation_effects — old soul_wisp spawn; timed out after 120 seconds.
+test_player_health_flow — removed SoulWisp scene/type.
+test_progression_screens — removed FormsScreen.
+test_rift_points_text — removed FormsScreen.
+test_save_manager — removed purchase_form API; timed out after 120 seconds.
+test_screen_setup_order — removed FormsScreen.
+
+All game runtime files are unchanged by this source-kit task. The new scene,
+skin and event hooks are instructions for Claude, not implemented features.
+Godot MCP was unavailable. In-game sci-fi arena screenshots/play tests belong
+to the integration stage. Four portrait kit layouts and spawn previews were
+rendered from the actual exported pieces.
