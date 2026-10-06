@@ -1,0 +1,2 @@
+# The plugin ignores /bin here ("Remove /bin folder line if you want to commit"). Wisp Rush commits
+# the Android libraries in bin/ (2026-10-05) so every checkout can build the APK without the editor.
