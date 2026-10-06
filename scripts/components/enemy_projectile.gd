@@ -110,6 +110,12 @@ func on_hit_player() -> void:
 		_begin_fade()
 
 
+## Banish Bomb removes either a flying shot or its lingering wall mark.
+func banish() -> void:
+	if mode != Mode.FADING:
+		_begin_fade()
+
+
 func _physics_process(delta: float) -> void:
 	var scaled: float = delta * _world_speed
 	_time += delta

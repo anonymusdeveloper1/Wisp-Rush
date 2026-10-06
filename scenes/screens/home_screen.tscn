@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/environment/home_background.png" id="2_background"]
 [ext_resource type="Texture2D" path="res://assets/art/branding/wisp_rush_logo.png" id="3_logo"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/playable/patchvile/patchvile_portrait.png" id="4_wisp"]
-[ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_daily.tres" id="7_daily"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/home_icons/daily.png" id="7_daily"]
 [ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_stats.tres" id="8_stats"]
 [ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_settings.tres" id="9_settings"]
 [ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_currency.tres" id="10_shards"]
@@ -12,8 +12,8 @@
 [ext_resource type="Script" path="res://scenes/screens/home_ambience.gd" id="14_ambience"]
 [ext_resource type="Script" path="res://scenes/screens/orbit_motes.gd" id="15_orbit"]
 [ext_resource type="Script" path="res://scenes/player/visuals/playable_character_preview.gd" id="16_character_preview"]
-[ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_trials.tres" id="17_trials"]
-[ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_shop.tres" id="18_shop"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/home_icons/trials.png" id="17_trials"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/home_icons/shop.png" id="18_shop"]
 
 [node name="HomeScreen" type="Control"]
 layout_mode = 3
@@ -248,12 +248,13 @@ theme_type_variation = &"CaptionTile"
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 22.0
-offset_top = 18.0
-offset_right = -22.0
-offset_bottom = 114.0
+offset_left = 34.0
+offset_top = 30.0
+offset_right = -34.0
+offset_bottom = 102.0
 grow_horizontal = 2
 mouse_filter = 2
+texture_filter = 1
 texture = ExtResource("17_trials")
 expand_mode = 1
 stretch_mode = 5
@@ -285,12 +286,13 @@ theme_type_variation = &"CaptionTile"
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 22.0
-offset_top = 18.0
-offset_right = -22.0
-offset_bottom = 114.0
+offset_left = 34.0
+offset_top = 30.0
+offset_right = -34.0
+offset_bottom = 102.0
 grow_horizontal = 2
 mouse_filter = 2
+texture_filter = 1
 texture = ExtResource("7_daily")
 expand_mode = 1
 stretch_mode = 5
@@ -328,12 +330,13 @@ theme_type_variation = &"CaptionTile"
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 22.0
-offset_top = 18.0
-offset_right = -22.0
-offset_bottom = 114.0
+offset_left = 34.0
+offset_top = 30.0
+offset_right = -34.0
+offset_bottom = 102.0
 grow_horizontal = 2
 mouse_filter = 2
+texture_filter = 1
 texture = ExtResource("18_shop")
 expand_mode = 1
 stretch_mode = 5

@@ -1,6 +1,6 @@
 # ADR-0023: 3D arenas
 
-> **Status:** Accepted; amended 2026-10-01 and 2026-10-02 (the zoom intro, see the Addendum) · **Date:** 2026-09-30 · **Deciders:** owner / Claude Code (Opus 5.5) ·
+> **Status:** **Its arenas superseded by [ADR-0027](0027-one-arena-simulation.md)** (2026-10-05: the 3D arenas and the zoom intro removed; kept as history; the art rule that arenas may be 3D stands); Accepted; amended 2026-10-01 and 2026-10-02 (the zoom intro, see the Addendum) · **Date:** 2026-09-30 · **Deciders:** owner / Claude Code (Opus 5.5) ·
 > **Amends:** [ADR-0018](0018-pixel-art-direction.md) (no 3D art: arenas may now be 3D) and
 > [ADR-0021](0021-layered-arenas.md) (the scene a run shows for an arena is now any `ArenaVisual`)
 

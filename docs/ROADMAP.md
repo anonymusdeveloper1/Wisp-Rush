@@ -83,7 +83,7 @@
 - ✅ Endless skins: all 30 real skins pass spec 05's checker and eye review and are extracted and wired with `placeholder = false`; `placeholder_void_slate` saves map to `astral_observatory` (2026-09-15). Device pass pending
 - ⬜ Rift Points pacing calibrated on a device: `EconomyTuning.placeholder` (`res://data/economy/default_economy_tuning.tres`) is a headless bot estimate and must be `false` before release; the level-clear bonus (20 + 10/level, repeats 25 %) is a starting value in the same file (specs 01–02, [shop.md](systems/shop.md))
 - ⬜ Home's SHOP and NO ADS wired to real billing, or hidden, before any store release (ADR-0012)
-- ⬜ Tutorial screen placeholder replaced before release: the code-drawn ghost hand (`scenes/tutorial/tutorial_ghost_hand.gd`, glowing fingertip + stem, no hand art exists); its arena is the default Endless skin, now real art ([tutorial.md](systems/tutorial.md))
+- ⬜ Tutorial screen placeholder replaced before release: the code-drawn ghost hand (`scenes/tutorial/tutorial_ghost_hand.gd`, glowing fingertip + stem, no hand art exists); its arena is SIMULATION, the one arena ([tutorial.md](systems/tutorial.md))
 
 ## Milestone 7 — Engagement core (complete)
 
@@ -247,11 +247,8 @@
       (`concept_art/rook_autosprite_v1/`), cleaned frame by frame, packed at Patchvile's scale; outline
       kept, his own ceiling, a one-shot dash (push, dive, tail-blade swing), his rig's dash look kept;
       his bone rig removed. Owner phone test pending
-- 🔄 **Morrow**, the last rig, on the AutoSprite recipe (owner, 2026-09-27): the Codex prompt for three
-      variants of each pose saved in `concept_art/morrow_autosprite_v1/PROMPTS.md`; next the owner picks
-      the variants
-- ⬜ Rework the rest of the roster the same way (Morrow), each from the owner's AutoSprite
-      sheets
+- ~~Morrow, the last rig, on the AutoSprite recipe~~ — Morrow removed from the game 2026-10-05 (owner,
+      GDD §14 #83); his AutoSprite prompt pack went with him. The whole roster is on the recipe
 - ✅ Owner-approved v2 designs and implementation handoff: Mythic Ilyra, then Legendary Bram
       (`concept_art/wisp_rush_playable_characters_v2/`, GDD §14 #32)
 - ✅ Ilyra (Mythic) implemented and verified through her completion gate: 28 clean layers, all 13
@@ -288,21 +285,58 @@
       ([enemies.md](systems/enemies.md), GDD §14 #62; the mixes no longer change the enemies); owner phone
       test pending; the sixth enemy, two bosses and the removal of the old bosses and rosters to come
 
+## Milestone 15 — Enemy pickups and consumable item packs
+
+> Owner request 2026-10-05: replace run upgrades with the accepted seven drops; Items Shop packs
+> of 1, 5, 10 and 25. [Pickup items](systems/pickup_items.md), GDD §14 #76–77, ADR-0026.
+
+- ✅ Seven packed pixel icons and physical enemy drops; temporary effects replace live XP/cards
+- ✅ Persistent Ward stock, double-tap protection and brief escape immunity
+- ✅ RP packs for Ward, Magnet and Fortune Star; one-use selected next-run Magnet/Star
+- ✅ Ordinary/board HUD indicators and replacement tutorial lesson; isolated integration checks
+- ✅ Portrait phone QA: Items and gameplay at five aspects; BOARD 01 and SIMULATION HUD review
+- ⬜ Owner device/feel pass for provisional prices, durations and drop rate
+
+## Milestone 16 — One arena and the Shop's bottom navigation
+
+> Owner request 2026-10-05: remove the arena toggle and every arena but SIMULATION, from the code too;
+> a bottom navigation in the Shop (CHARACTERS, SHOP) with the back button at the top; a place to buy
+> Rift Points. GDD §14 #78, [ADR-0027](decisions/0027-one-arena-simulation.md),
+> [ADR-0028](decisions/0028-shop-bottom-navigation-and-rift-points-packs.md).
+
+- ✅ Every arena but SIMULATION removed (scenes, scripts, shaders, runtime art, the painted-background
+      path, arena-only tools); the Tutorial on SIMULATION; old saves fall back to it
+- ✅ Shop: BACK at the top, a bottom navigation with CHARACTERS and SHOP; SHOP lists NO ADS, ITEMS and
+      RIFT POINTS; the bottom navigation made bigger (owner)
+- ✅ Rift Points packs (500 / 1,200 / 2,500 / 6,500 RP, placeholder prices), disabled until billing
+- ⬜ Owner phone test
+
 ## Milestone 9 — Monetisation
 
 > Owner decision 2026-09-12: **free with opt-in rewarded video plus one "Remove Ads + Shard Pack" IAP.**
 > Never interstitials — a forced ad between three-minute runs breaks the "immediate momentum" pillar
 > (GDD §2). Blocked on M7 shipping and showing healthy day-1/day-7 retention.
 > **2026-09-14:** the pack carries no currency — Remove Ads only, and Rift Points can't be bought (ADR-0013).
+> **2026-10-05 (owner):** Rift Points are sold in packs for real money (ADR-0028). Interstitials after
+> every second run join the rewarded ads, on Google AdMob with test ad units (ADR-0029).
 
 - ✅ ADR-0009: monetisation model, SDK choice and the privacy consequences
 - ⬜ GDD §12/§13 amendment — the "offline, no data collection, no fake purchases" promise no longer
       holds unqualified once an ad SDK ships
 - ✅ Ad SDK integration behind a service wrapper, so gameplay code never calls the SDK directly
-- ⬜ Rewarded placements: revive once per run · double Rift Points at Results · one upgrade reroll
-- ⬜ IAP: Remove Ads (no currency inside — ADR-0013), including restore purchases
+- 🔄 Google AdMob on test ad units (2026-10-05, ADR-0029): interstitial after every second run, rewarded
+      revive once per run and double Rift Points at Results, Google's consent form; owner phone test
+      pending; the owner's App ID and ad units, a privacy policy and a Settings privacy-options entry
+      before release (the upgrade reroll has nothing to reroll since ADR-0026)
+- 🔄 IAP through Google Play Billing (2026-10-05, ADR-0030): Remove Ads (acknowledged, restored at start)
+      and the four Rift Points packs (saved, then consumed; pending payments; crash recovery); waits for
+      Play Console ([checklist](guides/play_console_setup.md))
+- 🔄 Cloud save on the player's Google account (Play Games Saved Games, newest save wins; ADR-0030):
+      built and tested with stand-ins; the Play Games plugin is enabled once Play Console gives its project ID
 - ✅ Shop screen UI (Remove Ads bundle, Restore) reachable from Home's SHOP and NO ADS, purchases
       disabled until a store is connected ([ADR-0012](decisions/0012-store-surface-before-billing.md))
+- ✅ Rift Points packs on the Shop's SHOP page, sold through the same store contract and disabled until a
+      store is connected (2026-10-05, [ADR-0028](decisions/0028-shop-bottom-navigation-and-rift-points-packs.md))
 - ⬜ `AdProvider` price query, so BUY can show the localized price
 - ⬜ Consent flow (GDPR / ATT) and a published privacy policy
 - ✅ Verify no ad or IAP code path can block, delay or interrupt a run start
@@ -310,7 +344,7 @@
 ## Backlog
 | Item | Notes |
 |---|---|
-| Redraw painted art as pixel art (ADR-0018) | The game is 2D pixel art (owner, 2026-09-24). Legacy painted art: enemies, bosses, VFX sprites, the Quarry Titan and Wisp Bearer arenas, and the characters that are not yet reworked. Characters first (Patchvile done, Ilyra next), then the UI (integration in progress), then the arenas and the world |
+| Redraw painted art as pixel art (ADR-0018) | The game is 2D pixel art (owner, 2026-09-24). Legacy painted art: enemies, bosses, VFX sprites (the Quarry Titan and Wisp Bearer arenas were removed 2026-10-05, ADR-0027), and the characters that are not yet reworked. Characters first (Patchvile done, Ilyra next), then the UI (integration in progress), then the arenas and the world |
 | Pixel-exact drawing of characters (nearest filtering, whole-number scale) | Not decided. A version was built and reverted on 2026-09-24 (owner). Equal detail across the roster is handled instead by the roster size: Patchvile's pixel count and scale for everyone ([character_creation.md](guides/character_creation.md) §3–§4) |
 | ~~Fix the Void pack's canvas overrun at source~~ | Obsolete 2026-09-25: Void was removed from the game |
 | ~~Fix the Verdant Shade pack's frame cut at source~~ | Obsolete 2026-09-25: Shade is rebuilt from AutoSprite sheets, and the Codex pack is only the source of its first frames (whose slivers `build_first_frames.py` removes) |

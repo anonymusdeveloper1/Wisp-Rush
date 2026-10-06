@@ -20,7 +20,7 @@ signal finished(resources: Dictionary)
 const MAX_WAIT_SECONDS: float = 6.0
 ## A run loading screen stays up at least this long, so it reads as a screen, not a flash.
 const RUN_MIN_SECONDS: float = 0.9
-## Seven portrait illustrations: the five playable characters other than Morrow, Grimgrin and
+## Seven portrait illustrations: the five playable characters, Grimgrin and
 ## the owner's new lantern boss. One is chosen at random for boot or run loading.
 const BACKGROUND_POOL: PackedStringArray = [
 	"res://assets/art/environment/loading_screens/loading_new_boss.png",

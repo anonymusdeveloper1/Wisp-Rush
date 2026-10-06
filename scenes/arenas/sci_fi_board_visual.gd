@@ -13,8 +13,8 @@ extends ArenaVisual
 ## are kept as whole art pixels above and below the frame and filled with the kit's caps, the frame
 ## continued (GDD §14 #74). [method fit] returns the floor; the walls are the rim's inner edge.
 ##
-## The HUD, fed by GameWorld through [method set_board_hud]: pause, the level badge over the soul
-## gauge, the upgrade badge (its count from 1 up), score and Rift Points in the top hardware; the
+## The HUD, fed by GameWorld through [method set_board_hud]: pause, Ward stock over its protection
+## gauge, a Ward icon, score and Rift Points in the top hardware; the
 ## magenta boss meter (only in a boss fight) and the amber RUSH meter inside the screen. Every fill
 ## is its full texture cropped to the value, never stretched. Counters use the game's pixel font,
 ## sized to their sockets. Only the pause button takes input.
@@ -58,7 +58,6 @@ const SCORE_TEXT := Rect2(12.0, 11.0, 104.0, 17.0)
 const RP_TEXT := Rect2(36.0, 10.0, 60.0, 16.0)
 const RP_ICON := Rect2(12.0, 10.0, 17.0, 16.0)
 const LEVEL_TEXT := Rect2(8.0, 8.0, 20.0, 20.0)
-const UPGRADE_TEXT := Rect2(8.0, 8.0, 8.0, 9.0)
 ## The screen's data marks (build_kit.py): the first row under the floor's top, the margin the last
 ## keeps from its bottom, the step, and the left and right marks' insets (the right one drops a
 ## little).
@@ -132,6 +131,10 @@ var _spawn_layer: Control
 var _art: Control
 var _text: Control
 var _boss_track: TextureRect
+var _rush_track: TextureRect
+var _pause: TextureButton
+## The Ward badge (stock and icon) in art pixels, for [method get_hud_rect].
+var _ward_area: Rect2 = Rect2()
 var _boss_fill: Control
 var _rush_fill: Control
 var _soul_fill: Control
@@ -139,7 +142,6 @@ var _rp_icon: TextureRect
 var _score_label: Label
 var _rp_label: Label
 var _level_label: Label
-var _upgrade_label: Label
 ## Each counter's socket in design pixels.
 var _sockets: Dictionary[Label, Rect2] = {}
 ## Enemies arriving (weak references), their progress readers and the sprite drawing each; idle
@@ -196,8 +198,11 @@ func fit(view_size: Vector2, safe_top: float) -> Rect2:
 		SIDE_WIDTH, top + TOP_HEIGHT,
 		BOARD_WIDTH - 2.0 * SIDE_WIDTH, height - top - bottom - TOP_HEIGHT - BOTTOM_HEIGHT,
 	)
-	_build(height, top, bottom)
 	_floor_rect = Rect2(_floor_art.position * _unit, _floor_art.size * _unit)
+	# Before the board is in the tree it only measures the floor; GameWorld fits it once added.
+	if not is_node_ready():
+		return _floor_rect
+	_build(height, top, bottom)
 	set_board_hud(_hud)
 	_update_arrivals()
 	_update_boss_appearance(0.0)
@@ -214,14 +219,24 @@ func set_board_hud(state: Dictionary) -> void:
 		return
 	_set_text(_score_label, str(state.get("score", "")))
 	_set_text(_rp_label, str(state.get("rift_points", "")))
-	_set_text(_level_label, str(state.get("level", "")))
-	var upgrades: int = int(state.get("upgrades", 0))
-	_set_text(_upgrade_label, str(upgrades) if upgrades > 0 else "")
+	_set_text(_level_label, str(state.get("ward_stock", 0)))
 	_rp_icon.texture = state.get("rp_icon", null) as Texture2D
+	_pause.visible = bool(state.get("pause", true))
 	_boss_track.visible = bool(state.get("boss", false))
 	_set_fill(_boss_fill, METER_FILL.size.x, float(state.get("boss_health", 0.0)))
 	_set_fill(_rush_fill, METER_FILL.size.x, float(state.get("rush", 0.0)))
-	_set_fill(_soul_fill, SOUL_FILL.size.x, float(state.get("soul", 0.0)))
+	_set_fill(_soul_fill, SOUL_FILL.size.x, 1.0 if bool(state.get("ward_active", false)) else 0.0)
+
+
+func get_hud_rect(element: StringName) -> Rect2:
+	var art := Rect2()
+	match element:
+		&"rush":
+			if _rush_track != null:
+				art = Rect2(_rush_track.position, _rush_track.size)
+		&"items":
+			art = _ward_area
+	return Rect2(art.position * _unit, art.size * _unit)
 
 
 func show_enemy_arrival(enemy: Node2D, progress: Callable) -> bool:
@@ -426,8 +441,8 @@ func _build_meters(floor_art: Rect2) -> void:
 	var centre := Vector2(floor_art.get_center().x, floor_art.position.y)
 	_boss_track = _piece(_art, "hud/boss_meter_track", centre + BOSS_METER_OFFSET)
 	_boss_fill = _fill(_boss_track, "hud/boss_meter_fill", METER_FILL)
-	var rush_track: TextureRect = _piece(_art, "hud/rush_meter_track", centre + RUSH_METER_OFFSET)
-	_rush_fill = _fill(rush_track, "hud/rush_meter_fill", METER_FILL)
+	_rush_track = _piece(_art, "hud/rush_meter_track", centre + RUSH_METER_OFFSET)
+	_rush_fill = _fill(_rush_track, "hud/rush_meter_fill", METER_FILL)
 
 
 func _build_hud(top: float) -> void:
@@ -446,6 +461,7 @@ func _build_hud(top: float) -> void:
 	pause.size = Vector2(touch, touch)
 	pause.pressed.connect(func() -> void: hud_pause_pressed.emit())
 	_art.add_child(pause)
+	_pause = pause
 	var level := Vector2(LEVEL_POS.x, top + LEVEL_POS.y)
 	_piece(_art, "hud/level_badge", level)
 	_level_label = _label(level, LEVEL_TEXT, &"ValueLabel")
@@ -453,8 +469,16 @@ func _build_hud(top: float) -> void:
 	var soul_track: TextureRect = _piece(_art, "hud/soul_gauge_track", soul)
 	_soul_fill = _fill(soul_track, "hud/soul_gauge_fill", SOUL_FILL)
 	var upgrade := Vector2(UPGRADE_POS.x, top + UPGRADE_POS.y)
-	_piece(_art, "hud/upgrade_badge", upgrade)
-	_upgrade_label = _label(upgrade, UPGRADE_TEXT, &"AmberValueLabel")
+	var ward := TextureRect.new()
+	ward.texture = preload("res://assets/art/ui/items/soul_ward.png")
+	ward.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	ward.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	ward.position = upgrade
+	ward.size = Vector2(32, 32)
+	ward.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_art.add_child(ward)
+	var badge := Rect2(level, _tex("hud/level_badge").get_size())
+	_ward_area = badge.merge(Rect2(ward.position, ward.size))
 	var score := Vector2(SCORE_POS.x, top + SCORE_POS.y)
 	_piece(_art, "hud/score_plate", score)
 	_score_label = _label(score, SCORE_TEXT, &"ValueLabel")

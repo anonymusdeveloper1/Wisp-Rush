@@ -1,7 +1,7 @@
 # System: RUSH mode and fast feel
 
 > **Status:** ✅ done (device pass pending) ·
-> **Last updated:** 2026-09-25 · **GDD section:** §5.1, §5.6, §8, §14 #27–#28
+> **Last updated:** 2026-10-05 · **GDD section:** §5.1, §5.6, §8, §14 #27–#28
 >
 > Built from [specs/rush_and_feel/](../specs/rush_and_feel/README.md). The GDD owns the rules; this
 > file owns how they are built.
@@ -17,7 +17,7 @@ burst. Run-local; no mode-specific code, so it works the same in Endless and the
 | `res://scripts/resources/run_feel_tuning.gd` | `RunFeelTuning` — every value below |
 | `res://data/feel/default_run_feel_tuning.tres` | Starting values (GDD §14 #27), set on `GameWorld.feel_tuning` |
 | `res://scenes/gameplay/game_world.gd` | Meter, RUSH mode, finishers, time-scale owner, shard sweeps, trails, HUD |
-| `res://scenes/gameplay/game_world.tscn` | `%RushRow` (`%RushLabel` + `%RushBar`) under the soul level |
+| `res://scenes/gameplay/game_world.tscn` | `%RushRow` (`%RushLabel` + `%RushBar`) below the active item indicators |
 | `res://scenes/player/wisp_player.gd` | Game-time momentum window, RUSH speed modifier and damage immunity, streak glow, speed lines, RUSH aura |
 | `res://scenes/pickups/soul_shard_pickup.gd` | `sweep_to` / `collect_now` |
 | `res://scripts/components/vfx_pool.gd` | `play_flight` (soul orbs) |
@@ -48,7 +48,7 @@ GameWorld
 | `SoulShardPickup.collect_now() -> bool` / `is_sweeping()` / `is_auto_collected()` | methods | Instant collect; sweep state. |
 | `VfxPool.play_flight(texture, from, to, start_scale, end_scale, duration, tint)` | method | Pooled sprite that flies between canvas points. |
 | `GameWorld._request_time_scale(scale, real_seconds)` | private method | Timed request (hit-stop, finisher). |
-| `GameWorld._hold_time_scale(key, scale)` / `_release_time_scale(key)` | private methods | Keyed hold with no timer, e.g. `&"upgrade_tray"` for as long as the upgrade tray is up ([mutations.md](mutations.md)); holding a key again replaces its scale. |
+| Time-scale ownership | private | Hit-stop and timed finishers remain coordinated by GameWorld; the former upgrade hold has no live caller. |
 
 ## Data & tuning
 `RunFeelTuning` (`default_run_feel_tuning.tres`):
@@ -92,10 +92,10 @@ Presentation-only constants (orb size, callout scale, glow texture size, HUD off
   fatal hit (during the death dissolve); `_emit_run_end()` then `collect_now()`s anything left right
   before the summary. Shards collect through `collected` → `_award_rift_points`, once. One rising
   chime run of at most 6 `shard_pickup`s per sweep; swept shards play no per-shard sound.
-- **Finisher** (`_play_finisher`): the kill that brings one dash id to 5 kills (Soul Link kills of that
-  dash count, Death Pulse kills do not); a kill that leaves `_remaining_live_enemies == 0` in free-play
+- **Finisher** (`_play_finisher`): the kill that brings one dash id to 5 kills (Echo Wisp kills of that
+  dash count, Banish Bomb kills do not); a kill that leaves `_remaining_live_enemies == 0` in free-play
   waves with no boss pending or alive, at most once per 6 s of game time; any boss's killing blow
-  (before the victory beat). Refused while paused, while the upgrade tray is up or after run end. Reduced
+  (before the victory beat). Refused while paused, after run end. Reduced
   Motion: only the low `pulse` (no time scale, flash or trauma).
 - **Meter.** Hidden (`%RushRow`) and frozen while `GameWorld.set_rush_enabled(false)` (Tutorial lessons
   other than RUSH, [tutorial.md](tutorial.md)); reset per run (GameWorld is
@@ -105,9 +105,9 @@ Presentation-only constants (orb size, callout scale, glow texture size, HUD off
   catches up when it lands; under Reduced Motion the bar simply fills. Full or running: the row pulses
   (static brighter under Reduced Motion).
 - **RUSH mode.** Starts in `_process` once the meter is full and play is free (never while RUSH is disabled,
-  paused or the upgrade tray is up — it waits for them; the tray in turn never opens during RUSH).
+  paused or the run is over).
   For 6 game seconds: Wisp speed ×1.3 (`set_rush_speed_multiplier`), score ×2 inside
-  `_apply_velocity_score_bonus` (after Void Velocity), combo timer and empty-dash decay frozen, damage
+  `_apply_item_score_bonus` (multiplying Fortune Star and RUSH), combo timer and empty-dash decay frozen, damage
   immunity, music intensity 1.0, momentum visuals at full, Wisp aura, edge glow (off under Reduced
   Motion); the bar drains with the time left. Start: 1.5× `RUSH` callout, heavy haptic, trauma 0.5,
   `level_up`. Last second: the aura flickers. End: meter 0, soft `pulse`, everything restored.
@@ -117,7 +117,7 @@ Presentation-only constants (orb size, callout scale, glow texture size, HUD off
 - Manual (device, owner preference): chain three quick dashes (trail grows, speed lines at max, then
   take a hit); leave shards and start a wave/boss; reap 5 in one dash; clear the field twice within
   6 s; kill a boss; fill RUSH (~25 kills) and check ×1.3 speed, ×2 score, frozen combo, no damage,
-  peak music, meter empty after; pause and bank an upgrade with a full meter; repeat with Reduced
+  peak music, meter empty after; pause with a full meter; repeat with Reduced
   Motion; play Endless and the daily run. Logs: `[GameWorld] RUSH start|end`,
   `finisher | reason=`, `shard sweep | shards=`.
 - Automated: none (owner preference 2026-09-15). Planned: `test_rush_mode.gd`, `test_run_feel.gd` (spec
@@ -135,6 +135,7 @@ Presentation-only constants (orb size, callout scale, glow texture size, HUD off
 ## Change history
 | Date | Change |
 |---|---|
+| 2026-10-05 | RUSH stays separate from pickups; score multiplies with Fortune Star and its immunity preserves Soul Ward |
 | 2026-09-25 | Story Rifts removed (owner): Rift-level mentions dropped |
 | 2026-09-15 | Keyed time-scale holds (`_hold_time_scale` / `_release_time_scale`) for the upgrade tray; the paused upgrade choice is gone |
 | 2026-09-15 | Meter gating reads `set_rush_enabled` (Tutorial screen) instead of the removed in-run lesson |

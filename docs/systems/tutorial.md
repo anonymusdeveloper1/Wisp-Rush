@@ -1,6 +1,6 @@
 # System: Tutorial
 
-> **Status:** ✅ done (device pass pending) · **Last updated:** 2026-09-28 · **GDD section:** §11, §14 #29
+> **Status:** ✅ done (device pass pending) · **Last updated:** 2026-10-05 · **GDD section:** §11, §14 #29
 >
 > **Changed 2026-09-15 (owner decision):** a separate Tutorial screen replaced the in-run first-run
 > lesson (`TutorialOverlay`, `GameWorld.tutorial_enabled` / `tutorial_completed`). Real runs never teach.
@@ -33,7 +33,7 @@ TutorialScreen (Control, mouse ignore)          GameWorld is added in _ready as 
 │   └── Guide → %SkipButton (SecondaryButton, top-left where the hidden pause button sits; top-right
 │       holds Rift Points and the score since 2026-09-24)
 │             %GuideMargin → Center → %GuidePanel → Copy: StepRow (%StepLabel, %Dots PageDots), %CaptionLabel
-├── HandLayer (CanvasLayer 11: above the HUD, so the hand can tap the upgrade tray's cards)
+├── HandLayer (CanvasLayer 11: above the HUD, so the hand can demonstrate the shield double tap)
 │   └── %GhostHand (TutorialGhostHand)
 └── ConfirmLayer (CanvasLayer 12, always processes) → %SkipConfirm: %ConfirmDim (Palette.SCRIM),
     PanelCrest: "SKIP THE TUTORIAL?", %SkipConfirmButton (DangerButton), %SkipCancelButton (SecondaryButton)
@@ -56,18 +56,17 @@ TutorialScreen (Control, mouse ignore)          GameWorld is added in _ready as 
 
 ## Data & tuning
 
-`TutorialCatalog` (`default_tutorial.tres`): `lessons`, `arena_skin_id` (`astral_observatory`, the
-default skin), `boss_health` 3, captions for retry/hit/complete; demo timings (start delay 1.0 s, press
+`TutorialCatalog` (`default_tutorial.tres`): `lessons`, `arena_skin_id` (`sci_fi_simulation_v1`,
+SIMULATION, the one arena since 2026-10-05, ADR-0027), `boss_health` 3, captions for retry/hit/complete; demo timings (start delay 1.0 s, press
 0.3, drag 0.55, hold 0.4 (was 0.2; long enough to read the aim path and ×count), release 0.45, redirect drag 0.1, drag length 260 px, start offset 90 px, gap
-0.45, demo hit distance 150 px, settle 0.9; upgrade demo: card look 0.7 real s, tapped card index 1,
-tray wait limit 8 real s); try timings (hint every 2.6 s at 60 % alpha, retry 0.8 s,
+0.45, demo hit distance 150 px, settle 0.9; shield demo: press/hold/release 0.08 s each, tap gap 0.08 s; try hint every 2.6 s at alpha 0.6, retry 0.8 s;
 refill 0.6 s, success 1.3 s, complete 2.0 s, callout ×1.25).
 `TutorialLessonData`: id, title, demo/try captions, success callout, `goal` (`wall_dash`, `kill`,
-`chain`, `redirect_kill`, `safe_kill`, `upgrade`, `rush_kill`, `boss`), `goal_count`, `player_start`,
+`chain`, `redirect_kill`, `safe_kill`, `shield`, `rush_kill`, `boss`), `goal_count`, `player_start`,
 `enemy_kind` + `enemy_positions`, `rush_positions`, `hazard_kind` + `hazard_position`, `spawns_boss`,
 `demo_swipes` (`Vector2.ZERO` = aim at nearest target), `redirect_swipe_index`, `demo_drives_wisp`,
 `demo_shows_hit` + `demo_hit_reform`, `reset_after_demo`, `retry_on_miss`, `hud_focus`,
-`experience_enabled`, `demo_experience_share`, `demo_upgrade_tap`, `drops_shards`, `rush_enabled`,
+`drops_item`, `demo_shield_tap`, `drops_shards`, `rush_enabled`,
 `rush_start_share`.
 Positions are arena UV (0..1 of the playfield rect, clamped onto the floor).
 
@@ -86,8 +85,7 @@ SaveManager (`mark_tutorial_completed`, Reduced Motion), `PageDots`, `SoundFx`, 
   aim until it lights up) · 3 chain ≥ 2 of 3 in one dash (caption: line up lit souls, read the ×count) · 4 redirect: a kill on a leg started mid-dash · 5 blockers: reach the soul behind
   a split void crystal · 6 danger: kill past a spike bloom without a hit ("One touch of the spikes ends a run."; no focus ring
   since the HUD lost its lives readout, 2026-09-24)
-  · 7 Rift Points & XP: kills drop shards (swept on landing), XP fills and banks a level (UPGRADE
-  READY), the cards slide up at the lesson's calm moment, tap one · 8 RUSH: meter
+  · 7 Pickups & Protection: slice the target, collect its Ward and double tap to protect · 8 RUSH: meter
   starts at 90 %, fill it, kill during RUSH (targets respawn when RUSH starts) · 9 boss: Reaper with 3
   health, strike the open core.
 - **Demo:** player input off; the hand plays each swipe beside the Wisp and the director mirrors it into
@@ -95,30 +93,23 @@ SaveManager (`mark_tutorial_completed`, Reduced Motion), `PageDots`, `SoundFx`, 
   release). `demo_aim` → `WispPlayer.preview_aim` fires the real aim preview, so demos show the path
   line, the lit enemies and ×N, and releases take the aim assist, exactly as the player's own swipes. A redirect swipe plays right after the previous release. The danger demo forces its hit as
   the dash nears the spikes, reforming at `demo_hit_reform`. The boss demo shows the hand only (the
-  Wisp does not strike). **Upgrade demo** (`demo_upgrade_tap`, 2026-09-15): after its swipe the
-  director fills the XP bar (the level banks), calls `GameWorld.request_upgrade_calm_moment()`; once the
-  Wisp rests with its combo run out the tray slides up (world ×0.3), the hand waits 0.7 real s, taps
-  card 1 (`play_tap`) and the director picks it through `choose_upgrade_card` — the hand really drives
-  the tap, not caption-only. If the tray never opens within 8 real s the demo moves on caption-only.
+  Wisp does not strike). **Shield demo** (`demo_shield_tap`): the target drops a Ward, the real
+  dash collects it, and the ghost hand shows two short taps. The director activates the Ward after
+  the second demo tap; the try always uses the player's own gesture.
   Then the arena is rebuilt (unless `reset_after_demo` is false).
 - **Try:** input on; the hand repeats a dimmed hint after 2.6 s idle (boss: only while the core is
   open); a dash hides it. Misses rebuild the lesson after 0.8 s when `retry_on_miss` (or the field is
-  empty); a hit in the danger lesson retries with "Hit! …". XP is on only in lesson 7; RUSH only in 8.
-  Lesson 7's try: reaping every soul tops the bar up and requests the calm moment; the first time the
-  tray rests a dimmed hand taps a card as a hint (never picks); a swipe or the 6 s timeout sends the
-  cards away and the director requests another calm moment once the Wisp rests on an empty field. The
-  lesson passes on `upgrade_chosen`.
-- **Upgrade tray placement:** `TutorialScreen._layout` calls `set_upgrade_tray_lift(GUIDE_BAND_HEIGHT)`,
-  so the tray rests above the caption band and the caption stays readable.
-- **Never dies:** every hit refills Soul Fragments after 0.6 s (at once if one more would kill).
+  empty); a hit in the danger lesson retries with "Hit! …". RUSH is on only in lesson 8.
+  Lesson 7's try drops a Ward from its target; its first swipe collects it. An empty field waits for
+  the double tap instead of retrying. Dimmed two-tap hints never activate the shield. The lesson
+  passes only on `shield_activated` during TRY. Demo/try stock is local and never saved.
 - **Success beat:** callout + `upgrade_choice` sound, 1.3 s, next lesson. **Complete:** arena cleared,
   "TUTORIAL COMPLETE" + `level_up`, 2.0 s, then `finished(false)`.
 - **SKIP** always visible; confirm pauses the arena and drops the Wisp's aim (`GameWorld.cancel_player_aim`, clears lit enemies); back/Escape toggles the confirm. Leaving disables the
   hosted GameWorld and unpauses the tree (the confirm may have paused it).
 - **Scripted arena** (`MODE_TUTORIAL`): no wave director, boss cadence, run end, Results, RP banking,
   challenge/Trial/statistics recording (Main never connects `run_ended`); pause button hidden, no
-  focus-loss pause, GameWorld leaves back/Escape to the host. RP and XP shown in the HUD are never banked.
-  No natural calm moments: the upgrade tray opens only on a lesson's `request_upgrade_calm_moment`.
+  focus-loss pause, GameWorld leaves back/Escape to the host. RP and item stock shown in the HUD are never banked.
 - **Routing (Main):** after Loading, `tutorial_completed == false` → Tutorial, else Home. Finishing or
   skipping calls `mark_tutorial_completed()` and goes Home (first launch and replay alike). The
   Tutorial never glides in transitions (it hosts a screen-space arena).
@@ -128,13 +119,13 @@ SaveManager (`mark_tutorial_completed`, Reduced Motion), `PageDots`, `SoundFx`, 
 
 - Fresh save (Settings → Reset Progress): launch → Tutorial; play all nine lessons; Home follows.
 - Settings → REPLAY TUTORIAL → SKIP → confirm → Home; Android back inside opens the confirm.
-- Automated: none (owner preference 2026-09-15). A temporary headless smoke walked every lesson,
+- Automated: `tools/run_tests.sh pickup_tutorial` checks lesson 7 demo, collection, player double
+  tap and persistent-save isolation. The other lessons retain their earlier verification history. A temporary headless smoke walked every lesson,
   skip, first-launch and the then Rift Map routing (0 failures) and was deleted. Logs: `[Tutorial] lesson n/9 id | demo|try|retry|passed`.
 
 ## Known issues / TODO
 
-- Placeholder art: the ghost hand is code-drawn (ROADMAP M6). The arena is the default Endless skin, now
-  real art (2026-09-15).
+- Placeholder art: the ghost hand is code-drawn (ROADMAP M6). The arena is SIMULATION (2026-10-05).
 - The mid-dash redirect window is short (a dash crosses the arena in ~0.25 s); needs the device pass.
 - The aim preview follows the player's AIM ARROW setting; with it OFF (possible on a replay)
   the slice/chain captions mention lighting the player cannot see.
@@ -145,6 +136,8 @@ SaveManager (`mark_tutorial_completed`, Reduced Motion), `PageDots`, `SoundFx`, 
 
 | Date | Change |
 |---|---|
+| 2026-10-05 | The Tutorial plays on SIMULATION, the one arena (owner, GDD §14 #78, ADR-0027): the board hides its pause button, and the RUSH and item callouts point at the board's own meters (`ArenaVisual.get_hud_rect`) |
+| 2026-10-05 | Lesson 7 replaces XP/cards with a collected Ward, ghost-hand double tap and player shield activation |
 | 2026-09-28 | Targets are the Hooded Scribe (Enemies v2), standing still and never attacking; the Soul Wisp is gone |
 | 2026-09-25 | Story Rifts removed (owner): the replay is Settings → REPLAY TUTORIAL only, and it returns Home |
 | 2026-09-15 | Lesson 7 uses the banked upgrade flow: UPGRADE READY, calm-moment tray, hand taps a card (`demo_upgrade_tap`, `play_tap`, HandLayer 11), new captions |

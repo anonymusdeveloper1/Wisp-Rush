@@ -97,6 +97,10 @@ func _check_redirect_scoring_is_not_farmable() -> void:
 	# A legitimate rapid launch off the wall...
 	_swipe(_inward_aim())
 	await _wait_state(WispPlayer.State.DASHING)
+	# ...that leaves the wall first: on its first frame the Wisp is still on the wall line, where a
+	# redirect along the wall has no length and is refused...
+	for _frame: int in 4:
+		await physics_frame
 	# ...followed by redirects in open air, each well inside the rapid window.
 	for _turn: int in 2:
 		var heading: Vector2 = (_player.get_dash_target() - _player.global_position).normalized()

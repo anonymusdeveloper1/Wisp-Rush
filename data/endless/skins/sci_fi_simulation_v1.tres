@@ -1,17 +1,10 @@
-[gd_resource type="Resource" script_class="ArenaSkinData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="ArenaSkinData" load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/arena_skin_data.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/art/environment/arenas/thumbnails/sci_fi_simulation_v1.png" id="2_thumbnail"]
 
 [resource]
 script = ExtResource("1_script")
 skin_id = &"sci_fi_simulation_v1"
 display_name = "SIMULATION"
 description = "A close-up simulation screen: a navy display in a graphite frame, with the HUD built in."
-tier = 0
-background_path = "res://assets/art/environment/arenas/sci_fi_simulation_v1.png"
-thumbnail = ExtResource("2_thumbnail")
-price = 0
-accent = Color(0.157, 0.737, 0.824, 1)
-floor_rect = Rect2(0.08927, 0.06699, 0.82147, 0.86603)
 visual_scene_path = "res://scenes/arenas/sci_fi_simulation_v1.tscn"

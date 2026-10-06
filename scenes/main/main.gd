@@ -19,6 +19,9 @@ const DASH_STYLE_CATALOG: DashStyleCatalog = preload(
 	"res://data/dash_styles/default_dash_style_catalog.tres"
 )
 const TUTORIAL_CATALOG: TutorialCatalog = preload("res://data/tutorial/default_tutorial.tres")
+const ITEM_CATALOG: RunItemCatalog = preload("res://data/items/default_item_catalog.tres")
+## The Rift Points packs the Shop sells (ADR-0028).
+const RIFT_POINTS_PACKS: RiftPointsPackCatalog = preload("res://data/shop/rift_points_packs.tres")
 ## Screen scenes streamed in at boot, keyed by screen id.
 const SCREEN_PATHS: Dictionary[StringName, String] = {
 	&"home": "res://scenes/screens/home_screen.tscn",
@@ -60,9 +63,6 @@ var transitions_enabled: bool = DisplayServer.get_name() != "headless"
 var _current_screen: Node
 ## Profile of the run on screen or just finished; restarts and Results' next steps build from it.
 var _active_profile: RunProfile
-## The next run built is a restart from the run's own dialogs (Results' PLAY AGAIN, the pause menu's
-## restart): it skips the arena's opening shot (owner, 2026-10-02).
-var _replaying: bool = false
 ## Shop tab the SHOP button opens: the last one viewed this session.
 var _shop_tab: StringName = ShopScreen.TAB_WISPS
 ## The Shop on screen was opened from Results, so its back returns there.
@@ -118,6 +118,15 @@ func _ready() -> void:
 		var overlay := DebugOverlay.new()
 		overlay.name = "DebugOverlay"
 		get_tree().root.add_child.call_deferred(overlay)
+	var monetisation: MonetisationService = _monetisation()
+	if monetisation != null:
+		# The store learns these products when it starts (deferred, so this lands first; ADR-0030).
+		monetisation.set_rift_points_packs(RIFT_POINTS_PACKS)
+		monetisation.store_changed.connect(_on_store_changed)
+		monetisation.purchase_delivered.connect(_on_purchase_delivered)
+	var cloud_save := get_node_or_null(^"/root/CloudSave") as CloudSaveService
+	if cloud_save != null:
+		cloud_save.save_restored.connect(_on_cloud_save_restored)
 	var version: String = Engine.get_version_info()["string"]
 	print("[Main] boot ok | godot=%s | physics=%d Hz" % [version, physics_hz])
 	_build_veil()
@@ -241,7 +250,6 @@ func _show_home() -> void:
 		return
 	get_tree().paused = false
 	_active_profile = null
-	_replaying = false
 	_last_results_summary = {}
 	SoundFx.music_state(0.0, false)
 	var snapshot: Dictionary = _save_manager.get_snapshot()
@@ -255,7 +263,7 @@ func _show_home() -> void:
 		_home.settings_requested.connect(_show_settings)
 		# SHOP reopens the last tab viewed; NO ADS opens its own tab.
 		_home.shop_requested.connect(_show_shop)
-		_home.remove_ads_requested.connect(_show_shop.bind(ShopScreen.TAB_NO_ADS))
+		_home.remove_ads_requested.connect(_show_shop.bind(ShopScreen.TAB_SHOP))
 	if _home == _current_screen:
 		_home.setup(snapshot, FORM_CATALOG.get_form(StringName(snapshot[&"equipped_form"])))
 		return
@@ -316,11 +324,9 @@ func _on_play_requested(with_loading: bool = true) -> void:
 	)
 	profile.opening_boss_id = ENDLESS_CATALOG.tuning.opening_boss_id
 	var paths := PackedStringArray()
-	# A layered arena's run shows its scene, not its background (the Shop's still of it).
+	# The run shows the arena's scene; it loads behind the run loading screen.
 	if skin != null and skin.has_visual_scene():
 		paths.append(skin.visual_scene_path)
-	elif skin != null and not skin.background_path.is_empty():
-		paths.append(skin.background_path)
 	if with_loading and transitions_enabled:
 		_show_run_loading(profile, paths, "ENDLESS", skin.display_name if skin != null else "")
 	else:
@@ -400,6 +406,8 @@ func _show_shop(tab: StringName = &"", from_results: bool = false) -> void:
 	shop.equip_requested.connect(_on_cosmetic_equip_requested)
 	shop.store_purchase_requested.connect(_on_shop_purchase_requested)
 	shop.restore_requested.connect(_on_shop_restore_requested)
+	shop.item_pack_requested.connect(_on_item_pack_requested)
+	shop.starting_item_selected.connect(_on_starting_item_selected)
 	shop.setup(_shop_snapshot(), _shop_tab)
 	_replace_screen(shop)
 
@@ -416,10 +424,19 @@ func _shop_snapshot() -> Dictionary:
 	var snapshot: Dictionary = _save_manager.get_snapshot()
 	var monetisation: MonetisationService = _monetisation()
 	snapshot[&"store_available"] = monetisation != null and monetisation.is_store_available()
+	var prices: Dictionary = {}
+	if monetisation != null:
+		prices[MonetisationService.PRODUCT_REMOVE_ADS] = monetisation.get_store_price(
+			MonetisationService.PRODUCT_REMOVE_ADS
+		)
+		for pack: RiftPointsPack in RIFT_POINTS_PACKS.packs:
+			if pack != null:
+				prices[pack.product_id] = monetisation.get_store_price(pack.product_id)
+	snapshot[&"store_prices"] = prices
 	return snapshot
 
 
-## Buys a form, dash style or arena skin with Rift Points; buying equips it.
+## Buys a form or dash style with Rift Points; buying equips it.
 func _on_cosmetic_purchase_requested(kind: StringName, item_id: StringName) -> void:
 	var item: Dictionary = _cosmetic_info(kind, item_id)
 	var purchased: bool = not item.is_empty() and _save_manager.purchase_cosmetic(
@@ -442,6 +459,29 @@ func _on_cosmetic_equip_requested(kind: StringName, item_id: StringName) -> void
 	)
 
 
+func _on_item_pack_requested(item_id: StringName, quantity: int) -> void:
+	if not _current_screen is ShopScreen:
+		return
+	var item: RunItemData = ITEM_CATALOG.get_item(item_id)
+	var purchased: bool = _save_manager.purchase_item_pack(item_id, quantity)
+	SoundFx.play(&"ui_purchase" if purchased else &"ui_error")
+	_refresh_shop_screen(
+		"%s ×%d ADDED" % [item.display_name, quantity] if purchased else "PACK COULD NOT BE BOUGHT",
+		purchased,
+	)
+
+
+func _on_starting_item_selected(item_id: StringName) -> void:
+	if not _current_screen is ShopScreen:
+		return
+	var selected: bool = _save_manager.select_starting_item(item_id)
+	SoundFx.play(&"ui_confirm" if selected else &"ui_error")
+	var message: String = "BOOST COULD NOT BE SELECTED"
+	if selected:
+		message = "NEXT-RUN BOOST CLEARED" if item_id.is_empty() else "NEXT-RUN BOOST SELECTED"
+	_refresh_shop_screen(message, selected)
+
+
 ## Name, price and whether the purchase gate is met for a catalog item; empty for an unknown id.
 func _cosmetic_info(kind: StringName, item_id: StringName) -> Dictionary:
 	var snapshot: Dictionary = _save_manager.get_snapshot()
@@ -462,39 +502,70 @@ func _cosmetic_info(kind: StringName, item_id: StringName) -> Dictionary:
 			if style == null or style.style_id != item_id:
 				return {}
 			return {&"name": style.display_name, &"price": style.price, &"requirement_met": true}
-		SaveManagerService.KIND_ARENA_SKIN:
-			var skin: ArenaSkinData = ENDLESS_CATALOG.get_skin(item_id)
-			if skin == null or skin.skin_id != item_id:
-				return {}
-			return {
-				&"name": skin.display_name,
-				&"price": skin.price,
-				&"requirement_met": true,
-			}
 	return {}
 
 
-## Runs a Remove Ads purchase through the Monetisation autoload; the screen itself only ever asks.
+## Runs a store purchase (Remove Ads or a Rift Points pack) through the Monetisation autoload; the
+## screen itself only ever asks.
 func _on_shop_purchase_requested(product_id: StringName) -> void:
 	if not _current_screen is ShopScreen:
 		return
 	var monetisation: MonetisationService = _monetisation()
-	var purchased: bool = (
-		monetisation != null
-		and product_id == MonetisationService.PRODUCT_REMOVE_ADS
-		and monetisation.purchase_remove_ads()
-	)
-	SoundFx.play(&"ui_purchase" if purchased else &"ui_error")
-	_refresh_shop_screen("ADS REMOVED" if purchased else "THE PURCHASE DID NOT COMPLETE", purchased)
+	var pack: RiftPointsPack = RIFT_POINTS_PACKS.get_pack(product_id)
+	var status: StringName = MonetisationService.PURCHASE_FAILED
+	if monetisation != null and pack != null:
+		# A Rift Points pack (owner 2026-10-05, ADR-0028): Google Play, then the Rift Points.
+		status = await monetisation.purchase_rift_points(pack)
+	elif monetisation != null and product_id == MonetisationService.PRODUCT_REMOVE_ADS:
+		status = await monetisation.purchase_remove_ads()
+	if not _current_screen is ShopScreen:
+		return
+	var done: bool = status == MonetisationService.PURCHASE_DONE
+	SoundFx.play(&"ui_purchase" if done else &"ui_error")
+	var message: String = "THE PURCHASE DID NOT COMPLETE"
+	match status:
+		MonetisationService.PURCHASE_DONE:
+			message = "+%s" % RiftPoints.format(pack.rift_points) if pack != null else "ADS REMOVED"
+		MonetisationService.PURCHASE_PENDING:
+			message = "PAYMENT PENDING  •  IT ARRIVES WHEN GOOGLE CONFIRMS IT"
+		MonetisationService.PURCHASE_CANCELLED:
+			message = "PURCHASE CANCELLED"
+	_refresh_shop_screen(message, done)
 
 
 func _on_shop_restore_requested() -> void:
 	if not _current_screen is ShopScreen:
 		return
 	var monetisation: MonetisationService = _monetisation()
-	var restored: bool = monetisation != null and monetisation.restore_purchases()
+	var restored: bool = monetisation != null and await monetisation.restore_purchases()
+	if not _current_screen is ShopScreen:
+		return
 	SoundFx.play(&"ui_purchase" if restored else &"ui_error")
 	_refresh_shop_screen("PURCHASES RESTORED" if restored else "NOTHING TO RESTORE", restored)
+
+
+## The store came up or learned its prices: a Shop on screen re-reads it (ADR-0030).
+func _on_store_changed() -> void:
+	if _current_screen is ShopScreen:
+		_refresh_shop_screen("", true)
+
+
+## A purchase reached the save without the player waiting on it (a pending payment that completed,
+## or one a crash left undelivered): the Shop on screen says so.
+func _on_purchase_delivered(product_id: StringName, rift_points: int) -> void:
+	SoundFx.play(&"ui_purchase")
+	if _current_screen is ShopScreen:
+		var message: String = (
+			"ADS REMOVED" if product_id == MonetisationService.PRODUCT_REMOVE_ADS
+			else "+%s" % RiftPoints.format(rift_points)
+		)
+		_refresh_shop_screen(message, true)
+
+
+## The cloud save replaced this phone's save (ADR-0030): Home on screen is rebuilt from it.
+func _on_cloud_save_restored() -> void:
+	if _current_screen is HomeScreen:
+		_show_home()
 
 
 ## Re-reads the save into the Shop on screen, on its current tab, and shows `message`.
@@ -599,21 +670,53 @@ func _build_game(profile: RunProfile) -> GameWorld:
 	_active_profile = profile
 	var game := _instantiate(&"game") as GameWorld
 	game.run_seed = profile.run_seed
-	game.play_arena_intro = not _replaying
-	_replaying = false
 	game.configure_run(profile)
 	game.home_requested.connect(_show_home)
-	game.restart_requested.connect(_restart_run)
 	game.run_ended.connect(_show_results)
+	game.set_soul_ward_stock(_save_manager.get_item_count(RunItemCatalog.SOUL_WARD))
+	game.run_started.connect(_on_item_run_started.bind(game))
+	game.item_collected.connect(_on_run_item_collected.bind(game))
+	game.shield_requested.connect(_on_soul_ward_requested.bind(game))
 	if transitions_enabled:
 		game.hold_start()
 		game.process_mode = Node.PROCESS_MODE_DISABLED
 	return game
 
 
+## Spending occurs when waves start, after the held run and arena intro finish.
+func _on_item_run_started(game: GameWorld) -> void:
+	game.set_soul_ward_stock(_save_manager.get_item_count(RunItemCatalog.SOUL_WARD))
+	var item_id: StringName = _save_manager.consume_starting_item()
+	if not item_id.is_empty():
+		game.activate_item(item_id)
+
+
+## Ward drops enter persistent stock immediately; the other six are run-local pickups.
+func _on_run_item_collected(item_id: StringName, game: GameWorld) -> void:
+	if item_id == RunItemCatalog.SOUL_WARD:
+		var saved: bool = _save_manager.grant_item(item_id)
+		game.show_callout("SOUL WARD STORED" if saved else "WARD COULD NOT BE SAVED")
+		if not saved:
+			push_warning("[Items] Ward collection could not be saved")
+		game.set_soul_ward_stock(_save_manager.get_item_count(item_id))
+
+
+## The player requested a double-tap shield. Save first, then activate the spent copy.
+func _on_soul_ward_requested(game: GameWorld) -> void:
+	if game != _current_screen:
+		return
+	game.set_soul_ward_stock(_save_manager.get_item_count(RunItemCatalog.SOUL_WARD))
+	if game.can_activate_soul_ward():
+		if _save_manager.consume_item(RunItemCatalog.SOUL_WARD):
+			game.activate_soul_ward()
+		else:
+			game.show_callout("WARD COULD NOT BE USED")
+			SoundFx.play(&"ui_error")
+	game.set_soul_ward_stock(_save_manager.get_item_count(RunItemCatalog.SOUL_WARD))
+
+
 ## Replays the same profile: the same daily run, or Endless rebuilt on the equipped skin.
 func _restart_run() -> void:
-	_replaying = true
 	var profile: RunProfile = _active_profile
 	if profile == null:
 		_on_play_requested(false)
@@ -680,6 +783,13 @@ func _show_results(summary: Dictionary) -> void:
 	).size()
 	var arena: ArenaSkinData = ENDLESS_CATALOG.get_skin(StringName(str(summary.get(&"skin_id", ""))))
 	display_summary[&"arena_name"] = arena.display_name if arena != null else ""
+	# Everything is banked; on every second finished run an interstitial shows before Results
+	# (owner 2026-10-05, ADR-0029). Without a loaded ad Results simply comes up.
+	var monetisation: MonetisationService = _monetisation()
+	if monetisation != null:
+		monetisation.record_finished_run()
+		if monetisation.can_show_interstitial():
+			await monetisation.show_interstitial()
 	_present_results(display_summary)
 
 
@@ -692,8 +802,42 @@ func _present_results(display_summary: Dictionary) -> void:
 	results.restart_requested.connect(_restart_run)
 	results.home_requested.connect(_show_home)
 	results.wisps_requested.connect(_show_shop.bind(ShopScreen.TAB_WISPS, true))
+	results.double_rp_requested.connect(_on_double_rp_requested.bind(results))
 	_replace_screen(results)
 	results.setup(display_summary)
+	var monetisation: MonetisationService = _monetisation()
+	if (
+		monetisation != null
+		and monetisation.can_offer(MonetisationService.PLACEMENT_DOUBLE_RIFT_POINTS)
+	):
+		results.set_double_rp_offer(_run_rift_points(display_summary))
+
+
+## The Rift Points a run earned itself (collected + performance): what the rewarded double adds.
+func _run_rift_points(display_summary: Dictionary) -> int:
+	return (
+		maxi(0, int(display_summary.get(&"rp_collected", 0)))
+		+ maxi(0, int(display_summary.get(&"rp_performance", 0)))
+	)
+
+
+## WATCH AD • DOUBLE RP on Results (owner 2026-10-05, ADR-0029): an earned reward banks the run's
+## Rift Points once more and Results shows the new total and balance.
+func _on_double_rp_requested(results: ResultsScreen) -> void:
+	var monetisation: MonetisationService = _monetisation()
+	var amount: int = _run_rift_points(_last_results_summary)
+	var earned: bool = false
+	if monetisation != null and amount > 0:
+		earned = await monetisation.show_rewarded(MonetisationService.PLACEMENT_DOUBLE_RIFT_POINTS)
+	var added: int = amount if earned and _save_manager.add_rift_points(amount) else 0
+	if added > 0:
+		_last_results_summary[&"rp_earned"] = int(_last_results_summary.get(&"rp_earned", 0)) + added
+		_last_results_summary[&"rift_points_total"] = _save_manager.get_rift_points()
+		SoundFx.play(&"ui_purchase")
+		print("[Main] rewarded double | +%d RP" % added)
+	if is_instance_valid(results) and results.is_inside_tree():
+		results.setup(_last_results_summary)
+		results.finish_double_rp(added)
 
 
 ## The best score Results compares against: Endless's own best, today's daily best, or the

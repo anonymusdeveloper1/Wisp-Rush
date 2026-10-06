@@ -1,6 +1,12 @@
 # System: Run progression and mutations
 
-> **Status:** ✅ done · six mutations since Reaper's Gift left the pool (2026-09-24) · **Last updated:** 2026-09-25 · **GDD section:** §5.5, §6–7, §15–16
+> **Status:** Retired from live gameplay 2026-10-05 · **Last updated:** 2026-10-05
+>
+> XP, run levels, calm-moment offers, card picking and the tray are replaced by
+> [pickup items](pickup_items.md), GDD §14 #76–77 and ADR-0026. The remaining document describes
+> the former implementation. Its Resources, standalone component and tray files remain unused;
+> GameWorld no longer exposes the XP/tray APIs listed below. `test_run_progression` checks only
+> that legacy component; the live behaviour is covered by `test_pickup_effects`.
 
 ## Purpose
 
@@ -125,21 +131,12 @@ GameWorld translates mutation levels into Wisp/enemy/hazard effects and owns run
   and Soul Hunger's wider pull is what gathers them before they fade or while the Wisp keeps dashing.
 
 ## How to test
-
-- Run `tools/godot/test_run_progression.gd` for threshold/choice rules and
-  `tools/godot/test_mutation_effects.gd` for the live effects, the one-fragment start and that
-  Reaper's Gift is out of the pool.
-- Manual (device, owner preference): bank two levels mid-combo (pill ×2, no interruption); stop at a
-  wave start (cards slide up, world slow); tap one (next set slides in), swipe the arena on the second
-  (tray away, pill ×1); wait out 6 s once; pause with the tray up; repeat with Reduced Motion.
-  Logs: `[GameWorld] level banked`, `calm moment | reason=`, `upgrade tray open|closed | reason=`.
-- Visual: `tools/godot/render_upgrade_showcase.gd` (command in its header).
-- Automated: none (owner preference 2026-09-15). A temporary headless smoke (52 checks, deleted)
-  covered banking, calm-moment opening, slow motion, pick/next set, swipe, timeout, pause, boss, RUSH,
-  Reduced Motion, scene exit and the tutorial lesson. The stale `test_run_progression.gd` /
-  `test_gameplay_slice.gd` were only pointed at `UpgradeTray`.
-
-## Known issues / TODO
++
++`tools/run_tests.sh run_progression` covers the retained standalone legacy component. Its former
++live-effects check and tray showcase were replaced by `test_pickup_effects` and
++`render_pickup_showcase`; current gameplay checks are in [pickup_items.md](pickup_items.md).
++
++## Known issues / TODO
 
 - Cross-run currency/best persistence arrives with SaveManager in Milestone 3.
 - Starting values need the device pass: whether 0.3 slow motion reads as "not a safe pause", whether

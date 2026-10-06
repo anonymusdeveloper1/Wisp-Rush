@@ -1,6 +1,7 @@
 # Devlog episodes: the playable characters
 
-> **Veyra was removed from the game on 2026-09-25**: film only Rook and Morrow from this plan.
+> **Veyra was removed from the game on 2026-09-25**, and **Morrow on 2026-10-05** (owner): film only Rook
+> from this plan.
 > **Rook's bone rig was replaced by whole-frame sprites on 2026-09-27** (GDD §14 #56): the rig motion
 > this plan describes for him (wing beats, springy tail, ceiling roost) is no longer in the game.
 >

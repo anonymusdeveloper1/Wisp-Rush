@@ -65,7 +65,7 @@ func _check_every_character_has_one() -> void:
 ## The pool is persistent, so it belongs beside EffectsLayer, not inside it — code elsewhere counts
 ## EffectsLayer's children. It also has to sit at the VFX pool's absolute depth rather than over it.
 func _check_pool_placement() -> void:
-	var game: GameWorld = await _open_run(CATALOG.get_form(&"morrow"))
+	var game: GameWorld = await _open_run(CATALOG.get_form(&"rook"))
 	if game == null:
 		return
 	var effects := game.get_node(^"WorldContent/EffectsLayer") as Node2D
@@ -97,7 +97,7 @@ func _check_pool_placement() -> void:
 
 ## A dash through the real controller leaves a ribbon, and it is the character's colour.
 func _check_a_real_dash_draws_its_colour() -> void:
-	for form_id: StringName in [&"morrow", &"scarlet", &"patchvile"]:
+	for form_id: StringName in [&"rook", &"scarlet", &"patchvile"]:
 		var form: FormData = CATALOG.get_form(form_id)
 		var game: GameWorld = await _open_run(form)
 		if game == null:

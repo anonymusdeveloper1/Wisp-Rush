@@ -45,15 +45,16 @@ def pixel_palette(image: Image.Image) -> Image.Image:
 
 def main() -> None:
     manifest = json.loads((ROOT / "generation.json").read_text(encoding="utf-8"))
+    refinements = json.loads((ROOT / "refinements.json").read_text(encoding="utf-8"))["outputs"]
     RUNTIME.mkdir(parents=True, exist_ok=True)
     outputs = []
     thumbs = []
     for entry in manifest["outputs"]:
         name = entry["name"]
         source_path = ROOT / "raw" / f"{name}_source.png"
-        refined_path = ROOT / "raw" / f"{name}_source_v2.png"
-        if refined_path.is_file():
-            source_path = refined_path
+        refinement = next((item for item in reversed(refinements) if item["name"] == name), None)
+        if refinement is not None:
+            source_path = ROOT / refinement["raw_path"]
         with Image.open(source_path) as source:
             width, height = source.size
             desired = ART_SIZE[0] / ART_SIZE[1]
@@ -92,11 +93,13 @@ def main() -> None:
             "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
             "prompt": f"prompts/{name}.md",
             "composition_refinement": (
-                f"prompts/{name}_refinement.md" if refined_path.is_file() else None
+                refinement["prompt"] if refinement is not None else None
             ),
             "runtime_path": f"res://assets/art/environment/loading_screens/{name}.png",
             "runtime_matches_source": runtime_path.read_bytes() == path.read_bytes(),
         })
+        if refinement is not None and "face_positions_final_px" in refinement:
+            outputs[-1]["face_positions_final_px"] = refinement["face_positions_final_px"]
         thumbs.append((LABELS[name], art))
         print(f"{path.name}: 1080x2400, {colors} colors, exact 4 px grid OK")
 

@@ -1,0 +1,156 @@
+[
+  {
+    "id": "soul_ward",
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGBA",
+    "rgba_colors": 57976,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "alpha_bbox": [
+      0,
+      54,
+      1190,
+      1244
+    ],
+    "has_partial_alpha": true,
+    "sha256": "6684a14233b1b01b184744c7d686343f5c3e646597089e9becf775d87d35757f",
+    "original_matches": true
+  },
+  {
+    "id": "rift_magnet",
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGBA",
+    "rgba_colors": 54058,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "alpha_bbox": [
+      97,
+      181,
+      1198,
+      1214
+    ],
+    "has_partial_alpha": true,
+    "sha256": "7d16da61f90b07dff4adc7fc99f02d8395a252bdcdd84bfb56253d163739d772",
+    "original_matches": true
+  },
+  {
+    "id": "fortune_star",
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGBA",
+    "rgba_colors": 53622,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "alpha_bbox": [
+      89,
+      119,
+      1210,
+      1170
+    ],
+    "has_partial_alpha": true,
+    "sha256": "9d2b575fb8f799c2ab77b17b2e36f872ba58ea4e7cad60ebc0b083b9ac7cc059",
+    "original_matches": true
+  },
+  {
+    "id": "stillglass",
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGBA",
+    "rgba_colors": 60494,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "alpha_bbox": [
+      87,
+      35,
+      1210,
+      1254
+    ],
+    "has_partial_alpha": true,
+    "sha256": "7f0fdeb901230e19c00aa88271212002acdd46fe4a06f894f4d190b3c2a513b8",
+    "original_matches": true
+  },
+  {
+    "id": "banish_bomb",
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGBA",
+    "rgba_colors": 48396,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "alpha_bbox": [
+      97,
+      53,
+      1169,
+      1254
+    ],
+    "has_partial_alpha": true,
+    "sha256": "75c38a5c84ab2329205203b49e60ea47b63f61f6d228e32c4a6a859e8375e516",
+    "original_matches": true
+  },
+  {
+    "id": "reapers_edge",
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGBA",
+    "rgba_colors": 51169,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "alpha_bbox": [
+      89,
+      31,
+      1173,
+      1175
+    ],
+    "has_partial_alpha": true,
+    "sha256": "87b99f4d481b17a077fc27c0de4b57961f9f4ec546c623b341b744518f5385fa",
+    "original_matches": true
+  },
+  {
+    "id": "echo_wisp",
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGBA",
+    "rgba_colors": 41230,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "alpha_bbox": [
+      89,
+      21,
+      1218,
+      1222
+    ],
+    "has_partial_alpha": true,
+    "sha256": "bb969624d83f67c0dc6e783215f64aba76ec3d62847a97b99b74774eea27e8a4",
+    "original_matches": true
+  }
+]

@@ -25,6 +25,7 @@ their native distance from the top-left. Pieces drawn at native size are therefo
 the kit; taller pieces get longer straight walls. The divider's centre gem is healed out (a rule is
 stretched across whole panels, so a centred gem cannot survive a one-band nine-patch). Focus rings
 are the kit's focus art minus its normal art, drawn by Godot over whatever state the control is in.
+The captioned tiles lose the seam above their caption (owner, 2026-10-05; `erase_seam`).
 """
 import json
 import os
@@ -98,6 +99,9 @@ ICONS = [
 ]
 # Panels whose top/bottom edge band is measured for the ornament scenes.
 EDGE_PIECES = ["panel_default", "panel_card", "panel_crest", "panel_banner"]
+# Home's captioned tiles have no seam above the caption (owner, 2026-10-05): the kit's seam rows
+# are replaced by the plain interior, in every state the tiles are built from.
+SEAMLESS = {"caption_tile_normal", "caption_tile_disabled", "caption_tile_focus"}
 
 
 def load_manifest():
@@ -107,7 +111,26 @@ def load_manifest():
 
 
 def load(name):
-    return np.asarray(Image.open(os.path.join(KIT, "components", name + ".png")).convert("RGBA"))
+    a = np.asarray(Image.open(os.path.join(KIT, "components", name + ".png")).convert("RGBA"))
+    return erase_seam(a) if name in SEAMLESS else a
+
+
+def erase_seam(a):
+    """Replace the first band of rows below the middle that differs from the middle row (the seam
+    and its diamond above a captioned tile's caption) by the plain middle row."""
+    h = a.shape[0]
+    ref = a[h // 2]
+    y = h // 2
+    while y < h and np.array_equal(a[y], ref):
+        y += 1
+    top = y
+    while y < h and not np.array_equal(a[y], ref):
+        y += 1
+    if y >= h:
+        raise SystemExit("seam not followed by a plain row; refusing to erase the bottom frame")
+    out = a.copy()
+    out[top:y] = ref
+    return out
 
 
 def save(a, folder, name):

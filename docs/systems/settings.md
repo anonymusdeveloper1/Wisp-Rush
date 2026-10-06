@@ -70,7 +70,11 @@ SaveManager (authority, ADR-0003), Audio (live volume preview), GameWorld (liste
   enemies of the aim preview. **AIM ASSIST** (owner decision 2026-09-15, "Gently bends a dash into
   more enemies"): the release-time ±6° bend ([player_dash.md](player_dash.md)); independent of AIM ARROW.
 - REPLAY TUTORIAL (MORE card, Home-level only like RESET PROGRESS) emits `tutorial_requested`; Main opens the Tutorial and returns Home. Back since 2026-09-24, when the Rift Map, which held the only replay, left the first release; the Rifts were removed on 2026-09-25 ([tutorial.md](tutorial.md)).
-- Privacy copy: offline, no accounts, ads, analytics or tracking; data stays on the device.
+- Privacy copy (corrected 2026-10-05, ADR-0030): plays offline; ads from Google AdMob with Google's
+  consent form; purchases through Google Play; progress on the device and, when signed in to Google
+  Play Games, on the Google account; Reset Progress erases them.
+- **CLOUD SAVE card** (Home-level, only on a build with a cloud; [cloud_save.md](cloud_save.md)):
+  ON, or OFF with SIGN IN WITH GOOGLE PLAY GAMES; it follows `CloudSave.state_changed`.
 - Loading never stays longer than 6 s — anything unfinished then loads synchronously.
 
 ## How to test
@@ -89,6 +93,7 @@ SaveManager (authority, ADR-0003), Audio (live volume preview), GameWorld (liste
 
 | Date | Change |
 |---|---|
+| 2026-10-05 | The CLOUD SAVE card and the corrected privacy text (owner, GDD §14 #84, ADR-0030) |
 | 2026-09-25 | The scroll bar is hidden (owner); swiping still scrolls. The touch pass-through stays and a swipe on a slider keeps moving the slider (owner) |
 | 2026-09-25 | Developer-card section brought up to date: four actions (owner) |
 | 2026-09-25 | Settings scrolls (owner): fixed header, `%Scroll` → Body (cards, feedback line); cards and buttons pass touches to the scroll; feedback scrolls into view. Developer UNLOCK EVERYTHING tooltip reads "Forms, Trials and Rift Points"; statistics row TIME IN THE RIFT → TIME PLAYED |

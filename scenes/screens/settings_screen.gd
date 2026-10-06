@@ -40,6 +40,9 @@ var _pending_changes: Dictionary = {}
 var _save_countdown: float = -1.0
 var _reset_arm_remaining: float = -1.0
 
+## The CLOUD SAVE card's status line and SIGN IN button, when the card exists.
+var _cloud_status: Label
+var _cloud_button: Button
 @onready var _groups: VBoxContainer = %Groups
 @onready var _scroll: ScrollContainer = %Scroll
 @onready var _shade: ColorRect = %Shade
@@ -79,6 +82,7 @@ func _ready() -> void:
 		_back_button.add_theme_font_size_override(&"font_size", RUN_BACK_GLYPH_SIZE)
 		_back_button.tooltip_text = "Back to the paused run"
 	_back_button.pressed.connect(_on_back_button_pressed)
+	_build_cloud_card()
 	_build_developer_card()
 	_music_slider.value_changed.connect(
 		func(value: float) -> void: _queue_change(&"music_volume", value)
@@ -167,9 +171,10 @@ static func build_about_text() -> String:
 		"WISP RUSH  •  VERSION %s" % version,
 		"",
 		"PRIVACY",
-		"Wisp Rush plays fully offline. It has no accounts, ads, analytics or tracking and never "
-		+ "sends data anywhere. Your progress and settings are stored only on this device; "
-		+ "Reset Progress erases them.",
+		"Wisp Rush plays offline. On Android it shows ads from Google AdMob, which uses the "
+		+ "network and ad data, with Google's consent form where it is required. Purchases go "
+		+ "through Google Play. Your progress and settings are stored on this device and, when you "
+		+ "are signed in to Google Play Games, on your Google account; Reset Progress erases them.",
 		"",
 		"CREDITS",
 		"Illustrations from the Wisp Rush asset pack. Sound is synthesized in-game.",
@@ -298,6 +303,60 @@ func _on_reset_confirm_button_pressed() -> void:
 	_close_panels()
 	_show_feedback("ALL PROGRESS ERASED")
 	progress_reset.emit()
+
+
+## The CLOUD SAVE card (owner 2026-10-05, ADR-0030): whether progress is kept on the player's
+## Google account, and SIGN IN when the silent sign-in at launch did not work. Home-level only, and
+## only on a build with a cloud (Android with the Play Games plugin), so it is never a dead button.
+func _build_cloud_card() -> void:
+	var cloud := get_node_or_null(^"/root/CloudSave") as CloudSaveService
+	if cloud == null or not cloud.is_supported() or not allow_progress_reset:
+		return
+	var card := PanelContainer.new()
+	card.name = "CloudCard"
+	card.theme_type_variation = &"PanelCard"
+	card.mouse_filter = Control.MOUSE_FILTER_PASS
+	var rows := VBoxContainer.new()
+	rows.add_theme_constant_override(&"separation", 10)
+	card.add_child(rows)
+	var caption := Label.new()
+	caption.theme_type_variation = &"CaptionLabel"
+	caption.text = "CLOUD SAVE"
+	rows.add_child(caption)
+	_cloud_status = Label.new()
+	_cloud_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	rows.add_child(_cloud_status)
+	_cloud_button = Button.new()
+	_cloud_button.theme_type_variation = &"SecondaryButton"
+	_cloud_button.text = "SIGN IN WITH GOOGLE PLAY GAMES"
+	_cloud_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_cloud_button.mouse_filter = Control.MOUSE_FILTER_PASS
+	_cloud_button.pressed.connect(func() -> void:
+		_cloud_button.disabled = true
+		await cloud.sign_in()
+		if is_inside_tree():
+			_refresh_cloud_card())
+	rows.add_child(_cloud_button)
+	_groups.add_child(card)
+	_groups.move_child(card, 0)
+	UiJuice.bind_press_feedback(card)
+	SoundFx.bind_buttons(card)
+	cloud.state_changed.connect(_refresh_cloud_card)
+	_refresh_cloud_card()
+
+
+func _refresh_cloud_card() -> void:
+	var cloud := get_node_or_null(^"/root/CloudSave") as CloudSaveService
+	if cloud == null or _cloud_status == null or not is_instance_valid(_cloud_status):
+		return
+	if cloud.is_syncing():
+		_cloud_status.text = "SYNCING…"
+	elif cloud.is_signed_in():
+		_cloud_status.text = "ON  •  YOUR PROGRESS IS SAVED TO YOUR GOOGLE ACCOUNT"
+	else:
+		_cloud_status.text = "OFF  •  SIGN IN TO KEEP YOUR PROGRESS ON YOUR GOOGLE ACCOUNT"
+	_cloud_button.visible = not cloud.is_signed_in()
+	_cloud_button.disabled = cloud.is_syncing()
 
 
 ## Appends a developer card that unlocks progression, in debug builds only.

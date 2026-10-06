@@ -1,42 +1,48 @@
 class_name ShopScreen
 extends Control
-## The Shop: the one place Rift Points are spent. Three tabs - CHARACTERS, ARENAS, NO ADS.
+## The Shop (owner 2026-10-05, GDD §14 #78, ADR-0028): the back button and the Rift Points balance
+## at the top, and a bottom navigation between two pages, CHARACTERS and SHOP.
 ##
-## Each RP tab is a FocusCarousel of cards that behaves like the old Forms picker (owner reference
-## 2026-09-13); ARENAS went back to it from a thumbnail gallery when the thirty Endless arenas were
-## replaced by painted ones (owner, 2026-09-23). Swipe or tap a side card to browse, locked items stay
-## previewable, one description
-## line and a single main button. The button reads BUY • price, NEED n RP, the gate reason, EQUIP or
-## EQUIPPED (spec story_and_endless/04). NO ADS is the ADR-0012 Remove Ads panel with no Rift Points
-## anywhere: its buttons stay disabled until a real store is connected. The screen only emits
-## intent; Main runs purchases and equips through SaveManager, store purchases through Monetisation.
-## Styling comes from theme type variations: the tab bar is a NavBar of toggle NavButtons.
+## CHARACTERS is a FocusCarousel of character cards that behaves like the old Forms picker (owner
+## reference 2026-09-13): swipe or tap a side card to browse, locked characters stay previewable,
+## one description line and a single main button that reads BUY • price, NEED n RP, the gate reason,
+## EQUIP or EQUIPPED. SHOP is one scrolling list of the deals: NO ADS (the ADR-0012 Remove Ads offer
+## and Restore), ITEMS (pickup packs and the next-run boost, bought with Rift Points) and RIFT
+## POINTS (packs sold for real money); it scrolls by swiping, with no scroll bar drawn. Real-money
+## buttons stay disabled until a real store is connected. The screen only emits intent; Main runs
+## purchases and equips through SaveManager, store purchases through Monetisation. Styling comes
+## from theme type variations: the bottom navigation is a NavBar of toggle NavButtons.
 
 ## Asks Main to buy the cosmetic `item_id` of `kind` (a SaveManagerService.KIND_* value).
 signal purchase_requested(kind: StringName, item_id: StringName)
+## Asks Main to persist a pickup pack purchase.
+signal item_pack_requested(item_id: StringName, quantity: int)
+## Selects or clears the owned starting boost for the next run.
+signal starting_item_selected(item_id: StringName)
 ## Asks Main to equip an owned cosmetic.
 signal equip_requested(kind: StringName, item_id: StringName)
-## Asks Main to buy a real-money product; only possible while the store is available.
+## Asks Main to buy a real-money product (Remove Ads or a Rift Points pack); only possible while the
+## store is available.
 signal store_purchase_requested(product_id: StringName)
 ## Asks Main to restore earlier store purchases.
 signal restore_requested
-## The player switched tabs; Main remembers the last tab for the session.
+## The player switched pages; Main remembers the last one for the session.
 signal tab_changed(tab: StringName)
 ## The player left the Shop.
 signal back_requested
 
-## The CHARACTERS tab; its id keeps the older "wisps" name (sessions and fixtures refer to it).
+## The CHARACTERS page; its id keeps the older "wisps" name (sessions and fixtures refer to it).
 const TAB_WISPS: StringName = &"wisps"
-const TAB_ARENAS: StringName = &"arenas"
-const TAB_NO_ADS: StringName = &"no_ads"
-const TABS: Array[StringName] = [TAB_WISPS, TAB_ARENAS, TAB_NO_ADS]
+## The SHOP page: NO ADS, ITEMS and RIFT POINTS.
+const TAB_SHOP: StringName = &"shop"
+const TABS: Array[StringName] = [TAB_WISPS, TAB_SHOP]
 
 const RP_ICON: Texture2D = preload("res://assets/ui/theme/icons/icon_currency.tres")
 const LOCK_ICON: Texture2D = preload("res://assets/ui/theme/icons/icon_lock.tres")
 const OWNED_ICON: Texture2D = preload("res://assets/art/ui/system/10_forms.png")
 const REAPER_ICON: Texture2D = preload("res://assets/art/ui/system/18_reaper.png")
 
-## Brightness of an unowned item's visual, so ownership reads at a glance on every card.
+## Brightness of an unowned character's visual, so ownership reads at a glance on every card.
 const LOCKED_VISUAL_BRIGHTNESS: float = 0.42
 ## Card text sizes in the 1080-wide design space.
 const CARD_NAME_SIZE: int = 44
@@ -45,23 +51,25 @@ const STATE_ICON_SIZE := Vector2(48, 48)
 ## Soft halo in the form's own tint behind its portrait.
 const PORTRAIT_GLOW_ALPHA: float = 0.42
 const LOCKED_GLOW_ALPHA: float = 0.14
-## How many cards either side of the focused one are built live: an animated character, or an
-## arena's full-size art instead of its thumbnail. Every other card shows its still thumbnail. A
-## live card holds a character's whole menu frame set or an arena's full background, and a texture
-## costs its full uncompressed size in VRAM whatever it cost on disk, so building all of them at
-## once is what the roster cannot afford.
+## How many cards either side of the focused one are built live (an animated character). Every other
+## card shows its still portrait. A live card holds a character's whole menu frame set, and a
+## texture costs its full uncompressed size in VRAM whatever it cost on disk, so building all of
+## them at once is what the roster cannot afford.
 const LIVE_CARD_RADIUS: int = 1
 ## Share of a CHARACTERS card's picture area a live character fills.
 const CHARACTER_FILL: float = 0.94
+## A Rift Points pack card's picture size, in design pixels.
+const PACK_ICON_SIZE := Vector2(176, 176)
 
 @export var form_catalog: FormCatalog
-@export var endless_catalog: EndlessCatalog
+## The Rift Points packs the SHOP page sells.
+@export var rift_points_packs: RiftPointsPackCatalog
 
 var _snapshot: Dictionary = {}
 var _tab: StringName = TAB_WISPS
-## Tab whose cards are currently in the carousel; empty until the first build.
-var _built_tab: StringName = &""
-## Previewed item per RP tab; an absent tab follows its equipped item.
+## Whether the character cards are in the carousel yet.
+var _cards_built: bool = false
+## The character the player is previewing; absent means the equipped one.
 var _selected_ids: Dictionary[StringName, StringName] = {}
 var _items: Array[Resource] = []
 var _pending_feedback: Array = []
@@ -71,8 +79,10 @@ var _glow_texture: GradientTexture2D
 ## Live character previews of the CHARACTERS cards by form id (rigs and animated portraits alike).
 var _character_previews: Dictionary[StringName, PlayableCharacterPreview] = {}
 var _tab_buttons: Dictionary[StringName, Button] = {}
-## ARENAS cards currently showing their full-size background, by skin id.
-var _live_arenas: Dictionary[StringName, bool] = {}
+## Each Rift Points pack card's buy button, by product id.
+var _pack_buttons: Dictionary[StringName, Button] = {}
+## The price label of each Rift Points pack card, by product id.
+var _pack_prices: Dictionary[StringName, Label] = {}
 
 @onready var _balance_label: Label = %BalanceLabel
 @onready var _carousel_page: Control = %CarouselPage
@@ -80,39 +90,48 @@ var _live_arenas: Dictionary[StringName, bool] = {}
 @onready var _dots: PageDots = %Dots
 @onready var _description_label: Label = %DescriptionLabel
 @onready var _requirement_label: Label = %RequirementLabel
-@onready var _no_ads_page: Control = %NoAdsPage
+@onready var _action_button: Button = %ActionButton
+@onready var _shop_page: ScrollContainer = %ShopPage
+@onready var _item_page: RunItemShopPage = %ItemsPage
+@onready var _pack_grid: GridContainer = %RiftPointPacks
 @onready var _offer_status: Label = %OfferStatus
 @onready var _offer_strike: ColorRect = %OfferStrike
+@onready var _offer_buy_button: Button = %OfferBuyButton
 @onready var _restore_button: Button = %RestoreButton
 @onready var _feedback_label: Label = %FeedbackLabel
-@onready var _action_button: Button = %ActionButton
 @onready var _back_button: Button = %BackButton
 
 
 func _ready() -> void:
-	assert(form_catalog != null and endless_catalog != null)
+	assert(form_catalog != null and rift_points_packs != null)
 	# The offer emblem is Home's NO ADS glyph, not currency art: Remove Ads carries no Rift Points.
 	_offer_strike.color = Palette.WARNING_AMBER
-	# Main plays the purchase, equip or error sound for these, so SoundFx must not add a click.
-	# BOUND_META rather than SKIP_META, which would also drop UiJuice's press dip.
-	for button: Button in [_action_button, _restore_button]:
-		button.set_meta(SoundFx.BOUND_META, true)
-	_tab_buttons = {
-		TAB_WISPS: %WispsTab as Button,
-		TAB_ARENAS: %ArenasTab as Button,
-		TAB_NO_ADS: %NoAdsTab as Button,
-	}
+	_tab_buttons = {TAB_WISPS: %WispsTab as Button, TAB_SHOP: %ShopTab as Button}
 	var group := ButtonGroup.new()
 	for tab: StringName in TABS:
 		var tab_button: Button = _tab_buttons[tab]
 		tab_button.toggle_mode = true
 		tab_button.button_group = group
 		tab_button.pressed.connect(_on_tab_pressed.bind(tab))
+	_build_pack_cards()
+	_pass_touches_to_scroll(_shop_page)
+	# Main plays the purchase, equip or error sound for these, so SoundFx must not add a click.
+	# BOUND_META rather than SKIP_META, which would also drop UiJuice's press dip.
+	for button: Button in [_action_button, _offer_buy_button, _restore_button]:
+		button.set_meta(SoundFx.BOUND_META, true)
+	for button: Button in _pack_buttons.values():
+		button.set_meta(SoundFx.BOUND_META, true)
 	_back_button.pressed.connect(func() -> void: back_requested.emit())
 	_action_button.pressed.connect(_on_action_pressed)
+	_offer_buy_button.pressed.connect(
+		func() -> void: store_purchase_requested.emit(MonetisationService.PRODUCT_REMOVE_ADS))
 	_restore_button.pressed.connect(func() -> void: restore_requested.emit())
 	_carousel.selection_changed.connect(_on_carousel_selection_changed)
 	_carousel.activated.connect(func(_index: int) -> void: _on_action_pressed())
+	_item_page.pack_requested.connect(
+		func(id: StringName, quantity: int) -> void: item_pack_requested.emit(id, quantity))
+	_item_page.starting_item_selected.connect(
+		func(id: StringName) -> void: starting_item_selected.emit(id))
 	_rebuild()
 	if not _pending_feedback.is_empty():
 		show_feedback(str(_pending_feedback[0]), bool(_pending_feedback[1]))
@@ -124,26 +143,28 @@ func _process(_delta: float) -> void:
 	_dots.position_value = _carousel.get_scroll()
 
 
-## Shows `tab` for a save snapshot. Safe before `_ready` (Main sets screens up before adding them).
+## Shows the page `tab` for a save snapshot. Safe before `_ready` (Main sets screens up before
+## adding them). An unknown tab (an older session's ARENAS, ITEMS or NO ADS) opens SHOP, which holds
+## them.
 ##
-## Reads `rift_points`, `owned_*` / `equipped_*` for characters and arena skins,
-## `bosses_defeated`, `ads_removed` and `settings`, plus `store_available`, which
-## Main adds because the store is not part of the save.
+## Reads `rift_points`, `owned_forms` / `equipped_form`, `bosses_defeated`, `ads_removed`, the item
+## stock and `settings`, plus `store_available`, which Main adds because the store is not part of
+## the save.
 func setup(snapshot: Dictionary, tab: StringName) -> void:
 	_snapshot = snapshot.duplicate(true)
-	_tab = tab if tab in TABS else TAB_WISPS
+	_tab = tab if tab in TABS else TAB_SHOP
 	if is_node_ready():
 		_rebuild()
 
 
-## The tab on screen.
+## The page on screen.
 func get_tab() -> StringName:
 	return _tab
 
 
-## The id previewed on the current RP tab, or empty on NO ADS.
+## The character previewed on CHARACTERS, or empty on SHOP.
 func get_selected_id() -> StringName:
-	return _selected_id(_tab) if _tab != TAB_NO_ADS else &""
+	return _selected_id() if _tab == TAB_WISPS else &""
 
 
 ## Shows a short purchase, equip or restore result. Safe before `_ready`.
@@ -167,60 +188,47 @@ func _on_tab_pressed(tab: StringName) -> void:
 func _rebuild() -> void:
 	for tab: StringName in TABS:
 		_tab_buttons[tab].set_pressed_no_signal(tab == _tab)
-	var rp_tab: bool = _tab != TAB_NO_ADS
-	_carousel_page.visible = rp_tab
-	_no_ads_page.visible = not rp_tab
-	if rp_tab and _built_tab != _tab:
+	var characters: bool = _tab == TAB_WISPS
+	_carousel_page.visible = characters
+	_shop_page.visible = not characters
+	if characters and not _cards_built:
 		_build_cards()
-	elif rp_tab and not _selected_ids.has(_tab):
-		# A snapshot can arrive after the cards were built (fixtures add the screen before setting it
-		# up). Until the player browses this tab, its carousel follows the equipped item.
+	elif characters and not _selected_ids.has(TAB_WISPS):
+		# A snapshot can arrive after the cards were built (fixtures add the screen before setting
+		# it up). Until the player browses, the carousel follows the equipped character.
 		_focus_selected_card()
-	if rp_tab:
+	if characters:
 		_sync_live_cards()
 	_refresh()
-	if rp_tab:
+	if characters:
 		_carousel.grab_focus.call_deferred()
 
 
 func _build_cards() -> void:
-	_built_tab = _tab
-	_items = _items_for(_tab)
+	_cards_built = true
+	_items.assign(form_catalog.load_forms())
 	_character_previews.clear()
-	_live_arenas.clear()
 	var cards: Array[Control] = []
 	for item: Resource in _items:
-		cards.append(_build_card(item))
+		cards.append(_build_card(item as FormData))
 	_syncing = true
-	_carousel.set_cards(cards, _index_of(_selected_id(_tab)))
+	_carousel.set_cards(cards, _index_of(_selected_id()))
 	_syncing = false
 	_sync_live_cards()
 	_dots.count = _items.size()
 
 
-func _items_for(tab: StringName) -> Array[Resource]:
-	var items: Array[Resource] = []
-	match tab:
-		TAB_WISPS:
-			items.assign(form_catalog.load_forms())
-		TAB_ARENAS:
-			for skin: ArenaSkinData in endless_catalog.skins:
-				if skin != null:
-					items.append(skin)
-	return items
-
-
-## Moves the carousel to this tab's selected item without reporting it as a player pick.
+## Moves the carousel to the selected character without reporting it as a player pick.
 func _focus_selected_card() -> void:
 	_syncing = true
-	_carousel.select(_index_of(_selected_id(_tab)), false)
+	_carousel.select(_index_of(_selected_id()), false)
 	_syncing = false
 
 
 func _on_carousel_selection_changed(index: int) -> void:
 	if _syncing or index < 0 or index >= _items.size():
 		return
-	_selected_ids[_tab] = _item_id(_items[index])
+	_selected_ids[TAB_WISPS] = (_items[index] as FormData).form_id
 	_feedback_label.text = ""
 	_sync_live_cards()
 	_refresh()
@@ -230,28 +238,28 @@ func _refresh() -> void:
 	if not is_node_ready():
 		return
 	_balance_label.text = RiftPoints.format(_balance())
-	if _tab == TAB_NO_ADS:
-		_refresh_no_ads()
+	if _tab == TAB_SHOP:
+		_refresh_shop()
 		return
 	var hollow := PackedInt32Array()
 	for index: int in _items.size():
-		_refresh_card(_carousel.get_card(index), _items[index])
-		if not _owns(_items[index]):
+		_refresh_card(_carousel.get_card(index), _items[index] as FormData)
+		if not _owns(_items[index] as FormData):
 			hollow.append(index)
 	_dots.hollow = hollow
-	var selected_index: int = _index_of(_selected_id(_tab))
+	var selected_index: int = _index_of(_selected_id())
 	if selected_index >= _items.size():
 		_description_label.text = ""
 		_action_button.text = "EQUIPPED"
 		_action_button.disabled = true
 		return
-	var item: Resource = _items[selected_index]
-	_description_label.text = str(item.get(&"description"))
-	var price: int = _price(item)
-	var gate: String = _gate_reason(item)
+	var form := _items[selected_index] as FormData
+	_description_label.text = form.description
+	var price: int = maxi(0, form.price)
+	var gate: String = _gate_reason(form)
 	_action_button.icon = null
-	if _owns(item):
-		var equipped: bool = _is_equipped(item)
+	if _owns(form):
+		var equipped: bool = form.form_id == _equipped_id()
 		_requirement_label.text = "EQUIPPED" if equipped else "OWNED  ·  READY TO EQUIP"
 		_action_button.text = "EQUIPPED" if equipped else "EQUIP"
 		_action_button.disabled = equipped
@@ -270,124 +278,141 @@ func _refresh() -> void:
 		_action_button.disabled = false
 
 
-func _refresh_no_ads() -> void:
+## The SHOP page: the Remove Ads offer, the item packs and the Rift Points packs.
+func _refresh_shop() -> void:
 	var ads_removed: bool = bool(_snapshot.get(&"ads_removed", false))
 	var store: bool = _store_available()
 	if ads_removed:
 		_offer_status.text = "ADS REMOVED  •  THANK YOU"
-		_action_button.text = "OWNED"
-		_action_button.disabled = true
+		_offer_buy_button.text = "OWNED"
+		_offer_buy_button.disabled = true
 	elif not store:
 		_offer_status.text = "THE STORE IS NOT OPEN YET"
-		_action_button.text = "COMING SOON"
-		_action_button.disabled = true
+		_offer_buy_button.text = "COMING SOON"
+		_offer_buy_button.disabled = true
 	else:
-		_offer_status.text = "ONE-TIME PURCHASE"
-		_action_button.text = "BUY"
-		_action_button.disabled = false
-	_action_button.icon = null
+		var offer_price: String = _store_price(MonetisationService.PRODUCT_REMOVE_ADS)
+		_offer_status.text = (
+			"ONE-TIME PURCHASE" if offer_price.is_empty() else "ONE-TIME PURCHASE  •  %s" % offer_price
+		)
+		_offer_buy_button.text = "BUY"
+		_offer_buy_button.disabled = false
 	_restore_button.disabled = not store
-	_ensure_no_ads_focus.call_deferred()
+	_item_page.setup(_snapshot)
+	for button: Button in _pack_buttons.values():
+		button.text = "BUY" if store else "COMING SOON"
+		button.disabled = not store
+	# Once Google Play answers, its own localized price replaces the placeholder (ADR-0030).
+	for pack: RiftPointsPack in rift_points_packs.packs:
+		if pack != null and _pack_prices.has(pack.product_id):
+			var price: String = _store_price(pack.product_id)
+			_pack_prices[pack.product_id].text = pack.price_label if price.is_empty() else price
 
 
-## Focuses BUY, or BACK when BUY is disabled - only when focus is missing or on a disabled button,
-## so a refresh after RESTORE never yanks keyboard or controller focus away from the player.
-func _ensure_no_ads_focus() -> void:
-	if not is_inside_tree() or _tab != TAB_NO_ADS:
-		return
-	var owner_control: Control = get_viewport().gui_get_focus_owner()
-	var owner_button := owner_control as BaseButton
-	if (
-		owner_control != null
-		and is_ancestor_of(owner_control)
-		and owner_control.is_visible_in_tree()
-		and (owner_button == null or not owner_button.disabled)
-	):
-		return
-	if _action_button.disabled:
-		_back_button.grab_focus()
-	else:
-		_action_button.grab_focus()
+## The store's price for a product, from the snapshot Main adds (`store_prices`), or empty.
+func _store_price(product_id: StringName) -> String:
+	var prices: Variant = _snapshot.get(&"store_prices", {})
+	return str((prices as Dictionary).get(product_id, "")) if prices is Dictionary else ""
 
 
 func _on_action_pressed() -> void:
-	if _action_button.disabled:
+	if _action_button.disabled or _tab != TAB_WISPS:
 		return
-	if _tab == TAB_NO_ADS:
-		store_purchase_requested.emit(MonetisationService.PRODUCT_REMOVE_ADS)
-		return
-	var index: int = _index_of(_selected_id(_tab))
+	var index: int = _index_of(_selected_id())
 	if index >= _items.size():
 		return
-	var item: Resource = _items[index]
-	if _owns(item):
-		equip_requested.emit(_kind(item), _item_id(item))
+	var form := _items[index] as FormData
+	if _owns(form):
+		equip_requested.emit(SaveManagerService.KIND_FORM, form.form_id)
 	else:
-		purchase_requested.emit(_kind(item), _item_id(item))
+		purchase_requested.emit(SaveManagerService.KIND_FORM, form.form_id)
 
 
-# ------------------------------------------------------------------------ item model
+# ------------------------------------------------------------------------ Rift Points packs
 
-func _kind(item: Resource) -> StringName:
-	if item is ArenaSkinData:
-		return SaveManagerService.KIND_ARENA_SKIN
-	return SaveManagerService.KIND_FORM
-
-
-func _item_id(item: Resource) -> StringName:
-	if item is ArenaSkinData:
-		return (item as ArenaSkinData).skin_id
-	return (item as FormData).form_id
-
-
-func _price(item: Resource) -> int:
-	return maxi(0, int(item.get(&"price")))
+## Lets a touch swipe that starts on a card or button scroll the SHOP page, as in Settings (owner
+## 2026-10-05: the Shop did not scroll on phones): every control under it that would stop the
+## touch passes it on instead. Buttons still press on a tap.
+func _pass_touches_to_scroll(node: Node) -> void:
+	for child: Node in node.get_children():
+		var control := child as Control
+		if control != null and control.mouse_filter == Control.MOUSE_FILTER_STOP:
+			control.mouse_filter = Control.MOUSE_FILTER_PASS
+		_pass_touches_to_scroll(child)
 
 
-func _owned_ids(kind: StringName) -> Array:
-	var key: StringName = &"owned_forms"
-	match kind:
-		SaveManagerService.KIND_ARENA_SKIN:
-			key = &"owned_arena_skins"
-	var owned: Variant = _snapshot.get(key, [])
+## One card per pack: its picture, the Rift Points it gives, its price and a buy button.
+func _build_pack_cards() -> void:
+	for pack: RiftPointsPack in rift_points_packs.packs:
+		if pack == null:
+			continue
+		var card := PanelContainer.new()
+		card.name = "Pack_%s" % pack.product_id
+		card.theme_type_variation = &"PanelCard"
+		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var column := VBoxContainer.new()
+		column.add_theme_constant_override(&"separation", 12)
+		card.add_child(column)
+		var icon := TextureRect.new()
+		icon.texture = pack.icon if pack.icon != null else RP_ICON
+		icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		icon.custom_minimum_size = PACK_ICON_SIZE
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		column.add_child(icon)
+		var amount := Label.new()
+		amount.theme_type_variation = &"TitleLabel"
+		amount.add_theme_font_size_override(&"font_size", 44)
+		amount.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		amount.text = RiftPoints.format(pack.rift_points)
+		column.add_child(amount)
+		var price := Label.new()
+		price.theme_type_variation = &"CaptionLabel"
+		price.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		price.text = pack.price_label
+		column.add_child(price)
+		_pack_prices[pack.product_id] = price
+		var buy := Button.new()
+		buy.name = "Buy"
+		buy.theme_type_variation = &"PrimaryButton"
+		buy.text = "COMING SOON"
+		buy.disabled = true
+		buy.pressed.connect(func() -> void: store_purchase_requested.emit(pack.product_id))
+		column.add_child(buy)
+		_pack_buttons[pack.product_id] = buy
+		_pack_grid.add_child(card)
+
+
+# ------------------------------------------------------------------------ character model
+
+func _owned_ids() -> Array:
+	var owned: Variant = _snapshot.get(&"owned_forms", [])
 	return owned as Array if owned is Array else []
 
 
-func _equipped_id(tab: StringName) -> StringName:
-	match tab:
-		TAB_ARENAS:
-			return StringName(str(_snapshot.get(
-				&"equipped_arena_skin", endless_catalog.default_skin_id
-			)))
+func _equipped_id() -> StringName:
 	return StringName(str(_snapshot.get(&"equipped_form", String(FormCatalog.DEFAULT_FORM_ID))))
 
 
-func _selected_id(tab: StringName) -> StringName:
-	return _selected_ids.get(tab, _equipped_id(tab)) as StringName
+func _selected_id() -> StringName:
+	return _selected_ids.get(TAB_WISPS, _equipped_id()) as StringName
 
 
-func _owns(item: Resource) -> bool:
-	return String(_item_id(item)) in _owned_ids(_kind(item))
+func _owns(form: FormData) -> bool:
+	return String(form.form_id) in _owned_ids()
 
 
-func _is_equipped(item: Resource) -> bool:
-	match _kind(item):
-		SaveManagerService.KIND_ARENA_SKIN:
-			return _item_id(item) == _equipped_id(TAB_ARENAS)
-	return _item_id(item) == _equipped_id(TAB_WISPS)
-
-
-## Why an unowned item cannot be bought yet, as the button text; empty when nothing gates it.
-func _gate_reason(item: Resource) -> String:
-	if item is FormData and (item as FormData).requires_boss_victory:
-		if int(_snapshot.get(&"bosses_defeated", 0)) <= 0:
-			return "BEAT A BOSS FIRST"
+## Why an unowned character cannot be bought yet, as the button text; empty when nothing gates it.
+func _gate_reason(form: FormData) -> String:
+	if form.requires_boss_victory and int(_snapshot.get(&"bosses_defeated", 0)) <= 0:
+		return "BEAT A BOSS FIRST"
 	return ""
 
 
-func _index_of(item_id: StringName) -> int:
+func _index_of(form_id: StringName) -> int:
 	for index: int in _items.size():
-		if _item_id(_items[index]) == item_id:
+		if (_items[index] as FormData).form_id == form_id:
 			return index
 	return 0
 
@@ -405,18 +430,13 @@ func _reduced_motion() -> bool:
 	return settings is Dictionary and bool((settings as Dictionary).get(&"reduced_motion", false))
 
 
-func _equipped_form_tint() -> Color:
-	return form_catalog.get_form(_equipped_id(TAB_WISPS)).tint
-
-
 # ------------------------------------------------------------------------ cards
 
-## One portrait card: name on top, the item's visual in the middle, its state at the bottom. The
-## same card holds a character or an arena.
-func _build_card(item: Resource) -> Control:
+## One portrait card: name on top, the character in the middle, its state at the bottom.
+func _build_card(item: FormData) -> Control:
 	var card := Button.new()
 	card.theme_type_variation = &"CardButton"
-	card.name = "Card_%s" % _item_id(item)
+	card.name = "Card_%s" % item.form_id
 	var margin := MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
 	for side: String in ["left", "right"]:
@@ -432,17 +452,14 @@ func _build_card(item: Resource) -> Control:
 	name_label.theme_type_variation = &"TitleLabel"
 	name_label.add_theme_font_size_override(&"font_size", CARD_NAME_SIZE)
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_label.text = str(item.get(&"display_name"))
+	name_label.text = item.display_name
 	column.add_child(name_label)
 
 	var visual := MarginContainer.new()
 	visual.name = "Visual"
 	visual.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(visual)
-	if item is ArenaSkinData:
-		_add_arena_visual(visual, item as ArenaSkinData)
-	else:
-		_add_form_visual(visual, item as FormData)
+	_add_form_visual(visual, item)
 
 	var state_row := HBoxContainer.new()
 	state_row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -477,24 +494,13 @@ func _add_form_visual(visual: Control, form: FormData) -> void:
 	visual.add_child(portrait)
 
 
-## The arena's thumbnail, whole and uncropped. [method _sync_live_cards] swaps in the full-size
-## art when the card comes near the focus.
-func _add_arena_visual(visual: Control, skin: ArenaSkinData) -> void:
-	var art := _texture_rect(skin.thumbnail, TextureRect.STRETCH_KEEP_ASPECT_CENTERED)
-	art.name = "Portrait"
-	visual.add_child(art)
-
-
 ## Brings the focused card and its [constant LIVE_CARD_RADIUS] neighbours to life and puts every
 ## other card back to its still portrait. Called whenever the carousel moves, so walking the roster
-## never holds more than a few characters' menu frames, or arenas' full backgrounds, at once.
+## never holds more than a few characters' menu frames at once.
 func _sync_live_cards() -> void:
-	if _tab == TAB_ARENAS:
-		_sync_live_arenas()
-		return
 	if _tab != TAB_WISPS:
 		return
-	var centre: int = _index_of(_selected_id(_tab))
+	var centre: int = _index_of(_selected_id())
 	for index: int in _items.size():
 		var form := _items[index] as FormData
 		if form == null:
@@ -509,28 +515,6 @@ func _sync_live_cards() -> void:
 			_wake_card(index, form)
 		else:
 			_sleep_card(index, form)
-
-
-## Full-size art on the ARENAS cards near the focus, the thumbnail on the rest.
-func _sync_live_arenas() -> void:
-	var centre: int = _index_of(_selected_id(_tab))
-	for index: int in _items.size():
-		var skin := _items[index] as ArenaSkinData
-		var visual: Control = _card_visual(index)
-		if skin == null or visual == null:
-			continue
-		var wanted: bool = absi(index - centre) <= LIVE_CARD_RADIUS
-		if wanted == _live_arenas.has(skin.skin_id):
-			continue
-		var art := visual.get_node_or_null(^"Portrait") as TextureRect
-		if art == null:
-			continue
-		var background: Texture2D = skin.load_background() if wanted else null
-		art.texture = background if background != null else skin.thumbnail
-		if wanted:
-			_live_arenas[skin.skin_id] = true
-		else:
-			_live_arenas.erase(skin.skin_id)
 
 
 ## Replaces a card's still portrait with a live character.
@@ -582,7 +566,7 @@ func _texture_rect(texture: Texture2D, stretch: TextureRect.StretchMode) -> Text
 	return rect
 
 
-func _refresh_card(card: Control, item: Resource) -> void:
+func _refresh_card(card: Control, item: FormData) -> void:
 	if card == null:
 		return
 	var owned: bool = _owns(item)
@@ -598,18 +582,18 @@ func _refresh_card(card: Control, item: Resource) -> void:
 	if glow != null:
 		glow.modulate.a = PORTRAIT_GLOW_ALPHA if owned else LOCKED_GLOW_ALPHA
 	var gate: String = _gate_reason(item)
-	if _is_equipped(item) and owned:
+	if item.form_id == _equipped_id() and owned:
 		state_icon.texture = OWNED_ICON
 		state_label.text = "EQUIPPED"
 	elif owned:
 		state_icon.texture = OWNED_ICON
 		state_label.text = "OWNED"
 	elif not gate.is_empty():
-		state_icon.texture = REAPER_ICON if item is FormData else LOCK_ICON
-		state_label.text = "BOSS" if item is FormData else "ENDLESS"
+		state_icon.texture = REAPER_ICON
+		state_label.text = "BOSS"
 	else:
 		state_icon.texture = RP_ICON
-		state_label.text = RiftPoints.format(_price(item))
+		state_label.text = RiftPoints.format(maxi(0, item.price))
 
 
 ## Radial white-to-clear halo, tinted per card through self_modulate.

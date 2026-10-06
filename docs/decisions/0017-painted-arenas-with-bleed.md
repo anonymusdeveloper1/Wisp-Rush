@@ -1,6 +1,6 @@
 # ADR-0017: Painted arenas with bleed, picked in a pager
 
-> **Status:** Accepted; amended by [ADR-0020](0020-an-arena-may-bring-its-own-floor.md) (an arena may
+> **Status:** **Superseded by [ADR-0027](0027-one-arena-simulation.md)** (2026-10-05: the painted arenas and the painted-background path removed; kept as history); Accepted; amended by [ADR-0020](0020-an-arena-may-bring-its-own-floor.md) (an arena may
 > bring its own floor) and [ADR-0021](0021-layered-arenas.md) (an arena may be a layered scene) · **Date:** 2026-09-23 · **Deciders:** owner / Claude Code (Opus 5.5)
 >
 > Supersedes [ADR-0014](0014-endless-arenas-share-one-floor-template.md) (the frozen 941×1672

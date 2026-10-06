@@ -14,7 +14,7 @@ safe across app interruptions and back presses.
 | Path | Role |
 |---|---|
 | `res://scenes/gameplay/game_world.gd` | Trauma shake, hit-stop, feedback hooks, auto-pause, back handling, pause/confirm/settings overlays |
-| `res://scenes/gameplay/game_world.tscn` | PauseOverlay (Resume, Restart, Settings, Home) and ConfirmOverlay |
+| `res://scenes/gameplay/game_world.tscn` | PauseOverlay (Resume, Settings, Home; RESTART RUN removed 2026-10-05, owner) and ConfirmOverlay |
 | `res://scripts/components/vfx_pool.gd` | `VfxPool`: 24 pooled Sprite2D one-shots (and flights), no per-effect allocation |
 | `res://scenes/gameplay/wall_splash_fx.gd` | `WallSplashFx`: the splash where the Wisp hits a wall — pooled droplet emitters plus a splat and flash through `VfxPool` |
 | `res://scenes/gameplay/strike_fx.gd` | `StrikeFx`: the hit animation, a pixel-art strike drawn in code where a dash lands a hit on an enemy or a boss — eight pooled strikes at absolute z 16 |
@@ -44,7 +44,6 @@ GameWorld
 | `GameWorld.add_trauma(amount)` | method | Adds 0..1 shake trauma (offset ∝ trauma²). |
 | `GameWorld.handle_back() -> bool` | method | Confirm → settings → pause toggle; always consumes back. |
 | `GameWorld.is_run_meaningful()` | method | Score, kills or wave > 1 → Restart/Home ask first. |
-| `GameWorld.restart_requested` | signal | Confirmed restart from the pause menu. |
 | `VfxPool.play(texture, position, rotation, start_scale, end_scale, duration, tint) -> int` | method | One pooled effect. |
 | `VfxPool.play_flight(texture, from, to, start_scale, end_scale, duration, tint) -> int` | method | One pooled sprite flying between canvas points (RUSH soul orbs). |
 | `Haptics.pulse(duration_ms, amplitude)` | static | Vibrate when enabled on mobile. |
@@ -95,7 +94,8 @@ trauma decays 1.8/s. Strength = Screen Shake × (`REDUCED_MOTION_SHAKE` 0.3 when
   Motion plays the first two frames without sparks. A Warden's shield block is not a hit. The look and
   timings are Claude's, for the owner's phone test.
 - Focus loss or app pause opens the pause overlay (never resumes into danger); music ducks.
-- Restart/Home from pause confirm only when progress would be lost; in-run Settings hides Reset.
+- Home from pause confirms only when progress would be lost (ABANDON THIS RUN?); in-run Settings
+  hides Reset. The pause menu has no restart since 2026-10-05 (owner).
 - The debug overlay is never created in release builds.
 
 ## How to test
@@ -115,6 +115,7 @@ trauma decays 1.8/s. Strength = Screen Shake × (`REDUCED_MOTION_SHAKE` 0.3 when
 
 | Date | Change |
 |---|---|
+| 2026-10-05 | RESTART RUN removed from the pause menu (owner, GDD §14 #80): the button, `restart_requested` and the confirm's restart branch; `test_m4_systems` checks the button is gone and Home still confirms |
 | 2026-09-28 | Hit animation: `StrikeFx` on every dash hit on an enemy or a boss (owner, GDD §14 #61). Verified: `validate.sh` OK; not run in a test (the owner tests on the phone) |
 | 2026-09-15 | Time-scale request owner (hit-stop + finisher), finisher flash, `VfxPool.play_flight` (spec rush_and_feel) |
 | 2026-09-12 | Redesign v1 colours; VFX converted to straight alpha (ADR-0005) |

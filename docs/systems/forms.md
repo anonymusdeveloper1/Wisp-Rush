@@ -18,7 +18,7 @@ every gameplay value identical.
 |---|---|
 | `res://scripts/resources/form_data.gd` | Character identity, price, requirement, portrait, tint and optional `visual_scene` rig |
 | `res://scripts/resources/form_catalog.gd` | Ordered nine-character registry (`REQUIRED_FORM_COUNT`) and validation |
-| `res://data/forms/*.tres` | Patchvile (the default), Shade, Mothmere, Scarlet and Rook (whole-frame sprites), Morrow (rig) — six: the 2026-09-25 cut left five, Mothmere was added the same day, and Scarlet replaced Ilyra on 2026-09-26. No character has a tier (GDD §14 #53) |
+| `res://data/forms/*.tres` | Patchvile (the default), Shade, Mothmere, Scarlet and Rook (whole-frame sprites) — five: the 2026-09-25 cut left five, Mothmere was added the same day, Scarlet replaced Ilyra on 2026-09-26, and Morrow (the last rig) was removed on 2026-10-05. No character has a tier (GDD §14 #53) |
 | `res://scenes/screens/shop_screen.tscn` / `.gd` | CHARACTERS tab: the animated card carousel, buy/equip ([shop.md](shop.md)) |
 | `res://scripts/components/focus_carousel.gd` / `page_dots.gd` | Shared card picker + page indicator ([ui_design_system.md](ui_design_system.md)) |
 
@@ -79,6 +79,7 @@ and tint; the Shop animates every card ([playable_character_visuals.md](playable
 
 | Date | Change |
 |---|---|
+| 2026-10-05 | Morrow removed (owner, GDD §14 #83): five characters (`REQUIRED_FORM_COUNT` 5, `VALID_FORM_IDS`); a save that held him falls back to Patchvile |
 | 2026-09-27 | Rook's form points at his whole-frame portrait (`rook_portrait.png`) and warms his menu frames (`menu_frames_path`); his rig is gone |
 | 2026-09-26 | Scarlet replaces Ilyra (removed completely; `scarlet` in `VALID_FORM_IDS`, `ilyra_2` mapping gone); tiers removed (`FormData.tier`, the Shop badge) |
 | 2026-09-25 | Mothmere added: six characters (`REQUIRED_FORM_COUNT` 6, `VALID_FORM_IDS`) |

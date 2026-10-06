@@ -1,0 +1,76 @@
+{
+  "tool": "built-in image_gen",
+  "date": "2026-10-05",
+  "transparent_background": true,
+  "outputs": [
+    {
+      "id": "soul_ward",
+      "file": "raw/soul_ward.png",
+      "original_path": "C:\\Users\\marti\\.codex\\generated_images\\01a10ba6-7194-7da3-8339-07a28012a0e0\\exec-d184fadf-dae9-4e40-8c6f-b9ba243168ea.png",
+      "prompt_file": "prompts/soul_ward.md",
+      "references": [
+        "../wisp_rush_pixel_ui_v1/previews/icon_components.png"
+      ]
+    },
+    {
+      "id": "rift_magnet",
+      "file": "raw/rift_magnet.png",
+      "original_path": "C:\\Users\\marti\\.codex\\generated_images\\01a10ba6-7194-7da3-8339-07a28012a0e0\\exec-1236ff29-1357-4836-89cf-14cb89e2c2ce.png",
+      "prompt_file": "prompts/rift_magnet.md",
+      "references": [
+        "raw/soul_ward.png",
+        "../wisp_rush_pixel_ui_v1/previews/icon_components.png"
+      ]
+    },
+    {
+      "id": "fortune_star",
+      "file": "raw/fortune_star.png",
+      "original_path": "C:\\Users\\marti\\.codex\\generated_images\\01a10ba6-7194-7da3-8339-07a28012a0e0\\exec-e8ebbb47-c7ac-44da-b33c-e2a253984055.png",
+      "prompt_file": "prompts/fortune_star.md",
+      "references": [
+        "raw/soul_ward.png",
+        "../wisp_rush_pixel_ui_v1/previews/icon_components.png"
+      ]
+    },
+    {
+      "id": "stillglass",
+      "file": "raw/stillglass.png",
+      "original_path": "C:\\Users\\marti\\.codex\\generated_images\\01a10ba6-7194-7da3-8339-07a28012a0e0\\exec-b1ac4353-c737-460e-a1b0-e97c7425bb08.png",
+      "prompt_file": "prompts/stillglass.md",
+      "references": [
+        "raw/soul_ward.png",
+        "../wisp_rush_pixel_ui_v1/previews/icon_components.png"
+      ]
+    },
+    {
+      "id": "banish_bomb",
+      "file": "raw/banish_bomb.png",
+      "original_path": "C:\\Users\\marti\\.codex\\generated_images\\01a10ba6-7194-7da3-8339-07a28012a0e0\\exec-e4d46918-e6db-4021-bc0f-83e700e94a39.png",
+      "prompt_file": "prompts/banish_bomb.md",
+      "references": [
+        "raw/soul_ward.png",
+        "../wisp_rush_pixel_ui_v1/previews/icon_components.png"
+      ]
+    },
+    {
+      "id": "reapers_edge",
+      "file": "raw/reapers_edge.png",
+      "original_path": "C:\\Users\\marti\\.codex\\generated_images\\01a10ba6-7194-7da3-8339-07a28012a0e0\\exec-022d2f23-a529-41c3-9219-04c0a864c6ca.png",
+      "prompt_file": "prompts/reapers_edge.md",
+      "references": [
+        "raw/soul_ward.png",
+        "../wisp_rush_pixel_ui_v1/previews/icon_components.png"
+      ]
+    },
+    {
+      "id": "echo_wisp",
+      "file": "raw/echo_wisp.png",
+      "original_path": "C:\\Users\\marti\\.codex\\generated_images\\01a10ba6-7194-7da3-8339-07a28012a0e0\\exec-dc8e5684-7ad7-47ff-9d90-89044eadb55b.png",
+      "prompt_file": "prompts/echo_wisp.md",
+      "references": [
+        "raw/soul_ward.png",
+        "../wisp_rush_pixel_ui_v1/previews/icon_components.png"
+      ]
+    }
+  ]
+}

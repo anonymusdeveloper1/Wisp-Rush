@@ -78,7 +78,6 @@ func _run() -> void:
 	_game.configure_run(RunProfile.tutorial(ENDLESS_CATALOG, skin, FORM_CATALOG.get_form(FormCatalog.DEFAULT_FORM_ID)))
 	root.add_child(_game)
 	_player = _game._player
-	_game.set_experience_enabled(false)
 	_game.set_rush_enabled(false)
 	_game.enemy_defeated.connect(
 		func(world_position: Vector2, dash_kill_index: int) -> void:

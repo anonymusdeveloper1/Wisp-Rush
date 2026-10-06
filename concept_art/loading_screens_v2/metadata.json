@@ -15,58 +15,58 @@
     {
       "file": "loading_new_boss.png",
       "label": "New boss",
-      "raw_path": "raw/loading_new_boss_source_v2.png",
+      "raw_path": "raw/loading_new_boss_source_v3.png",
       "raw_size": [
-        841,
-        1870
+        928,
+        1695
       ],
-      "raw_sha256": "97123650a5d0a22b76d9b50ba7de8d16e17a9ba3c69e0529b50c92700a75e249",
+      "raw_sha256": "eff77c2df56137b0f97e277e2269d7088c8c089520232224cd334d12dbb20049",
       "center_cover_crop": [
+        82.625,
         0,
-        0.556,
-        841,
-        1869.444
+        845.375,
+        1695
       ],
       "size": [
         1080,
         2400
       ],
       "mode": "RGB",
-      "colors": 201,
+      "colors": 214,
       "opaque": true,
       "exact_4_px_grid": true,
-      "sha256": "a103901e616957bcb594ed135039af600a00d923340041cc58bb78636ef97bda",
+      "sha256": "ea9f0c8f68d9e7cd29be961b71b26c04967b70b2fa5d2c5c831181af3143f54a",
       "prompt": "prompts/loading_new_boss.md",
-      "composition_refinement": "prompts/loading_new_boss_refinement.md",
+      "composition_refinement": "prompts/loading_new_boss_refinement_v3.md",
       "runtime_path": "res://assets/art/environment/loading_screens/loading_new_boss.png",
       "runtime_matches_source": true
     },
     {
       "file": "loading_grimgrin.png",
       "label": "Grimgrin",
-      "raw_path": "raw/loading_grimgrin_source.png",
+      "raw_path": "raw/loading_grimgrin_source_v2.png",
       "raw_size": [
-        841,
-        1870
+        928,
+        1695
       ],
-      "raw_sha256": "8a999eb0e630e16dccbd2c6ace4449a61b46d416157a08bf37df8336fcef0626",
+      "raw_sha256": "f61fcfd46504b373c77a03cf1b4d2e0f1728e7740d624e595e5533dbfa5a2e6d",
       "center_cover_crop": [
+        82.625,
         0,
-        0.556,
-        841,
-        1869.444
+        845.375,
+        1695
       ],
       "size": [
         1080,
         2400
       ],
       "mode": "RGB",
-      "colors": 201,
+      "colors": 199,
       "opaque": true,
       "exact_4_px_grid": true,
-      "sha256": "9a16b43dd3df7ed11b0bfb4891784779b492d89e60ac1de40cc4d940b5b98347",
+      "sha256": "9b39d16cc31e6fc53a78952b45b8e615482035967ec6688db1ffead3a456f9ef",
       "prompt": "prompts/loading_grimgrin.md",
-      "composition_refinement": null,
+      "composition_refinement": "prompts/loading_grimgrin_refinement.md",
       "runtime_path": "res://assets/art/environment/loading_screens/loading_grimgrin.png",
       "runtime_matches_source": true
     },

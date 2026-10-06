@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="RunItemCatalog" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/run_item_catalog.gd" id="1_catalog"]
+[ext_resource type="Script" path="res://scripts/resources/run_item_data.gd" id="2_item"]
+[ext_resource type="Resource" path="res://data/items/soul_ward.tres" id="3_soul_ward"]
+[ext_resource type="Resource" path="res://data/items/rift_magnet.tres" id="4_rift_magnet"]
+[ext_resource type="Resource" path="res://data/items/fortune_star.tres" id="5_fortune_star"]
+[ext_resource type="Resource" path="res://data/items/stillglass.tres" id="6_stillglass"]
+[ext_resource type="Resource" path="res://data/items/banish_bomb.tres" id="7_banish_bomb"]
+[ext_resource type="Resource" path="res://data/items/reapers_edge.tres" id="8_reapers_edge"]
+[ext_resource type="Resource" path="res://data/items/echo_wisp.tres" id="9_echo_wisp"]
+
+[resource]
+script = ExtResource("1_catalog")
+items = Array[ExtResource("2_item")]([ExtResource("3_soul_ward"), ExtResource("4_rift_magnet"), ExtResource("5_fortune_star"), ExtResource("6_stillglass"), ExtResource("7_banish_bomb"), ExtResource("8_reapers_edge"), ExtResource("9_echo_wisp")])
+drop_chance = 0.1
+floor_lifetime = 14.0
+ward_escape_seconds = 0.9
+

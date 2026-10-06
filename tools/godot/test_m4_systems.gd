@@ -124,16 +124,20 @@ func _run_checks() -> void:
 		push_error("m4_systems: back did not resume the paused run")
 	game._score = 50
 	game.handle_back()
-	(game.get_node("%RestartButton") as Button).pressed.emit()
+	# The pause menu has no RESTART RUN since 2026-10-05 (owner).
+	if game.get_node_or_null("%RestartButton") != null:
+		failures += 1
+		push_error("m4_systems: the pause menu still offers RESTART RUN")
+	(game.get_node("%HomeButton") as Button).pressed.emit()
 	if not (game.get_node("%ConfirmOverlay") as Control).visible:
 		failures += 1
-		push_error("m4_systems: restart of a meaningful run skipped confirmation")
-	var restart_seen: Array[bool] = [false]
-	game.restart_requested.connect(func() -> void: restart_seen[0] = true)
+		push_error("m4_systems: leaving a meaningful run skipped confirmation")
+	var home_seen: Array[bool] = [false]
+	game.home_requested.connect(func() -> void: home_seen[0] = true)
 	(game.get_node("%ConfirmYesButton") as Button).pressed.emit()
-	if not restart_seen[0] or paused:
+	if not home_seen[0] or paused:
 		failures += 1
-		push_error("m4_systems: confirmed restart did not resume and request a new run")
+		push_error("m4_systems: confirmed leave did not resume and request Home")
 	game.queue_free()
 	await process_frame
 	if root.canvas_transform.origin != Vector2.ZERO or not is_equal_approx(Engine.time_scale, 1.0):

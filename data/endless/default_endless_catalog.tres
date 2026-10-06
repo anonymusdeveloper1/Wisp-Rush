@@ -1,29 +1,19 @@
-[gd_resource type="Resource" script_class="EndlessCatalog" load_steps=19 format=3]
+[gd_resource type="Resource" script_class="EndlessCatalog" load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/endless_catalog.gd" id="1_script"]
 [ext_resource type="Script" path="res://scripts/resources/arena_skin_data.gd" id="2_skin_script"]
 [ext_resource type="Resource" path="res://data/endless/default_endless_tuning.tres" id="3_tuning"]
-[ext_resource type="Resource" path="res://data/endless/skins/quarry_titan.tres" id="4_quarry_titan"]
 [ext_resource type="Script" path="res://scripts/resources/endless_roster.gd" id="5_roster_script"]
 [ext_resource type="Resource" path="res://data/endless/rosters/obsidian_garden.tres" id="6_obsidian_garden"]
 [ext_resource type="Resource" path="res://data/endless/rosters/shattered_rift.tres" id="7_shattered_rift"]
 [ext_resource type="Resource" path="res://data/endless/rosters/ember_hollow.tres" id="8_ember_hollow"]
 [ext_resource type="Resource" path="res://data/endless/rosters/frozen_choir.tres" id="9_frozen_choir"]
 [ext_resource type="Resource" path="res://data/endless/rosters/reapers_court.tres" id="10_reapers_court"]
-[ext_resource type="Resource" path="res://data/endless/skins/stitched_doll_jungle.tres" id="11_stitched_doll_jungle"]
-[ext_resource type="Resource" path="res://data/endless/skins/stitchwarden_vigil.tres" id="12_stitchwarden_vigil"]
-[ext_resource type="Resource" path="res://data/endless/skins/chained_colossus.tres" id="13_chained_colossus"]
-[ext_resource type="Resource" path="res://data/endless/skins/chained_colossus_3d.tres" id="14_chained_colossus_3d"]
-[ext_resource type="Resource" path="res://data/endless/skins/zoom_arena_3d.tres" id="15_zoom_arena_3d"]
-[ext_resource type="Resource" path="res://data/endless/skins/board_01.tres" id="16_board_01"]
-[ext_resource type="Resource" path="res://data/endless/skins/board_01_light.tres" id="17_board_01_light"]
 [ext_resource type="Resource" path="res://data/endless/skins/sci_fi_simulation_v1.tres" id="18_sci_fi_simulation_v1"]
 
 [resource]
 script = ExtResource("1_script")
-floor_rect = Rect2(0.16153, 0.2183, 0.67588, 0.56699)
-floor_polygon = PackedVector2Array(0.16153, 0.2183, 0.83741, 0.2183, 0.83741, 0.78529, 0.16153, 0.78529)
-skins = Array[ExtResource("2_skin_script")]([ExtResource("4_quarry_titan"), ExtResource("11_stitched_doll_jungle"), ExtResource("12_stitchwarden_vigil"), ExtResource("13_chained_colossus"), ExtResource("14_chained_colossus_3d"), ExtResource("15_zoom_arena_3d"), ExtResource("16_board_01"), ExtResource("17_board_01_light"), ExtResource("18_sci_fi_simulation_v1")])
-default_skin_id = &"quarry_titan"
+skins = Array[ExtResource("2_skin_script")]([ExtResource("18_sci_fi_simulation_v1")])
+default_skin_id = &"sci_fi_simulation_v1"
 tuning = ExtResource("3_tuning")
 rosters = Array[ExtResource("5_roster_script")]([ExtResource("6_obsidian_garden"), ExtResource("7_shattered_rift"), ExtResource("8_ember_hollow"), ExtResource("9_frozen_choir"), ExtResource("10_reapers_court")])

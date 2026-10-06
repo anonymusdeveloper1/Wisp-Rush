@@ -1,10 +1,10 @@
 class_name GameWorld
 extends Control
-## Coordinates one run: waves, combat, mutations, bosses, rewards and the run summary.
+## Coordinates one run: waves, combat, pickup items, bosses, rewards and the run summary.
 ##
 ## Main configures it with a `RunProfile`, whose `ArenaRules` decide the backdrop, floor, roster,
-## bosses and difficulty. Endless and the daily run cycle bosses, harder each cycle, until death. Level-ups never interrupt: they bank silently and a bottom card tray slides up,
-## with the world in slow motion, only at a calm moment (docs/systems/mutations.md). A scripted
+## bosses and difficulty. Endless and the daily run cycle bosses, harder each cycle, until death. Enemy drops grant temporary powers or stored double-tap protection
+## (docs/systems/pickup_items.md). A scripted
 ## profile (`RunProfile.MODE_TUTORIAL`) starts no waves, never ends and never pauses itself: the
 ## Tutorial screen's director drives it through the scripted-run hooks and the run event signals below
 ## (docs/systems/tutorial.md). Real runs never teach.
@@ -13,8 +13,6 @@ extends Control
 signal home_requested
 ## Emitted with the run statistics after the Wisp death dissolve.
 signal run_ended(summary: Dictionary)
-## Emitted when the player confirms restarting the run from the pause menu.
-signal restart_requested
 ## Run events for observers such as the tutorial director. A dash (or redirect leg) launched.
 signal dash_launched(from_redirect: bool)
 ## A dash leg finished with [param kills] enemies; [param ended_by] is `&"wall"`, `&"redirect"` or
@@ -25,8 +23,14 @@ signal dash_resolved(kills: int, ended_by: StringName)
 signal enemy_defeated(world_position: Vector2, dash_kill_index: int)
 ## The Wisp lost a Soul Fragment and has [param current_health] left.
 signal player_damaged(current_health: int)
-## The player picked [param mutation_id] on the upgrade card tray.
-signal upgrade_chosen(mutation_id: StringName)
+## A physical item was collected; Main persists Ward stock.
+signal item_collected(item_id: StringName)
+## The host must persist one Ward copy before allowing protection.
+signal shield_requested
+## A stored Ward copy was applied to the living player.
+signal shield_activated
+## A free-play run actually started; selected stock is spent now rather than during prewarm.
+signal run_started
 ## RUSH mode started.
 signal rush_started
 ## A boss encounter was won (after its dissolve).
@@ -51,6 +55,7 @@ const HAZARD_SCENES: Dictionary = {
 	&"blade_ring": preload("res://scenes/hazards/blade_ring.tscn"),
 }
 ## The Rift Points pickup; its scene keeps the soul shard name (the art is a shard).
+const ITEM_PICKUP_SCENE: PackedScene = preload("res://scenes/pickups/run_item_pickup.tscn")
 const RP_PICKUP_SCENE: PackedScene = preload("res://scenes/pickups/soul_shard_pickup.tscn")
 ## The rare Soul Fragment pickup.
 const REAPER_SCENE: PackedScene = preload("res://scenes/bosses/reaper_boss.tscn")
@@ -63,7 +68,6 @@ const BOSS_VARIANTS: Dictionary = {
 	&"reaper_ascended": preload("res://data/bosses/reaper_ascended.tres"),
 	&"grimgrin": preload("res://data/bosses/grimgrin.tres"),
 }
-const DEATH_PULSE_TEXTURE: Texture2D = preload("res://assets/art/vfx/06_death_pulse.png")
 const COMBO_TIMEOUT: float = 2.2
 const RAPID_REDIRECT_WINDOW_MSEC: int = 550
 const RAPID_REDIRECT_SCORE: int = 25
@@ -83,6 +87,8 @@ const TRAUMA_DECAY: float = 1.8
 ## Shake multiplier applied on top of Screen Shake when Reduced Motion is on.
 const REDUCED_MOTION_SHAKE: float = 0.3
 const HIT_STOP_SECONDS: float = 0.06
+## Seconds without damage after a rewarded revive (Claude's value for the phone test, ADR-0029).
+const REVIVE_INVULNERABLE_SECONDS: float = 2.0
 const HIT_STOP_TIME_SCALE: float = 0.08
 ## RUSH soul orb art and its size in Wisp radii at launch and on arrival.
 const RUSH_ORB_TEXTURE: Texture2D = preload("res://assets/art/vfx/12_collectible_sparkle.png")
@@ -97,12 +103,6 @@ const RUSH_EDGE_GLOW_INNER: float = 0.62
 ## Brightness swing of the full RUSH bar pulse, and how fast its displayed fill catches up.
 const RUSH_BAR_PULSE_AMOUNT: float = 0.3
 const RUSH_BAR_CATCH_UP_RATE: float = 14.0
-## The painted stone floor of wisp_rush_arena_background.png in texture UV space (measured from the
-## art): the largest rectangle inscribed in its octagon. The playfield is inset to this, so the Wisp
-## always rests on stone instead of the void, the scenery or under the HUD.
-const ARENA_FLOOR_UV := Rect2(0.145, 0.255, 0.700, 0.515)
-## The playfield never shrinks below this fraction of the viewport, whatever the aspect ratio.
-const ARENA_MIN_VIEWPORT_FRACTION := Vector2(0.70, 0.50)
 ## The playfield is inset by this multiple of the Wisp's collision radius, so its sprite stays
 ## visible at the wall. Defined once here and pushed down: it used to be repeated as a bare 1.35 in
 ## the player and the safe-reform search, which could silently disagree.
@@ -113,14 +113,8 @@ const LAUNCH_HAPTIC_MS: int = 18
 const LAUNCH_HAPTIC_AMPLITUDE: float = 0.6
 const REDIRECT_HAPTIC_MS: int = 10
 const REDIRECT_HAPTIC_AMPLITUDE: float = 0.4
-## Design pixels the backdrop extends past the viewport so shake never reveals its edges.
+## Design pixels the world shade extends past the viewport so shake never reveals its edges.
 const BACKGROUND_OVERSCAN: float = 16.0
-## Seconds the Wisp and the HUD take to fade in when an arena's opening shot ends.
-const INTRO_FADE_SECONDS: float = 0.35
-## On a board arena: how far from the character a tap still counts as tapping him (multiples of his
-## collision radius), and the longest press that counts as a tap (msec).
-const CHARACTER_TAP_REACH: float = 2.4
-const CHARACTER_TAP_MSEC: int = 450
 ## HUD geometry in design pixels (1080-wide canvas), measured from the safe-area insets.
 ## Header (owner decision 2026-09-24): pause, with UPGRADE under it, on the left; Rift Points with
 ## the icon on its right and the score under it, unframed, on the right; the soul level bar and
@@ -130,21 +124,13 @@ const CHARACTER_TAP_MSEC: int = 450
 const HUD_PAUSE_SIZE: float = 112.0
 ## Width the Rift Points / score column reserves on the right; it grows leftward past this.
 const HUD_STATS_WIDTH: float = 260.0
-const HUD_XP_TOP: float = 14.0
-const HUD_LEVEL_TOP: float = 38.0
 ## RUSH row (label + slim bar) under the soul level.
-const HUD_RUSH_TOP: float = 80.0
+const HUD_RUSH_TOP: float = 120.0
 const HUD_RUSH_HEIGHT: float = 32.0
 ## Clear of the Rift Points / score column on the right, which ends ~137 px down.
-const HUD_BOSS_TOP: float = 150.0
+const HUD_BOSS_TOP: float = 180.0
 const HUD_CALLOUT_TOP: float = 474.0
 const HUD_FOCUS_TOP: float = 564.0
-## UPGRADE button (tappable, shown while a level-up is banked): size and gap under the pause button,
-## on the left.
-const HUD_UPGRADE_BUTTON_SIZE: float = 132.0
-const HUD_UPGRADE_BUTTON_GAP: float = 18.0
-## Time-scale hold key of the upgrade card tray (`_hold_time_scale`).
-const TIME_SCALE_HOLD_UPGRADE_TRAY: StringName = &"upgrade_tray"
 ## World tint over the arena backdrop: calm run, Reaper encounter and the post-Reaper release.
 const SHADE_CALM: Color = Color(Palette.VOID_CHARCOAL, 0.14)
 const SHADE_BOSS: Color = Color(Palette.VOID_CHARCOAL * 0.8 + Palette.RIFT_MAGENTA * 0.2, 0.5)
@@ -160,6 +146,7 @@ const SHADE_VICTORY: Color = Color(Palette.SLATE_TEAL, 0.26)
 @export var feel_tuning: RunFeelTuning
 
 var _arena_rect: Rect2 = Rect2()
+var _ward_stock: int = 0
 var _score: int = 0
 var _combo: int = 0
 var _highest_combo: int = 0
@@ -175,6 +162,8 @@ var _focus_remaining: float = 0.0
 var _waves_start_remaining: float = -1.0
 var _remaining_live_enemies: int = 0
 var _run_over: bool = false
+## The revive offer (watch an ad to continue) is on screen; the tree is paused under it.
+var _revive_offer_open: bool = false
 var _waves_started: bool = false
 var _boss_pending: bool = false
 var _post_boss_remaining: float = -1.0
@@ -183,13 +172,6 @@ var _boss: BossActor
 var _start_held: bool = false
 ## `_begin_run` arrived while held and runs on release.
 var _start_pending: bool = false
-## Whether the run opens with the arena's opening shot (a 3D arena's zoom, ADR-0023). Main turns it
-## off for a run started again from the run's own dialogs, so playing again goes straight back in
-## (owner, 2026-10-02). Set before the node enters the tree.
-var play_arena_intro: bool = true
-## The arena's opening shot is playing: the Wisp and the HUD are hidden, steering is off, a tap
-## skips it, and the waves start when it ends.
-var _intro_playing: bool = false
 ## The equipped arena is a board that draws the HUD in its frame (ADR-0024): GameWorld's own HUD bars
 ## and buttons wait, hidden, under [member _hidden_hud]; they keep their values, which feed the board.
 var _board_hud: bool = false
@@ -197,18 +179,10 @@ var _hidden_hud: Control
 ## The HUD controls a board takes over, and the index each had under SafeHud.
 var _board_hud_controls: Array[Control] = []
 var _board_hud_indices: Array[int] = []
-var _hud_level: int = 1
-## The light on the character while upgrades are ready on a board; tap him to open them.
-var _upgrade_glow: UpgradeGlow
-## A press that began on the glowing character: where and when (msec); -1 when there is none.
-var _character_tap_start := Vector2.ZERO
-var _character_tap_msec: int = -1
 ## Throwaway nodes `warm_up_render()` draws once under the cover; freed on release.
 var _warm_nodes: Array[Node] = []
 ## Tutorial arena (`RunProfile.is_scripted`): no waves, no self-pause, the host owns back.
 var _scripted: bool = false
-## Whether kills and bosses grant XP; scripted lessons switch it (always on in real runs).
-var _experience_enabled: bool = true
 ## Whether the RUSH meter fills and RUSH may start; scripted lessons switch it (on in real runs).
 var _rush_enabled: bool = true
 var _last_wall_impact_msec: int = -1
@@ -222,8 +196,6 @@ var _cosmetic_form: FormData
 var _dash_style: DashStyleData
 ## The arena this run plays under: Endless rules, or the neutral arena. Never null.
 var _arena_rules: ArenaRules = ArenaRules.new()
-## Animated scenery of Legendary/Mythic Endless skins: shader on the backdrop + glow particles.
-var _ambience: ArenaAmbience
 ## A layered or 3D arena's scene, shown instead of the painted backdrop (ADR-0021, ADR-0023); null
 ## otherwise.
 var _arena_visual: ArenaVisual
@@ -270,18 +242,6 @@ var _time_scale_requests: Dictionary[int, float] = {}
 var _next_time_scale_request_id: int = 0
 ## Held time scales by key, released explicitly (`_hold_time_scale`); they join the lowest-wins rule.
 var _time_scale_holds: Dictionary[StringName, float] = {}
-## Calm moments (wave start, boss beaten, field clear): each one gets a new id and a short window in
-## which the banked upgrade cards may open; a moment whose cards were shown never offers again.
-var _calm_moment_id: int = 0
-var _calm_window_remaining: float = 0.0
-var _upgrade_offer_spent_moment_id: int = 0
-## Tutorial lesson asked for its calm moment (`request_upgrade_calm_moment`); cleared when cards open.
-var _scripted_upgrade_calm_requested: bool = false
-## Real seconds left before the open tray slides away on its own.
-var _upgrade_tray_remaining: float = 0.0
-## Extra design px a host screen lifts the tray above the bottom safe margin (tutorial caption band).
-var _upgrade_tray_lift: float = 0.0
-var _upgrade_button_pulse_time: float = 0.0
 ## World shade colour set by run state; the finisher flash blends over it.
 var _shade_base_color: Color = SHADE_CALM
 var _finisher_flash: float = 0.0
@@ -298,6 +258,8 @@ var _rush_display_target: float = 0.0
 var _rush_pulse_time: float = 0.0
 var _rush_edge_glow: TextureRect
 
+@onready var _run_items: RunItems = %RunItems
+@onready var _item_hud: RunItemHud = %RunItemHud
 @onready var _enemy_layer: Node2D = %EnemyLayer
 @onready var _hazard_layer: Node2D = %HazardLayer
 @onready var _boss_layer: Node2D = %BossLayer
@@ -308,18 +270,13 @@ var _rush_edge_glow: TextureRect
 @onready var _rift_points_icon: TextureRect = $HUD/SafeHud/StatsColumn/RiftPointsLine/RiftPointsIcon
 @onready var _boss_icon: TextureRect = $HUD/SafeHud/BossHud/TitleRow/ReaperIcon
 @onready var _wave_director: WaveDirector = %WaveDirector
-@onready var _run_progression: RunProgression = %RunProgression
 @onready var _world_shade: ColorRect = %WorldShade
 @onready var _rift_points_count: Label = %RiftPointsCount
 @onready var _score_label: Label = %ScoreLabel
 @onready var _stats_column: VBoxContainer = %StatsColumn
-@onready var _xp_bar: ProgressBar = %XPBar
-@onready var _run_level_label: Label = %RunLevelLabel
 @onready var _rush_row: HBoxContainer = %RushRow
 @onready var _rush_bar: ProgressBar = %RushBar
 @onready var _pause_button: Button = %PauseButton
-@onready var _upgrade_button: Button = %UpgradeButton
-@onready var _upgrade_count: Label = %UpgradeCount
 @onready var _combo_label: Label = %ComboLabel
 @onready var _focus_label: Label = %FocusLabel
 @onready var _instruction_label: Label = %InstructionLabel
@@ -327,17 +284,17 @@ var _rush_edge_glow: TextureRect
 @onready var _boss_warning: Label = %BossWarning
 @onready var _boss_bar: ProgressBar = %BossBar
 @onready var _boss_phase_label: Label = %BossPhaseLabel
-@onready var _upgrade_tray: UpgradeTray = %UpgradeTray
 @onready var _pause_overlay: Control = %PauseOverlay
 @onready var _resume_button: Button = %ResumeButton
 @onready var _home_button: Button = %HomeButton
-@onready var _restart_button: Button = %RestartButton
 @onready var _settings_button: Button = %SettingsButton
 @onready var _confirm_overlay: Control = %ConfirmOverlay
 @onready var _confirm_title: Label = %ConfirmTitle
 @onready var _confirm_yes_button: Button = %ConfirmYesButton
 @onready var _confirm_cancel_button: Button = %ConfirmCancelButton
-@onready var _background: TextureRect = %FullBleedBackground
+@onready var _revive_overlay: Control = %ReviveOverlay
+@onready var _revive_watch_button: Button = %ReviveWatchButton
+@onready var _revive_decline_button: Button = %ReviveDeclineButton
 
 
 func _ready() -> void:
@@ -353,31 +310,26 @@ func _ready() -> void:
 	_player.focus_started.connect(_on_player_focus_started)
 	_player.damaged.connect(_on_player_damaged)
 	_player.died.connect(_on_player_died)
+	_player.shield_requested.connect(_on_shield_requested)
+	_player.shield_broken.connect(_on_shield_broken)
+	_run_items.changed.connect(_apply_item_modifiers)
+	_run_items.activated.connect(_on_item_activated)
 	_player.aim_preview_changed.connect(_on_player_aim_preview_changed)
 	# The one query handed down to the Wisp: its aim assist scores directions with it.
 	_player.set_aim_target_counter(_count_aim_targets)
 	_wave_director.formation_requested.connect(_on_formation_requested)
 	_wave_director.wave_started.connect(_on_wave_started)
-	_run_progression.experience_changed.connect(_on_experience_changed)
-	_run_progression.level_ready.connect(_on_progression_level_ready)
-	_run_progression.mutation_applied.connect(_on_mutation_applied)
-	_upgrade_tray.choice_selected.connect(_on_upgrade_choice_selected)
 	_pause_button.pressed.connect(_on_pause_button_pressed)
-	_upgrade_button.pressed.connect(_on_upgrade_button_pressed)
 	_resume_button.pressed.connect(_on_resume_button_pressed)
 	_home_button.pressed.connect(_on_home_button_pressed)
-	_restart_button.pressed.connect(_on_restart_button_pressed)
 	_settings_button.pressed.connect(_open_settings_overlay)
 	_confirm_yes_button.pressed.connect(_on_confirm_yes_button_pressed)
 	_confirm_cancel_button.pressed.connect(_close_confirm)
+	_revive_watch_button.pressed.connect(_on_revive_watch_pressed)
+	_revive_decline_button.pressed.connect(_decline_revive)
 	_pause_overlay.visible = false
 	_confirm_overlay.visible = false
-	_ambience = ArenaAmbience.new()
-	_ambience.name = "ArenaAmbience"
-	_ambience.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_ambience.process_mode = Node.PROCESS_MODE_PAUSABLE
-	# Between the painted backdrop and WorldShade, so boss and victory shading tint its particles too.
-	_background.add_sibling(_ambience)
+	_revive_overlay.visible = false
 	_vfx = VfxPool.new()
 	_vfx.name = "VfxPool"
 	_effects_layer.add_sibling(_vfx)
@@ -404,8 +356,6 @@ func _ready() -> void:
 	# Under enemies and hazards (lit rings and crystals read on top of the line), above the floor.
 	_enemy_layer.add_sibling(_aim_guide)
 	_enemy_layer.get_parent().move_child(_aim_guide, _enemy_layer.get_index())
-	for button: Node in _upgrade_tray.find_children("*", "BaseButton", true, false):
-		button.set_meta(SoundFx.SKIP_META, true)
 	if feel_tuning == null:
 		feel_tuning = RunFeelTuning.new()
 	_build_rush_edge_glow()
@@ -425,7 +375,7 @@ func _ready() -> void:
 			_cosmetic_form.visual_scene,
 		)
 	_apply_arena()
-	_update_player_mutation_stats()
+	_apply_item_modifiers()
 	_player.set_momentum_presentation(
 		feel_tuning, _get_dash_trail_tint(), _dash_effect == null or _dash_effect.shared_trails
 	)
@@ -438,7 +388,6 @@ func _ready() -> void:
 		monetisation.begin_run()
 	_rift_points_count.text = "0"
 	_layout_for_viewport()
-	_run_progression.start(run_seed + 41)
 	call_deferred(&"_begin_run")
 	print("[GameWorld] ready | arena=%s seed=%d" % [_arena_rect.size, run_seed])
 
@@ -451,8 +400,8 @@ func _process(delta: float) -> void:
 		return
 	_update_enemy_targets()
 	_update_boss_target()
-	if is_instance_valid(_arena_visual):
-		_arena_visual.set_focus_point(_player.global_position)
+	_run_items.advance(delta)
+	_item_hud.refresh(_run_items, _ward_stock, _player.has_soul_ward())
 	_update_combo(delta)
 	_update_focus(delta)
 	_update_rush(delta)
@@ -463,16 +412,14 @@ func _process(delta: float) -> void:
 		_wave_director.set_run_context(
 			_player.get_current_health(),
 			_player.get_maximum_health(),
-			_run_progression.get_total_mutation_levels(),
+			0,
 		)
 		_wave_director.advance(delta, _remaining_live_enemies)
 	if (
 		_boss_pending
-		and not _upgrade_tray.is_open()
 		and _player.state == WispPlayer.State.WAITING_AT_EDGE
 	):
 		_start_boss_encounter()
-	_update_upgrade_offer(delta)
 
 
 func _physics_process(_delta: float) -> void:
@@ -484,10 +431,6 @@ func _physics_process(_delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	# A scripted arena's host screen owns back and Escape (the tutorial's skip confirm).
 	if _scripted:
-		return
-	if _intro_playing and _is_press(event):
-		get_viewport().set_input_as_handled()
-		_arena_visual.skip_intro()
 		return
 	if event.is_action_pressed(&"pause"):
 		get_viewport().set_input_as_handled()
@@ -562,16 +505,6 @@ func get_rush_count() -> int:
 ## Returns whether the Reaper currently owns encounter flow.
 func is_boss_active() -> bool:
 	return is_instance_valid(_boss)
-
-
-## Adds run XP through the same progression path as enemy rewards.
-func add_experience(amount: int) -> void:
-	_grant_experience(amount)
-
-
-## Returns the current run-only level for one mutation identifier.
-func get_mutation_level(mutation_id: StringName) -> int:
-	return _run_progression.get_mutation_level(mutation_id)
 
 
 ## Holds the run start (Main's cover-then-build and run prewarm): the arena builds and draws, but the
@@ -661,11 +594,6 @@ func configure_run(profile: RunProfile) -> void:
 		_layout_for_viewport()
 
 
-## The animated scenery layer over the backdrop (no scenery unless the skin has it).
-func get_arena_ambience() -> ArenaAmbience:
-	return _ambience
-
-
 ## Run mode from the profile: `RunProfile.MODE_ENDLESS`, `MODE_DAILY` or `MODE_TUTORIAL`.
 func get_run_mode() -> StringName:
 	return _mode
@@ -681,26 +609,16 @@ func get_arena_rules() -> ArenaRules:
 	return _arena_rules
 
 
-## Swaps in the arena's backdrop and latches its boss cadence.
-##
-## The playfield comes from the texture and the arena's own floor: the neutral arena uses
-## ARENA_FLOOR_UV, an Endless arena brings its catalog's floor rect (ADR-0017). A layered arena
-## shows its scene instead of the texture and gives the floor itself (ADR-0021).
+## Shows the arena's scene and latches its boss cadence. The playfield is the floor the scene
+## draws (ADR-0027: the one arena, SIMULATION).
 func _apply_arena() -> void:
 	_set_arena_visual(_arena_rules.get_visual_scene())
-	if _arena_visual == null:
-		var backdrop: Texture2D = _arena_rules.get_background()
-		if backdrop != null:
-			_background.texture = backdrop
-	if _ambience != null:
-		_ambience.configure(_arena_rules.get_scenery(), _background)
 	_boss_wave_interval = maxi(1, _arena_rules.get_boss_wave_interval())
 	_apply_arena_difficulty()
 
 
-## Shows [param scene] (a layered, 3D or board arena, ADR-0021, ADR-0023, ADR-0024) in place of the
-## painted backdrop, or the backdrop again when it is null. Keeps the one already shown when it is the
-## same scene. A board takes over the HUD ([method _apply_board_hud]).
+## Shows [param scene] (the arena, an `ArenaVisual`) under everything else. Keeps the one already
+## shown when it is the same scene. A board takes over the HUD ([method _apply_board_hud]).
 func _set_arena_visual(scene: PackedScene) -> void:
 	var wanted: String = scene.resource_path if scene != null else ""
 	if is_instance_valid(_arena_visual) and _arena_visual.scene_file_path == wanted:
@@ -717,18 +635,14 @@ func _set_arena_visual(scene: PackedScene) -> void:
 		else:
 			_arena_visual.name = "ArenaVisual"
 			_arena_visual.set_reduced_motion(_reduced_motion)
-			# Right over the painted backdrop, so the ambience and WorldShade still draw over it.
-			_background.add_sibling(_arena_visual)
-			if not play_arena_intro:
-				_arena_visual.skip_intro()
+			# Under everything, so WorldShade and the world draw over it.
+			add_child(_arena_visual)
+			move_child(_arena_visual, 0)
 			_arena_visual.hud_pause_pressed.connect(_on_pause_button_pressed)
-	_background.visible = _arena_visual == null
 	_apply_board_hud(is_instance_valid(_arena_visual) and _arena_visual.has_board_hud())
 
 
-## A board arena draws the HUD in its frame (owner 2026-10-02, ADR-0024): GameWorld's own HUD bars and
-## buttons move under a hidden holder while [param on] (they keep being updated, and feed the board in
-## [method _update_board_hud]), and the light on the character shows when upgrades are ready.
+## Board arenas retain their pause/score/RUSH/boss controls and now display Ward availability.
 func _apply_board_hud(on: bool) -> void:
 	if on == _board_hud:
 		return
@@ -740,79 +654,32 @@ func _apply_board_hud(on: bool) -> void:
 		_hidden_hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_hidden_hud.set_anchors_preset(Control.PRESET_FULL_RECT)
 		_safe_hud.add_child(_hidden_hud)
-		_board_hud_controls = [
-			_pause_button, _upgrade_button, _stats_column, _xp_bar, _run_level_label, _rush_row, _boss_hud,
-		]
+		_board_hud_controls = [_pause_button, _stats_column, _rush_row, _boss_hud]
 		for control: Control in _board_hud_controls:
 			_board_hud_indices.append(control.get_index())
-	for i: int in _board_hud_controls.size():
-		var control: Control = _board_hud_controls[i]
+	for index: int in _board_hud_controls.size():
+		var control: Control = _board_hud_controls[index]
 		control.reparent(_hidden_hud if on else _safe_hud, false)
 		if not on:
-			_safe_hud.move_child(control, mini(_board_hud_indices[i], _safe_hud.get_child_count() - 1))
-	if on and _upgrade_glow == null:
-		_upgrade_glow = UpgradeGlow.new()
-		_upgrade_glow.name = "UpgradeGlow"
-		_upgrade_glow.visible = false
-		# Behind the character, in the same layer.
-		_player.add_sibling(_upgrade_glow)
-		_player.get_parent().move_child(_upgrade_glow, _player.get_index())
-	if _upgrade_glow != null:
-		_upgrade_glow.visible = false
-	_character_tap_msec = -1
+			_safe_hud.move_child(control,
+				mini(_board_hud_indices[index], _safe_hud.get_child_count() - 1))
 
 
-## Feeds the board arena its HUD values and places the light on the character.
+## Feeds board hardware its current stock and shield state; timed items use the bottom frame.
 func _update_board_hud() -> void:
 	if not _board_hud or not is_instance_valid(_arena_visual):
 		return
-	var ready: bool = _upgrade_button.visible and not _run_over and not _upgrade_tray.is_open()
-	var upgrades: int = _run_progression.get_banked_levels() if ready else 0
 	_arena_visual.set_board_hud({
-		"score": _score_label.text,
-		"rift_points": _rift_points_count.text,
-		"rp_icon": _rift_points_icon.texture,
-		"level": _hud_level,
-		"soul": _xp_bar.value / maxf(_xp_bar.max_value, 1.0),
+		"score": _score_label.text, "rift_points": _rift_points_count.text,
+		"rp_icon": _rift_points_icon.texture, "ward_stock": _ward_stock,
+		"ward_active": _player.has_soul_ward(),
 		"rush": _rush_bar.value / maxf(_rush_bar.max_value, 1.0),
 		"boss": _boss_hud.visible,
 		"boss_health": _boss_bar.value / maxf(_boss_bar.max_value, 1.0),
 		"boss_icon": _boss_icon.texture,
-		"upgrades": upgrades,
+		# The Tutorial hides the pause button (a scripted arena); the board follows it.
+		"pause": _pause_button.visible,
 	})
-	if _upgrade_glow != null:
-		_upgrade_glow.visible = upgrades > 0 and _player.visible
-		_upgrade_glow.position = _player.position
-		_upgrade_glow.radius = _player.get_collision_radius()
-		_upgrade_glow.reduced_motion = _reduced_motion
-
-
-## On a board, tapping the glowing character opens the upgrades (owner 2026-10-02): a press that starts
-## on him and lifts within the dash's minimum swipe distance and [constant CHARACTER_TAP_MSEC]. The
-## press still reaches the Wisp (it may become an aim); the tap's release does not, and the aim is
-## dropped as the cards open.
-func _input(event: InputEvent) -> void:
-	if not _board_hud or _scripted or _intro_playing:
-		return
-	var button := event as InputEventMouseButton
-	if button == null or button.button_index != MOUSE_BUTTON_LEFT:
-		return
-	if button.pressed:
-		_character_tap_msec = -1
-		if _upgrade_glow != null and _upgrade_glow.visible and not get_tree().paused:
-			var reach: float = _player.get_collision_radius() * CHARACTER_TAP_REACH
-			if button.position.distance_to(_player.global_position) <= reach:
-				_character_tap_start = button.position
-				_character_tap_msec = Time.get_ticks_msec()
-		return
-	if _character_tap_msec < 0:
-		return
-	var held: int = Time.get_ticks_msec() - _character_tap_msec
-	var moved: float = button.position.distance_to(_character_tap_start)
-	_character_tap_msec = -1
-	if held <= CHARACTER_TAP_MSEC and moved < _player.tuning.minimum_swipe_distance:
-		get_viewport().set_input_as_handled()
-		_on_upgrade_button_pressed()
 
 
 ## Pushes the arena's difficulty for the current cycle into the wave director and live enemies.
@@ -919,11 +786,8 @@ func spawn_scripted_hazard(kind: StringName, arena_uv: Vector2) -> HazardActor:
 	return _spawn_hazard(kind, arena_to_world(arena_uv, _floor_margin() * 2.0))
 
 
-## Empties the arena for the next lesson step: enemies, hazards, any boss (freed without a defeat),
-## floor shards (collected) and an open upgrade tray (its level stays banked).
+## Clears enemies, floor items and temporary powers between tutorial lessons.
 func clear_scripted_arena() -> void:
-	_scripted_upgrade_calm_requested = false
-	_close_upgrade_tray(&"reset")
 	debug_quiet_arena()
 	if is_instance_valid(_boss):
 		_boss.queue_free()
@@ -932,6 +796,13 @@ func clear_scripted_arena() -> void:
 		_set_world_shade(SHADE_CALM)
 		_update_music_state()
 	_sweep_floor_shards(true)
+	for child: Node in _pickup_layer.get_children():
+		if child is RunItemPickup:
+			child.queue_free()
+	_run_items.clear()
+	_player.clear_soul_ward()
+	if _scripted:
+		_ward_stock = 0
 
 
 ## Starts a boss encounter now with [param health] (rounded to three phase bands).
@@ -950,20 +821,6 @@ func find_nearest_target(origin: Vector2) -> Vector2:
 	if nearest != null:
 		return nearest.global_position
 	return _boss.global_position if is_instance_valid(_boss) else origin
-
-
-## Turns XP from kills and bosses on or off (real runs keep it on).
-func set_experience_enabled(enabled: bool) -> void:
-	_experience_enabled = enabled
-
-
-## Adds XP, bypassing `set_experience_enabled`, until the bar holds [param share] (0..1) of the next
-## threshold; 1.0 banks a level-up; its cards wait for `request_upgrade_calm_moment`.
-func set_experience_share(share: float) -> void:
-	var target: int = ceili(float(_run_progression.get_xp_threshold()) * clampf(share, 0.0, 1.0))
-	var missing: int = target - _run_progression.get_current_xp()
-	if missing > 0:
-		_run_progression.add_experience(missing)
 
 
 ## Turns the RUSH meter and RUSH mode on or off (row shown only while on); off ends a running RUSH.
@@ -1044,12 +901,16 @@ func sweep_shards() -> void:
 	_sweep_floor_shards()
 
 
-## Screen rect of a HUD element to point at: `&"xp"` or `&"rush"`; empty otherwise. There is no
-## `&"health"` since the lives readout left the HUD (2026-09-24).
+## A tutorial HUD focus target, in viewport coordinates.
 func get_hud_rect(element: StringName) -> Rect2:
+	# A board draws these in itself (ADR-0024); its rect is in its own coordinates.
+	if _board_hud and is_instance_valid(_arena_visual):
+		var drawn: Rect2 = _arena_visual.get_hud_rect(element)
+		if drawn.has_area():
+			return _arena_visual.get_global_transform() * drawn
 	match element:
-		&"xp":
-			return _xp_bar.get_global_rect().merge(_run_level_label.get_global_rect())
+		&"items":
+			return _item_hud.get_stock_rect()
 		&"rush":
 			return _rush_row.get_global_rect()
 	return Rect2()
@@ -1065,53 +926,14 @@ func show_callout(text: String, emphasis: float = 1.0) -> void:
 	_show_callout(text, emphasis)
 
 
-## The lesson's calm moment: banked upgrade cards slide up once the Wisp rests with no combo running
-## (a scripted arena has no other calm moments). One request opens the tray at most once.
-func request_upgrade_calm_moment() -> void:
-	_scripted_upgrade_calm_requested = true
-
-
-## Whether a lesson calm moment is still waiting to open the tray.
-func has_upgrade_calm_request() -> bool:
-	return _scripted_upgrade_calm_requested
-
-
-## Level-ups banked and still spendable.
-func get_banked_upgrades() -> int:
-	return _run_progression.get_banked_levels()
-
-
-## Whether the upgrade card tray is up (sliding in or resting).
-func is_upgrade_tray_open() -> bool:
-	return _upgrade_tray.is_open()
-
-
-## Whether the tray rests fully up and accepts a pick (the tutorial hand taps then).
-func is_upgrade_tray_settled() -> bool:
-	return _upgrade_tray.is_settled()
-
-
-## Screen rect of upgrade card [param index] while the tray is up; empty otherwise.
-func get_upgrade_card_rect(index: int) -> Rect2:
-	return _upgrade_tray.get_card_rect(index)
-
-
-## Picks upgrade card [param index] as a tap would (the tutorial demo); false when refused.
-func choose_upgrade_card(index: int) -> bool:
-	return _upgrade_tray.choose_index(index)
-
-
-## Lifts the upgrade tray [param lift] design px above the bottom safe margin (a host caption band).
-func set_upgrade_tray_lift(lift: float) -> void:
-	_upgrade_tray_lift = maxf(0.0, lift)
-	if is_node_ready():
-		_layout_safe_hud()
-
-
 ## Handles Android back and Escape: closes the topmost overlay, otherwise toggles pause.
 ## Always returns true because an active run consumes back presses.
 func handle_back() -> bool:
 	if _run_over:
+		return true
+	if _revive_offer_open:
+		if not _revive_watch_button.disabled:
+			_decline_revive()
 		return true
 	if _confirm_overlay.visible:
 		_close_confirm()
@@ -1140,7 +962,7 @@ func get_shake_strength() -> float:
 	return _shake_strength
 
 
-## Returns whether leaving now would discard meaningful progress (Restart/Home then confirm).
+## Returns whether leaving now would discard meaningful progress (Home then confirm).
 func is_run_meaningful() -> bool:
 	return not _run_over and (_score > 0 or _total_kills > 0 or _current_wave > 1)
 
@@ -1166,11 +988,10 @@ func _exit_tree() -> void:
 
 func _layout_for_viewport() -> void:
 	_arena_rect = _compute_arena_rect()
-	for backdrop: Control in [_background, _ambience, _world_shade]:
-		backdrop.offset_left = -BACKGROUND_OVERSCAN
-		backdrop.offset_top = -BACKGROUND_OVERSCAN
-		backdrop.offset_right = BACKGROUND_OVERSCAN
-		backdrop.offset_bottom = BACKGROUND_OVERSCAN
+	_world_shade.offset_left = -BACKGROUND_OVERSCAN
+	_world_shade.offset_top = -BACKGROUND_OVERSCAN
+	_world_shade.offset_right = BACKGROUND_OVERSCAN
+	_world_shade.offset_bottom = BACKGROUND_OVERSCAN
 	# The rect stays the design-pixel scale and the distribution domain; the polygon is the wall.
 	_player.set_arena_rect(_arena_rect)
 	_arena_polygon = _compute_arena_polygon()
@@ -1198,28 +1019,16 @@ func _layout_for_viewport() -> void:
 
 
 func _layout_safe_hud() -> void:
-	# Header: pause and UPGRADE on the left, Rift Points and score on the right, and the soul level
-	# bar, RUSH and the boss line stacked in the middle (owner, 2026-09-24).
 	var margins: Vector4 = _get_safe_margins()
 	var top: float = margins.y
 	_pause_button.offset_left = margins.x
 	_pause_button.offset_top = top
 	_pause_button.offset_right = margins.x + HUD_PAUSE_SIZE
 	_pause_button.offset_bottom = top + HUD_PAUSE_SIZE
-	var upgrade_top: float = top + HUD_PAUSE_SIZE + HUD_UPGRADE_BUTTON_GAP
-	_upgrade_button.offset_left = margins.x
-	_upgrade_button.offset_top = upgrade_top
-	_upgrade_button.offset_right = margins.x + HUD_UPGRADE_BUTTON_SIZE
-	_upgrade_button.offset_bottom = upgrade_top + HUD_UPGRADE_BUTTON_SIZE
 	_stats_column.offset_left = -(margins.z + HUD_STATS_WIDTH)
 	_stats_column.offset_top = top
 	_stats_column.offset_right = -margins.z
 	_stats_column.offset_bottom = top + _stats_column.get_combined_minimum_size().y
-	_xp_bar.offset_top = top + HUD_XP_TOP
-	# The kit's slim track is 20 px (five art pixels); any other height would drop or repeat a row.
-	_xp_bar.offset_bottom = top + HUD_XP_TOP + 20.0
-	_run_level_label.offset_top = top + HUD_LEVEL_TOP
-	_run_level_label.offset_bottom = top + HUD_LEVEL_TOP + 34.0
 	_rush_row.offset_top = top + HUD_RUSH_TOP
 	_rush_row.offset_bottom = top + HUD_RUSH_TOP + HUD_RUSH_HEIGHT
 	_boss_hud.offset_top = top + HUD_BOSS_TOP
@@ -1230,25 +1039,7 @@ func _layout_safe_hud() -> void:
 	_focus_label.offset_bottom = top + HUD_FOCUS_TOP + 44.0
 	_instruction_label.offset_top = -(margins.w + 150.0)
 	_instruction_label.offset_bottom = -(margins.w + 96.0)
-	_upgrade_tray.set_bottom_inset(
-		margins.w + _upgrade_tray_lift + size.y * _run_progression.tuning.tray_raise_share
-	)
-
-
-## Maps the painted floor of the cover-scaled backdrop into screen space and keeps it on screen.
-## Screen-space rectangle the cover-scaled backdrop image occupies.
-##
-## Shared by the legacy floor rect and the arena floor polygon so both are mapped through exactly
-## the same transform; if they diverged, the wall and the art would disagree.
-func _backdrop_image_rect() -> Rect2:
-	var view: Rect2 = get_viewport_rect()
-	var texture: Texture2D = _background.texture
-	if texture == null or texture.get_size().x <= 0.0 or texture.get_size().y <= 0.0:
-		return view
-	var texture_size: Vector2 = texture.get_size()
-	var cover: float = maxf(view.size.x / texture_size.x, view.size.y / texture_size.y)
-	var image_size: Vector2 = texture_size * cover
-	return Rect2(view.position + (view.size - image_size) * 0.5, image_size)
+	_item_hud.fit(size, margins, _arena_rect, _board_hud)
 
 
 ## Moves a point that should be on the floor onto the painted floor, [param margin] px clear.
@@ -1296,42 +1087,25 @@ func _get_reform_candidates() -> Array[Vector2]:
 	return candidates
 
 
-## The arena's floor (the Endless template) in screen space. A layered arena's is its drawn floor,
-## the arena rect itself.
+## The arena's floor in screen space: the arena's drawn floor, the arena rect itself.
 func _compute_arena_polygon() -> PackedVector2Array:
-	if is_instance_valid(_arena_visual):
-		var floor_rect: Rect2 = _arena_rect
-		return PackedVector2Array([
-			floor_rect.position,
-			Vector2(floor_rect.end.x, floor_rect.position.y),
-			floor_rect.end,
-			Vector2(floor_rect.position.x, floor_rect.end.y),
-		])
-	var floor_uv: PackedVector2Array = _arena_rules.get_floor_polygon()
-	if floor_uv.size() < 3:
-		return PackedVector2Array()
-	return DashGeometry.polygon_from_uv(floor_uv, _backdrop_image_rect())
+	var floor_rect: Rect2 = _arena_rect
+	return PackedVector2Array([
+		floor_rect.position,
+		Vector2(floor_rect.end.x, floor_rect.position.y),
+		floor_rect.end,
+		Vector2(floor_rect.position.x, floor_rect.end.y),
+	])
 
 
+## The floor exactly as the arena drew it: no minimum size widens it (ADR-0021).
 func _compute_arena_rect() -> Rect2:
 	var view: Rect2 = get_viewport_rect()
-	if is_instance_valid(_arena_visual):
-		# The floor exactly as the layered arena drew it: no minimum size widens it (ADR-0021).
-		var margins: Vector4 = _get_safe_margins()
-		_arena_visual.set_safe_bottom(margins.w)
-		return _arena_visual.fit(view.size, margins.y).intersection(view)
-	var texture: Texture2D = _background.texture
-	var rect: Rect2 = view
-	if texture != null and texture.get_size().x > 0.0 and texture.get_size().y > 0.0:
-		var image: Rect2 = _backdrop_image_rect()
-		var floor_uv: Rect2 = _arena_rules.get_floor_rect_uv() if _arena_rules != null else Rect2()
-		if not floor_uv.has_area():
-			floor_uv = ARENA_FLOOR_UV
-		rect = Rect2(image.position + floor_uv.position * image.size, floor_uv.size * image.size)
-	var minimum: Vector2 = view.size * ARENA_MIN_VIEWPORT_FRACTION
-	rect.size = rect.size.max(minimum)
-	rect.position = rect.position.clamp(view.position, view.end - rect.size)
-	return rect.intersection(view)
+	if not is_instance_valid(_arena_visual):
+		return view
+	var margins: Vector4 = _get_safe_margins()
+	_arena_visual.set_safe_bottom(margins.w)
+	return _arena_visual.fit(view.size, margins.y).intersection(view)
 
 
 func _get_safe_margins() -> Vector4:
@@ -1373,50 +1147,16 @@ func _begin_run() -> void:
 		_instruction_label.visible = false
 		_pause_button.visible = false
 		print("[GameWorld] scripted arena ready")
-	elif not _play_arena_intro():
+	else:
 		_start_waves()
 	_refresh_rush_hud()
-
-
-## Plays the arena's opening shot (a 3D arena's zoom into its floor, ADR-0023) with the Wisp and the
-## HUD hidden and steering off; the waves start when it ends. False when the arena has none.
-func _play_arena_intro() -> bool:
-	if not play_arena_intro or not is_instance_valid(_arena_visual) or not _arena_visual.has_intro():
-		return false
-	_intro_playing = true
-	_player.visible = false
-	_safe_hud.visible = false
-	_player.set_input_enabled(false)
-	_arena_visual.intro_finished.connect(_on_arena_intro_finished, CONNECT_ONE_SHOT)
-	print("[GameWorld] arena intro")
-	_arena_visual.play_intro()
-	return true
-
-
-func _on_arena_intro_finished() -> void:
-	if not _intro_playing:
-		return
-	_intro_playing = false
-	_player.set_input_enabled(true)
-	for item: CanvasItem in [_player, _safe_hud]:
-		item.modulate.a = 0.0
-		item.visible = true
-		create_tween().tween_property(item, ^"modulate:a", 1.0, INTRO_FADE_SECONDS)
-	print("[GameWorld] arena intro done")
-	_start_waves()
-
-
-static func _is_press(event: InputEvent) -> bool:
-	return (
-		(event is InputEventScreenTouch and (event as InputEventScreenTouch).pressed)
-		or (event is InputEventMouseButton and (event as InputEventMouseButton).pressed)
-	)
 
 
 func _start_waves() -> void:
 	if _waves_started or _run_over:
 		return
 	_waves_started = true
+	run_started.emit()
 	# Endless rules spawn continuously (never a quiet wait); the neutral arena keeps timed waves.
 	var endless_rules := _arena_rules as EndlessArenaRules
 	var endless_tuning: EndlessTuning = endless_rules.get_tuning() if endless_rules != null else null
@@ -1443,7 +1183,6 @@ func _update_post_boss(delta: float) -> void:
 		_post_boss_remaining = -1.0
 		_set_world_shade(SHADE_CALM)
 		_wave_director.resume_after_boss()
-		_mark_calm_moment(&"boss_defeated")
 
 
 func _update_boss_target() -> void:
@@ -1465,7 +1204,6 @@ func _on_wave_started(wave: int, _threat_budget: int) -> void:
 	# The enemy mixes' "<NAME> WAVE" callouts went with the mixes (Enemies v2).
 	if wave > 1:
 		_show_callout("WAVE %02d" % wave)
-	_mark_calm_moment(&"wave_start")
 
 
 func _start_boss_encounter(health_override: int = 0) -> void:
@@ -1473,7 +1211,6 @@ func _start_boss_encounter(health_override: int = 0) -> void:
 		return
 	_boss_pending = false
 	# Upgrade cards never stay up into a boss; a banked level waits for the boss to fall.
-	_close_upgrade_tray(&"boss")
 	_sweep_floor_shards()
 	_clear_enemies()
 	_clear_hazards()
@@ -1571,20 +1308,17 @@ func _on_reaper_defeated(
 	rp_reward: int,
 	) -> void:
 	var victory_duration: float = 1.0
-	var experience_reward: int = 0
 	var defeat_name: String = "REAPER"
 	if is_instance_valid(_boss):
 		victory_duration = _boss.get_victory_duration()
-		experience_reward = _boss.get_experience_reward()
 		defeat_name = _boss.get_defeat_name()
 	_boss = null
 	_bosses_defeated += 1
 	_sweep_floor_shards()
 	_update_music_state()
-	_score += _apply_velocity_score_bonus(score_reward)
+	_score += _apply_item_score_bonus(score_reward)
 	_score_label.text = "%06d" % _score
 	_award_rift_points(rp_reward)
-	_grant_experience(experience_reward)
 	_clear_enemies()
 	_clear_hazards()
 	_boss_hud.visible = false
@@ -1673,7 +1407,7 @@ func _spawn_enemy(
 	enemy.set_arena_polygon(_arena_polygon)
 	enemy.set_target_position(_player.global_position)
 	enemy.set_last_edge_position(_player.global_position)
-	enemy.set_world_speed(0.32 if _focus_remaining > 0.0 else 1.0)
+	enemy.set_world_speed(_regular_enemy_speed())
 	enemy.set_speed_scale(_arena_rules.get_enemy_speed_scale(_bosses_defeated))
 	enemy.killed.connect(_on_enemy_killed)
 	enemy.projectile_fired.connect(_on_enemy_projectile_fired)
@@ -1695,7 +1429,7 @@ func _on_enemy_projectile_fired(projectile: EnemyProjectile) -> void:
 	_projectile_layer.add_child(projectile)
 	projectile.set_arena(_arena_rect, _arena_polygon)
 	projectile.set_target_position(_player.global_position)
-	projectile.set_world_speed(0.32 if _focus_remaining > 0.0 else 1.0)
+	projectile.set_world_speed(_regular_enemy_speed())
 
 
 ## Spawns a splitter's children around its death point, clamped inside the playfield. No Enemies v2
@@ -1897,16 +1631,28 @@ func _update_focus(delta: float) -> void:
 		_focus_label.visible = false
 
 
+func _regular_enemy_speed() -> float:
+	var speed: float = _player.tuning.focus_world_speed if _focus_remaining > 0.0 else 1.0
+	if _run_items.is_active(RunItemCatalog.STILLGLASS):
+		speed = minf(speed,
+			_run_items.catalog.get_item(RunItemCatalog.STILLGLASS).enemy_speed_multiplier)
+	return speed
+
+
 func _set_world_speed(multiplier: float) -> void:
+	var enemy_speed: float = multiplier
+	if _run_items.is_active(RunItemCatalog.STILLGLASS):
+		enemy_speed = minf(enemy_speed,
+			_run_items.catalog.get_item(RunItemCatalog.STILLGLASS).enemy_speed_multiplier)
 	for child: Node in _enemy_layer.get_children():
 		if child is EnemyActor:
-			(child as EnemyActor).set_world_speed(multiplier)
+			(child as EnemyActor).set_world_speed(enemy_speed)
 	for child: Node in _hazard_layer.get_children():
 		if child is HazardActor:
 			(child as HazardActor).set_world_speed(multiplier)
 	for child: Node in _projectile_layer.get_children():
 		if child is EnemyProjectile:
-			(child as EnemyProjectile).set_world_speed(multiplier)
+			(child as EnemyProjectile).set_world_speed(enemy_speed)
 
 
 func _on_viewport_size_changed() -> void:
@@ -1914,8 +1660,6 @@ func _on_viewport_size_changed() -> void:
 
 
 func _on_player_dash_started(direction: Vector2, dash_id: int) -> void:
-	# Keep playing: a swipe on the arena sends the cards away and the level stays banked.
-	_close_upgrade_tray(&"swipe")
 	if _redirect_pending:
 		# A redirect ends one leg and starts the next without ever touching a wall, so the leg that
 		# just finished is drawn here — otherwise a chained dash would leave only its last streak.
@@ -1949,9 +1693,8 @@ func _on_player_dash_started(direction: Vector2, dash_id: int) -> void:
 		var elapsed_msec: int = Time.get_ticks_msec() - _last_wall_impact_msec
 		if elapsed_msec <= RAPID_REDIRECT_WINDOW_MSEC:
 			_rapid_redirect_dashes[dash_id] = true
-	var link_level: int = _run_progression.get_mutation_level(&"soul_link")
-	if link_level > 0:
-		_link_remaining_by_event[dash_id] = link_level
+	if _run_items.is_active(RunItemCatalog.ECHO_WISP):
+		_link_remaining_by_event[dash_id] = 1
 	dash_launched.emit(from_redirect)
 	if _instruction_label.visible and _instruction_label.modulate.a > 0.0:
 		var instruction_tween: Tween = create_tween()
@@ -1982,24 +1725,10 @@ func _on_player_dash_segment_swept(
 		_dash_direction = travel.normalized()
 	var hazard_event: Dictionary = _find_dash_hazard_event(segment_start, segment_end)
 	var hit_end: Vector2 = hazard_event.get(&"point", segment_end)
-	var cold_level: int = _run_progression.get_mutation_level(&"cold_wake")
 	for child: Node in _enemy_layer.get_children():
 		if not child is EnemyActor:
 			continue
 		var enemy := child as EnemyActor
-		if cold_level > 0 and enemy.is_contact_active():
-			var cold_distance: float = DashGeometry.distance_to_segment(
-				enemy.global_position,
-				segment_start,
-				hit_end,
-			)
-			if cold_distance <= corridor_radius + enemy.get_collision_radius():
-				enemy.apply_slow(
-					_run_progression.tuning.cold_wake_base_duration
-					+ float(cold_level - 1)
-					* _run_progression.tuning.cold_wake_duration_per_level,
-					_run_progression.tuning.cold_wake_speed,
-				)
 		var enemy_position: Vector2 = enemy.global_position
 		if enemy.try_dash_hit(
 			segment_start,
@@ -2012,6 +1741,8 @@ func _on_player_dash_segment_swept(
 	for child: Node in _pickup_layer.get_children():
 		if child is SoulShardPickup:
 			(child as SoulShardPickup).try_dash_collect(segment_start, hit_end, corridor_radius)
+		elif child is RunItemPickup:
+			(child as RunItemPickup).try_dash_collect(segment_start, hit_end, corridor_radius)
 	if is_instance_valid(_boss):
 		var boss_position: Vector2 = _boss.global_position
 		if _boss.try_dash_hit(
@@ -2315,7 +2046,6 @@ func _on_player_wall_impacted(
 	var dash_kills: int = _resolve_completed_dash(dash_id)
 	_play_wall_splash(world_position, inward_normal, dash_kills)
 	_play_impact_feedback(world_position, inward_normal, dash_kills)
-	_release_death_pulse(world_position, dash_id)
 	dash_resolved.emit(dash_kills, &"wall")
 
 
@@ -2341,7 +2071,7 @@ func _resolve_completed_dash(dash_id: int, from_redirect: bool = false) -> int:
 		_combo_remaining *= 0.72
 	if dash_kills >= 2:
 		_multi_kill_dashes += 1
-		var bonus: int = _apply_velocity_score_bonus(dash_kills * dash_kills * 10)
+		var bonus: int = _apply_item_score_bonus(dash_kills * dash_kills * 10)
 		_score += bonus
 		_award_rift_points(dash_kills / 3)
 		var label: String = "DOUBLE REAP" if dash_kills == 2 else "TRIPLE REAP"
@@ -2350,40 +2080,10 @@ func _resolve_completed_dash(dash_id: int, from_redirect: bool = false) -> int:
 		_show_callout("%s  +%d" % [label, bonus])
 	if _rapid_redirect_dashes.get(dash_id, false):
 		_rapid_ricochets += 1
-		_score += _apply_velocity_score_bonus(RAPID_REDIRECT_SCORE)
+		_score += _apply_item_score_bonus(RAPID_REDIRECT_SCORE)
 	_rapid_redirect_dashes.erase(dash_id)
 	_score_label.text = "%06d" % _score
 	return dash_kills
-
-
-func _release_death_pulse(world_position: Vector2, dash_id: int) -> void:
-	var pulse_level: int = _run_progression.get_mutation_level(&"death_pulse")
-	if pulse_level <= 0:
-		return
-	var radius_design: float = (
-		_run_progression.tuning.pulse_base_radius
-		+ float(pulse_level) * _run_progression.tuning.pulse_radius_per_level
-	)
-	var radius: float = radius_design * (_arena_rect.size.x / 1080.0)
-	var event_id: int = -PULSE_EVENT_OFFSET - dash_id
-	for child: Node in _enemy_layer.get_children():
-		if child is EnemyActor:
-			var enemy := child as EnemyActor
-			if enemy.global_position.distance_to(world_position) <= radius + enemy.get_collision_radius():
-				enemy.try_direct_hit(maxi(1, (pulse_level + 1) / 3), event_id)
-	var pulse := Sprite2D.new()
-	pulse.texture = DEATH_PULSE_TEXTURE
-	pulse.global_position = world_position
-	pulse.modulate = Color(_get_form_tint(), 0.82)
-	pulse.scale = Vector2.ONE * 0.05
-	_effects_layer.add_child(pulse)
-	var final_scale: Vector2 = Vector2.ONE * (radius * 2.0 / 362.0)
-	var pulse_tween: Tween = create_tween().set_parallel(true)
-	pulse_tween.tween_property(pulse, "scale", final_scale, 0.28).set_trans(
-		Tween.TRANS_QUAD
-	).set_ease(Tween.EASE_OUT)
-	pulse_tween.tween_property(pulse, "modulate:a", 0.0, 0.28)
-	pulse_tween.chain().tween_callback(pulse.queue_free)
 
 
 func _on_player_focus_started(duration: float, world_speed: float) -> void:
@@ -2397,14 +2097,14 @@ func _on_enemy_killed(
 		enemy: EnemyActor,
 		world_position: Vector2,
 		score_reward: int,
-		experience_reward: int,
+		_experience_reward: int,
 		damage_event_id: int,
 	) -> void:
 	_combo += 1
 	_highest_combo = maxi(_highest_combo, _combo)
 	_total_kills += 1
 	_combo_remaining = COMBO_TIMEOUT
-	_score += _apply_velocity_score_bonus(score_reward * _combo)
+	_score += _apply_item_score_bonus(score_reward * _combo)
 	var dash_kill_index: int = 0
 	if damage_event_id > 0:
 		dash_kill_index = _kills_by_dash.get(damage_event_id, 0) + 1
@@ -2414,23 +2114,23 @@ func _on_enemy_killed(
 	_spawn_split_children(enemy, world_position)
 	_fill_rush_from_kill(world_position, dash_kill_index)
 	_try_kill_finisher(dash_kill_index)
-	if _is_field_clear():
-		_mark_calm_moment(&"field_clear")
 	SoundFx.multi_kill(int(_kills_by_dash.get(damage_event_id, 1)) if damage_event_id > 0 else 1)
 	_play_kill_effects(world_position)
 	_update_music_state()
-	_grant_experience(experience_reward)
 	_score_label.text = "%06d" % _score
 	_combo_label.text = "×%d SOUL CHAIN" % _combo
 	_style_callout(false)
 	_combo_label.visible = _combo >= 2
 	if _random.randf() <= enemy.get_shard_drop_chance():
 		_spawn_rp_pickup(world_position)
+	if not _scripted and _random.randf() < _run_items.catalog.drop_chance:
+		var choices: Array[RunItemData] = _run_items.catalog.items
+		_spawn_item_pickup(choices[_random.randi_range(0, choices.size() - 1)], world_position)
 	_try_soul_link(enemy, world_position, damage_event_id)
 	enemy_defeated.emit(world_position, dash_kill_index)
 	print(
-		"[GameWorld] enemy killed | event=%d score=%d combo=%d xp=%d"
-		% [damage_event_id, _score, _combo, _run_progression.get_current_xp()]
+		"[GameWorld] enemy killed | event=%d score=%d combo=%d"
+		% [damage_event_id, _score, _combo]
 	)
 
 
@@ -2439,12 +2139,17 @@ func _try_soul_link(
 		world_position: Vector2,
 		damage_event_id: int,
 	) -> void:
+	if not _run_items.is_active(RunItemCatalog.ECHO_WISP):
+		return
 	var links_remaining: int = _link_remaining_by_event.get(damage_event_id, 0)
 	if links_remaining <= 0:
 		return
 	_link_remaining_by_event[damage_event_id] = links_remaining - 1
 	var nearest: EnemyActor = _find_nearest_active_enemy(world_position, killed_enemy)
 	if nearest != null:
+		_vfx.play_flight(_run_items.catalog.get_item(RunItemCatalog.ECHO_WISP).get_icon(),
+			world_position, nearest.global_position, Vector2.ONE * 0.16, Vector2.ONE * 0.08,
+			feel_tuning.orb_flight_seconds, Palette.SOUL_WHITE)
 		nearest.try_direct_hit(_player.dash_damage, damage_event_id)
 
 
@@ -2464,15 +2169,12 @@ func _find_nearest_active_enemy(origin: Vector2, excluded: EnemyActor) -> EnemyA
 	return nearest
 
 
-## The score choke point: Void Velocity's bonus, then RUSH's multiplier while it runs.
-func _apply_velocity_score_bonus(base_score: int) -> int:
-	var velocity_level: int = _run_progression.get_mutation_level(&"void_velocity")
-	var rush_multiplier: float = feel_tuning.score_multiplier if is_rush_active() else 1.0
-	return roundi(
-		float(base_score)
-		* (1.0 + float(velocity_level) * _run_progression.tuning.velocity_score_bonus)
-		* rush_multiplier
-	)
+## Score earned now includes Fortune Star and the existing RUSH multiplier.
+func _apply_item_score_bonus(base_score: int) -> int:
+	var multiplier: float = feel_tuning.score_multiplier if is_rush_active() else 1.0
+	if _run_items.is_active(RunItemCatalog.FORTUNE_STAR):
+		multiplier *= _run_items.catalog.get_item(RunItemCatalog.FORTUNE_STAR).score_multiplier
+	return roundi(float(base_score) * multiplier)
 
 
 func _spawn_rp_pickup(world_position: Vector2) -> void:
@@ -2490,13 +2192,6 @@ func _on_rp_pickup_collected(amount: int, pickup: SoulShardPickup) -> void:
 		SoundFx.play(&"shard_pickup")
 
 
-## Adds run XP. Every XP award goes through here.
-func _grant_experience(amount: int) -> void:
-	if amount <= 0 or not _experience_enabled:
-		return
-	_run_progression.add_experience(amount)
-
-
 ## Adds Rift Points collected during the run; every in-run RP award passes through here.
 func _award_rift_points(amount: int) -> void:
 	if amount <= 0:
@@ -2506,11 +2201,9 @@ func _award_rift_points(amount: int) -> void:
 
 
 func _get_pickup_attraction_radius() -> float:
-	var hunger_level: int = _run_progression.get_mutation_level(&"soul_hunger")
-	return (
-		_run_progression.tuning.shard_attraction_radius
-		+ float(hunger_level) * _run_progression.tuning.hunger_attraction_per_level
-	)
+	if _run_items.is_active(RunItemCatalog.RIFT_MAGNET):
+		return _arena_rect.size.length() / maxf(0.1, _arena_rect.size.x / 1080.0)
+	return _run_items.catalog.base_rp_attraction_radius
 
 
 func _update_pickup_attraction() -> void:
@@ -2525,184 +2218,14 @@ func _update_pickup_attraction() -> void:
 			)
 
 
-func _on_experience_changed(current_xp: int, threshold: int, run_level: int) -> void:
-	_xp_bar.max_value = maxf(1.0, float(threshold))
-	_xp_bar.value = float(current_xp)
-	_run_level_label.text = "SOUL LEVEL %d" % run_level
-	_hud_level = run_level
-
-
-## A level-up never interrupts: it is banked silently until a calm moment offers the cards.
-func _on_progression_level_ready() -> void:
-	_refresh_upgrade_button()
-	print("[GameWorld] level banked | banked=%d" % _run_progression.get_banked_levels())
-
-
-## Starts a calm moment: a wave starting, a boss beaten (after the victory beat) or the field clear
-## of regular enemies. Banked cards may open within `calm_window_seconds` once the rest is calm too.
-func _mark_calm_moment(reason: StringName) -> void:
-	if _run_over or _scripted:
-		return
-	_calm_moment_id += 1
-	_calm_window_remaining = _run_progression.tuning.calm_window_seconds
-	if _run_progression.get_banked_levels() > 0:
-		print("[GameWorld] calm moment | reason=%s id=%d banked=%d" % [
-			reason, _calm_moment_id, _run_progression.get_banked_levels(),
-		])
-
-
-## Counts the open tray's real-time timeout down, or opens the tray at a calm moment. Runs only
-## while the tree is not paused and the run is not over.
-func _update_upgrade_offer(delta: float) -> void:
-	_pulse_upgrade_button(delta)
-	if _upgrade_tray.is_open():
-		# `delta` is scaled by the slow motion the tray itself holds; the timeout is real seconds.
-		_upgrade_tray_remaining -= delta / maxf(Engine.time_scale, 0.01)
-		_upgrade_tray.set_timeout_share(
-			_upgrade_tray_remaining / maxf(0.01, _run_progression.tuning.tray_timeout)
-		)
-		if _upgrade_tray_remaining <= 0.0:
-			_close_upgrade_tray(&"timeout")
-		return
-	_calm_window_remaining = maxf(0.0, _calm_window_remaining - delta)
-	if _is_upgrade_calm():
-		_open_upgrade_tray()
-
-
-## Every rule of a calm moment (GDD §5.5): cards banked, free play (a tutorial lesson only on its own
-## request), no boss pending, alive or in its victory beat, no RUSH, not paused, run not over, the
-## Wisp resting at an edge, no combo running, and a calm moment whose cards were not shown yet.
-func _is_upgrade_calm() -> bool:
-	if _run_progression.get_banked_levels() <= 0:
-		return false
-	if _run_over or get_tree().paused or _pause_overlay.visible:
-		return false
-	if _boss_pending or is_instance_valid(_boss) or _post_boss_remaining >= 0.0:
-		return false
-	if is_rush_active() or _combo > 0:
-		return false
-	if _player.state != WispPlayer.State.WAITING_AT_EDGE:
-		return false
-	if _scripted:
-		return _scripted_upgrade_calm_requested
-	return _calm_window_remaining > 0.0 and _calm_moment_id != _upgrade_offer_spent_moment_id
-
-
-## Slides the card tray up with the next three choices; the world runs at `tray_time_scale` while it
-## is up (normal speed under Reduced Motion). Plays `level_up`.
-func _open_upgrade_tray() -> void:
-	var choices: Array[MutationData] = _run_progression.offer_choices(3)
-	if choices.is_empty():
-		return
-	_scripted_upgrade_calm_requested = false
-	_upgrade_offer_spent_moment_id = _calm_moment_id
-	_present_upgrade_choices(choices)
-	_refresh_upgrade_button()
-	SoundFx.play(&"level_up")
-	print("[GameWorld] upgrade tray open | banked=%d moment=%d" % [
-		_run_progression.get_banked_levels(), _calm_moment_id,
-	])
-
-
-func _present_upgrade_choices(choices: Array[MutationData]) -> void:
-	var tuning: RunProgressionTuning = _run_progression.tuning
-	_upgrade_tray_remaining = tuning.tray_timeout
-	_upgrade_tray.present(
-		choices,
-		_run_progression.get_levels(),
-		0.0 if _reduced_motion else tuning.tray_slide_seconds,
-	)
-	if _reduced_motion:
-		_release_time_scale(TIME_SCALE_HOLD_UPGRADE_TRAY)
-	else:
-		_hold_time_scale(TIME_SCALE_HOLD_UPGRADE_TRAY, tuning.tray_time_scale)
-
-
-## Sends the tray away (if up) and releases its slow motion; any banked level stays banked. The calm
-## moment it was opened for is spent, so the cards return only at the next one. [param instant] skips
-## the slide (run end).
-func _close_upgrade_tray(reason: StringName, instant: bool = false) -> void:
-	_release_time_scale(TIME_SCALE_HOLD_UPGRADE_TRAY)
-	if not _upgrade_tray.is_open():
-		return
-	_calm_window_remaining = 0.0
-	_upgrade_tray.dismiss(
-		0.0 if instant or _reduced_motion else _run_progression.tuning.tray_slide_seconds
-	)
-	_refresh_upgrade_button()
-	print("[GameWorld] upgrade tray closed | reason=%s banked=%d" % [
-		reason, _run_progression.get_banked_levels(),
-	])
-
-
-## A card was tapped: apply it once, then show the next banked set at once or close the tray.
-func _on_upgrade_choice_selected(mutation_id: StringName) -> void:
-	if not _run_progression.apply_choice(mutation_id):
-		return
-	SoundFx.play(&"upgrade_choice")
-	var next_choices: Array[MutationData] = []
-	if _run_progression.get_banked_levels() > 0:
-		next_choices = _run_progression.offer_choices(3)
-	if next_choices.is_empty():
-		_close_upgrade_tray(&"picked")
-	else:
-		_present_upgrade_choices(next_choices)
-	upgrade_chosen.emit(mutation_id)
-
-
-## The UPGRADE button (owner 2026-09-15): tapping it opens the cards now, without waiting for a calm
-## moment. Refused while paused, after the run ends or when the cards are already up.
-func _on_upgrade_button_pressed() -> void:
-	if _run_over or get_tree().paused or _upgrade_tray.is_open():
-		return
-	if _run_progression.get_banked_levels() <= 0:
-		_refresh_upgrade_button()
-		return
-	_player.cancel_active_aim()
-	_open_upgrade_tray()
-
-
-## Shows the UPGRADE button while a level-up is banked and the cards are not up; ×N for several.
-func _refresh_upgrade_button() -> void:
-	if not is_node_ready():
-		return
-	var banked: int = _run_progression.get_banked_levels()
-	_upgrade_button.visible = banked > 0 and not _run_over and not _upgrade_tray.is_open()
-	_upgrade_count.visible = banked > 1
-	_upgrade_count.text = "×%d" % banked
-	if not _upgrade_button.visible:
-		_upgrade_button.modulate = Color.WHITE
-
-
-func _pulse_upgrade_button(delta: float) -> void:
-	if not _upgrade_button.visible:
-		return
-	var brightness: float = 1.0
-	if not _reduced_motion:
-		var tuning: RunProgressionTuning = _run_progression.tuning
-		_upgrade_button_pulse_time += delta / maxf(Engine.time_scale, 0.01)
-		var phase: float = _upgrade_button_pulse_time * TAU * tuning.button_pulse_rate
-		brightness = 1.0 + tuning.button_pulse_amount * (0.5 + 0.5 * sin(phase))
-	_upgrade_button.modulate = Color(brightness, brightness, brightness, 1.0)
-
-
-func _on_mutation_applied(mutation_id: StringName, mutation_level: int) -> void:
-	_refresh_upgrade_button()
-	_update_player_mutation_stats()
+## Applies the temporary item modifiers; damage and movement stay at the ordinary baseline.
+func _apply_item_modifiers() -> void:
+	var width: float = 1.0
+	if _run_items.is_active(RunItemCatalog.REAPERS_EDGE):
+		width = _run_items.catalog.get_item(RunItemCatalog.REAPERS_EDGE).corridor_multiplier
+	_player.set_run_combat_modifiers(1, width, 1.0)
 	_update_pickup_attraction()
-	var mutation: MutationData = _run_progression.get_mutation(mutation_id)
-	_show_callout("%s  LV.%d" % [mutation.display_name, mutation_level])
-
-
-func _update_player_mutation_stats() -> void:
-	var hunger_level: int = _run_progression.get_mutation_level(&"soul_hunger")
-	var wide_level: int = _run_progression.get_mutation_level(&"wide_reap")
-	var velocity_level: int = _run_progression.get_mutation_level(&"void_velocity")
-	_player.set_run_combat_modifiers(
-		1 + hunger_level,
-		1.0 + float(wide_level) * _run_progression.tuning.wide_reap_per_level,
-		1.0 + float(velocity_level) * _run_progression.tuning.velocity_per_level,
-	)
+	_set_world_speed(_player.tuning.focus_world_speed if _focus_remaining > 0.0 else 1.0)
 
 
 func _on_player_damaged(current_health: int, _maximum_health: int) -> void:
@@ -2723,12 +2246,20 @@ func _on_player_damaged(current_health: int, _maximum_health: int) -> void:
 
 
 func _on_player_died() -> void:
-	if _run_over:
+	if _run_over or _revive_offer_open:
 		return
+	if _can_offer_revive():
+		_open_revive_offer()
+		return
+	_finish_death()
+
+
+## Ends the run after a death no revive undid.
+func _finish_death() -> void:
 	_run_over = true
+	_run_items.clear()
+	_player.clear_soul_ward()
 	_clear_aim_preview()
-	_close_upgrade_tray(&"run_end", true)
-	# Banked but unpicked level-ups are lost with the run.
 	_clear_time_scale_requests()
 	_end_rush(false)
 	SoundFx.play(&"player_dissolve")
@@ -2740,6 +2271,63 @@ func _on_player_died() -> void:
 	if is_instance_valid(_arena_visual):
 		_arena_visual.clear_spawn_effects()
 	_emit_run_end()
+
+
+## Whether to offer the rewarded revive: a real run (not the Tutorial), and Monetisation allows it
+## (an ad loaded, consent decided, ads not removed, not used this run; owner 2026-10-05, ADR-0029).
+func _can_offer_revive() -> bool:
+	if _scripted or _mode == RunProfile.MODE_TUTORIAL:
+		return false
+	var monetisation := get_node_or_null(^"/root/Monetisation") as MonetisationService
+	return monetisation != null and monetisation.can_offer(MonetisationService.PLACEMENT_REVIVE)
+
+
+## Freezes the run under the revive offer: WATCH AD or NO THANKS (Android back is NO THANKS).
+func _open_revive_offer() -> void:
+	_revive_offer_open = true
+	_player.cancel_active_aim()
+	_clear_aim_preview()
+	_clear_time_scale_requests()
+	SoundFx.music_state(0.0, false)
+	_revive_watch_button.disabled = false
+	_revive_decline_button.disabled = false
+	_revive_overlay.visible = true
+	get_tree().paused = true
+	_revive_watch_button.grab_focus()
+
+
+func _close_revive_offer() -> void:
+	_revive_overlay.visible = false
+	_revive_offer_open = false
+	get_tree().paused = false
+
+
+## Shows the rewarded ad; an earned reward brings the Wisp back, anything else ends the run.
+func _on_revive_watch_pressed() -> void:
+	if not _revive_offer_open or _revive_watch_button.disabled:
+		return
+	_revive_watch_button.disabled = true
+	_revive_decline_button.disabled = true
+	var monetisation := get_node_or_null(^"/root/Monetisation") as MonetisationService
+	var earned: bool = false
+	if monetisation != null:
+		earned = await monetisation.show_rewarded(MonetisationService.PLACEMENT_REVIVE)
+	if not is_inside_tree():
+		return
+	if earned and _player.revive(REVIVE_INVULNERABLE_SECONDS):
+		_close_revive_offer()
+		_update_music_state()
+		_show_callout("REVIVED")
+		print("[GameWorld] revived by a rewarded ad | wave=%d score=%d" % [_current_wave, _score])
+		return
+	_decline_revive()
+
+
+func _decline_revive() -> void:
+	if not _revive_offer_open:
+		return
+	_close_revive_offer()
+	_finish_death()
 
 
 ## Builds the run summary and emits `run_ended` once.
@@ -2756,7 +2344,6 @@ func _emit_run_end() -> void:
 		&"bosses": _bosses_defeated,
 		&"rp_collected": _rp_collected,
 		&"rp_performance": get_rp_performance(),
-		&"run_level": _run_progression.get_run_level(),
 		&"daily_date": _daily_date_key,
 		&"is_daily": _mode == RunProfile.MODE_DAILY,
 		&"mode": String(_mode),
@@ -2827,10 +2414,6 @@ func _set_paused(paused: bool) -> void:
 	if paused:
 		# Pause and interruptions never keep a slow-motion request or hold running under the menu.
 		_clear_time_scale_requests()
-	# The pause menu hides an open upgrade tray; resuming shows it again with its slow motion.
-	_upgrade_tray.set_suspended(paused)
-	if not paused and _upgrade_tray.is_open() and not _reduced_motion:
-		_hold_time_scale(TIME_SCALE_HOLD_UPGRADE_TRAY, _run_progression.tuning.tray_time_scale)
 	_pause_overlay.visible = paused
 	get_tree().paused = paused
 	SoundFx.set_interrupted(paused)
@@ -2858,26 +2441,14 @@ func _on_home_button_pressed() -> void:
 		_leave_to_home()
 
 
-func _on_restart_button_pressed() -> void:
-	if is_run_meaningful():
-		_open_confirm(&"restart")
-	else:
-		_restart_run()
-
-
 func _leave_to_home() -> void:
 	_set_paused(false)
 	home_requested.emit()
 
 
-func _restart_run() -> void:
-	_set_paused(false)
-	restart_requested.emit()
-
-
 func _open_confirm(action: StringName) -> void:
 	_confirm_action = action
-	_confirm_title.text = "RESTART THIS RUN?" if action == &"restart" else "ABANDON THIS RUN?"
+	_confirm_title.text = "ABANDON THIS RUN?"
 	_confirm_overlay.visible = true
 	_confirm_cancel_button.grab_focus()
 
@@ -2895,9 +2466,7 @@ func _on_confirm_yes_button_pressed() -> void:
 	var action: StringName = _confirm_action
 	_confirm_overlay.visible = false
 	_confirm_action = &""
-	if action == &"restart":
-		_restart_run()
-	elif action == &"home":
+	if action == &"home":
 		_leave_to_home()
 
 
@@ -2923,7 +2492,6 @@ func _close_settings_overlay() -> void:
 
 func _apply_feel_settings(settings: Dictionary) -> void:
 	_reduced_motion = bool(settings.get(&"reduced_motion", false))
-	_ambience.set_active(not _reduced_motion)
 	if is_instance_valid(_arena_visual):
 		_arena_visual.set_reduced_motion(_reduced_motion)
 	_player.set_reduced_motion(_reduced_motion)
@@ -2985,7 +2553,7 @@ func _expire_time_scale_request(request_id: int) -> void:
 		_apply_time_scale()
 
 
-## Holds [param scale] under [param key] until `_release_time_scale(key)` (no timer): the upgrade tray
+## Holds [param scale] under [param key] until `_release_time_scale(key)` (no timer).
 ## keeps the world slow for as long as it is up. Holding a key again replaces its scale. Pause,
 ## interruption, run end, scene exit and `_reset_view_effects()` drop every hold.
 func _hold_time_scale(key: StringName, scale: float) -> void:
@@ -3222,10 +2790,10 @@ func _try_kill_finisher(dash_kill_index: int) -> void:
 
 
 ## Slow-motion finisher: ~0.4 s at ×0.3 through the time-scale owner, a light Soul White flash, a small
-## trauma kick and a low `soul_pulse`. Never under the pause menu or the upgrade choice; Reduced Motion
+## trauma kick and a low `soul_pulse`. Never under the pause menu; Reduced Motion
 ## keeps only the sound (and whatever callout the moment already shows).
 func _play_finisher(reason: StringName) -> void:
-	if _run_over or get_tree().paused or _upgrade_tray.is_open():
+	if _run_over or get_tree().paused:
 		return
 	SoundFx.play(&"soul_pulse", feel_tuning.finisher_pulse_pitch)
 	print("[GameWorld] finisher | reason=%s reduced_motion=%s" % [reason, _reduced_motion])
@@ -3284,7 +2852,7 @@ func _on_rush_orb_landed(amount: float) -> void:
 
 
 ## Counts RUSH down in game time and starts it once the meter is full and play is free; a full meter
-## waits out a disabled RUSH, pause and the upgrade tray (`_process` does not run while paused).
+## waits out a disabled RUSH and pause (`_process` does not run while paused).
 func _update_rush(delta: float) -> void:
 	if is_rush_active():
 		var remaining: float = _rush_remaining - delta
@@ -3305,7 +2873,6 @@ func _can_start_rush() -> bool:
 		not _run_over
 		and _is_free_play()
 		and not get_tree().paused
-		and not _upgrade_tray.is_open()
 		and not _pause_overlay.visible
 	)
 
@@ -3454,3 +3021,116 @@ func _play_sweep_chimes(shards: int) -> void:
 
 func _play_sweep_chime(pitch: float) -> void:
 	SoundFx.play(&"shard_pickup", pitch)
+
+
+
+## Stock synchronized by Main after a purchase, collection or consumption.
+func set_soul_ward_stock(stock: int) -> void:
+	_ward_stock = maxi(0, stock)
+
+
+## Stored Ward copies available this run.
+func get_soul_ward_stock() -> int:
+	return _ward_stock
+
+
+## Refuses activation while protected, paused, in an intro or after death.
+func can_activate_soul_ward() -> bool:
+	return _ward_stock > 0 and not _run_over and not get_tree().paused \
+		and not _player.has_soul_ward() and _player.get_current_health() > 0
+
+
+## Activates a copy the host has already persisted as spent.
+func activate_soul_ward() -> bool:
+	if not can_activate_soul_ward():
+		return false
+	if not _player.activate_soul_ward(_run_items.catalog.ward_escape_seconds):
+		return false
+	_ward_stock -= 1
+	_show_callout("SOUL WARD")
+	shield_activated.emit()
+	return true
+
+
+## Applies a temporary pickup or the immediate bomb, including a selected starting boost.
+func activate_item(item_id: StringName) -> bool:
+	return _run_items.activate(item_id)
+
+
+## Current timer state for the HUD, tutorial and integration checks.
+func get_run_items() -> RunItems:
+	return _run_items
+
+
+## Spawns a named pickup at a world position; scripted lessons use this instead of random drops.
+func spawn_scripted_item(item_id: StringName, world_position: Vector2) -> void:
+	var item: RunItemData = _run_items.catalog.get_item(item_id)
+	if item != null:
+		_spawn_item_pickup(item, world_position)
+
+
+func _spawn_item_pickup(item: RunItemData, world_position: Vector2) -> void:
+	var pickup := ITEM_PICKUP_SCENE.instantiate() as RunItemPickup
+	pickup.configure(item, _player, _arena_rect.size.x, _run_items.catalog.floor_lifetime)
+	pickup.position = world_position
+	pickup.collected.connect(_on_item_collected)
+	_pickup_layer.add_child(pickup)
+
+
+func _on_item_collected(item_id: StringName) -> void:
+	if _run_over:
+		return
+	if item_id == RunItemCatalog.SOUL_WARD:
+		_ward_stock += 1
+		_show_callout("SOUL WARD STORED" if _scripted else "SOUL WARD")
+	else:
+		activate_item(item_id)
+	item_collected.emit(item_id)
+	SoundFx.play(&"shard_pickup")
+
+
+func _on_item_activated(item_id: StringName) -> void:
+	var item: RunItemData = _run_items.catalog.get_item(item_id)
+	if item_id == RunItemCatalog.BANISH_BOMB:
+		var radius: float = item.burst_radius * _arena_rect.size.x / 1080.0
+		var event_id: int = -PULSE_EVENT_OFFSET - Time.get_ticks_usec()
+		for child: Node in _enemy_layer.get_children():
+			if child is EnemyActor:
+				var enemy := child as EnemyActor
+				if enemy.global_position.distance_to(_player.global_position) <= (
+					radius + enemy.get_collision_radius()):
+					enemy.try_direct_hit(1, event_id)
+		for child: Node in _projectile_layer.get_children():
+			if child is EnemyProjectile and (
+				child.global_position.distance_to(_player.global_position) <= radius):
+				(child as EnemyProjectile).banish()
+		_play_banish_burst(radius)
+	elif item_id == RunItemCatalog.RIFT_MAGNET:
+		_sweep_floor_shards()
+	_show_callout(item.display_name)
+
+
+func _play_banish_burst(radius: float) -> void:
+	var burst := SoulWardVisual.new()
+	_effects_layer.add_child(burst)
+	burst.global_position = _player.global_position
+	burst.radius = radius if _reduced_motion else SoulWardVisual.CELL_SIZE
+	var tween: Tween = burst.create_tween().set_parallel(true)
+	if not _reduced_motion:
+		tween.tween_property(burst, ^"radius", radius, 0.3)
+	tween.tween_property(burst, ^"modulate:a", 0.0, 0.3)
+	tween.chain().tween_callback(burst.queue_free)
+
+
+func _on_shield_requested() -> void:
+	if not can_activate_soul_ward():
+		return
+	if _scripted:
+		activate_soul_ward()
+	else:
+		shield_requested.emit()
+
+
+func _on_shield_broken() -> void:
+	_show_callout("WARD BROKEN")
+	SoundFx.play(&"wall_impact")

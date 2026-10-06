@@ -7,8 +7,10 @@ signal progression_changed(snapshot: Dictionary)
 ## Emitted after settings change and save, with the full validated settings.
 signal settings_changed(settings: Dictionary)
 
-## v9 (2026-09-25) dropped the story Rift progress: `selected_rift`, `rift_bests`, `rift_levels`.
-const SCHEMA_VERSION: int = 9
+## v10 adds consumable stock and a one-run boost selection; existing progress is preserved.
+const SCHEMA_VERSION: int = 10
+## Consumable identities and validated catalog prices; icons are lazy paths.
+const ITEM_CATALOG: RunItemCatalog = preload("res://data/items/default_item_catalog.tres")
 const DEFAULT_SAVE_PATH: String = "user://wisp_rush_save.json"
 const DEFAULT_TEMP_PATH: String = "user://wisp_rush_save.tmp.json"
 const DEFAULT_BACKUP_PATH: String = "user://wisp_rush_save.backup.json"
@@ -30,36 +32,37 @@ const VALID_FORM_IDS: Array[String] = [
 	"patchvile",
 	"verdant_shade",
 	"scarlet",
-	"morrow",
 	"rook",
 	"mothmere",
 ]
 ## The character every save owns and equips first; must match `FormCatalog.DEFAULT_FORM_ID`.
 const DEFAULT_FORM_ID: String = "patchvile"
 ## Forms that no longer exist, and what a save that names one gets instead. Empty: Ash, Venom,
-## Bloodmoon, Frost and Bram (2026-09-20), Void, Eclipse, Veyra and Noxen (2026-09-25) and Ilyra
-## with her `ilyra_2` experiment (2026-09-26, replaced by Scarlet) were retired outright and need no
-## entry: `_sanitize_cosmetic` already drops an unknown id and falls the equipped slot back to
+## Bloodmoon, Frost and Bram (2026-09-20), Void, Eclipse, Veyra and Noxen (2026-09-25), Ilyra
+## with her `ilyra_2` experiment (2026-09-26, replaced by Scarlet) and Morrow (2026-10-05, owner)
+## were retired outright and need no entry: `_sanitize_cosmetic` already drops an unknown id and falls the equipped slot back to
 ## `DEFAULT_FORM_ID`.
 const RETIRED_FORM_IDS: Dictionary[String, String] = {}
 ## Endless arena skin ids accepted from disk, in catalog order; must match
-## data/endless/default_endless_catalog.tres (test_endless_catalog checks it).
+## data/endless/default_endless_catalog.tres (test_endless_catalog checks it). The game has one arena,
+## SIMULATION (owner 2026-10-05, ADR-0027).
 const VALID_ARENA_SKIN_IDS: Array[String] = [
-	"quarry_titan",
-	"stitched_doll_jungle",
-	"stitchwarden_vigil",
-	"chained_colossus",
-	"chained_colossus_3d",
-	"zoom_arena_3d",
-	"board_01",
-	"board_01_light",
 	"sci_fi_simulation_v1",
 ]
 ## Skin every save owns and unknown ids fall back to (`EndlessCatalog.default_skin_id`).
-const DEFAULT_ARENA_SKIN_ID: String = "quarry_titan"
-## Retired arena skin ids and the skin that replaces them when a save is sanitized.
+const DEFAULT_ARENA_SKIN_ID: String = "sci_fi_simulation_v1"
+## Retired arena skin ids and the skin that replaces them when a save is sanitized: every arena
+## removed on 2026-10-05 (ADR-0027) becomes SIMULATION.
 const RETIRED_ARENA_SKIN_IDS: Dictionary[String, String] = {
 	"placeholder_void_slate": DEFAULT_ARENA_SKIN_ID,
+	"quarry_titan": DEFAULT_ARENA_SKIN_ID,
+	"stitched_doll_jungle": DEFAULT_ARENA_SKIN_ID,
+	"stitchwarden_vigil": DEFAULT_ARENA_SKIN_ID,
+	"chained_colossus": DEFAULT_ARENA_SKIN_ID,
+	"chained_colossus_3d": DEFAULT_ARENA_SKIN_ID,
+	"zoom_arena_3d": DEFAULT_ARENA_SKIN_ID,
+	"board_01": DEFAULT_ARENA_SKIN_ID,
+	"board_01_light": DEFAULT_ARENA_SKIN_ID,
 }
 ## Consent values accepted from disk; anything else falls back to "unknown".
 const VALID_CONSENT_STATES: Array[String] = ["unknown", "granted", "denied"]
@@ -197,6 +200,33 @@ func save_now() -> bool:
 		return false
 	_main_was_valid = true
 	return true
+
+
+## The whole save as the bytes the cloud save stores (JSON), play time committed first (ADR-0030).
+func export_cloud_save() -> PackedByteArray:
+	if _data.is_empty():
+		_data = _make_defaults()
+	_commit_play_time()
+	_data[&"schema_version"] = SCHEMA_VERSION
+	return JSON.stringify(_data).to_utf8_buffer()
+
+
+## Replaces the save with one from the cloud (owner 2026-10-05, ADR-0030): validated and migrated
+## exactly like a file read from disk, then saved and announced. Returns false, changing nothing,
+## when the bytes are not a save.
+func import_cloud_save(bytes: PackedByteArray) -> bool:
+	var json := JSON.new()
+	if bytes.is_empty() or json.parse(bytes.get_string_from_utf8()) != OK:
+		return false
+	if not json.data is Dictionary:
+		return false
+	_data = _validate_and_migrate(json.data as Dictionary)
+	_play_time_since_save = 0.0
+	var saved: bool = save_now()
+	if saved:
+		progression_changed.emit(get_snapshot())
+		settings_changed.emit(get_settings())
+	return saved
 
 
 ## Resets all progression to safe defaults and immediately saves it.
@@ -445,6 +475,93 @@ func _save_and_emit() -> bool:
 	return saved
 
 
+## Count of one of the three stored shop items.
+func get_item_count(item_id: StringName) -> int:
+	var stock: Dictionary = _data.get(&"item_stock", {}) as Dictionary
+	return maxi(0, int(stock.get(String(item_id), 0)))
+
+
+## Buys an allowed pack at the catalog price, atomically with its stored count.
+func purchase_item_pack(item_id: StringName, quantity: int) -> bool:
+	var price: int = ITEM_CATALOG.get_pack_price(item_id, quantity)
+	if price <= 0 or get_rift_points() < price or get_item_count(item_id) > MAX_COUNTER - quantity:
+		return false
+	var before: Dictionary = _data.duplicate(true)
+	var stock: Dictionary = (_data[&"item_stock"] as Dictionary).duplicate()
+	stock[String(item_id)] = get_item_count(item_id) + quantity
+	_data[&"item_stock"] = stock
+	_data[&"rift_points"] = get_rift_points() - price
+	if _save_and_emit():
+		return true
+	_data = before
+	return false
+
+
+## Adds a collected Ward or another valid stored item; rolls back on persistence failure.
+func grant_item(item_id: StringName, quantity: int = 1) -> bool:
+	var item: RunItemData = ITEM_CATALOG.get_item(item_id)
+	if (
+		item == null or not item.shop_enabled or quantity <= 0
+		or get_item_count(item_id) > MAX_COUNTER - quantity
+	):
+		return false
+	var before: Dictionary = _data.duplicate(true)
+	var stock: Dictionary = (_data[&"item_stock"] as Dictionary).duplicate()
+	stock[String(item_id)] = get_item_count(item_id) + quantity
+	_data[&"item_stock"] = stock
+	if _save_and_emit():
+		return true
+	_data = before
+	return false
+
+
+## Spends one stored copy for a live activation; refuses empty or unknown stock.
+func consume_item(item_id: StringName) -> bool:
+	var item: RunItemData = ITEM_CATALOG.get_item(item_id)
+	if item == null or not item.shop_enabled or get_item_count(item_id) <= 0:
+		return false
+	var before: Dictionary = _data.duplicate(true)
+	var stock: Dictionary = (_data[&"item_stock"] as Dictionary).duplicate()
+	stock[String(item_id)] = get_item_count(item_id) - 1
+	_data[&"item_stock"] = stock
+	if _save_and_emit():
+		return true
+	_data = before
+	return false
+
+
+## Selects one owned Magnet/Star for the next run; empty clears the selection.
+func select_starting_item(item_id: StringName) -> bool:
+	var item: RunItemData = ITEM_CATALOG.get_item(item_id)
+	if not item_id.is_empty() and (
+		item == null or not item.starting_boost or get_item_count(item_id) <= 0
+	):
+		return false
+	var previous: String = str(_data.get(&"next_run_item", ""))
+	_data[&"next_run_item"] = String(item_id)
+	if _save_and_emit():
+		return true
+	_data[&"next_run_item"] = previous
+	return false
+
+
+## Spends the selected boost and clears its selection together, once a run actually begins.
+func consume_starting_item() -> StringName:
+	var item_id := StringName(str(_data.get(&"next_run_item", "")))
+	var item: RunItemData = ITEM_CATALOG.get_item(item_id)
+	if item == null or not item.starting_boost or get_item_count(item_id) <= 0:
+		return &""
+	var before: Dictionary = _data.duplicate(true)
+	var stock: Dictionary = (_data[&"item_stock"] as Dictionary).duplicate()
+	stock[String(item_id)] = get_item_count(item_id) - 1
+	_data[&"item_stock"] = stock
+	_data[&"next_run_item"] = ""
+	if _save_and_emit():
+		return item_id
+	_data = before
+	return &""
+
+
 func _make_defaults() -> Dictionary:
 	return {
 		&"schema_version": SCHEMA_VERSION,
@@ -457,6 +574,8 @@ func _make_defaults() -> Dictionary:
 		&"bosses_defeated": 0,
 		&"play_time_seconds": 0.0,
 		&"rift_points": 0,
+		&"item_stock": {},
+		&"next_run_item": "",
 		&"owned_forms": [DEFAULT_FORM_ID],
 		&"equipped_form": DEFAULT_FORM_ID,
 		&"tutorial_completed": false,
@@ -497,7 +616,7 @@ func _validate_and_migrate(source: Dictionary) -> Dictionary:
 	if version < 6:
 		raw = _migrate_to_v6(raw)
 	# v6 -> v7 adds the Endless fields and v7 -> v8 the dash style fields; their defaults below are
-	# the migration. v8 -> v9 drops the story Rift fields: they are simply not copied below.
+	# the migration. v8 -> v9 drops story Rift fields; v9 -> v10 adds item stock/selection below.
 	var result: Dictionary = _make_defaults()
 	for key: StringName in [
 		&"best_score",
@@ -525,6 +644,20 @@ func _validate_and_migrate(source: Dictionary) -> Dictionary:
 	_sanitize_cosmetic(raw, result, KIND_FORM, DEFAULT_FORM_ID)
 	_sanitize_cosmetic(raw, result, KIND_DASH_STYLE, String(DashStyleCatalog.DEFAULT_STYLE_ID))
 	_sanitize_cosmetic(raw, result, KIND_ARENA_SKIN, DEFAULT_ARENA_SKIN_ID)
+	# v9 -> v10 adds stock and a one-run selection without changing existing progression.
+	var stock: Dictionary = {}
+	var raw_stock_value: Variant = raw.get(&"item_stock", {})
+	var raw_stock: Dictionary = raw_stock_value as Dictionary if raw_stock_value is Dictionary else {}
+	for item: RunItemData in ITEM_CATALOG.get_shop_items():
+		stock[String(item.item_id)] = _safe_int(
+			raw_stock.get(String(item.item_id), 0), 0, 0, MAX_COUNTER)
+	result[&"item_stock"] = stock
+	var selected := StringName(str(raw.get(&"next_run_item", "")))
+	var selected_item: RunItemData = ITEM_CATALOG.get_item(selected)
+	if selected_item != null and selected_item.starting_boost and (
+		int(stock.get(String(selected), 0)) > 0
+	):
+		result[&"next_run_item"] = String(selected)
 	result[&"trial_rank"] = _safe_int(raw.get(&"trial_rank", 1), 1, 1, 999)
 	result[&"claimed_depth"] = _safe_int(raw.get(&"claimed_depth", 0), 0, 0, 9999)
 	result[&"ads_removed"] = raw[&"ads_removed"] if raw.get(&"ads_removed") is bool else false

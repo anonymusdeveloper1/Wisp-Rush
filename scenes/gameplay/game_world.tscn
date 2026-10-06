@@ -1,7 +1,6 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/gameplay/game_world.gd" id="1_game"]
-[ext_resource type="Texture2D" path="res://assets/art/environment/wisp_rush_arena_background.png" id="2_background"]
 [ext_resource type="PackedScene" path="res://scenes/player/wisp_player.tscn" id="3_player"]
 [ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_currency.tres" id="5_shards"]
 [ext_resource type="Resource" path="res://data/economy/default_economy_tuning.tres" id="30_economy"]
@@ -10,17 +9,15 @@
 [ext_resource type="Script" path="res://scenes/gameplay/wave_director.gd" id="8_wave_director"]
 [ext_resource type="Resource" path="res://data/waves/default_wave_tuning.tres" id="9_wave_tuning"]
 [ext_resource type="Resource" path="res://data/waves/default_catalog.tres" id="10_catalog"]
-[ext_resource type="Script" path="res://scripts/components/run_progression.gd" id="11_progression"]
-[ext_resource type="Resource" path="res://data/progression/default_run_progression.tres" id="12_progression_tuning"]
-[ext_resource type="PackedScene" path="res://scenes/gameplay/upgrade_tray.tscn" id="13_upgrade_tray"]
+[ext_resource type="Script" path="res://scripts/components/run_items.gd" id="11_items"]
+[ext_resource type="Resource" path="res://data/items/default_item_catalog.tres" id="12_item_catalog"]
+[ext_resource type="Script" path="res://scenes/gameplay/run_item_hud.gd" id="13_item_hud"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/system/18_reaper.png" id="14_reaper"]
 [ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_play.tres" id="16_play"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/system/07_restart.png" id="17_restart"]
 [ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_settings.tres" id="18_settings"]
 [ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_home.tres" id="19_home"]
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/crest_top.tscn" id="20_crest_top"]
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/crest_bottom.tscn" id="21_crest_bottom"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/system/11_upgrades.png" id="40_upgrade"]
 
 [node name="GameWorld" type="Control"]
 process_mode = 3
@@ -34,19 +31,6 @@ mouse_filter = 2
 script = ExtResource("1_game")
 economy_tuning = ExtResource("30_economy")
 feel_tuning = ExtResource("31_feel")
-
-[node name="FullBleedBackground" type="TextureRect" parent="."]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("2_background")
-expand_mode = 1
-stretch_mode = 6
 
 [node name="WorldShade" type="ColorRect" parent="."]
 unique_name_in_owner = true
@@ -89,10 +73,10 @@ script = ExtResource("8_wave_director")
 tuning = ExtResource("9_wave_tuning")
 catalog = ExtResource("10_catalog")
 
-[node name="RunProgression" type="Node" parent="."]
+[node name="RunItems" type="Node" parent="."]
 unique_name_in_owner = true
-script = ExtResource("11_progression")
-tuning = ExtResource("12_progression_tuning")
+script = ExtResource("11_items")
+catalog = ExtResource("12_item_catalog")
 
 [node name="HUD" type="CanvasLayer" parent="."]
 layer = 10
@@ -106,6 +90,12 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+
+[node name="RunItemHud" type="Control" parent="HUD/SafeHud"]
+unique_name_in_owner = true
+layout_mode = 0
+mouse_filter = 2
+script = ExtResource("13_item_hud")
 
 [node name="StatsColumn" type="VBoxContainer" parent="HUD/SafeHud"]
 unique_name_in_owner = true
@@ -157,37 +147,6 @@ text = "000000"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="XPBar" type="ProgressBar" parent="HUD/SafeHud"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(440, 0)
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -220.0
-offset_right = 220.0
-offset_bottom = 20.0
-grow_horizontal = 2
-mouse_filter = 2
-theme_type_variation = &"SlimProgressBar"
-show_percentage = false
-
-[node name="RunLevelLabel" type="Label" parent="HUD/SafeHud"]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -220.0
-offset_right = 220.0
-offset_bottom = 32.0
-grow_horizontal = 2
-theme_type_variation = &"ValueLabel"
-theme_override_font_sizes/font_size = 22
-text = "SOUL LEVEL 1"
-horizontal_alignment = 1
-vertical_alignment = 1
-
 [node name="RushRow" type="HBoxContainer" parent="HUD/SafeHud"]
 unique_name_in_owner = true
 layout_mode = 1
@@ -218,69 +177,6 @@ size_flags_vertical = 4
 mouse_filter = 2
 theme_type_variation = &"RushProgressBar"
 show_percentage = false
-
-[node name="UpgradeButton" type="Button" parent="HUD/SafeHud"]
-unique_name_in_owner = true
-visible = false
-custom_minimum_size = Vector2(132, 132)
-layout_mode = 1
-offset_right = 132.0
-offset_bottom = 132.0
-focus_mode = 0
-tooltip_text = "Upgrade"
-theme_type_variation = &"IconButton"
-
-[node name="UpgradeIcon" type="TextureRect" parent="HUD/SafeHud/UpgradeButton"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 30.0
-offset_top = 14.0
-offset_right = -30.0
-offset_bottom = -44.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("40_upgrade")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="UpgradeCaption" type="Label" parent="HUD/SafeHud/UpgradeButton"]
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -44.0
-offset_bottom = -12.0
-grow_horizontal = 2
-grow_vertical = 0
-mouse_filter = 2
-theme_type_variation = &"CaptionLabel"
-theme_override_font_sizes/font_size = 22
-text = "UPGRADE"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="UpgradeCount" type="Label" parent="HUD/SafeHud/UpgradeButton"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -54.0
-offset_top = -8.0
-offset_right = 6.0
-offset_bottom = 32.0
-grow_horizontal = 0
-mouse_filter = 2
-theme_type_variation = &"AmberValueLabel"
-theme_override_font_sizes/font_size = 33
-text = "×2"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="PauseButton" type="Button" parent="HUD/SafeHud"]
 unique_name_in_owner = true
@@ -400,9 +296,6 @@ theme_type_variation = &"BossProgressBar"
 value = 100.0
 show_percentage = false
 
-[node name="UpgradeTray" parent="HUD" instance=ExtResource("13_upgrade_tray")]
-unique_name_in_owner = true
-
 [node name="PauseOverlay" type="Control" parent="HUD"]
 unique_name_in_owner = true
 process_mode = 3
@@ -465,14 +358,6 @@ layout_mode = 2
 theme_type_variation = &"PrimaryButton"
 text = "RESUME"
 icon = ExtResource("16_play")
-
-[node name="RestartButton" type="Button" parent="HUD/PauseOverlay/Center/Panel/Margin/Choices"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(520, 0)
-layout_mode = 2
-theme_type_variation = &"SecondaryButton"
-text = "RESTART RUN"
-icon = ExtResource("17_restart")
 
 [node name="SettingsButton" type="Button" parent="HUD/PauseOverlay/Center/Panel/Margin/Choices"]
 unique_name_in_owner = true
@@ -570,3 +455,77 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"PrimaryButton"
 text = "KEEP PLAYING"
+
+[node name="ReviveOverlay" type="Control" parent="HUD"]
+unique_name_in_owner = true
+process_mode = 3
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="HUD/ReviveOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.067, 0.082, 0.129, 0.72)
+
+[node name="Center" type="CenterContainer" parent="HUD/ReviveOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="HUD/ReviveOverlay/Center"]
+custom_minimum_size = Vector2(720, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="HUD/ReviveOverlay/Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 16
+
+[node name="Choices" type="VBoxContainer" parent="HUD/ReviveOverlay/Center/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 26
+
+[node name="ReviveTitle" type="Label" parent="HUD/ReviveOverlay/Center/Panel/Margin/Choices"]
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+theme_override_font_sizes/font_size = 44
+text = "CONTINUE?"
+horizontal_alignment = 1
+
+[node name="ReviveText" type="Label" parent="HUD/ReviveOverlay/Center/Panel/Margin/Choices"]
+custom_minimum_size = Vector2(560, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 33
+text = "Watch an ad to come back and keep this run going."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ReviveWatchButton" type="Button" parent="HUD/ReviveOverlay/Center/Panel/Margin/Choices"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"PrimaryButton"
+text = "WATCH AD"
+
+[node name="ReviveDeclineButton" type="Button" parent="HUD/ReviveOverlay/Center/Panel/Margin/Choices"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"SecondaryButton"
+text = "NO THANKS"

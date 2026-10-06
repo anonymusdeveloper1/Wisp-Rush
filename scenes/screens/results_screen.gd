@@ -6,7 +6,8 @@ extends Control
 ## with the mode and arena name and the depth reward banner when one was paid, the score as a hero
 ## AmberValueLabel over a code-drawn amber sunburst, personal best on a plate (or NEW BEST), run
 ## metrics as three icon tiles, the Rift Points breakdown (collected, performance, rewards, then the
-## run total and the new balance), then the PLAY AGAIN PrimaryButton above the quieter Home row
+## run total and the new balance), then WATCH AD • DOUBLE RP when a rewarded ad is ready (ADR-0029),
+## the PLAY AGAIN PrimaryButton above the quieter Home row
 ## (CHARACTERS stays hidden, as it always has for these runs). All styling comes from the project
 ## theme's type variations; the few colours drawn in code come from Palette. The `Panel` node keeps
 ## its path but draws no frame itself.
@@ -17,6 +18,8 @@ signal restart_requested
 signal home_requested
 ## Emitted when the player taps CHARACTERS; Main opens the Shop's CHARACTERS tab.
 signal wisps_requested
+## Emitted when the player taps WATCH AD • DOUBLE RP; Main shows the rewarded ad and banks the bonus.
+signal double_rp_requested
 
 ## Text shown on the best plate when this run set (or tied) the personal best.
 const NEW_BEST_TEXT: String = "NEW BEST"
@@ -67,12 +70,14 @@ var _reduced_motion: bool = false
 @onready var _restart_button: Button = %RestartButton
 @onready var _home_button: Button = %HomeButton
 @onready var _forms_button: Button = %FormsButton
+@onready var _double_rp_button: Button = %DoubleRpButton
 
 
 func _ready() -> void:
 	_restart_button.pressed.connect(func() -> void: restart_requested.emit())
 	_home_button.pressed.connect(func() -> void: home_requested.emit())
 	_forms_button.pressed.connect(func() -> void: wisps_requested.emit())
+	_double_rp_button.pressed.connect(_on_double_rp_pressed)
 	_score_glow.draw.connect(_draw_score_glow)
 	_reduced_motion = _read_reduced_motion()
 	set_process(not _reduced_motion)
@@ -98,6 +103,26 @@ func setup(run_summary: Dictionary) -> void:
 	_summary = run_summary.duplicate(true)
 	if is_node_ready():
 		_apply_summary()
+
+
+## Offers the rewarded double (owner 2026-10-05, ADR-0029): the button shows [param amount], the Rift
+## Points the ad would add; 0 hides it. Main calls it once a rewarded ad is ready.
+func set_double_rp_offer(amount: int) -> void:
+	_double_rp_button.visible = amount > 0
+	_double_rp_button.disabled = false
+	_double_rp_button.text = "WATCH AD  •  DOUBLE RP  %s" % RiftPoints.format_gain(amount)
+
+
+## After the ad: [param added] Rift Points banked shows the button as done; 0 hides it.
+func finish_double_rp(added: int) -> void:
+	_double_rp_button.disabled = true
+	_double_rp_button.visible = added > 0
+	_double_rp_button.text = "DOUBLED  %s" % RiftPoints.format_gain(added)
+
+
+func _on_double_rp_pressed() -> void:
+	_double_rp_button.disabled = true
+	double_rp_requested.emit()
 
 
 ## Text of the primary button (PLAY AGAIN).

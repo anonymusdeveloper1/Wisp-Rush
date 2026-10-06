@@ -1,8 +1,8 @@
 extends SceneTree
 ## Playable characters: rig contract, controller-driven states, smoothness, menus and GameWorld.
 ##
-## For every rigged character: the full animation vocabulary, no collision in the rig, a particle
-## budget, skinned ribbons whose weights add up, a silhouette that matches `design_size`, the real
+## For every character: the full animation vocabulary, no collision in the rig, a particle
+## budget, a silhouette that matches `design_size`, the real
 ## WispPlayer driving every gameplay state, no per-frame snaps, Reduced Motion, the Home hero, the
 ## Shop's animated CHARACTERS cards (selected and unlock flourishes) and a production GameWorld.
 
@@ -13,7 +13,7 @@ const SHOP_SCENE: PackedScene = preload("res://scenes/screens/shop_screen.tscn")
 const ENDLESS_CATALOG: EndlessCatalog = preload("res://data/endless/default_endless_catalog.tres")
 const CATALOG: FormCatalog = preload("res://data/forms/default_catalog.tres")
 const RIGGED: Array[StringName] = [
-	&"patchvile", &"verdant_shade", &"scarlet", &"rook", &"morrow", &"mothmere",
+	&"patchvile", &"verdant_shade", &"scarlet", &"rook", &"mothmere",
 ]
 const ARENA := Rect2(140.0, 420.0, 800.0, 1100.0)
 ## Largest believable change in one 1/60 s frame (scaled by the real frame time); more is a snap.
@@ -37,7 +37,6 @@ func _run() -> void:
 		var form: FormData = CATALOG.get_form(form_id)
 		await _check_rig_contract(form)
 		await _check_controller_flow(form)
-	await _check_reduced_motion(CATALOG.get_form(&"morrow"))
 	await _check_reduced_motion(CATALOG.get_form(&"scarlet"))
 	await _check_reduced_motion(CATALOG.get_form(&"rook"))
 	await _check_home(CATALOG.get_form(&"rook"))
@@ -80,8 +79,6 @@ func _check_rig_contract(form: FormData) -> void:
 		_fail("%s: %d particles is outside the %s..%d budget" % [
 			id, particles, "0" if painted else "1", PARTICLE_BUDGET,
 		])
-	for node: Node in visual.find_children("*", "RibbonChain", true, false):
-		_check_ribbon(id, node as RibbonChain)
 	# Standing heading follows the wall: floor upright, ceiling inverted, side walls sideways.
 	for wall: Array in [
 		[Vector2.UP, 0.0], [Vector2.DOWN, PI], [Vector2.RIGHT, PI * 0.5], [Vector2.LEFT, -PI * 0.5],
@@ -122,27 +119,6 @@ func _check_rig_contract(form: FormData) -> void:
 			_fail("%s: %s did not return to idle" % [id, flourish])
 	visual.queue_free()
 	await process_frame
-
-
-func _check_ribbon(id: String, ribbon: RibbonChain) -> void:
-	var mesh: Polygon2D = ribbon.get_mesh()
-	var bone_count: int = ribbon.get_bones().size()
-	if mesh == null or bone_count < 2 or mesh.get_bone_count() != bone_count:
-		_fail("%s: ribbon %s has no skinned bone chain" % [id, ribbon.name])
-		return
-	var totals := PackedFloat32Array()
-	totals.resize(mesh.polygon.size())
-	for bone: int in mesh.get_bone_count():
-		var weights: PackedFloat32Array = mesh.get_bone_weights(bone)
-		if weights.size() != totals.size():
-			_fail("%s: ribbon %s weights do not cover every vertex" % [id, ribbon.name])
-			return
-		for vertex: int in weights.size():
-			totals[vertex] += weights[vertex]
-	for total: float in totals:
-		if absf(total - 1.0) > 0.001:
-			_fail("%s: ribbon %s has a vertex weighted %.3f" % [id, ribbon.name, total])
-			return
 
 
 func _check_controller_flow(form: FormData) -> void:
@@ -260,7 +236,7 @@ func _check_home(form: FormData) -> void:
 func _check_shop() -> void:
 	var snapshot: Dictionary = {
 		&"rift_points": 0,
-		&"owned_forms": ["patchvile", "morrow"],
+		&"owned_forms": ["patchvile", "mothmere"],
 		&"equipped_form": "patchvile",
 		&"owned_dash_styles": ["soul"],
 		&"equipped_dash_style": "soul",
@@ -300,7 +276,7 @@ func _check_shop() -> void:
 	# Main re-reads the save after a purchase. Owner, 2026-09-21: no bounce when a character is
 	# picked, bought or equipped - the card keeps its rest instead of hopping.
 	var bought: Dictionary = snapshot.duplicate(true)
-	bought[&"owned_forms"] = ["patchvile", "morrow", "rook"]
+	bought[&"owned_forms"] = ["patchvile", "mothmere", "rook"]
 	bought[&"equipped_form"] = "rook"
 	shop.setup(bought, ShopScreen.TAB_WISPS)
 	await process_frame
@@ -313,16 +289,16 @@ func _check_shop() -> void:
 		_fail("buying Rook played the %s bounce" % rook_state)
 	# ...and an equip does not either.
 	var equipped: Dictionary = bought.duplicate(true)
-	equipped[&"equipped_form"] = "morrow"
+	equipped[&"equipped_form"] = "mothmere"
 	shop.setup(equipped, ShopScreen.TAB_WISPS)
 	await process_frame
 	await process_frame
-	var morrow: PlayableCharacterPreview = _card_preview(shop, &"morrow")
-	var morrow_state: StringName = &""
-	if morrow != null:
-		morrow_state = morrow.get_visual().get_current_visual_state()
-	if morrow_state in [PlayableCharacterVisual.CHARACTER_SELECTED, PlayableCharacterVisual.CHARACTER_UNLOCKED]:
-		_fail("equipping Morrow played the %s bounce" % morrow_state)
+	var mothmere: PlayableCharacterPreview = _card_preview(shop, &"mothmere")
+	var mothmere_state: StringName = &""
+	if mothmere != null:
+		mothmere_state = mothmere.get_visual().get_current_visual_state()
+	if mothmere_state in [PlayableCharacterVisual.CHARACTER_SELECTED, PlayableCharacterVisual.CHARACTER_UNLOCKED]:
+		_fail("equipping Mothmere played the %s bounce" % mothmere_state)
 	shop.queue_free()
 	await process_frame
 

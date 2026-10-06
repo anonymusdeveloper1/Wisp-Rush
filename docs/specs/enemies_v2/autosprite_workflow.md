@@ -136,6 +136,8 @@ plan's 1,500.
 
 ## 9. Morrow the same way (option)
 
+> Morrow was removed from the game on 2026-10-05 (owner), with his prompt pack; this section is history.
+
 Morrow's first frames were to come from Codex (`concept_art/morrow_autosprite_v1/PROMPTS.md`). Without
 Codex, the same AutoSprite features can make them: upload his portrait (free) as the base and use
 **Generate pose** for each state (floor, right wall, ceiling, dash). Not decided; the owner chooses.

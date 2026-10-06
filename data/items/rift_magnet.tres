@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="RunItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/run_item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+item_id = &"rift_magnet"
+display_name = "RIFT MAGNET"
+description = "Pulls Rift Points across the arena for 10 seconds."
+icon_path = "res://assets/art/ui/items/rift_magnet.png"
+shop_enabled = true
+unit_price = 20
+duration_seconds = 10.0
+starting_boost = true
+

@@ -44,11 +44,12 @@ func _run_check() -> void:
 		failures += 1
 		push_error("game_flow: Play did not open GameWorld")
 	else:
-		var pause_button := game.get_node("HUD/SafeHud/PauseButton") as Button
+		# The one arena is a board with its own pause button (ADR-0024, ADR-0027).
+		var board := game.get_node("ArenaVisual") as ArenaVisual
 		var home_button := game.get_node(
 			"HUD/PauseOverlay/Center/Panel/Margin/Choices/HomeButton"
 		) as Button
-		pause_button.pressed.emit()
+		board.hud_pause_pressed.emit()
 		home_button.pressed.emit()
 		await process_frame
 		if main.get_child_count() != 1 or not main.get_child(0) is HomeScreen:

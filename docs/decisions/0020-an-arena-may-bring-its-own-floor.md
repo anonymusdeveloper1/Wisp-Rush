@@ -1,6 +1,6 @@
 # ADR-0020: An arena may bring its own floor
 
-> **Status:** Accepted; its note on sizes is corrected by [ADR-0021](0021-layered-arenas.md) ·
+> **Status:** **Superseded by [ADR-0027](0027-one-arena-simulation.md)** (2026-10-05: these arenas removed; kept as history); Accepted; its note on sizes is corrected by [ADR-0021](0021-layered-arenas.md) ·
 > **Date:** 2026-09-30 · **Deciders:** owner / Claude Code (Opus 5.5) ·
 > **Amends:** [ADR-0017](0017-painted-arenas-with-bleed.md) (one shared floor for every arena)
 

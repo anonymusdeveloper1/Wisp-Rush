@@ -482,6 +482,15 @@ layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
 
+[node name="DoubleRpButton" type="Button" parent="SafeMargin/Center/Panel/Margin/Content"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(720, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"SecondaryButton"
+text = "WATCH AD  •  DOUBLE RP"
+
 [node name="RestartButton" type="Button" parent="SafeMargin/Center/Panel/Margin/Content"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(720, 0)

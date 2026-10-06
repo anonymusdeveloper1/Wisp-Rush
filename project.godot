@@ -27,6 +27,7 @@ config/icon="res://assets/art/branding/app_icon/app_icon_512.png"
 SaveManager="*res://scripts/autoload/save_manager.gd"
 Audio="*res://scripts/autoload/audio_service.gd"
 Monetisation="*res://scripts/autoload/monetisation_service.gd"
+CloudSave="*res://scripts/autoload/cloud_save_service.gd"
 
 [debug]
 
@@ -44,6 +45,10 @@ window/handheld/orientation=1
 [editor]
 
 version_control/plugin_name="GitPlugin"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/admob/plugin.cfg", "res://addons/GodotGooglePlayBilling/plugin.cfg")
 
 [global_group]
 

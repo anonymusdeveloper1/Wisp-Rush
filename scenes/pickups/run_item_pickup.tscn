@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/pickups/run_item_pickup.gd" id="1_pickup"]
+
+[node name="RunItemPickup" type="Node2D" groups=["pickups"]]
+process_mode = 1
+texture_filter = 1
+script = ExtResource("1_pickup")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+unique_name_in_owner = true

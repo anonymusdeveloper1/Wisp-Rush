@@ -86,7 +86,6 @@ of a release build, player counts).
   then `adb pull /sdcard/clip.mp4`. Portrait 1080×2340 is already TikTok/Shorts ratio.
 - **Deterministic in-engine renders** (no phone needed), from the repo root:
   - `tools/screenshot.sh res://scenes/screens/home_screen.tscn 24 1080x1920` → `logs/screenshot.png`
-  - `tools/godot/render_endless_scenery_sheet.gd` — every Legendary/Mythic skin, 3 frames each
   - `tools/godot/render_*_showcase.gd` — pause menu, Reaper, upgrades, wall splash, aim arrow, Home motion
   - `tools/qa_matrix.sh <screen>` — the same screen at 5 phone sizes (good for "fits every phone" shots)
 - **Existing stills to reuse:** `logs/endless/scenery_round0_before.png` (old effects) vs

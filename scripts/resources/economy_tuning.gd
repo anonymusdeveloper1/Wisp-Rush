@@ -2,8 +2,9 @@ class_name EconomyTuning
 extends Resource
 ## Rift Points payouts that do not come from a pickup: the performance bonus.
 ##
-## Rift Points (RP) are the only currency and are earned only by playing (ADR-0013, GDD §6). Values
-## here are starting values pending device calibration (GDD §14 #16, docs/systems/shop.md).
+## Rift Points (RP) are the only currency: earned by playing (ADR-0013, GDD §6) and sold in packs in
+## the Shop (ADR-0028). Values here are starting values pending device calibration (GDD §14 #16,
+## docs/systems/shop.md).
 
 ## Run score that pays one performance Rift Point (integer division, rounded down).
 @export_range(1, 100000, 1) var score_per_rift_point: int = 200

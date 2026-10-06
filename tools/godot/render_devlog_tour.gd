@@ -6,9 +6,9 @@ extends SceneTree
 ##     --write-movie "$PWD/video/footage/tour_menus.avi" \
 ##     --script res://tools/godot/render_devlog_tour.gd -- tour=menus
 ## Tours:
-##   menus — boot loading screen → Home → Shop WISPS/DASHES/ARENAS (to the Mythic cards) → Home →
-##           PLAY → run loading screen → an Endless run on `skin` played by the bot.
-## Options: tour=menus  skin=<arena skin to own and equip, default quarry_titan>
+##   menus — boot loading screen → Home → Shop CHARACTERS, then its SHOP page → Home →
+##           PLAY → run loading screen → an Endless run on SIMULATION played by the bot.
+## Options: tour=menus
 ##   rift_points=<balance, default 4200>  run_seconds=<Endless play time, default 14>
 ##   quality=<MJPEG quality 0-1, default 0.9>  plus devlog_bot.gd options (hold, redirects, survive…)
 ## Uses its own isolated save (user://test_runs/devlog_tour*.json), reset at start. Navigation runs
@@ -18,7 +18,6 @@ extends SceneTree
 const DevlogBot = preload("res://tools/godot/devlog_bot.gd")
 const Clip = preload("res://tools/godot/render_gameplay_clip.gd")
 const MAIN_SCENE: PackedScene = preload("res://scenes/main/main.tscn")
-const ENDLESS_CATALOG: EndlessCatalog = preload("res://data/endless/default_endless_catalog.tres")
 const FPS: float = 60.0
 const SAVE_PATH: String = "user://test_runs/devlog_tour.json"
 const TEMP_PATH: String = "user://test_runs/devlog_tour.tmp.json"
@@ -75,13 +74,6 @@ func _prepare_save(save_manager: SaveManagerService) -> void:
 	save_manager.reload()
 	save_manager.reset_save()
 	save_manager.mark_tutorial_completed()
-	var skin_id := StringName(str(_options.get("skin", "quarry_titan")))
-	var skin: ArenaSkinData = ENDLESS_CATALOG.get_skin(skin_id)
-	if skin != null and skin.skin_id == skin_id:
-		# Grant exactly the price, so the purchase leaves a zero balance before the shown one.
-		save_manager.add_rift_points(skin.price)
-		save_manager.purchase_cosmetic(SaveManagerService.KIND_ARENA_SKIN, skin_id, skin.price, true)
-		save_manager.equip_cosmetic(SaveManagerService.KIND_ARENA_SKIN, skin_id)
 	save_manager.add_rift_points(DevlogBot.option_int(_options, "rift_points", 4200))
 
 
@@ -99,16 +91,9 @@ func _tour_menus() -> void:
 	for index: int in [1, 2]:
 		shop._carousel.select(index, true)
 		await _hold(0.8)
-	_step(&"shop_arenas")
-	shop._on_tab_pressed(ShopScreen.TAB_ARENAS)
-	await _hold(1.2)
-	for index: int in [1, 2, 3, 4, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23]:
-		shop._carousel.select(index, true)
-		await _hold(0.45)
-	_step(&"shop_mythic")
-	for index: int in [24, 25, 26, 27, 28, 29]:
-		shop._carousel.select(index, true)
-		await _hold(1.3)
+	_step(&"shop_deals")
+	shop._on_tab_pressed(ShopScreen.TAB_SHOP)
+	await _hold(1.6)
 	shop.back_requested.emit()
 	await _wait_for(HomeScreen)
 	await _hold(0.9)

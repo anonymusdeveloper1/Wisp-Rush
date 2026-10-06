@@ -24,7 +24,9 @@ game shows it.
 
 ## Playable-character layers
 
-`extract_playable_characters.py` isolates the approved transparent cutout sheets under
+**Removed 2026-10-05** (owner): Morrow, the last bone rig, was removed, and so was this intake from
+`extract_playable_characters.py`, with `build_character_rig.py`. History: the script isolated the
+approved transparent cutout sheets under
 `concept_art/wisp_rush_playable_characters_v1/assets/` into independent runtime PNG layers for
 Morrow (Veyra was removed 2026-09-25; Rook became a whole-frame sheet pack on 2026-09-27):
 
@@ -113,10 +115,14 @@ These options control which components are kept:
 
 `extract_floor_polygons.py` baked each story Rift's playable floor into `RiftData.floor_polygon` from
 its runtime background (ADR-0011). It went to the Recycle Bin with the story Rifts on 2026-09-25; the
-Endless floor is measured by `make_arena.py` below and lives in `EndlessCatalog.floor_polygon`.
+Endless floor was measured by `make_arena.py` below and lived in `EndlessCatalog.floor_polygon` until
+the arenas were removed (2026-10-05, ADR-0027): the floor is now SIMULATION's, drawn by its board.
 `extract_rifts.py` now slices only the Rifts v1 pack's enemies and bosses (the Endless enemy mixes).
 
-## Painted Endless arenas (`make_arena.py`)
+## Painted Endless arenas (`make_arena.py`) — removed 2026-10-05
+
+**Removed with the arenas** (owner, ADR-0027): `make_arena.py` and the painted arenas it imported
+are gone; the game has one arena, SIMULATION, whose pieces `make_board.py` copies. History:
 
 An Endless arena is one painted image to the contract in `docs/guides/arena_art.md` (1080×2400,
 a 1080×1920 safe zone, the shared floor at x 174–904, y 659–1747). Its source and an `arena.json`
@@ -127,7 +133,7 @@ python tools/art/make_arena.py quarry_titan   # background + 0.3x Shop thumbnail
 python tools/art/make_arena.py --guide        # concept_art/arenas_v2/_layout/arena_layout_guide.png
 ```
 
-**Retired 2026-09-23** with the thirty generated skins they made (ADR-0017): `extract_endless.py`,
-`make_endless_skin_data.py`, `endless_scenery.py`, `make_endless_floor_template.py`,
-`check_endless_skin.py` and `set_endless_import_lossy.py`. Do not run them: they would write the
-removed skins back into `data/endless/` and `assets/art/environment/endless/`.
+**Retired 2026-09-23** with the thirty generated skins they made (ADR-0017), and **deleted
+2026-10-05** with the arenas (ADR-0027): `extract_endless.py`, `make_endless_skin_data.py`,
+`endless_scenery.py`, `make_endless_floor_template.py`, `check_endless_skin.py` and
+`set_endless_import_lossy.py`.

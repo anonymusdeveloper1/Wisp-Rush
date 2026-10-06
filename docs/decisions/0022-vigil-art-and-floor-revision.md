@@ -1,6 +1,6 @@
 # ADR-0022: Revise Stitchwarden's Vigil art and floor
 
-> **Status:** Accepted · **Date:** 2026-09-30 · **Deciders:** owner / Codex ·
+> **Status:** **Superseded by [ADR-0027](0027-one-arena-simulation.md)** (2026-10-05: the Vigil removed; kept as history); Accepted · **Date:** 2026-09-30 · **Deciders:** owner / Codex ·
 > **Amends:** [ADR-0021](0021-layered-arenas.md) (the Vigil's first floor size and art assembly)
 
 ## Context

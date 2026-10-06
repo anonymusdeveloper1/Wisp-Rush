@@ -16,7 +16,6 @@
  },
  "groups": [
   {"name": "backgrounds", "mode": "opaque", "dir": "environment", "items": [
-   {"file": "02_gameplay_arena_floor.png", "out": "wisp_rush_arena_background.png"},
    {"file": "../../wisp_rush_home_pixel_v1/home_background_source.png", "out": "home_background.png"},
    {"file": "04_shared_menu_background.png", "out": "menu_background.png"}
   ]},

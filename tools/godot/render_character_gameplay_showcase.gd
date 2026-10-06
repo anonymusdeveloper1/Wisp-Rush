@@ -3,7 +3,7 @@ extends Node
 ##
 ## Usage (WISP_CHARACTER picks the form, default rook; WISP_DASH="x,y" the dash direction,
 ## default up and a little left):
-##   WISP_CHARACTER=morrow tools/screenshot.sh \
+##   WISP_CHARACTER=mothmere tools/screenshot.sh \
 ##     res://tools/godot/render_character_gameplay_showcase.tscn 120 540x960
 
 const GAME_WORLD_SCENE: PackedScene = preload("res://scenes/gameplay/game_world.tscn")

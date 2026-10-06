@@ -5,8 +5,7 @@ extends Control
 ## Hosts a GameWorld configured with `RunProfile.tutorial` (the Endless floor template under the
 ## default skin; no waves, run end or recording) and a TutorialDirector running the lessons of
 ## `data/tutorial/default_tutorial.tres`. Above the arena sit the step counter with progress dots
-## and a one-line caption; the code-drawn ghost hand sits above the HUD too, so it can tap upgrade
-## cards. SKIP is always visible and, like Android back and Escape, asks "SKIP THE TUTORIAL?" first. Main decides where `finished` leads (Home) and
+## and a one-line caption; the code-drawn ghost hand sits above the HUD too, so it can demonstrate the shield double tap. SKIP is always visible and, like Android back and Escape, asks "SKIP THE TUTORIAL?" first. Main decides where `finished` leads (Home) and
 ## marks the tutorial completed.
 
 ## The tutorial ended: every lesson passed ([param skipped] false) or the player confirmed SKIP.
@@ -194,8 +193,6 @@ func _layout() -> void:
 	_skip_button.offset_bottom = margins.y + skip_size.y
 	_guide_margin.offset_top = -(margins.w + GUIDE_BAND_HEIGHT)
 	_guide_margin.offset_bottom = -margins.w
-	# The upgrade card tray slides up above the caption band, so the caption stays readable.
-	_game.set_upgrade_tray_lift(GUIDE_BAND_HEIGHT)
 
 
 func _fallback_profile() -> RunProfile:

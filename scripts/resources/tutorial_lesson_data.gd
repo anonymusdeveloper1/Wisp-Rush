@@ -12,11 +12,11 @@ const GOAL_KILL: StringName = &"kill"
 const GOAL_CHAIN: StringName = &"chain"
 const GOAL_REDIRECT_KILL: StringName = &"redirect_kill"
 const GOAL_SAFE_KILL: StringName = &"safe_kill"
-const GOAL_UPGRADE: StringName = &"upgrade"
+const GOAL_SHIELD: StringName = &"shield"
 const GOAL_RUSH_KILL: StringName = &"rush_kill"
 const GOAL_BOSS: StringName = &"boss"
 const GOALS: Array[StringName] = [
-	GOAL_WALL_DASH, GOAL_KILL, GOAL_CHAIN, GOAL_REDIRECT_KILL, GOAL_SAFE_KILL, GOAL_UPGRADE,
+	GOAL_WALL_DASH, GOAL_KILL, GOAL_CHAIN, GOAL_REDIRECT_KILL, GOAL_SAFE_KILL, GOAL_SHIELD,
 	GOAL_RUSH_KILL, GOAL_BOSS,
 ]
 
@@ -64,16 +64,13 @@ const GOALS: Array[StringName] = [
 @export var reset_after_demo: bool = true
 ## Whether a wall landing that misses the goal rebuilds the lesson for another attempt.
 @export var retry_on_miss: bool = false
-## HUD element the hand's focus ring points at: `&"xp"`, `&"rush"` or empty (the HUD has no lives
+## HUD element the hand's focus ring points at: `&"items"`, `&"rush"` or empty (the HUD has no lives
 ## readout since 2026-09-24).
 @export var hud_focus: StringName = &""
-## Kills and bosses grant XP (the upgrade lesson).
-@export var experience_enabled: bool = false
-## XP bar share the demo fills to (0 leaves it); the try fills the rest.
-@export_range(0.0, 0.95, 0.05) var demo_experience_share: float = 0.0
-## The demo fills the XP bar, asks for the lesson's calm moment and the ghost hand
-## taps an upgrade card once the tray slides up (the upgrade lesson).
-@export var demo_upgrade_tap: bool = false
+## Named item dropped by each lesson target; empty in other lessons.
+@export var drops_item: StringName = &""
+## The demo collects its Ward, then the hand double taps to activate it.
+@export var demo_shield_tap: bool = false
 ## Kills drop a Rift Points shard each, swept to the Wisp when it lands.
 @export var drops_shards: bool = false
 ## RUSH meter and mode are live (the RUSH lesson).
@@ -97,6 +94,6 @@ func validate() -> PackedStringArray:
 		failures.append("%s: redirect swipe index out of range" % lesson_id)
 	if goal == GOAL_BOSS and not spawns_boss:
 		failures.append("%s: a boss goal needs spawns_boss" % lesson_id)
-	if demo_upgrade_tap and not demo_drives_wisp:
-		failures.append("%s: an upgrade tap demo needs demo_drives_wisp" % lesson_id)
+	if demo_shield_tap and not demo_drives_wisp:
+		failures.append("%s: a shield tap demo needs demo_drives_wisp" % lesson_id)
 	return failures

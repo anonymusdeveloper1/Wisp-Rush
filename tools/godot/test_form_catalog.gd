@@ -3,7 +3,7 @@ extends SceneTree
 
 const CATALOG: FormCatalog = preload("res://data/forms/default_catalog.tres")
 const RIGGED: Array[StringName] = [
-	&"patchvile", &"verdant_shade", &"scarlet", &"rook", &"morrow", &"mothmere",
+	&"patchvile", &"verdant_shade", &"scarlet", &"rook", &"mothmere",
 ]
 
 
@@ -16,7 +16,7 @@ func _init() -> void:
 			push_error("form_catalog: %s" % failure)
 	var forms: Array[FormData] = CATALOG.load_forms()
 	# Every character is free until the owner sets prices; the default (Patchvile) must stay free.
-	var expected_prices: Array[int] = [0, 0, 0, 0, 0, 0]
+	var expected_prices: Array[int] = [0, 0, 0, 0, 0]
 	if forms.size() != expected_prices.size():
 		failures += 1
 		push_error("form_catalog: expected %d characters, got %d" % [

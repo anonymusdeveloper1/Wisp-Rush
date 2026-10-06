@@ -152,10 +152,20 @@ func _check_polygon_helpers() -> void:
 			_fail("%s floor polygon is implausibly small" % floor_id)
 
 
-## The floors the game plays on: the Endless floor every arena shares.
+## The floor the game plays on: the arena's (SIMULATION, ADR-0027) fitted to a 1080x1920 screen, in UV
+## of that screen.
 func _floors() -> Dictionary[StringName, PackedVector2Array]:
 	var catalog := load("res://data/endless/default_endless_catalog.tres") as EndlessCatalog
-	return {&"endless": catalog.floor_polygon}
+	var scene: PackedScene = catalog.get_skin(catalog.default_skin_id).load_visual_scene()
+	var visual := scene.instantiate() as ArenaVisual
+	root.add_child(visual)
+	var view := Vector2(1080.0, 1920.0)
+	var floor_rect: Rect2 = visual.fit(view, 27.0)
+	visual.free()
+	var uv := Rect2(floor_rect.position / view, floor_rect.size / view)
+	return {&"arena": PackedVector2Array([
+		uv.position, Vector2(uv.end.x, uv.position.y), uv.end, Vector2(uv.position.x, uv.end.y),
+	])}
 
 
 func _fail(message: String) -> void:

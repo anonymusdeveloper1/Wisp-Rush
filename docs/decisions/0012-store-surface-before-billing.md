@@ -1,6 +1,6 @@
 # ADR-0012: The Shop is visible before billing exists, with purchases disabled
 
-> **Status:** Accepted; "the Shop sells exactly one product" is superseded by
+> **Status:** Rift Points packs join Remove Ads on the Shop's SHOP page ([ADR-0028](0028-shop-bottom-navigation-and-rift-points-packs.md), 2026-10-05), the disabled-purchase rule standing; Accepted; "the Shop sells exactly one product" is superseded by
 > [ADR-0013](0013-rift-story-levels-endless-mode-and-rift-points.md) (Rift Points cosmetic tabs join the
 > No Ads tab; the disabled-purchase rule stands) · **Date:** 2026-09-13 · **Deciders:** owner (chose the option) + Claude Code ·
 > **Supersedes the "no surface renders" consequence of:** [ADR-0009](0009-monetisation-model.md) (its model stands)

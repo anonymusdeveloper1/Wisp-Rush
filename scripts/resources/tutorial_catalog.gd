@@ -4,8 +4,8 @@ extends Resource
 
 ## Ordered lessons, easiest to most skilful.
 @export var lessons: Array[TutorialLessonData] = []
-## Endless arena the tutorial shows (the default, the Quarry Titan).
-@export var arena_skin_id: StringName = &"quarry_titan"
+## Endless arena the tutorial shows (the one arena, SIMULATION, ADR-0027).
+@export var arena_skin_id: StringName = &"sci_fi_simulation_v1"
 ## Boss health in the boss lesson (rounded to three phase bands).
 @export_range(3, 30, 3) var boss_health: int = 3
 ## Caption while a missed attempt rebuilds.
@@ -38,12 +38,10 @@ extends Resource
 @export_range(20.0, 400.0, 10.0) var demo_hit_distance: float = 150.0
 ## Rest after the demo's last landing before the try, seconds.
 @export_range(0.0, 3.0, 0.05) var demo_settle_seconds: float = 0.9
-## Real seconds the demo lets the upgrade cards rest before the hand taps one.
-@export_range(0.0, 3.0, 0.05) var demo_card_look_seconds: float = 0.7
-## Zero-based card the demo hand taps (clamped to the cards shown).
-@export_range(0, 2, 1) var demo_card_index: int = 1
-## Real seconds the demo waits for the upgrade tray to open before it moves on without the tap.
-@export_range(1.0, 20.0, 0.5) var demo_tray_wait_limit: float = 8.0
+## Seconds of each demonstrated shield tap's press, hold and release.
+@export_range(0.02, 0.2, 0.01) var shield_tap_seconds: float = 0.08
+## Gap between the two demonstrated taps.
+@export_range(0.02, 0.2, 0.01) var shield_tap_gap: float = 0.08
 @export_group("Try")
 ## Idle seconds before the hand repeats its hint during a try.
 @export_range(0.5, 10.0, 0.1) var hint_interval: float = 2.6

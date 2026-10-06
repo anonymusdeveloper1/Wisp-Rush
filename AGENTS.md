@@ -56,19 +56,21 @@ These override every other instruction, workflow, skill and default (owner, 2026
    §3–§4). **Every character is the same size everywhere** (owner, 2026-09-26); Scarlet's sheets
    were made at 166 px, so her scene draws her 1.16× larger. **Every character, new or redesigned, stands centred on Home's
    platform** (owner, 2026-09-27): feet on the platform's centre, body centred over it; the scene's
-   `menu_offset` fixes a storefront frame that does not (guide §6). New characters are **whole-frame sprites, not bone rigs** (owner, 2026-09-20). For the existing
-   rigged characters, [docs/guides/character_rig_recipe.md](docs/guides/character_rig_recipe.md)
-   (layers, Bone2D chains and skinned Polygon2D ribbons, `ChainSpring`, the runtime state machine,
-   the QA loop and the mistakes already made). Then
+   `menu_offset` fixes a storefront frame that does not (guide §6). New characters are **whole-frame sprites, not bone rigs** (owner, 2026-09-20); no rigged character is
+   left since Morrow was removed (owner, 2026-10-05), so
+   [docs/guides/character_rig_recipe.md](docs/guides/character_rig_recipe.md) is history. Then
    [docs/systems/playable_character_visuals.md](docs/systems/playable_character_visuals.md) and
    [ADR-0015](docs/decisions/0015-animated-playable-characters.md).
 5c. **Making a devlog video (TikTok / YouTube Shorts)?** [docs/marketing/devlog_video_recipe.md](docs/marketing/devlog_video_recipe.md)
    (owner-approved recipe: rules, structures, Palmier Pro blueprint, QA), [docs/marketing/devlog_hooks.md](docs/marketing/devlog_hooks.md)
    (the hook library every episode picks from), [tools/video/README.md](tools/video/README.md)
    (commands) and [docs/marketing/devlog_video_brief.md](docs/marketing/devlog_video_brief.md) (what may be shown).
-5d. **Making an Endless arena image?** [docs/guides/arena_art.md](docs/guides/arena_art.md) — the 1080 × 2400
-   canvas, safe zone and bleed, and §2b, the rules for the playable floor (exact rectangle, plain surface,
-   nothing over it). Machine-readable: `concept_art/arenas_v2/_layout/arena_spec.json` and the floor mask.
+5d. **Making or changing the arena?** The game has one arena, **SIMULATION**, a board (owner, 2026-10-05,
+   [ADR-0027](docs/decisions/0027-one-arena-simulation.md); [ADR-0025](docs/decisions/0025-sci-fi-board-and-arena-spawn-effects.md)):
+   Codex's pixel-art kit in `concept_art/boards_v1/sci_fi_simulation_v1/` (`manifest.json`), copied into the
+   game by `python tools/art/make_board.py sci_fi_simulation_v1` and laid out by `SciFiBoardVisual`
+   ([docs/systems/endless_mode.md](docs/systems/endless_mode.md), [arena guide](docs/guides/arena_art.md) §6).
+   The rest of the arena guide is the painted-arena contract of the removed arenas.
 5e. **Adding or changing an enemy?** [docs/systems/enemies.md](docs/systems/enemies.md) — the Enemies v2
    enemies (five in the game since 2026-09-28): `WholeFrameEnemy` (moving, the swipe, lunge and shot
    attacks, the slice kill), `EnemyProjectile` (shots and the wall mark), what kills the Wisp, and the
@@ -91,6 +93,8 @@ These override every other instruction, workflow, skill and default (owner, 2026
   asset for portrait only; never add a landscape layout.
   The steps this manual requires for a change you *were* asked to make (validate, the docs it
   triggers, the DEVLOG entry) count as asked.
+- **Codex as a tool** (owner, 2026-10-05): Codex may be used as a tool through its command line
+  (§4). It may make **simple sprite sheets**; the other sprite sheets are made in AutoSprite.
 - **Godot 4.7.2, GDScript only, static typing.** Use Godot 4 APIs; never Godot 3 syntax
   (`yield`, `onready var`, string-based `connect`). Unsure about an API? Check the 4.x class
   reference (docs.godotengine.org/en/stable) — don't guess signatures.
@@ -132,8 +136,9 @@ These override every other instruction, workflow, skill and default (owner, 2026
 | Frame-time benchmark | `"$GODOT" --headless --path . --script res://tools/godot/bench_stress.gd` |
 | Regenerate runtime art (never hand-edit `assets/art/`) | `python3 tools/art/extract_redesign.py` → `tools/validate.sh` |
 | Style UI | use theme type variations (`docs/systems/ui_design_system.md`) and `Palette`; no per-node StyleBoxFlat/colour overrides |
-| Build + deploy the Android debug APK (device over USB) | `JAVA_HOME=$(/usr/libexec/java_home) "$GODOT" --headless --path . --export-debug "Android" build/android/wisp_rush_debug.apk` then `~/Library/Android/sdk/platform-tools/adb install -r -t build/android/wisp_rush_debug.apk` and `adb shell monkey -p com.cognitix.wisprush -c android.intent.category.LAUNCHER 1` (the activity is `GodotAppLauncher` and is **not exported**, so `am start -n` is denied) |
+| Build + deploy the Android debug APK (device over USB) | `JAVA_HOME=$(/usr/libexec/java_home) "$GODOT" --headless --path . --export-debug "Android" build/android/wisp_rush_debug.apk` then `~/Library/Android/sdk/platform-tools/adb install -r -t build/android/wisp_rush_debug.apk` and `adb shell monkey -p com.cognitix.wisprush -c android.intent.category.LAUNCHER 1` (the activity is `GodotAppLauncher` and is **not exported**, so `am start -n` is denied). The export is a **Gradle build** since 2026-10-05 (the AdMob plugin needs it, ADR-0029): on a fresh machine add `--install-android-build-template` to the first export (installs Godot's template in the git-ignored `android/`); the first build downloads Gradle and Google's SDK. |
 | Same, **on Windows** (this checkout at `D:\Wisp Rush`) | `GODOT_PATH=/d/Godot_v4.7.2-stable_win64.exe/Godot_v4.7.2-stable_win64.exe` for every `tools/*.sh`; export with `JAVA_HOME="C:/Program Files/Android/Android Studio/jbr" "$GODOT" --headless --path . --export-debug "Android" build/android/wisp_rush_debug.apk`, then `"$LOCALAPPDATA/Android/Sdk/platform-tools/adb.exe" install -r -t build/android/wisp_rush_debug.apk` and the same `monkey` launch. Read the device log with `adb logcat -d -s godot` |
+| Run Codex as a tool, **on Windows** (owner, 2026-10-05; sprite sheets only simple ones, §2) | The CLI comes with the Codex app and is not on the PATH: `codex.exe` in `C:\Program Files\WindowsApps\OpenAI.Codex_<version>_x64__2p2nqsd0c76g0\app\resources\` (`codex-cli 0.160.0` on 2026-10-05; the folder changes with each app update, and `Get-AppxPackage -Name OpenAI.Codex` gives it). `"$CODEX" exec -C "D:/Wisp Rush" --sandbox workspace-write -o <file> "<prompt>"` runs one task and writes Codex's last message to `<file>`; `-i <image>` attaches an image, `--json` prints its events. It uses the owner's ChatGPT login; image generation is on |
 | Screenshot of what the game renders | `tools/screenshot.sh [res://scene.tscn] [frames] [size]` → `logs/screenshot.png` |
 | Run the game (window) | `"$GODOT" --path .` |
 | Devlog video (capture, voice, graphics, sounds; edit in Palmier Pro) | [tools/video/README.md](tools/video/README.md), recipe [docs/marketing/devlog_video_recipe.md](docs/marketing/devlog_video_recipe.md) |

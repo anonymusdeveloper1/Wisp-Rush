@@ -1,7 +1,7 @@
 class_name EndlessArenaRules
 extends ArenaRules
-## Arena rules for Endless and the daily run: the shared floor template under a skin, seeded
-## bosses from a pool, and difficulty that climbs every boss cycle (ADR-0014). The pool's rosters no
+## Arena rules for Endless and the daily run: the arena's scene, seeded bosses from a pool, and
+## difficulty that climbs every boss cycle. The pool's rosters no
 ## longer change the enemies (Enemies v2, 2026-09-28); [method get_roster] is still the seeded pick.
 ##
 ## Picks are pure functions of the run seed and the wave or boss index, so the same seed always
@@ -42,32 +42,9 @@ func _init(
 		_boss_ids.append(&"reaper")
 
 
-func get_background() -> Texture2D:
-	return _skin.load_background() if _skin != null else null
-
-
 func get_visual_scene() -> PackedScene:
-	return _skin.load_visual_scene() if _skin != null else null
-
-
-func get_scenery() -> ArenaSceneryData:
-	return _skin.scenery if _skin != null else null
-
-
-## The shared floor, or the arena's own when it has one (ADR-0020): its rectangle's corners.
-func get_floor_polygon() -> PackedVector2Array:
-	if _skin != null and _skin.has_own_floor():
-		var own: Rect2 = _skin.floor_rect
-		return PackedVector2Array([
-			own.position, Vector2(own.end.x, own.position.y), own.end, Vector2(own.position.x, own.end.y),
-		])
-	return _catalog.floor_polygon if _catalog != null else PackedVector2Array()
-
-
-func get_floor_rect_uv() -> Rect2:
-	if _skin != null and _skin.has_own_floor():
-		return _skin.floor_rect
-	return _catalog.floor_rect if _catalog != null else Rect2()
+	var scene: PackedScene = _skin.load_visual_scene() if _skin != null else null
+	return scene if scene != null else super.get_visual_scene()
 
 
 func get_boss_wave_interval() -> int:

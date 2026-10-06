@@ -1,0 +1,174 @@
+{
+  "tool": "built-in image_gen",
+  "date": "2026-10-05",
+  "transparent_background": true,
+  "images_per_call": 1,
+  "reference_roles": [
+    {
+      "file": "../../assets/ui/theme/icons/icon_currency.png",
+      "role": "RP crystal shape and colours",
+      "sha256": "686a37a5afd8e9e47b44f25233a74f8b9415469fefcb91378ea7dd965dd31cf5",
+      "opaque_rgb_colours": [
+        "604D40",
+        "ECA255",
+        "FAE5C1"
+      ]
+    },
+    {
+      "file": "../pickup_items_v1/icons/soul_ward.png",
+      "role": "pickup sibling style, scale, outline and lighting"
+    },
+    {
+      "file": "../pickup_items_v1/icons/rift_magnet.png",
+      "role": "pickup sibling style, scale, outline and lighting"
+    }
+  ],
+  "build": {
+    "script": "build_icons.py",
+    "status": "not_run; deferred to Claude by the owner's instruction",
+    "runtime_directory": "assets/art/ui/rp_packs",
+    "preview_file": "preview_all.png",
+    "packed_size": [
+      256,
+      256
+    ],
+    "mode": "RGBA",
+    "logical_size": [
+      64,
+      64
+    ],
+    "maximum_body_extent": 48,
+    "grid": 4,
+    "alpha_threshold": 128
+  },
+  "outputs": [
+    {
+      "id": "rp_pack_500",
+      "rp": 500,
+      "picture": "a few RP crystals",
+      "file": "raw/rp_pack_500.png",
+      "original_path": "C:\\Users\\marti\\.codex\\generated_images\\01a10cd0-9a23-77b3-b860-43a7fb34ace5\\exec-f179947f-833e-47e6-af83-b76d7a1ead14.png",
+      "prompt_file": "prompts/rp_pack_500.md",
+      "source_sha256": "85590da446405461a96429d92c11d68d099e795ff6c216b4fbf5f40ba7deb40d",
+      "prompt_sha256": "e7f4d9c92c973210293369b138b633f0a6423180fb7be19d958cebe36da15a9f",
+      "matches_original": true,
+      "source_size": [
+        1254,
+        1254
+      ],
+      "source_mode": "RGBA",
+      "source_bytes": 244163,
+      "source_corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "runtime_file": "assets/art/ui/rp_packs/rp_pack_500.png",
+      "tool_arguments": {
+        "referenced_image_paths": [
+          "D:/Wisp Rush/assets/ui/theme/icons/icon_currency.png",
+          "D:/Wisp Rush/concept_art/pickup_items_v1/icons/soul_ward.png",
+          "D:/Wisp Rush/concept_art/pickup_items_v1/icons/rift_magnet.png"
+        ],
+        "transparent_background": true
+      }
+    },
+    {
+      "id": "rp_pack_1200",
+      "rp": 1200,
+      "picture": "a small pile of RP crystals",
+      "file": "raw/rp_pack_1200.png",
+      "original_path": "C:\\Users\\marti\\.codex\\generated_images\\01a10cd0-9a23-77b3-b860-43a7fb34ace5\\exec-b27b8e57-9336-4028-9584-00b8bae4cab9.png",
+      "prompt_file": "prompts/rp_pack_1200.md",
+      "source_sha256": "0b9d0dd51acea1b0fe076d825dac575bd7a63b80aa06b52769a6f9fd07c9cd09",
+      "prompt_sha256": "8ba186eacfa22b5698dc8056b5eae2ded9aa0d74674dbeba6e4d3b82f9c50fdd",
+      "matches_original": true,
+      "source_size": [
+        1254,
+        1254
+      ],
+      "source_mode": "RGBA",
+      "source_bytes": 393100,
+      "source_corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "runtime_file": "assets/art/ui/rp_packs/rp_pack_1200.png",
+      "tool_arguments": {
+        "referenced_image_paths": [
+          "D:/Wisp Rush/assets/ui/theme/icons/icon_currency.png",
+          "D:/Wisp Rush/concept_art/pickup_items_v1/icons/soul_ward.png",
+          "D:/Wisp Rush/concept_art/pickup_items_v1/icons/rift_magnet.png"
+        ],
+        "transparent_background": true
+      }
+    },
+    {
+      "id": "rp_pack_2500",
+      "rp": 2500,
+      "picture": "a large pile of RP crystals",
+      "file": "raw/rp_pack_2500.png",
+      "original_path": "C:\\Users\\marti\\.codex\\generated_images\\01a10cd0-9a23-77b3-b860-43a7fb34ace5\\exec-d887a765-93f1-429e-8423-77a33d43ac25.png",
+      "prompt_file": "prompts/rp_pack_2500.md",
+      "source_sha256": "b7f093d35301552a1adffe10af60551907d3d142dac116296e003d05108f93f4",
+      "prompt_sha256": "eada1ee068a14f55f8c1d9d394002150fdc19440d5d12126f21e88a193036030",
+      "matches_original": true,
+      "source_size": [
+        1254,
+        1254
+      ],
+      "source_mode": "RGBA",
+      "source_bytes": 523987,
+      "source_corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "runtime_file": "assets/art/ui/rp_packs/rp_pack_2500.png",
+      "tool_arguments": {
+        "referenced_image_paths": [
+          "D:/Wisp Rush/assets/ui/theme/icons/icon_currency.png",
+          "D:/Wisp Rush/concept_art/pickup_items_v1/icons/soul_ward.png",
+          "D:/Wisp Rush/concept_art/pickup_items_v1/icons/rift_magnet.png"
+        ],
+        "transparent_background": true
+      }
+    },
+    {
+      "id": "rp_pack_6500",
+      "rp": 6500,
+      "picture": "a heap of RP crystals spilling out of a small chest",
+      "file": "raw/rp_pack_6500.png",
+      "original_path": "C:\\Users\\marti\\.codex\\generated_images\\01a10cd0-9a23-77b3-b860-43a7fb34ace5\\exec-ec576bf5-40c5-4ccc-b896-8a82d24ca13d.png",
+      "prompt_file": "prompts/rp_pack_6500.md",
+      "source_sha256": "04ab7d9c9a510cc7b7987ac2f8f7bc8f78dad530aa9479bbb84bb3b7d0e3d858",
+      "prompt_sha256": "9858f43bff7ac49ff1952dab92a1b6da3bad981680f4064d0143167868e24bed",
+      "matches_original": true,
+      "source_size": [
+        1254,
+        1254
+      ],
+      "source_mode": "RGBA",
+      "source_bytes": 784284,
+      "source_corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "runtime_file": "assets/art/ui/rp_packs/rp_pack_6500.png",
+      "tool_arguments": {
+        "referenced_image_paths": [
+          "D:/Wisp Rush/assets/ui/theme/icons/icon_currency.png",
+          "D:/Wisp Rush/concept_art/pickup_items_v1/icons/soul_ward.png",
+          "D:/Wisp Rush/concept_art/pickup_items_v1/icons/rift_magnet.png"
+        ],
+        "transparent_background": true
+      }
+    }
+  ]
+}

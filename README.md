@@ -18,7 +18,8 @@ Milestone 2 is complete. The repository now contains a playable endless-run foun
 - Score, combo, multi-reap/rapid-redirect bonuses and working Pause/Resume/Home navigation.
 - Three Soul Fragments, enemy contact, safe-edge reform, visible i-frames and death dissolve.
 - Integrated first-run wall dash → single slice → triple reap lesson.
-- Enemy XP, safe three-card choices and all eight functional run mutations.
+- Seven enemy pickup items, double-tap Soul Ward protection and RP consumable packs
+  ([pickup system](docs/systems/pickup_items.md)).
 - Separate Rift Points drops/rewards plus score, best, wave, kill, chain and run Results statistics.
 
 The three-phase Reaper, persistent save/forms and local daily/challenge systems are next; see
@@ -84,11 +85,11 @@ it never changes speed, damage or distance.
 /Users/dimitarslezenkovski/Desktop/Godot.app/Contents/MacOS/Godot \
   --headless --path . --script res://tools/godot/test_hazard_gameplay.gd
 
-# XP/choice rules and all eight live mutation effects
+# Legacy XP component and current live pickup effects
 /Users/dimitarslezenkovski/Desktop/Godot.app/Contents/MacOS/Godot \
   --headless --path . --script res://tools/godot/test_run_progression.gd
 /Users/dimitarslezenkovski/Desktop/Godot.app/Contents/MacOS/Godot \
-  --headless --path . --script res://tools/godot/test_mutation_effects.gd
+  --headless --path . --script res://tools/godot/test_pickup_effects.gd
 
 # Render a visual at the default debug size or a requested window aspect
 tools/screenshot.sh res://scenes/gameplay/game_world.tscn 30 390x844

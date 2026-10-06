@@ -3,11 +3,13 @@
 > **Narrowed 2026-09-20 (GDD §14 #34).** The presentation-only character
 > architecture in this ADR still stands — it is what every character, rigged or not, plugs into.
 > What changed is how a character's *art* is authored: new characters are whole-frame sprites
-> ([character_creation.md](../guides/character_creation.md)), not bone rigs. Morrow keeps his rig
-> (Veyra and Noxen were removed 2026-09-25, GDD §14 #47; Rook's rig was replaced by whole-frame
+> ([character_creation.md](../guides/character_creation.md)), not bone rigs. Morrow kept his rig until he was
+> removed on 2026-10-05 (GDD §14 #83), the last rig (Veyra and Noxen were removed 2026-09-25, GDD §14 #47; Rook's rig was replaced by whole-frame
 > sprites on 2026-09-27, GDD §14 #56); the Ilyra and Bram rigs described in the addendum were
 > retired, and the name Ilyra went to the whole-frame sprite character, itself removed 2026-09-26 (GDD §14 #52).
-> **Tiers removed 2026-09-26** (GDD §14 #53): see the addendum below.
+> **Tiers removed 2026-09-26** (GDD §14 #53): see the addendum below. **The bone-rig code removed
+> 2026-10-05** (owner) after Morrow: `ChainSpring`, `RibbonChain` and the rig builder; the
+> presentation-only contract (`PlayableCharacterVisual`) stays for the whole-frame characters.
 
 > **Status:** Accepted · **Date:** 2026-09-17 · **Deciders:** owner (three playable characters with
 > smooth animation, "they are not just wisps but characters") + Codex (Veyra prototype) + Claude Code

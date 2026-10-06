@@ -11,6 +11,9 @@
   must be open) — `tools/video/README.md`. Blender is not an MCP server here: a 3D arena's model is
   built by a script run with Blender headless (`D:\Blender\blender.exe` on the Windows checkout;
   ADR-0023, arena guide §5).
+- **Codex** (owner, 2026-10-05): Claude Code may use Codex as a tool by running its CLI
+  (`codex exec`; the rule in AGENTS.md §2, the command in §4). It may make simple sprite sheets;
+  the other sprite sheets are made in AutoSprite.
 - **Pre-approved commands** (`.claude/settings.json`): `tools/validate.sh`,
   `node tools/project_map.mjs`, the Godot binary, read-only git plus `git add`, and all `godot` MCP
   tools. Edits to `.godot/` are denied.

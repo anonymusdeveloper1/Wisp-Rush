@@ -7,9 +7,10 @@
 [ext_resource type="PackedScene" path="res://assets/ui/theme/ornaments/crest_bottom.tscn" id="5_crest_bottom"]
 [ext_resource type="CanvasTexture" path="res://assets/ui/theme/icons/icon_currency.tres" id="6_rp"]
 [ext_resource type="Resource" path="res://data/forms/default_catalog.tres" id="7_forms"]
-[ext_resource type="Resource" path="res://data/endless/default_endless_catalog.tres" id="9_endless"]
+[ext_resource type="Resource" path="res://data/shop/rift_points_packs.tres" id="8_packs"]
 [ext_resource type="Script" path="res://scripts/components/focus_carousel.gd" id="10_carousel"]
 [ext_resource type="Script" path="res://scripts/components/page_dots.gd" id="11_dots"]
+[ext_resource type="Script" path="res://scenes/screens/run_item_shop_page.gd" id="12_items"]
 
 [node name="ShopScreen" type="Control"]
 layout_mode = 3
@@ -20,7 +21,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 form_catalog = ExtResource("7_forms")
-endless_catalog = ExtResource("9_endless")
+rift_points_packs = ExtResource("8_packs")
 
 [node name="Background" type="TextureRect" parent="."]
 texture_filter = 1
@@ -64,6 +65,14 @@ theme_override_constants/separation = 18
 [node name="Header" type="HBoxContainer" parent="SafeMargin/Content"]
 layout_mode = 2
 theme_override_constants/separation = 16
+
+[node name="BackButton" type="Button" parent="SafeMargin/Content/Header"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"SecondaryButton"
+text = "BACK"
 
 [node name="TitleBanner" type="PanelContainer" parent="SafeMargin/Content/Header"]
 layout_mode = 2
@@ -109,42 +118,6 @@ theme_override_font_sizes/font_size = 44
 text = "0 RP"
 vertical_alignment = 1
 
-[node name="TabBar" type="PanelContainer" parent="SafeMargin/Content"]
-layout_mode = 2
-theme_type_variation = &"NavBar"
-
-[node name="TabRow" type="HBoxContainer" parent="SafeMargin/Content/TabBar"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="WispsTab" type="Button" parent="SafeMargin/Content/TabBar/TabRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 88)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_type_variation = &"NavButton"
-toggle_mode = true
-button_pressed = true
-text = "CHARACTERS"
-
-[node name="ArenasTab" type="Button" parent="SafeMargin/Content/TabBar/TabRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 88)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_type_variation = &"NavButton"
-toggle_mode = true
-text = "ARENAS"
-
-[node name="NoAdsTab" type="Button" parent="SafeMargin/Content/TabBar/TabRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 88)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_type_variation = &"NavButton"
-toggle_mode = true
-text = "NO ADS"
-
 [node name="CarouselPage" type="VBoxContainer" parent="SafeMargin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -181,41 +154,64 @@ layout_mode = 2
 theme_type_variation = &"CaptionLabel"
 horizontal_alignment = 1
 
-[node name="NoAdsPage" type="VBoxContainer" parent="SafeMargin/Content"]
+[node name="ActionButton" type="Button" parent="SafeMargin/Content/CarouselPage"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(640, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"PrimaryButton"
+text = "EQUIPPED"
+
+[node name="ShopPage" type="ScrollContainer" parent="SafeMargin/Content"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/separation = 26
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 3
 
-[node name="TopSpacer" type="Control" parent="SafeMargin/Content/NoAdsPage"]
+[node name="Sections" type="VBoxContainer" parent="SafeMargin/Content/ShopPage"]
 layout_mode = 2
-size_flags_vertical = 3
-mouse_filter = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 30
 
-[node name="OfferCard" type="PanelContainer" parent="SafeMargin/Content/NoAdsPage"]
+[node name="NoAdsBanner" type="PanelContainer" parent="SafeMargin/Content/ShopPage/Sections"]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"PanelBanner"
+
+[node name="BannerOrnament" parent="SafeMargin/Content/ShopPage/Sections/NoAdsBanner" instance=ExtResource("3_banner")]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="SafeMargin/Content/ShopPage/Sections/NoAdsBanner"]
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+text = "NO ADS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OfferCard" type="PanelContainer" parent="SafeMargin/Content/ShopPage/Sections"]
 custom_minimum_size = Vector2(760, 0)
 layout_mode = 2
 size_flags_horizontal = 4
-size_flags_vertical = 4
 theme_type_variation = &"PanelCrest"
 
-[node name="CrestTop" parent="SafeMargin/Content/NoAdsPage/OfferCard" instance=ExtResource("4_crest_top")]
+[node name="CrestTop" parent="SafeMargin/Content/ShopPage/Sections/OfferCard" instance=ExtResource("4_crest_top")]
 layout_mode = 2
 
-[node name="CrestBottom" parent="SafeMargin/Content/NoAdsPage/OfferCard" instance=ExtResource("5_crest_bottom")]
+[node name="CrestBottom" parent="SafeMargin/Content/ShopPage/Sections/OfferCard" instance=ExtResource("5_crest_bottom")]
 layout_mode = 2
 
-[node name="OfferColumn" type="VBoxContainer" parent="SafeMargin/Content/NoAdsPage/OfferCard"]
+[node name="OfferColumn" type="VBoxContainer" parent="SafeMargin/Content/ShopPage/Sections/OfferCard"]
 layout_mode = 2
 theme_override_constants/separation = 18
 
-[node name="OfferGlyph" type="Control" parent="SafeMargin/Content/NoAdsPage/OfferCard/OfferColumn"]
-custom_minimum_size = Vector2(0, 240)
+[node name="OfferGlyph" type="Control" parent="SafeMargin/Content/ShopPage/Sections/OfferCard/OfferColumn"]
+custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
 mouse_filter = 2
 
-[node name="AdGlyph" type="Label" parent="SafeMargin/Content/NoAdsPage/OfferCard/OfferColumn/OfferGlyph"]
+[node name="AdGlyph" type="Label" parent="SafeMargin/Content/ShopPage/Sections/OfferCard/OfferColumn/OfferGlyph"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -228,7 +224,7 @@ text = "AD"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="OfferStrike" type="ColorRect" parent="SafeMargin/Content/NoAdsPage/OfferCard/OfferColumn/OfferGlyph"]
+[node name="OfferStrike" type="ColorRect" parent="SafeMargin/Content/ShopPage/Sections/OfferCard/OfferColumn/OfferGlyph"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 8
@@ -246,39 +242,84 @@ rotation = -0.785398
 pivot_offset = Vector2(110, 8)
 mouse_filter = 2
 
-[node name="OfferTitle" type="Label" parent="SafeMargin/Content/NoAdsPage/OfferCard/OfferColumn"]
+[node name="OfferTitle" type="Label" parent="SafeMargin/Content/ShopPage/Sections/OfferCard/OfferColumn"]
 layout_mode = 2
 theme_type_variation = &"TitleLabel"
 text = "REMOVE ADS"
 horizontal_alignment = 1
 
-[node name="OfferBody" type="Label" parent="SafeMargin/Content/NoAdsPage/OfferCard/OfferColumn"]
+[node name="OfferBody" type="Label" parent="SafeMargin/Content/ShopPage/Sections/OfferCard/OfferColumn"]
 layout_mode = 2
-text = "No ads, ever. Everything else in Wisp Rush is earned by playing."
+text = "No ads, ever."
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="OfferStatus" type="Label" parent="SafeMargin/Content/NoAdsPage/OfferCard/OfferColumn"]
+[node name="OfferStatus" type="Label" parent="SafeMargin/Content/ShopPage/Sections/OfferCard/OfferColumn"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"CaptionLabel"
 text = "THE STORE IS NOT OPEN YET"
 horizontal_alignment = 1
 
-[node name="BottomSpacer" type="Control" parent="SafeMargin/Content/NoAdsPage"]
+[node name="OfferBuyButton" type="Button" parent="SafeMargin/Content/ShopPage/Sections/OfferCard/OfferColumn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(480, 0)
 layout_mode = 2
-size_flags_vertical = 3
-mouse_filter = 2
+size_flags_horizontal = 4
+theme_type_variation = &"PrimaryButton"
+disabled = true
+text = "COMING SOON"
 
-[node name="RestoreButton" type="Button" parent="SafeMargin/Content/NoAdsPage"]
+[node name="RestoreButton" type="Button" parent="SafeMargin/Content/ShopPage/Sections"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(560, 0)
 layout_mode = 2
 size_flags_horizontal = 4
-size_flags_vertical = 4
 theme_type_variation = &"SecondaryButton"
 disabled = true
 text = "RESTORE PURCHASES"
+
+[node name="ItemsBanner" type="PanelContainer" parent="SafeMargin/Content/ShopPage/Sections"]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"PanelBanner"
+
+[node name="BannerOrnament" parent="SafeMargin/Content/ShopPage/Sections/ItemsBanner" instance=ExtResource("3_banner")]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="SafeMargin/Content/ShopPage/Sections/ItemsBanner"]
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+text = "ITEMS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ItemsPage" type="VBoxContainer" parent="SafeMargin/Content/ShopPage/Sections"]
+unique_name_in_owner = true
+layout_mode = 2
+script = ExtResource("12_items")
+
+[node name="RiftPointsBanner" type="PanelContainer" parent="SafeMargin/Content/ShopPage/Sections"]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"PanelBanner"
+
+[node name="BannerOrnament" parent="SafeMargin/Content/ShopPage/Sections/RiftPointsBanner" instance=ExtResource("3_banner")]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="SafeMargin/Content/ShopPage/Sections/RiftPointsBanner"]
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+text = "RIFT POINTS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RiftPointPacks" type="GridContainer" parent="SafeMargin/Content/ShopPage/Sections"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 20
+columns = 2
 
 [node name="FeedbackLabel" type="Label" parent="SafeMargin/Content"]
 unique_name_in_owner = true
@@ -287,22 +328,31 @@ layout_mode = 2
 theme_type_variation = &"CaptionLabel"
 horizontal_alignment = 1
 
-[node name="Footer" type="HBoxContainer" parent="SafeMargin/Content"]
+[node name="BottomNav" type="PanelContainer" parent="SafeMargin/Content"]
 layout_mode = 2
-theme_override_constants/separation = 20
+theme_type_variation = &"NavBar"
 
-[node name="BackButton" type="Button" parent="SafeMargin/Content/Footer"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(280, 0)
+[node name="NavRow" type="HBoxContainer" parent="SafeMargin/Content/BottomNav"]
 layout_mode = 2
-size_flags_vertical = 4
-theme_type_variation = &"SecondaryButton"
-text = "BACK"
+theme_override_constants/separation = 6
 
-[node name="ActionButton" type="Button" parent="SafeMargin/Content/Footer"]
+[node name="WispsTab" type="Button" parent="SafeMargin/Content/BottomNav/NavRow"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 160)
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_vertical = 4
-theme_type_variation = &"PrimaryButton"
-text = "EQUIPPED"
+theme_type_variation = &"NavButton"
+theme_override_font_sizes/font_size = 48
+toggle_mode = true
+button_pressed = true
+text = "CHARACTERS"
+
+[node name="ShopTab" type="Button" parent="SafeMargin/Content/BottomNav/NavRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 160)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"NavButton"
+theme_override_font_sizes/font_size = 48
+toggle_mode = true
+text = "SHOP"

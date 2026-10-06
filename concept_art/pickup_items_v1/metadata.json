@@ -1,0 +1,184 @@
+[
+  {
+    "id": "soul_ward",
+    "logical_size": [
+      64,
+      64
+    ],
+    "size": [
+      256,
+      256
+    ],
+    "grid": 4,
+    "rgba_colours": 12,
+    "source_crop": [
+      172,
+      59,
+      1083,
+      1201
+    ],
+    "source_sha256": "6684a14233b1b01b184744c7d686343f5c3e646597089e9becf775d87d35757f",
+    "final_sha256": "9e5b93c1ea40d2987d9dbd47e3ba349625e92925835e753cb90a241bb98ba378",
+    "runtime": "assets/art/ui/items/soul_ward.png",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "id": "rift_magnet",
+    "logical_size": [
+      64,
+      64
+    ],
+    "size": [
+      256,
+      256
+    ],
+    "grid": 4,
+    "rgba_colours": 13,
+    "source_crop": [
+      220,
+      264,
+      1034,
+      1075
+    ],
+    "source_sha256": "7d16da61f90b07dff4adc7fc99f02d8395a252bdcdd84bfb56253d163739d772",
+    "final_sha256": "7b856cdfd95a3ecadc76be68326498abf55d99362c27666d447738d3479bed4b",
+    "runtime": "assets/art/ui/items/rift_magnet.png",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "id": "fortune_star",
+    "logical_size": [
+      64,
+      64
+    ],
+    "size": [
+      256,
+      256
+    ],
+    "grid": 4,
+    "rgba_colours": 11,
+    "source_crop": [
+      111,
+      122,
+      1144,
+      1123
+    ],
+    "source_sha256": "9d2b575fb8f799c2ab77b17b2e36f872ba58ea4e7cad60ebc0b083b9ac7cc059",
+    "final_sha256": "7396f2bd3a28256f898184a8b6c9de143591ace4df5f53fc8e291bacb839c526",
+    "runtime": "assets/art/ui/items/fortune_star.png",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "id": "stillglass",
+    "logical_size": [
+      64,
+      64
+    ],
+    "size": [
+      256,
+      256
+    ],
+    "grid": 4,
+    "rgba_colours": 13,
+    "source_crop": [
+      197,
+      109,
+      1058,
+      1146
+    ],
+    "source_sha256": "7f0fdeb901230e19c00aa88271212002acdd46fe4a06f894f4d190b3c2a513b8",
+    "final_sha256": "cb760670401ba2e6b4d565c0ce74f2d3341967c53a061092e39434723409f66c",
+    "runtime": "assets/art/ui/items/stillglass.png",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "id": "banish_bomb",
+    "logical_size": [
+      64,
+      64
+    ],
+    "size": [
+      256,
+      256
+    ],
+    "grid": 4,
+    "rgba_colours": 12,
+    "source_crop": [
+      244,
+      106,
+      1165,
+      1160
+    ],
+    "source_sha256": "75c38a5c84ab2329205203b49e60ea47b63f61f6d228e32c4a6a859e8375e516",
+    "final_sha256": "e86d10e64bc56a8950b412a86c578adab44224681c3377ca15845179fe24c27d",
+    "runtime": "assets/art/ui/items/banish_bomb.png",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "id": "reapers_edge",
+    "logical_size": [
+      64,
+      64
+    ],
+    "size": [
+      256,
+      256
+    ],
+    "grid": 4,
+    "rgba_colours": 12,
+    "source_crop": [
+      172,
+      110,
+      1170,
+      1170
+    ],
+    "source_sha256": "87b99f4d481b17a077fc27c0de4b57961f9f4ec546c623b341b744518f5385fa",
+    "final_sha256": "f7c00512367d44ac13fcd024bfce66c48f1b9632539b3b732a4f67e191687190",
+    "runtime": "assets/art/ui/items/reapers_edge.png",
+    "alpha": [
+      0,
+      255
+    ]
+  },
+  {
+    "id": "echo_wisp",
+    "logical_size": [
+      64,
+      64
+    ],
+    "size": [
+      256,
+      256
+    ],
+    "grid": 4,
+    "rgba_colours": 9,
+    "source_crop": [
+      235,
+      217,
+      1038,
+      1104
+    ],
+    "source_sha256": "bb969624d83f67c0dc6e783215f64aba76ec3d62847a97b99b74774eea27e8a4",
+    "final_sha256": "9bbb7296942ee04f04063ab48c5d84acadb64f89e8c85950f9f958262f1d49a4",
+    "runtime": "assets/art/ui/items/echo_wisp.png",
+    "alpha": [
+      0,
+      255
+    ]
+  }
+]

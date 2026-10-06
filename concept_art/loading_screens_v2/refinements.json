@@ -28,6 +28,30 @@
       "raw_path": "raw/loading_rook_source_v2.png",
       "prompt": "prompts/loading_rook_refinement.md",
       "reason": "Lower the focal figure to clear the existing boot and run loading interface"
+    },
+    {
+      "name": "loading_grimgrin",
+      "date": "2026-10-05",
+      "generated_original": "C:\\Users\\marti\\.codex\\generated_images\\01a10cb9-3a0a-74c3-8d4c-a0d38dcce106\\exec-3a26d15e-d5da-4068-b807-53e914aa1c33.png",
+      "references": [
+        "raw/loading_grimgrin_source.png"
+      ],
+      "raw_path": "raw/loading_grimgrin_source_v2.png",
+      "raw_sha256": "f61fcfd46504b373c77a03cf1b4d2e0f1728e7740d624e595e5533dbfa5a2e6d",
+      "prompt": "prompts/loading_grimgrin_refinement.md",
+      "reason": "Lower Grimgrin so his eye and grin clear the run arena-name line on portrait tablets (1200x1920 and 1440x1920); face tops at or below y=1140 and faces above approximately y=1580 in the final 1080x2400 image."
+    },
+    {
+      "name": "loading_new_boss",
+      "date": "2026-10-05",
+      "generated_original": "C:\\Users\\marti\\.codex\\generated_images\\01a10cb9-3a0a-74c3-8d4c-a0d38dcce106\\exec-e1e71b9d-064d-47f6-9259-dfabc2cbf239.png",
+      "references": [
+        "raw/loading_new_boss_source_v2.png"
+      ],
+      "raw_path": "raw/loading_new_boss_source_v3.png",
+      "raw_sha256": "eff77c2df56137b0f97e277e2269d7088c8c089520232224cd334d12dbb20049",
+      "prompt": "prompts/loading_new_boss_refinement_v3.md",
+      "reason": "Lower the lantern boss a little further so the skull top clears the run arena-name line on portrait tablets (1200x1920 and 1440x1920); skull top at or below y=1140 and face above approximately y=1580 in the final 1080x2400 image."
     }
   ]
 }

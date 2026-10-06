@@ -71,6 +71,10 @@ shots and checks every danger; `DashGeometry` for the floor.
 
 ## Rules & behaviour
 
+Regular kills roll the independent seven-item drop chance in GameWorld. Stillglass slows regular
+actors and their shots; Bomb calls `EnemyProjectile.banish()` to clear flying shots and wall marks.
+Definitions and drop tuning: [pickup_items.md](pickup_items.md).
+
 - **Movement (owner, 2026-09-27):** they go around the Wisp on the sides. A melee enemy closes in
   from the side, then straight; a shooter holds its distance and circles, turning back at a wall.
 - **Attacks (owner, 2026-09-28):** the Claw Ghost swipes when close; the Root Mask lunges at where
@@ -91,7 +95,7 @@ shots and checks every danger; `DashGeometry` for the floor.
 
 - Manual: an Endless run (the owner tests on the phone).
 - No automated test covers the new set yet; `test_enemy_families`, `test_endless_enemies`,
-  `test_gameplay_slice`, `test_mutation_effects`, `test_player_health_flow` and `bench_stress` still
+  `test_player_health_flow` and `bench_stress` still
   use the removed enemies.
 
 ## Known issues / TODO
@@ -107,6 +111,7 @@ shots and checks every danger; `DashGeometry` for the floor.
 
 | Date | Change |
 |---|---|
+| 2026-10-05 | Regular enemy drops and item slow/banish effects; projectile banish API handles wall marks |
 | 2026-10-04 | `get_arrival_progress()` and `set_arrival_ring_enabled()`: an arena can draw the arrival (SIMULATION, ADR-0025) |
 | 2026-09-28 | Enemies v2 (owner): Bone Witch, Claw Ghost, Hooded Scribe, Root Mask, Stone Golem from the owner's AutoSprite sheets (cleaned of white leftovers), `WholeFrameEnemy`, `EnemyProjectile`, slice kill; every old enemy removed (to the Recycle Bin) |
 | 2026-09-15 | `would_dash_hit` pure query + `set_targeted` aim-preview ring (aim help) |

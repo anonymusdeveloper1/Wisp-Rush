@@ -1,0 +1,247 @@
+{
+  "tool": "built-in image_gen",
+  "date": "2026-10-05",
+  "transparent_background": true,
+  "images_per_call": 1,
+  "reference_path_base": "repository root",
+  "reference_roles": [
+    {
+      "file": "assets/ui/theme/icons/icon_shop.png",
+      "role": "SHOP meaning: merchant's bag",
+      "sha256": "d26c06106db895ff8ccb9f157688684e6acc7e1366f327e8e1fe41b6b7f9d726"
+    },
+    {
+      "file": "assets/ui/theme/icons/icon_daily.png",
+      "role": "DAILY meaning: sun with four cardinal rays",
+      "sha256": "a7c7d2ad7d0c5f5787222a17082ea4603afcdae50fd64d145f33abdf95299bc8"
+    },
+    {
+      "file": "assets/ui/theme/icons/icon_trials.png",
+      "role": "TRIALS meaning: upright five-pointed star",
+      "sha256": "d37c739f1437e27c5498672a3a3f6c0a0ce705444c33a1d761fab6f83b44b574"
+    },
+    {
+      "file": "concept_art/pickup_items_v1/icons/soul_ward.png",
+      "role": "packed pickup style, scale, outline and lighting",
+      "sha256": "9e5b93c1ea40d2987d9dbd47e3ba349625e92925835e753cb90a241bb98ba378"
+    },
+    {
+      "file": "concept_art/pickup_items_v1/icons/fortune_star.png",
+      "role": "packed pickup style, scale, outline and lighting",
+      "sha256": "7396f2bd3a28256f898184a8b6c9de143591ace4df5f53fc8e291bacb839c526"
+    },
+    {
+      "file": "assets/art/ui/rp_packs/rp_pack_6500.png",
+      "role": "packed RP pack style, scale, outline and lighting",
+      "sha256": "c8444b0e87a603eaab02295f6f536c693474081eb3ba74dca48b06367de485bc"
+    }
+  ],
+  "preview_reference": {
+    "file": "assets/ui/theme/textures/caption_tile_normal.png",
+    "role": "existing Home button surface used by the future review sheet",
+    "sha256": "585928acf0d80bac467f902d83e3a6279c70e2ba07c41ecf7003987869485504"
+  },
+  "build": {
+    "script": "build_icons.py",
+    "status": "not_run; deferred to Claude by the owner's instruction",
+    "command": "python concept_art/home_icons_v1/build_icons.py",
+    "runtime_directory": "assets/art/ui/home_icons",
+    "preview_file": "preview_all.png",
+    "preview_size": [
+      880,
+      850
+    ],
+    "packed_size": [
+      192,
+      192
+    ],
+    "mode": "RGBA",
+    "logical_size": [
+      48,
+      48
+    ],
+    "maximum_body_extent": 36,
+    "body_scale_reference": "48 / 64 logical pixels in the pickup and RP pack builders",
+    "grid": 4,
+    "screen_box": [
+      96,
+      96
+    ],
+    "screen_pixels_per_logical_pixel": 2,
+    "alpha_threshold": 128,
+    "palette_hex": [
+      "0B1116",
+      "111521",
+      "263D42",
+      "4C6670",
+      "536064",
+      "8FB3BA",
+      "62E8F2",
+      "EAFDFF",
+      "A78768",
+      "FAE5C1",
+      "F3A847",
+      "FFD391"
+    ],
+    "palette_source": "concept_art/pickup_items_v1/build_icons.py"
+  },
+  "verification": {
+    "raw_copies": "all three SHA-256 hashes match their generated originals",
+    "exact_prompts": "all three files equal the prompt strings passed to image_gen",
+    "raw_png_inspection": "Python standard library only: PNG header and decoded alpha samples/bounds; no Pillow or NumPy",
+    "packing": "not run",
+    "game_validation": "not run, as requested"
+  },
+  "outputs": [
+    {
+      "id": "shop",
+      "button": "SHOP",
+      "picture": "a merchant's bag",
+      "file": "raw/shop.png",
+      "original_path": "C:/Users/marti/.codex/generated_images/01a10d55-9477-7f63-9d9e-74e4c9e12cf3/exec-c1d3688c-9389-4de8-8b4d-629e3c9174d2.png",
+      "prompt_file": "prompts/shop.md",
+      "prompt_sha256": "809a9c68bdfa956d29e299829211cd053dbec26cf9de8b3892a364ce9e0d227d",
+      "matches_original": true,
+      "source_sha256": "77c4d2d4fad41c25246c3d9234971f13786d99b7f8110a355f8a4601f8720dab",
+      "source_size": [
+        1254,
+        1254
+      ],
+      "source_mode": "RGBA",
+      "source_bytes": 492631,
+      "source_corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "source_alpha_extrema": [
+        0,
+        255
+      ],
+      "source_alpha_bounds": [
+        128,
+        130,
+        1154,
+        1107
+      ],
+      "source_alpha128_bounds": [
+        212,
+        257,
+        1043,
+        1043
+      ],
+      "source_partial_alpha_pixels": 503055,
+      "runtime_file": "assets/art/ui/home_icons/shop.png",
+      "tool_arguments": {
+        "referenced_image_paths": [
+          "D:/Wisp Rush/assets/ui/theme/icons/icon_shop.png",
+          "D:/Wisp Rush/concept_art/pickup_items_v1/icons/soul_ward.png",
+          "D:/Wisp Rush/concept_art/pickup_items_v1/icons/fortune_star.png",
+          "D:/Wisp Rush/assets/art/ui/rp_packs/rp_pack_6500.png"
+        ],
+        "transparent_background": true
+      }
+    },
+    {
+      "id": "daily",
+      "button": "DAILY",
+      "picture": "a sun with four cardinal rays",
+      "file": "raw/daily.png",
+      "original_path": "C:/Users/marti/.codex/generated_images/01a10d55-9477-7f63-9d9e-74e4c9e12cf3/exec-7356e55b-71ad-4158-9813-4f95c5661d0d.png",
+      "prompt_file": "prompts/daily.md",
+      "prompt_sha256": "2064eb14e16ccfd67f8e846f0709c2219f27172e0a2e75067afd3528afeb207d",
+      "matches_original": true,
+      "source_sha256": "fa27d6211a78fba528cffad8e1ec9d51d16ad14929a4a8214b1aa80997484108",
+      "source_size": [
+        1254,
+        1254
+      ],
+      "source_mode": "RGBA",
+      "source_bytes": 425518,
+      "source_corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "source_alpha_extrema": [
+        0,
+        255
+      ],
+      "source_alpha_bounds": [
+        97,
+        23,
+        1210,
+        1212
+      ],
+      "source_alpha128_bounds": [
+        147,
+        121,
+        1107,
+        1133
+      ],
+      "source_partial_alpha_pixels": 384788,
+      "runtime_file": "assets/art/ui/home_icons/daily.png",
+      "tool_arguments": {
+        "referenced_image_paths": [
+          "D:/Wisp Rush/assets/ui/theme/icons/icon_daily.png",
+          "D:/Wisp Rush/concept_art/pickup_items_v1/icons/soul_ward.png",
+          "D:/Wisp Rush/concept_art/pickup_items_v1/icons/fortune_star.png",
+          "D:/Wisp Rush/assets/art/ui/rp_packs/rp_pack_6500.png"
+        ],
+        "transparent_background": true
+      }
+    },
+    {
+      "id": "trials",
+      "button": "TRIALS",
+      "picture": "an upright five-pointed star",
+      "file": "raw/trials.png",
+      "original_path": "C:/Users/marti/.codex/generated_images/01a10d55-9477-7f63-9d9e-74e4c9e12cf3/exec-0fa6bf0c-0aa6-4b51-aacf-3f384d274b18.png",
+      "prompt_file": "prompts/trials.md",
+      "prompt_sha256": "4a16d78662119749e9bcea80ac9ccd66ae0a327fbaa00186c92a247011d7d03c",
+      "matches_original": true,
+      "source_sha256": "b1eb8c275099132e51cad4172375651b141f6e07c8928a815cdeb9b5900c8687",
+      "source_size": [
+        1254,
+        1254
+      ],
+      "source_mode": "RGBA",
+      "source_bytes": 475761,
+      "source_corner_alpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "source_alpha_extrema": [
+        0,
+        255
+      ],
+      "source_alpha_bounds": [
+        57,
+        49,
+        1210,
+        1214
+      ],
+      "source_alpha128_bounds": [
+        163,
+        186,
+        1091,
+        1080
+      ],
+      "source_partial_alpha_pixels": 451184,
+      "runtime_file": "assets/art/ui/home_icons/trials.png",
+      "tool_arguments": {
+        "referenced_image_paths": [
+          "D:/Wisp Rush/assets/ui/theme/icons/icon_trials.png",
+          "D:/Wisp Rush/concept_art/pickup_items_v1/icons/soul_ward.png",
+          "D:/Wisp Rush/concept_art/pickup_items_v1/icons/fortune_star.png",
+          "D:/Wisp Rush/assets/art/ui/rp_packs/rp_pack_6500.png"
+        ],
+        "transparent_background": true
+      }
+    }
+  ]
+}

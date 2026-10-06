@@ -1,6 +1,6 @@
 # ADR-0025: The sci-fi board — a board with its own layout, and spawn effects drawn by the arena
 
-> **Status:** Accepted · **Date:** 2026-10-04 · **Deciders:** owner / Claude Code (Opus 5.5) ·
+> **Status:** The other arenas removed by [ADR-0027](0027-one-arena-simulation.md) (2026-10-05): SIMULATION is the one arena; Accepted · **Date:** 2026-10-04 · **Deciders:** owner / Claude Code (Opus 5.5) ·
 > **Builds on:** [ADR-0024](0024-board-arenas.md) (board arenas, the HUD in the board) and
 > [ADR-0021](0021-layered-arenas.md) (an arena may be a scene, an `ArenaVisual`)
 

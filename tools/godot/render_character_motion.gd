@@ -12,7 +12,7 @@ extends Node2D
 ## dash-showcase timeline (launch, kill accent, mid-dash turn, dive and landing) with a zoomed camera
 ## and an on-screen state label, for a slow-motion clip.
 ##
-## Usage (WISP_CHARACTER = rook | morrow | any form id):
+## Usage (WISP_CHARACTER = rook | any form id):
 ##   WISP_CHARACTER=rook "$GODOT" --path . --resolution 540x960 --fixed-fps 60 \
 ##     --write-movie logs/motion/rook/frame.png --quit-after 440 \
 ##     res://tools/godot/render_character_motion.tscn

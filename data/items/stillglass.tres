@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="RunItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/run_item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+item_id = &"stillglass"
+display_name = "STILLGLASS"
+description = "Slows enemies and their shots for 10 seconds."
+icon_path = "res://assets/art/ui/items/stillglass.png"
+duration_seconds = 10.0
+enemy_speed_multiplier = 0.55
+

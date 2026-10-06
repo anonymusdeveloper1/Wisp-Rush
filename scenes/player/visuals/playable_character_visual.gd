@@ -6,8 +6,9 @@ extends Node2D
 ## mirrors it. Whole-body motion (hover, squash and stretch, recoil, flourishes) is an
 ## AnimationPlayer library built at runtime and blended by an AnimationTree state machine. Heading
 ## is a damped spring, so turns ease in and overshoot a little instead of snapping. Each
-## character's rig adds its own secondary motion (wings, ribbons, hands) in
-## [method _update_secondary_motion].
+## character adds its own secondary motion in [method _update_secondary_motion]. Every character is
+## a whole-frame sprite character ([WholeFrameCharacterVisual]); the bone-rig parts (`ChainSpring`,
+## `RibbonChain`) were removed with Morrow, the last rig, on 2026-10-05.
 ##
 ## The rig is authored facing up: -Y is forward, +Y is behind (tails, trails), X is sideways.
 
@@ -304,7 +305,7 @@ func set_reduced_motion(enabled: bool) -> void:
 	_reduced_motion = enabled
 	if not is_node_ready():
 		return
-	_animation_tree.active = not enabled and is_visible_in_tree()
+	_set_tree_active(not enabled and is_visible_in_tree())
 	if _aura != null:
 		_aura.set_still(enabled)
 	if enabled:
@@ -361,8 +362,6 @@ func get_layer_bounds() -> Rect2:
 				rect.position, Vector2(rect.end.x, rect.position.y),
 				rect.end, Vector2(rect.position.x, rect.end.y),
 			])
-		elif node is Polygon2D:
-			corners = (node as Polygon2D).polygon
 		else:
 			continue
 		var xform: Transform2D = to_rig * (node as Node2D).get_global_transform()
@@ -376,12 +375,12 @@ func get_layer_bounds() -> Rect2:
 	return bounds
 
 
-## Extension point: per-character bones, ribbons, orbiters and material parameters.
+## Extension point: per-character secondary motion, orbiters and material parameters.
 func _update_secondary_motion(_delta: float) -> void:
 	pass
 
 
-## Extension point: a state just started (impulses for wings, ribbons, particles).
+## Extension point: a state just started (impulses for effects and particles).
 func _on_state_started(_state_name: StringName) -> void:
 	pass
 
@@ -496,8 +495,19 @@ func _travel(state_name: StringName, restart: bool = false) -> void:
 func _apply_visibility() -> void:
 	var shown: bool = is_visible_in_tree()
 	set_process(shown)
-	_animation_tree.active = shown and not _reduced_motion
+	_set_tree_active(shown and not _reduced_motion)
 	_update_particles()
+
+
+## Turns the AnimationTree on or off. Turned back on, its state machine restarts at Start, which
+## plays nothing and leaves MotionRoot at zero scale and black (measured 2026-10-05: the Shop's
+## CHARACTERS cards went empty after the SHOP page), so the current state is resumed where it was
+## (not restarted, which would snap a pose mid-animation).
+func _set_tree_active(active: bool) -> void:
+	var resumed: bool = active and not _animation_tree.active
+	_animation_tree.active = active
+	if resumed and _playback != null:
+		_playback.start(_current_state, false)
 
 
 func _update_particles() -> void:

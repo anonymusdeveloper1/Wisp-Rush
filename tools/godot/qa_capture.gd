@@ -6,9 +6,9 @@ extends SceneTree
 ##   WISP_ISOLATED_SAVE=1 Godot --path . --resolution 390x844 \
 ##     --script res://tools/godot/qa_capture.gd -- <screen> <out.png>
 ## Set WISP_CHARACTER to capture Home with a specific equipped form; otherwise the sample form is used.
-## Screens: home, shop_wisps, shop_arenas, shop_no_ads, daily,
-## trials, stats, settings, results, game, pause, upgrade, tutorial, and endless_<skin_id> (an
-## Endless run on that arena skin, with its animated scenery).
+## Screens: home, shop_wisps (the Shop's CHARACTERS page), shop_deals (its SHOP page), daily,
+## trials, stats, settings, results, game, pause, pickups, tutorial, and endless_<skin_id> (an
+## Endless run on that arena).
 
 const GAME_WORLD_PATH: String = "res://scenes/gameplay/game_world.tscn"
 const TUTORIAL_PATH: String = "res://scenes/tutorial/tutorial_screen.tscn"
@@ -33,6 +33,13 @@ func _run() -> void:
 		quit(2)
 		return
 	for frame: int in settle_frames + 2:
+		await process_frame
+	# Optional bottom-of-page capture of the SHOP page (the Rift Points packs on a short phone).
+	if screen == "shop_deals" and args.size() > 2 and args[2] == "bottom":
+		var shop := root.find_child("ShopScreen", true, false) as ShopScreen
+		var page := shop.get_node(^"%ShopPage") as ScrollContainer
+		page.scroll_vertical = int(page.get_v_scroll_bar().max_value)
+		await process_frame
 		await process_frame
 	# Not RenderingServer.frame_post_draw: macOS stops drawing covered windows, so it may never fire.
 	var image: Image = root.get_texture().get_image()
@@ -73,9 +80,9 @@ func _build(screen: String) -> int:
 		"settings":
 			_add_screen("res://scenes/screens/settings_screen.tscn")
 			return 20
-		"shop_wisps", "shop_arenas", "shop_no_ads":
+		"shop_wisps", "shop_deals":
 			var shop := _add_screen("res://scenes/screens/shop_screen.tscn") as ShopScreen
-			shop.setup(snapshot, StringName(screen.trim_prefix("shop_")))
+			shop.setup(snapshot, ShopScreen.TAB_WISPS if screen == "shop_wisps" else ShopScreen.TAB_SHOP)
 			return 20
 		"results":
 			var results := _add_screen("res://scenes/screens/results_screen.tscn") as ResultsScreen
@@ -98,7 +105,7 @@ func _build(screen: String) -> int:
 			# The Tutorial screen mid-demo of its first lesson (ghost hand, caption, SKIP).
 			_add_screen(TUTORIAL_PATH)
 			return 150
-		"game", "pause", "upgrade":
+		"game", "pause", "pickups":
 			var game := (load(GAME_WORLD_PATH) as PackedScene).instantiate() as GameWorld
 			game.run_seed = 714
 			# Capture windows steal focus from each other; only the "pause" shot should be paused.
@@ -109,10 +116,13 @@ func _build(screen: String) -> int:
 					await process_frame
 				game.handle_back()
 				return 10
-			if screen == "upgrade":
+			if screen == "pickups":
 				for frame: int in 10:
 					await process_frame
-				game.add_experience(1000)
+				game.set_soul_ward_stock(25)
+				game.activate_soul_ward()
+				for id: StringName in RunItemHud.TIMED_IDS:
+					game.activate_item(id)
 				return 60
 			return 150 if screen == "game" else 40
 	return -1
@@ -152,11 +162,12 @@ func _sample_snapshot() -> Dictionary:
 		&"bosses_defeated": 2,
 		&"play_time_seconds": 5480.0,
 		&"rift_points": 1320,
+		&"item_stock": {"soul_ward": 25, "rift_magnet": 5, "fortune_star": 10},
+		&"next_run_item": "rift_magnet",
 		&"owned_forms": ["patchvile", "verdant_shade", "scarlet"],
 		&"equipped_form": "scarlet",
-		# A Mythic arena equipped, so shop_arenas shows a card with the scenery grade and glow.
-		&"owned_arena_skins": ["quarry_titan"],
-		&"equipped_arena_skin": "quarry_titan",
+		&"owned_arena_skins": ["sci_fi_simulation_v1"],
+		&"equipped_arena_skin": "sci_fi_simulation_v1",
 		&"tutorial_completed": true,
 		&"challenge_state": {},
 		&"daily_state": {&"completed_dates": [], &"best_scores": {}},

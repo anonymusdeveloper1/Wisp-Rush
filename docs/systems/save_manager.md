@@ -1,6 +1,6 @@
 # System: Save manager
 
-> **Status:** ✅ done · **Last updated:** 2026-09-25 · **GDD section:** §6, §12, §24
+> **Status:** ✅ done · **Last updated:** 2026-10-05 · **GDD section:** §6, §12, §24
 >
 > **Changed 2026-09-15 ([spec 04](../specs/story_and_endless/04_shop.md)):** schema v8 adds dash styles;
 > every cosmetic is bought and equipped through `purchase_cosmetic` / `equip_cosmetic`.
@@ -26,6 +26,10 @@ write atomically, retain the last valid backup and recover without blocking Home
 
 ## Public API
 
+Consumable API: `get_item_count`, `purchase_item_pack`, `grant_item`, `consume_item`,
+`select_starting_item`, `consume_starting_item` ([pickup_items.md](pickup_items.md)); purchases,
+spending and selection restore their previous data if the atomic write fails.
+
 | Member | Kind | Description |
 |---|---|---|
 | `progression_changed(snapshot)` | signal | Persistent state changed after a successful mutation. |
@@ -42,7 +46,10 @@ write atomically, retain the last valid backup and recover without blocking Home
 
 ## Data & tuning
 
-**Schema v9.** Best/high wave, totals, play time, `rift_points`, forms, Endless (`endless_best_score`, `endless_best_wave`, `endless_runs`, `endless_intro_seen`,
+`item_stock` holds non-negative counts for Soul Ward, Rift Magnet and Fortune Star;
+`next_run_item` is one owned Magnet/Star id or empty. API and pack data: [pickup_items.md](pickup_items.md).
+
+**Schema v10.** Best/high wave, totals, play time, `rift_points`, forms, Endless (`endless_best_score`, `endless_best_wave`, `endless_runs`, `endless_intro_seen`,
 `owned_arena_skins` with the default always owned, `equipped_arena_skin`; ids outside
 `VALID_ARENA_SKIN_IDS` sanitize to `DEFAULT_ARENA_SKIN_ID` = `astral_observatory`; retired ids in
 `RETIRED_ARENA_SKIN_IDS`, i.e. `placeholder_void_slate`, map to their replacement), dash styles (`owned_dash_styles` with
@@ -57,6 +64,7 @@ JSON-compatible values. `record_run` updates the Endless bests and count only fo
 | v0 → v5 shape | `high_score`, `currency`, `tutorial_seen`, `unlocked_forms`, `selected_form` renamed |
 | v6 → v7 (spec 03) | Adds the Endless fields at their defaults; nothing else changes |
 | v7 → v8 (spec 04) | Adds `owned_dash_styles` / `equipped_dash_style` at their defaults (`soul`) |
+| v9 → v10 (2026-10-05) | Adds empty item stock and next-run selection; existing RP/cosmetics/statistics/settings remain unchanged |
 | v8 → v9 (2026-09-25) | The story Rifts are removed: `selected_rift`, `rift_bests` and `rift_levels` are dropped; nothing else changes |
 | v1–v5 → v6 (ADR-0013) | `soul_shards` → `rift_points`, plus a refund of every Sanctum level bought, from the frozen `SANCTUM_REFUND_COSTS` table; `sanctum_levels` dropped; Trials id `t08_soul_shards_m` → `t08_rp_collected_m` and challenge id `shard_seeker` → `rp_seeker` keep their progress |
 
@@ -84,6 +92,9 @@ Registered as the `SaveManager` autoload; architectural rationale is ADR-0003.
 
 ## How to test
 
+`tools/run_tests.sh pickup_inventory` checks v9 migration, all pack quantities, affordability,
+invalid requests, JSON counts, reload, selection/spending once and persistence rollback.
+
 - `tools/run_tests.sh save_manager` — defaults, round trip, corruption recovery, v0 and v1 migration,
   and a hand-built v5 fixture (300 shards, keen_edge 2, soul_reserve 1, an unknown id, a level above
   cap) migrating to v6 exactly once, a v6 round trip and a future-schema save left alone.
@@ -96,6 +107,8 @@ Registered as the `SaveManager` autoload; architectural rationale is ADR-0003.
 
 | Date | Change |
 |---|---|
+| 2026-10-05 | `export_cloud_save()` / `import_cloud_save(bytes)` for the cloud save: imported bytes go through `_validate_and_migrate` like a file, then save and emit (ADR-0030) |
+| 2026-10-05 | Save v10: consumable counts, pack purchases, collected/spent stock and selected one-use starting boost |
 | 2026-09-25 | Save v9: the story Rifts are removed (owner) — `selected_rift`, `rift_bests` and `rift_levels` dropped on load; `select_rift`, `get_rift_level`, `debug_set_rift_level` and the clear bonus in `record_run` removed |
 | 2026-09-15 | Schema v8: dash styles; `purchase_cosmetic` / `equip_cosmetic` / `owns_cosmetic` replace `purchase_form` / `equip_form` (spec 04) |
 | 2026-09-15 | Schema v7: Endless bests, runs, intro flag, owned/equipped arena skin (spec 03) |

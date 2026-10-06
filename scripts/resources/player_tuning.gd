@@ -2,6 +2,12 @@ class_name PlayerTuning
 extends Resource
 ## Data-driven starting values for Wisp gesture, dash, health, impact and focus behaviour.
 
+## Input timing for the stored Soul Ward's completed tap gesture, in milliseconds.
+@export_range(100, 1000, 10) var double_tap_interval_msec: int = 350
+@export_range(100, 1000, 10) var tap_max_hold_msec: int = 450
+## Maximum distance between the two taps, relative to the minimum accepted swipe.
+@export_range(1.0, 5.0, 0.1) var double_tap_distance_factor: float = 3.0
+
 ## Horizontal design coordinate baseline used to scale movement and distances.
 @export_range(1.0, 4096.0, 1.0) var design_width: float = 1080.0
 ## Wisp dash speed in pixels per second at [member design_width].

@@ -55,10 +55,10 @@ Sizes are in the 1080×1920 design space (≈ ×0.36 on a 390 pt phone).
 | `PrimaryButton` | Button | `button_primary_*` (112 tall, amber studs, ivory 44 px label). The single dominant, bottom-reachable action: Play, Restart, Daily Play, Buy/Equip. One per screen |
 | `SecondaryButton` | Button | `button_secondary_*` (96 tall, 34 px). Home on Results, Back, Resume/Quit, settings actions |
 | `DangerButton` | Button | `button_danger_*` (amber, light-amber label). Destructive/irreversible; always confirm |
-| `IconButton` | Button | `icon_tile_*` (112 × 112). Square icon-only tile: Pause, Settings, Back, Stats, HUD upgrade. Set `icon` (64 px glyph), no text. Pressed = brightened tile (the kit has no pressed tile) |
-| `CaptionTile` *(new)* | Button | `caption_tile_*`, native 140 × 164 only. Home's captioned tiles (Trials, Daily, Shop, No Ads; Rifts until 2026-09-24): children `Icon` (96 px box at y 18–114) and a 22 px uppercase `Caption` in the slot under the seam (y 127–151) |
+| `IconButton` | Button | `icon_tile_*` (112 × 112). Square icon-only tile: Pause, Settings, Back, Stats, HUD controls. Set `icon` (64 px glyph), no text. Pressed = brightened tile (the kit has no pressed tile) |
+| `CaptionTile` *(new)* | Button | `caption_tile_*`, native 140 × 164 only. Home's captioned tiles (Trials, Daily, Shop, No Ads; Rifts until 2026-09-24): children `Icon` (a 72 px box at y 30–102 since 2026-10-05, owner: more padding; was 96 px at y 18–114, which the NO ADS glyph keeps) and a 22 px uppercase `Caption` (y 127–151). No seam above the caption since 2026-10-05 (owner): `build_theme_textures.py` replaces the kit's seam rows with the plain interior (`erase_seam`) |
 | `SlotButton` | Button | `slot_*`; toggle mode, pressed = magenta slot. No game user today |
-| `CardButton` | Button | `panel_card` / `panel_card_selected` (pressed: magenta bar + studs) / `panel_card_locked` (disabled). Upgrade tray cards and every `FocusCarousel` card |
+| `CardButton` | Button | `panel_card` / `panel_card_selected` (pressed: magenta bar + studs) / `panel_card_locked` (disabled). Legacy upgrade cards and every `FocusCarousel` card |
 | `NavButton` | Button | `tab_normal` / `tab_active` (pressed). One Shop tab: the 64 px tab is drawn centred in an 88 px touch row (negative expand margins), so only use it at 88 px inside a `NavBar` |
 | *(default)* `PanelContainer` | PanelContainer | `panel_default`: info boxes, settings groups, confirm dialogs, tutorial guide |
 | `PanelCard` | PanelContainer | `panel_card`: run-metric tiles, stat tiles, form details |
@@ -74,7 +74,7 @@ Sizes are in the 1080×1920 design space (≈ ×0.36 on a 390 pt phone).
 | `AmberValueLabel` | Label | Score and rewards. 64 px amber, tabular, hard drop shadow |
 | `ProgressBar` | ProgressBar | `progress_track` + `progress_fill_xp` (40 tall; the fill covers the track where it reaches) |
 | `BossProgressBar` | ProgressBar | Same track, `progress_fill_boss` (magenta): Reaper health |
-| `SlimProgressBar` | ProgressBar | `hud_slim_track` + `hud_slim_fill_xp` (20 tall): HUD XP strip, goal rows, tray timeout |
+| `SlimProgressBar` | ProgressBar | `hud_slim_track` + `hud_slim_fill_xp` (20 tall): Goal rows and legacy XP/tray widgets |
 | `RushProgressBar` | ProgressBar | Slim track + `hud_slim_fill_rush` (ivory), so RUSH never reads as a second XP strip. Only `%RushBar` |
 | `HSlider` / `HSeparator` / `VScrollBar` | — | Slim track + cyan fill + `slider_grabber_*` / `divider` (centre gem removed, it cannot survive a stretch) / crisp flat stone grabber |
 | plain `Label` | Label | Body text 30 px soul white |
@@ -94,6 +94,10 @@ Instance one as a **child of a PanelContainer with the matching variation**; it 
 | `amber_top.tscn` | default `PanelContainer` | Warm seal on top — reward/landmark panels only |
 
 They assume the variation's content margins; if you override a panel's content margins, don't use them.
+
+Pickup icons and the new Items card page use the existing Theme variations, pixel font and nearest
+filtering. Ordinary HUD: Ward stock below pause, five timed icons above RUSH. Board HUD: active
+icons below the top hardware and Ward hint in the bottom frame ([pickup_items.md](pickup_items.md)).
 
 ## Shared components (`scripts/components/`)
 **Card-picker pattern** (owner decision 2026-09-13, Shop tabs; the Rift Map used it until 2026-09-25): a vertical screen with a
@@ -124,7 +128,9 @@ enemy/boss/selection only. Never communicate meaning by hue alone — pair with 
   `expand_mode = 1`, `stretch_mode = 6`.
 - **Icons:** kit glyphs in `res://assets/ui/theme/icons/` (`icon_play`, `icon_pause`, `icon_home`,
   `icon_lock`, `icon_settings`, `icon_shop`, `icon_trials`, `icon_daily`, `icon_stats`,
-  `icon_currency`); `hud_health_full` is unused since the HUD lost its lives readout (2026-09-24). Glyphs the kit lacks still come
+  `icon_currency`); Home's SHOP, DAILY and TRIALS tiles use Codex's icons in
+  `res://assets/art/ui/home_icons/` instead (192 × 192 on a 48 px grid, drawn at 72 with nearest
+  filtering; owner, 2026-10-05); `hud_health_full` is unused since the HUD lost its lives readout (2026-09-24). Glyphs the kit lacks still come
   from the painted `res://assets/art/ui/system/` set (`03_combo_chain`, `04_high_score`,
   `07_restart`, `10_forms`, `11_upgrades`, `18_reaper`) and `assets/art/ui/mutations/` — legacy
   until redrawn (ADR-0018). Put glyphs in an `IconButton`/`CaptionTile` or beside a value in a plate.
@@ -179,6 +185,8 @@ pixel, and `variation_embolden` smears them. Titles get one font pixel of letter
 ## Change history
 | Date | Change |
 |---|---|
+| 2026-10-05 | Home's captioned tiles: the seam above the caption removed in all three states (`erase_seam` in the builder; only the three `caption_tile_*` textures changed) and the image icons' box 72 px instead of 96 (owner, GDD §14 #81) |
+| 2026-10-05 | Home's SHOP, DAILY and TRIALS tiles use Codex's new icons (`assets/art/ui/home_icons/`, nearest filtering on the tile's `Icon`; owner, GDD §14 #80); the kit glyphs stay for other uses |
 | 2026-10-05 | Four dedicated menu backgrounds use nearest-filtered Background TextureRects; Theme components and behavior unchanged |
 | 2026-09-25 | Story Rifts removed (owner): the Rift Map no longer uses `FocusCarousel` or its arena background |
 | 2026-09-24 | Pixel font: Pixelify Sans as the theme default (crisp FontFile built by the theme builder), every size on the 11 grid (theme and all per-node overrides), no embolden on titles |

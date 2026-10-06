@@ -11,7 +11,7 @@ extends SceneTree
 
 const CATALOG: FormCatalog = preload("res://data/forms/default_catalog.tres")
 const IDS: Array[StringName] = [
-	&"patchvile", &"verdant_shade", &"scarlet", &"rook", &"morrow", &"mothmere",
+	&"patchvile", &"verdant_shade", &"scarlet", &"rook", &"mothmere",
 ]
 
 

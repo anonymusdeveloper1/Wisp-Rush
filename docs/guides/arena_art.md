@@ -1,5 +1,11 @@
 # Arena art — the contract
 
+> **2026-10-05 (owner, GDD §14 #78, [ADR-0027](../decisions/0027-one-arena-simulation.md)):** the game has
+> one arena, SIMULATION, a board ([ADR-0025](../decisions/0025-sci-fi-board-and-arena-spawn-effects.md)).
+> The painted, layered and 3D arenas this guide describes were removed from the game, and so were
+> `tools/art/make_arena.py`, `tools/godot/render_arena_still.gd` and the Shop's ARENAS pager; their
+> sources stay in `concept_art/`. `tools/art/make_board.py` (§6) still copies a board's pieces.
+
 > What an Endless arena image must be so it fits every phone without bars, blur, stretching or
 > cropping anything that matters, and so every arena plays on the same floor. Owner decision
 > 2026-09-23 ([ADR-0017](../decisions/0017-painted-arenas-with-bleed.md)): the thirty generated

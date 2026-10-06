@@ -1,11 +1,11 @@
-"""Copy a board's pixel-art pieces into the game (board arenas, ADR-0024).
+"""Copy a board's pixel-art pieces into the game (board arenas, ADR-0024, ADR-0025).
 
-    python tools/art/make_board.py board_01
+    python tools/art/make_board.py sci_fi_simulation_v1
 
 Reads `concept_art/boards_v1/<id>/manifest.json` (written by Codex with the pieces, from that folder's
 CODEX_PROMPT.md), checks every listed piece's size against it, and copies the runtime pieces
 (`floor/`, `frame/`, `hud/`, `anim/`, `deco/`) unchanged to `assets/art/environment/boards/<id>/`,
-where `BoardArenaVisual` loads them by name. The previews, review sheets and reference stay in
+where the board's `ArenaVisual` (SIMULATION's `SciFiBoardVisual`) loads them by name. The previews, review sheets and reference stay in
 concept_art. Never hand-edit the outputs; re-run this.
 """
 import json

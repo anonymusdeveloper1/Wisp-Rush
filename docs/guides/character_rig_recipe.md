@@ -1,7 +1,8 @@
 > **Superseded for new characters, 2026-09-20.** Playable characters are whole-frame sprites
-> now — see [character_creation.md](character_creation.md). This recipe stays for the one rig
-> still in the game (Morrow; Veyra and Noxen were removed 2026-09-25, and Rook's rig on 2026-09-27
-> when he moved to whole-frame sprites). Ilyra and Bram, which much of it was
+> now — see [character_creation.md](character_creation.md). **No rig is left in the game since
+> 2026-10-05**, when Morrow, the last one, was removed (owner); Veyra and Noxen were removed 2026-09-25,
+> and Rook's rig on 2026-09-27 when he moved to whole-frame sprites. The recipe is history: its code
+> (`ChainSpring`, `RibbonChain`, `build_character_rig.py`, the layer extraction) was removed the same day. Ilyra and Bram, which much of it was
 > written from, have been retired; their worked examples are still the clearest ones here.
 
 # How to build an animated playable character

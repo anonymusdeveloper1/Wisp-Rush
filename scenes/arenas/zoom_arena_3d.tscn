@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3]
-
-[ext_resource type="PackedScene" path="res://scenes/arenas/chained_colossus_3d.tscn" id="1_base"]
-
-[node name="ZoomArena3D" instance=ExtResource("1_base")]
-zoom_intro = true

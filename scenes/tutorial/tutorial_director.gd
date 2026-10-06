@@ -22,8 +22,8 @@ signal completion_started
 signal completed
 
 enum Phase { IDLE, DEMO, TRY, SUCCESS, COMPLETE }
-## The upgrade lesson's demo after its swipes: wait for the card tray, let it rest, tap, see it close.
-enum DemoTap { NONE, WAIT_TRAY, LOOK, TAPPING, WAIT_CLOSE, DONE }
+## Double-tap demonstration; hints use the same hand but never activate the player.
+enum DemoTap { NONE, FIRST, GAP, SECOND, DONE }
 
 var _catalog: TutorialCatalog
 var _game: GameWorld
@@ -47,16 +47,16 @@ var _rush_seen: bool = false
 ## The swipe the hand is playing aims at the nearest target, re-aimed at release.
 var _swipe_aims_at_target: bool = false
 var _demo_tap: DemoTap = DemoTap.NONE
-## Real seconds left in the current `DemoTap` wait.
+## Seconds until the demonstrated second tap.
 var _demo_tap_timer: float = 0.0
-## The try already showed its dimmed card-tap hint for the tray now up.
-var _tray_hint_shown: bool = false
+var _tap_alpha: float = 1.0
 
 
 func _process(delta: float) -> void:
 	if _phase == Phase.IDLE or _game == null:
 		return
 	_update_refill(delta)
+	_update_shield_taps(delta)
 	if _needs_place and _game.place_player(_lesson.player_start):
 		_needs_place = false
 	if not _lesson.hud_focus.is_empty() and _phase != Phase.COMPLETE:
@@ -100,7 +100,7 @@ func start(
 	_game.dash_resolved.connect(_on_dash_resolved)
 	_game.enemy_defeated.connect(_on_enemy_defeated)
 	_game.player_damaged.connect(_on_player_damaged)
-	_game.upgrade_chosen.connect(_on_upgrade_chosen)
+	_game.shield_activated.connect(_on_shield_activated)
 	_game.rush_started.connect(_on_rush_started)
 	_game.boss_defeated.connect(_on_boss_defeated)
 	var failures: PackedStringArray = catalog.validate()
@@ -137,7 +137,6 @@ func _begin_lesson(index: int) -> void:
 	_hand.stop()
 	_hand.set_focus_rect(Rect2())
 	_game.set_player_input_enabled(false)
-	_game.set_experience_enabled(false)
 	_game.set_rush_enabled(_lesson.rush_enabled)
 	_build_arena()
 	_phase = Phase.DEMO
@@ -184,17 +183,10 @@ func _update_demo(delta: float) -> void:
 		if not _settling:
 			_settling = true
 			_timer = _catalog.demo_settle_seconds
-			if _lesson.demo_experience_share > 0.0:
-				_game.set_experience_share(_lesson.demo_experience_share)
-			if _lesson.demo_upgrade_tap:
-				# A full bar banks the level; the cards wait for this calm moment.
-				_game.set_experience_share(1.0)
-				_game.request_upgrade_calm_moment()
-				_demo_tap = DemoTap.WAIT_TRAY
-				_demo_tap_timer = _catalog.demo_tray_wait_limit
+			if _lesson.demo_shield_tap:
+				_play_shield_taps(1.0)
 			return
-		if _demo_tap != DemoTap.NONE and _demo_tap != DemoTap.DONE:
-			_update_demo_tap()
+		if _demo_tap not in [DemoTap.NONE, DemoTap.DONE]:
 			return
 		_begin_try()
 		return
@@ -207,40 +199,23 @@ func _update_demo(delta: float) -> void:
 	_timer = 0.0 if next_is_redirect else _catalog.swipe_gap_seconds
 
 
-## Drives the upgrade demo in real time (the world is slow while the tray is up): wait for the tray to
-## settle, rest `demo_card_look_seconds`, tap a card with the hand, then wait for the tray to close.
-func _update_demo_tap() -> void:
-	var real_delta: float = get_process_delta_time() / maxf(Engine.time_scale, 0.01)
-	match _demo_tap:
-		DemoTap.WAIT_TRAY:
-			_demo_tap_timer -= real_delta
-			if _game.is_upgrade_tray_settled():
-				_demo_tap = DemoTap.LOOK
-				_demo_tap_timer = _catalog.demo_card_look_seconds
-			elif _demo_tap_timer <= 0.0:
-				# The tray never came up (should not happen): move on, caption only.
-				push_warning("[Tutorial] upgrade demo: the card tray did not open")
-				_demo_tap = DemoTap.DONE
-		DemoTap.LOOK:
-			_demo_tap_timer -= real_delta
-			if _demo_tap_timer > 0.0:
-				return
-			var card: Rect2 = _game.get_upgrade_card_rect(_catalog.demo_card_index)
-			if not card.has_area():
-				card = _game.get_upgrade_card_rect(0)
-			if not card.has_area() or not _game.is_upgrade_tray_settled():
-				_demo_tap = DemoTap.WAIT_CLOSE
-				return
-			_demo_tap = DemoTap.TAPPING
-			_hand.play_tap(card.get_center(), _catalog.press_seconds, _catalog.hold_seconds,
-				_catalog.release_seconds)
-		DemoTap.TAPPING:
-			if not _hand.is_gesturing():
-				_demo_tap = DemoTap.WAIT_CLOSE
-		DemoTap.WAIT_CLOSE:
-			if not _game.is_upgrade_tray_open():
-				_demo_tap = DemoTap.DONE
-				_timer = _catalog.demo_settle_seconds
+## Shows two short taps beside the resting Wisp.
+func _play_shield_taps(alpha: float) -> void:
+	_tap_alpha = alpha
+	_demo_tap = DemoTap.FIRST
+	_hand.play_tap(_game.get_player_position(), _catalog.shield_tap_seconds,
+		_catalog.shield_tap_seconds, _catalog.shield_tap_seconds, alpha)
+
+
+func _update_shield_taps(delta: float) -> void:
+	if _demo_tap != DemoTap.GAP:
+		return
+	_demo_tap_timer -= delta
+	if _demo_tap_timer > 0.0:
+		return
+	_demo_tap = DemoTap.SECOND
+	_hand.play_tap(_game.get_player_position(), _catalog.shield_tap_seconds,
+		_catalog.shield_tap_seconds, _catalog.shield_tap_seconds, _tap_alpha)
 
 
 ## The demo's own dash takes its hit once it nears the hazard, reforming where the lesson says.
@@ -259,7 +234,6 @@ func _begin_try() -> void:
 	_settling = false
 	if _lesson.reset_after_demo:
 		_build_arena()
-	_game.set_experience_enabled(_lesson.experience_enabled)
 	_game.set_player_input_enabled(true)
 	_phase = Phase.TRY
 	_retry_timer = -1.0
@@ -283,14 +257,15 @@ func _update_try(delta: float) -> void:
 		elif _rush_seen:
 			_schedule_retry(_catalog.retry_caption)
 			return
-	if _lesson.goal == TutorialLessonData.GOAL_UPGRADE and _update_upgrade_try():
-		return
 	if _hand.is_gesturing() or not _can_hint():
 		_hint_timer = _catalog.hint_interval
 		return
 	_hint_timer -= delta
 	if _hint_timer <= 0.0:
 		_hint_timer = _catalog.hint_interval
+		if _lesson.goal == TutorialLessonData.GOAL_SHIELD and _game.get_soul_ward_stock() > 0:
+			_play_shield_taps(_catalog.hint_alpha)
+			return
 		var authored: Vector2 = _lesson.demo_swipes[0]
 		var start_point: Vector2 = _game.arena_to_world(_lesson.player_start)
 		if _game.get_player_position().distance_to(start_point) > _catalog.drag_start_offset:
@@ -298,32 +273,11 @@ func _update_try(delta: float) -> void:
 		_play_swipe(authored, false, _catalog.hint_alpha)
 
 
-## The upgrade try: a banked level whose cards were sent away (swipe or timeout) asks for another calm
-## moment once the field is empty; the first time the tray rests, a dimmed hand taps a card as a hint.
-## Returns true while the tray is up (no swipe hints then).
-func _update_upgrade_try() -> bool:
-	if _game.is_upgrade_tray_open():
-		if not _tray_hint_shown and _game.is_upgrade_tray_settled() and not _hand.is_gesturing():
-			var card: Rect2 = _game.get_upgrade_card_rect(_catalog.demo_card_index)
-			if card.has_area():
-				_tray_hint_shown = true
-				_hand.play_tap(card.get_center(), _catalog.press_seconds, _catalog.hold_seconds,
-					_catalog.release_seconds, _catalog.hint_alpha)
-		return true
-	_tray_hint_shown = false
-	if (
-		_game.get_banked_upgrades() > 0
-		and not _game.has_upgrade_calm_request()
-		and _game.debug_live_enemy_count() == 0
-		and _game.is_player_ready()
-	):
-		_game.request_upgrade_calm_moment()
-	return false
-
-
 func _can_hint() -> bool:
 	if not _game.is_player_ready():
 		return false
+	if _lesson.goal == TutorialLessonData.GOAL_SHIELD and _game.get_soul_ward_stock() > 0:
+		return true
 	if _lesson.goal == TutorialLessonData.GOAL_BOSS:
 		return _game.is_boss_core_exposed()
 	return _lesson.enemy_positions.is_empty() or _game.debug_live_enemy_count() > 0
@@ -351,6 +305,7 @@ func _play_swipe(authored: Vector2, mid_dash: bool, alpha: float) -> void:
 func _schedule_retry(caption: String) -> void:
 	_retry_timer = _catalog.retry_seconds
 	_hand.stop()
+	_demo_tap = DemoTap.NONE
 	caption_changed.emit(caption)
 
 
@@ -361,6 +316,7 @@ func _succeed() -> void:
 	_timer = _catalog.success_seconds
 	_retry_timer = -1.0
 	_hand.stop()
+	_demo_tap = DemoTap.NONE
 	_game.show_callout(_lesson.success_callout, _catalog.success_emphasis)
 	SoundFx.play(&"upgrade_choice")
 	caption_changed.emit(_lesson.success_callout)
@@ -411,12 +367,16 @@ func _on_hand_released(drag_vector: Vector2) -> void:
 		_demo_hit_pending = true
 
 
-## The demo hand lifted from an upgrade card: pick it through the real tray (hint taps never pick).
+## The second demo tap activates the collected Ward; try hints only show the gesture.
 func _on_hand_tapped(_point: Vector2) -> void:
-	if _phase != Phase.DEMO or _demo_tap != DemoTap.TAPPING:
-		return
-	if not _game.choose_upgrade_card(_catalog.demo_card_index):
-		_game.choose_upgrade_card(0)
+	if _demo_tap == DemoTap.FIRST:
+		_demo_tap = DemoTap.GAP
+		_demo_tap_timer = _catalog.shield_tap_gap
+	elif _demo_tap == DemoTap.SECOND:
+		_demo_tap = DemoTap.DONE
+		if _phase == Phase.DEMO:
+			_game.activate_soul_ward()
+			_timer = _catalog.demo_settle_seconds
 
 
 func _on_dash_launched(from_redirect: bool) -> void:
@@ -431,6 +391,8 @@ func _on_enemy_defeated(world_position: Vector2, _dash_kill_index: int) -> void:
 		return
 	if _lesson.drops_shards:
 		_game.spawn_scripted_shard(world_position)
+	if not _lesson.drops_item.is_empty():
+		_game.spawn_scripted_item(_lesson.drops_item, world_position)
 	if _phase != Phase.TRY or _retry_timer >= 0.0:
 		return
 	match _lesson.goal:
@@ -469,12 +431,8 @@ func _on_dash_resolved(kills: int, ended_by: StringName) -> void:
 		return
 	var live: int = _game.debug_live_enemy_count()
 	match _lesson.goal:
-		TutorialLessonData.GOAL_UPGRADE:
+		TutorialLessonData.GOAL_SHIELD:
 			if live == 0:
-				# Every soul reaped: top the bar up; the lesson's calm moment
-				# slides the cards up once the Wisp rests with its combo run out.
-				_game.set_experience_share(1.0)
-				_game.request_upgrade_calm_moment()
 				return
 		TutorialLessonData.GOAL_RUSH_KILL:
 			if _game.is_rush_active():
@@ -496,8 +454,8 @@ func _on_player_damaged(current_health: int) -> void:
 		_schedule_retry(_catalog.hit_caption)
 
 
-func _on_upgrade_chosen(_mutation_id: StringName) -> void:
-	if _lesson != null and _lesson.goal == TutorialLessonData.GOAL_UPGRADE:
+func _on_shield_activated() -> void:
+	if _lesson != null and _lesson.goal == TutorialLessonData.GOAL_SHIELD:
 		_succeed()
 
 

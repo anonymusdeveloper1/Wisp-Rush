@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="RunItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/run_item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+item_id = &"reapers_edge"
+display_name = "REAPER'S EDGE"
+description = "Twice the dash hit width for 10 seconds."
+icon_path = "res://assets/art/ui/items/reapers_edge.png"
+duration_seconds = 10.0
+corridor_multiplier = 2.0
+

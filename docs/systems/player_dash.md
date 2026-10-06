@@ -1,6 +1,6 @@
 # System: Player dash
 
-> **Status:** ✅ done · per-character dash signatures 2026-09-19 · **Last updated:** 2026-09-25 · **GDD section:** §4–5.1, §5.6, §8
+> **Status:** ✅ done · per-character dash signatures 2026-09-19 · **Last updated:** 2026-10-05 · **GDD section:** §4–5.1, §5.6, §8
 
 ## Purpose
 
@@ -118,7 +118,7 @@ no sparks. Everything is built in code — no new art and no shader — and the 
 - A finger held down through a landing is kept: `_enter_waiting` no longer clears the pointer.
 - **Redirect** emits `dash_redirected` then `dash_started` with a new dash id, so GameWorld resolves
   the finished leg's kills and enemies can be hit again on the new leg.
-- **Speed** = `dash_speed × mutation multiplier × RUSH multiplier × viewport scale × (1 + momentum) ×
+- **Speed** = `dash_speed × RUSH multiplier × viewport scale × (1 + momentum) ×
   burst`. Burst decays from `launch_burst_multiplier` (1.4) over `launch_burst_decay` (0.11 s). RUSH's
   ×1.3 is a separate run modifier; `PlayerTuning` is never written.
 - **Momentum** +`momentum_step` (0.08) per launch within `momentum_window` (0.35 s) of landing and per
@@ -171,7 +171,9 @@ no sparks. Everything is built in code — no new art and no shader — and the 
 - An outward edge component reflects inward before calculating the first edge intersection.
 - Dash motion emits every swept physics segment; visual state never outruns authoritative state.
 - A solid hazard can interrupt the dash during that signal; movement does not continue behind it.
-- Run mutations scale damage, corridor width and speed within readability caps.
+- Reaper's Edge temporarily multiplies the entire damage corridor, including the aim-preview
+  query. Completed double taps request Soul Ward without launching/redirecting a dash; cancellation,
+  a long hold or a swipe clears the tap pair ([pickup_items.md](pickup_items.md)).
 - Resize recalculates bounds and keeps a waiting Wisp attached to its nearest edge.
 
 ## How to test
@@ -193,6 +195,7 @@ no sparks. Everything is built in code — no new art and no shader — and the 
 
 | Date | Change |
 |---|---|
+| 2026-10-05 | Completed double-tap shield gesture and temporary Reaper’s Edge corridor modifier |
 | 2026-09-25 | Story Rifts removed (owner): the floor polygon comes from the Endless catalog only |
 | 2026-09-19 | Per-character dash signatures: `DashEffectData`, `DashEffectFx` and twelve `.tres`. Replaces the purchasable dash styles as the thing that decides how a dash looks; the old styles stay as the fallback |
 | 2026-09-17 | Animated character rigs: `%CharacterVisualMount`, `set_cosmetic_form(…, visual_scene)`, per-frame `sync_controller` (state, dash/drift/aim direction, speed), `play_attack_visual` (ADR-0015) |

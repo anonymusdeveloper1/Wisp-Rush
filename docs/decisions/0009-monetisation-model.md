@@ -1,6 +1,6 @@
 # ADR-0009: Monetisation is opt-in rewarded video plus one Remove Ads purchase
 
-> **Status:** Accepted (plumbing shipped, no provider configured); "no purchase surface renders"
+> **Status:** "No interstitials, ever" superseded by [ADR-0029](0029-admob-interstitial-and-rewarded-ads.md) (2026-10-05: AdMob, interstitials after every second run, rewarded revive and double RP); RP packs added to the store by [ADR-0028](0028-shop-bottom-navigation-and-rift-points-packs.md) (2026-10-05); Accepted (plumbing shipped, no provider configured); "no purchase surface renders"
 > superseded by [ADR-0012](0012-store-surface-before-billing.md); the 1,500-shard bundle superseded by
 > [ADR-0013](0013-rift-story-levels-endless-mode-and-rift-points.md) (product `remove_ads`, no currency) · **Date:** 2026-09-12 ·
 > **Deciders:** owner (chose the model) + Claude Code

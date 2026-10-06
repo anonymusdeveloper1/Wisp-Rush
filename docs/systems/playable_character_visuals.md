@@ -1,6 +1,6 @@
 # System: Playable characters
 
-> **Status:** ✅ one rig — Morrow (2026-09-17) · ✅ **Rook** rebuilt on AutoSprite and his rig removed (2026-09-27) · **Void, Eclipse, Veyra and Noxen removed**
+> **Status:** no rig left — **Morrow**, the last one, removed 2026-10-05 (owner) · ✅ **Rook** rebuilt on AutoSprite and his rig removed (2026-09-27) · **Void, Eclipse, Veyra and Noxen removed**
 > (owner, 2026-09-25; Patchvile is the default) ·
 > ✅ **Shade** is a whole-frame character on `WholeFrameCharacterVisual` · ✅ **Shade rebuilt on AutoSprite** (2026-09-25), the second after
 > Patchvile ·
@@ -23,10 +23,9 @@
 
 ## Purpose
 
-Animated, gameplay-neutral characters on the one Wisp controller. Morrow, the Runebound, is a bone
-rig. **Patchvile** (the default character), **Shade**, **Mothmere**, **Scarlet** and **Rook**, the
+Animated, gameplay-neutral characters on the one Wisp controller. **Patchvile** (the default character), **Shade**, **Mothmere**, **Scarlet** and **Rook**, the
 Bonewing (a rig until 2026-09-27), are whole-frame characters on `WholeFrameCharacterVisual` — the
-pattern every new one follows. Void, Eclipse, Veyra and Noxen were removed on 2026-09-25 and Ilyra on 2026-09-26 (owner).
+pattern every new one follows. Void, Eclipse, Veyra and Noxen were removed on 2026-09-25, Ilyra on 2026-09-26 and Morrow, the last bone rig, on 2026-10-05 (owner).
 Collision, health, dash, scoring, controls and camera never change with the character, and no
 character has a tier (owner, 2026-09-26).
 
@@ -35,11 +34,8 @@ character has a tier (owner, 2026-09-26).
 | Path | Role |
 |---|---|
 | `res://scenes/player/visuals/playable_character_visual.gd` / `.tscn` | Base: state vocabulary, runtime AnimationPlayer library, AnimationTree state machine, heading spring, particle rules. The scene is the single-image rig (`%FormImage`) Shop cards use for the Wisp forms |
-| `res://scenes/player/visuals/chain_spring.gd` | `ChainSpring`: follow-through for tails, scarves, flaps and feet |
 | `res://scenes/player/visuals/character_aura.gd` | `CharacterAura`: lights that orbit and drift around a character. Optional `%Aura` node beside `%MotionRoot`; the base steps it and stills it for Reduced Motion |
-| `res://scenes/player/visuals/ribbon_chain.gd` | `RibbonChain` (`@tool`): skinned Polygon2D ribbon on its own Bone2D chain |
 | `res://scenes/player/visuals/playable_character_preview.gd` | `PlayableCharacterPreview`: Control host for Home and the Shop |
-| `res://scenes/player/visuals/morrow_visual.*` | Morrow's bone rig |
 | `res://scenes/player/visuals/rook_visual.*` | Rook (2026-09-27), rebuilt on the AutoSprite recipe; his bone rig was removed (owner, GDD §14 #56). All AutoSprite (`concept_art/rook_autosprite_v1/`) — a 23-frame storefront, a 17-frame floor, his own 19-frame ceiling, a 20-frame right wall (mirrored for the left) and an 8-frame one-shot dash (cells 03, 05, 07, 08, 09, 11, 14, 17: flight, push, dive, tail raised, the tail swing, the swing held to the wall), drawn flying left and turned a quarter so it flies up, with `dash_head_up`. Contact frame 4 (the tail swing). He keeps his outline (GDD §14 #55). His slicer cleans every frame (the white AutoSprite's background remover left in his gaps). Packed at Patchvile's scale (ROSTER CHECK 202 px, +4 %); his walls do not fit a 256 px cell at that scale (the floor spans 299 cell px, the right wall's tail swing 321), so his run sheet has 336 px cells like the dash, `design_size` is 336 and `art_scale` 1.55859375 (1.1875 × 336/256), which draws him at everyone's size; `menu_art_scale` 1.25. His rig's dash look is kept (owner): `DashEffectData` `DUST_WAKE` in violet, bone-white streaks on `%DashParticles`, magenta dust on `%TrailParticles`, a ring of 7 dust motes on `%Aura`, their sizes carried over from the rig's 640 design (× 0.525); no attack glow. `menu_offset` (2.7, 62.5): his tail blade hangs below his feet, so without it he floated about 80 px above Home's platform; now his feet are on its centre (GDD §14 #57) |
 | `res://scenes/player/visuals/whole_frame_character_visual.gd` | `WholeFrameCharacterVisual`: everything a whole-frame character does — the two on-demand frame sets, the screen-space wall animations and the mirrored right wall, the menu rest, Reduced Motion, and `_target_animation()`, which resolves the whole thirteen-state vocabulary onto the five animations a drawn character has. A character subclasses it only to carry a `class_name`; the frame-set paths and `menu_idle_animation` are set per scene. `menu_offset` (design units) moves the storefront on Home and the Shop card, never in a run, so the character stands centred on Home's platform (owner, 2026-09-27, GDD §14 #57) |
 | `res://scenes/player/visuals/verdant_shade_visual.*` | Shade, rebuilt on the AutoSprite recipe (2026-09-25), the second character after Patchvile: all AutoSprite (`concept_art/verdant_shade_autosprite_v1/`) — a 24-frame storefront (the menu video's breathing float), the 23-frame floor, the 21-frame right wall (the left wall is it mirrored), AutoSprite's own 23-frame ceiling (the owner generated it, so it is not the floor flipped) and a one-shot 8-frame dash attack (a flame burst, contact frame 4) drawn face down and turned 180° by the slicer so the face leads the flight (owner, 2026-09-25; no `dash_head_up`). Packed at Patchvile's scale (`roster_scale`) with his sizes (`design_size` 256, `art_scale` 1.1875, `menu_art_scale` 1.25). Its menus play the storefront, not the old video. Effects: a pale green attack glow (no shader slash: the drawn burst is the attack), its own loose leaves as dash particles (`verdant_shade_leaves.png`), green trail motes, a green dust landing, no shared cyan trails. It was the first character built to the [whole-frame contract](../guides/character_sprite_frames.md) (2026-09-20, Codex frames) |
@@ -50,9 +46,8 @@ character has a tier (owner, 2026-09-26).
 | `res://scripts/resources/menu_video_data.gd` · `res://data/characters/verdant_shade_menu_video.tres` · `res://assets/shaders/packed_alpha_video.gdshader` | `MenuVideoData`: a menu performance as a packed-alpha Theora video (generated by `tools/art/extract_menu_video.py`), and the shader that puts colour and matte back together ([ADR-0016](../decisions/0016-menu-videos-for-character-storefronts.md)). No character plays one since 2026-09-26: Ilyra's went with her, and Shade's clip is kept but unused since 2026-09-25 |
 | `res://scripts/resources/character_pose_sheet.gd` · `res://data/characters/<id>_frames.tres` | `CharacterPoseSheet`: generated with each whole-frame character's sheets; the tests read its per-frame silhouette drift. Its per-pose offset and scale were Ilyra's |
 | `res://assets/art/characters/playable/<id>/` | Runtime layers (generated, never hand-edit; [ASSETS.md](../ASSETS.md)) |
-| `res://data/forms/patchvile.tres` · `verdant_shade.tres` · `scarlet.tres` · `rook.tres` · `morrow.tres` · `mothmere.tres` | Identity, portrait, price 0, tint, `visual_scene`; Patchvile is the default (`FormCatalog.DEFAULT_FORM_ID`) |
+| `res://data/forms/patchvile.tres` · `verdant_shade.tres` · `scarlet.tres` · `rook.tres` · `mothmere.tres` | Identity, portrait, price 0, tint, `visual_scene`; Patchvile is the default (`FormCatalog.DEFAULT_FORM_ID`) |
 | `tools/art/extract_playable_characters.py` | Two intake paths: `CHARACTERS` cuts fixed cells out of a sheet (v1/v2), and `PART_PACKS` ingests a per-file pack verbatim — its PNGs are copied byte for byte because the manifest's pivots are in each file's own pixel space |
-| `tools/art/build_character_rig.py` | Part-pack manifest → the rig scene: parent-relative transforms, pivot-to-offset inversion, `z_index` from draw order, mirrored sub-trees, and `design_size` / `preview_center` measured from the assembled silhouette |
 | `tools/godot/render_character_{lineup,motion,select_showcase,home_showcase,gameplay_showcase}.*` · `tools/art/motion_contact_sheet.py` | Visual QA ([How to test](#how-to-test)) |
 | `tools/godot/test_playable_character_visual.gd` | Rig contract, states, smoothness, menus, GameWorld (every character) |
 | `tools/godot/test_patchvile_visual.gd` | The one-shot dash: plays once, holds its last frame, restarts on a redirect; the attack look rises, trails and fades; none of it moves under Reduced Motion; every other whole-frame dash still loops |
@@ -71,9 +66,7 @@ character has a tier (owner, 2026-09-26).
 ├── %Aura (optional)       ← CharacterAura: drifting lights, outside the body motion
 ├── %MotionRoot            ← body motion from the AnimationTree
 │   ├── %TrailParticles / %DashParticles (optional GPUParticles2D, world space)
-│   └── %Body              ← parts, drawn in tree order
-│       ├── RibbonChain…   ← Skeleton (Bone2D chain) + Mesh (skinned Polygon2D)
-│       └── pivots (Node2D) → Sprite2D layers
+│   └── %Body              ← the drawn character (a whole-frame `PoseSprite`)
 ├── %AnimationPlayer
 └── %AnimationTree
 ```
@@ -103,8 +96,6 @@ physics nodes; `WispPlayer/%CollisionShape` is the only footprint.
 | `WholeFrameCharacterVisual.art_scale` | export | Draws a whole-frame character's frames larger than its cell, in a run and on the menus alike (default 1). Cosmetic: the collision radius never changes. Patchvile uses 1.1875 in a run and `menu_art_scale` 1.25 on Home and the Shop (owner); the rig contract test measures his silhouette against `design_size × art_scale`. |
 | `WholeFrameCharacterVisual.menu_video` · `is_menu_video_playing()` · `get_menu_video_player()` | export / method | The character's `MenuVideoData`, played on Home and the Shop card through `CharacterMenuVideo`; tests and fixtures read the player ([ADR-0016](../decisions/0016-menu-videos-for-character-storefronts.md)). |
 | `CharacterMenuVideo.create(data)` · `dispose()` | static / method | Builds the shared menu-video player — packed-alpha shader, placement, loop, no taps; it pauses itself while hidden and restarts itself after its screen is re-attached. |
-| `ChainSpring.setup(joints, phase)` · `step(delta, time)` · `impulse(rad_per_s)` · `reset()` | method | Public fields tune stiffness, damping, lag, sway, `straighten`, `bias`, `max_offset`, `max_lag_rate`. |
-| `RibbonChain.texture` · `spine` · `cell_size` · `phase_offset` · `spring` · `step()` · `get_bones()` · `get_mesh()` | export / method | Skinned ribbon. |
 | `WispPlayer.set_cosmetic_form(texture, tint, visual_scene)` · `play_attack_visual()` · `get_character_visual()` | method | Controller side ([player_dash.md](player_dash.md)). |
 
 ## Animation vocabulary
@@ -202,15 +193,12 @@ source art went to the Recycle Bin (GDD §14 #52). This page described her in fu
 
 ## How to test
 
-- `tools/run_tests.sh playable_character_visual` — all states, no collision, ≤ 40 particles, ribbon
-  weights, silhouette vs `design_size`, the real controller through spawn/dash/kill/redirect/landing/
+- `tools/run_tests.sh playable_character_visual` — all states, no collision, ≤ 40 particles,
+  silhouette vs `design_size`, the real controller through spawn/dash/kill/redirect/landing/
   hit/victory/death with a per-frame snap check, Reduced Motion, Home, that buying and equipping in the Shop no longer bounce, GameWorld.
 - `tools/run_tests.sh rook_visual` (and `scarlet_visual`, `mothmere_visual`, `verdant_shade_visual`,
   `patchvile_visual`) — each whole-frame character's pack contract and behaviour.
-- `tools/run_tests.sh form_catalog` — six characters, prices, rigs, save ids.
-- Rebuilding a part-pack rig: `python3 tools/art/extract_playable_characters.py <id>` then
-  `python3 tools/art/build_character_rig.py <id>`. The scene is generated — hand edits to
-  `<id>_visual.tscn` are lost on the next run; per-character motion lives in `<id>_visual.gd`.
+- `tools/run_tests.sh form_catalog` — five characters, prices, scenes, save ids.
 - Rebuilding Rook: `python concept_art/rook_autosprite_v1/slice_sheet.py` (cuts and cleans the frames,
   writes `review/cleanup_<sheet>.png`, every frame before and after), then
   `python3 tools/art/extract_playable_characters.py rook`.
@@ -253,6 +241,9 @@ source art went to the Recycle Bin (GDD §14 #52). This page described her in fu
 
 | Date | Change |
 |---|---|
+| 2026-10-05 | **The bone-rig code removed** (owner): `ChainSpring`, `RibbonChain`, `tools/art/build_character_rig.py`, the layered-rig intake of `extract_playable_characters.py` (fixed-cell layers, part packs, ribbon spines; its whole-frame output re-packed byte-identical for Patchvile), the ribbon check of `test_playable_character_visual` and the skinned-mesh branch of `get_layer_bounds` |
+| 2026-10-05 | **Morrow removed** (owner, GDD §14 #83): his rig scene and script, form, dash effect, 12 rig layers and concept sources; no bone rig is left. The shared rig code (`ChainSpring`, `RibbonChain`) stays; `CharacterAura` is still Rook's |
+| 2026-10-05 | **A hidden character comes back** (owner: on the Shop, CHARACTERS after SHOP showed only the glow): turned back on, the AnimationTree's state machine restarted at Start, which plays nothing and left `MotionRoot` at scale 0.00001 and black (measured); `_set_tree_active` now resumes the current state where it was. Verified: the cards after three SHOP/CHARACTERS switches (scale 1, `idle_hover`, rendered), `test_playable_character_visual` 4/4 |
 | 2026-09-27 | **Every character, new or redesigned, stands centred on Home's platform** (owner, GDD §14 #57): `WholeFrameCharacterVisual.menu_offset`; Rook's (2.7, 62.5) puts his feet on the platform's centre and his body over it |
 | 2026-09-27 | **Rook rebuilt on the AutoSprite recipe; his bone rig removed** (owner, GDD §14 #56): the owner's five sheets, cleaned frame by frame by his slicer, packed at Patchvile's scale on 336 px run cells (`design_size` 336, `art_scale` 1.55859375); his own ceiling; dash cells 03, 05, 07, 08, 09, 11, 14, 17; his rig's dash look kept (streaks, dust trail, mote ring, `DUST_WAKE`); rig scene, script and 13 body-part images removed (to the Recycle Bin); `test_rook_visual.gd` |
 | 2026-09-26 | **Every character the same size again** (owner, GDD §14 #54): the own-height change reverted (ROSTER CHECK back to 194 for everyone); Scarlet drawn 1.16× larger (`art_scale` 1.38, `menu_art_scale` 1.45) so she stands on Home's platform like the others |

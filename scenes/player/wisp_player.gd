@@ -33,6 +33,10 @@ signal health_changed(current_health: int, maximum_health: int)
 signal damaged(current_health: int, maximum_health: int)
 ## Emitted once after the zero-health death dissolve finishes.
 signal died
+## Two short non-swipe taps requested a stored Soul Ward from the run host.
+signal shield_requested
+## An active Ward absorbed one hit without removing health.
+signal shield_broken
 
 ## Complete player state vocabulary defined by GDD §5.1.
 enum State {
@@ -128,6 +132,12 @@ var _last_landing_time: float = -1.0
 var _rush_speed_multiplier: float = 1.0
 ## RUSH damage immunity: blocks every damage source, separate from hurt invulnerability (no blink).
 var _damage_immune: bool = false
+var _soul_ward_active: bool = false
+var _ward_escape_seconds: float = 0.9
+var _ward_visual: SoulWardVisual
+var _tap_press_msec: int = 0
+var _last_tap_msec: int = -1
+var _last_tap_position: Vector2 = Vector2.ZERO
 ## Momentum presentation (GDD §5.6); null disables the streak glow and speed lines.
 var _feel_tuning: RunFeelTuning
 ## RUSH shows momentum visuals at full and a steady Wisp glow; `_rush_warning` makes it flicker.
@@ -198,6 +208,11 @@ func _ready() -> void:
 	_reduced_motion = _read_reduced_motion()
 	_apply_cosmetic_form()
 	_build_momentum_nodes()
+	_ward_visual = SoulWardVisual.new()
+	_ward_visual.name = "SoulWardShell"
+	_ward_visual.z_index = -1
+	_ward_visual.visible = false
+	add_child(_ward_visual)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -502,6 +517,29 @@ func set_damage_immune(immune: bool) -> void:
 	_damage_immune = immune
 
 
+## Activates one protection shell; stock is spent by the run host, not the player.
+func activate_soul_ward(escape_seconds: float) -> bool:
+	if _soul_ward_active or _health.is_depleted():
+		return false
+	_soul_ward_active = true
+	_ward_escape_seconds = escape_seconds
+	_ward_visual.radius = _player_radius * 2.4
+	_ward_visual.visible = true
+	return true
+
+
+## Whether the next otherwise-valid hit will be blocked by a Ward.
+func has_soul_ward() -> bool:
+	return _soul_ward_active
+
+
+## Removes the shell when a run or scripted lesson is reset.
+func clear_soul_ward() -> void:
+	_soul_ward_active = false
+	if _ward_visual != null:
+		_ward_visual.visible = false
+
+
 ## Whether RUSH damage immunity is on.
 func is_damage_immune() -> bool:
 	return _damage_immune
@@ -568,6 +606,8 @@ func set_arena_rect(rect: Rect2) -> void:
 	var circle := _collision_shape.shape as CircleShape2D
 	if circle != null:
 		circle.radius = _player_radius
+	if _ward_visual != null:
+		_ward_visual.radius = _player_radius * 2.4
 
 	var visual_diameter: float = _player_radius * 3.35
 	_base_sprite_scale = Vector2.ONE * (visual_diameter / SOURCE_FRAME_SIZE)
@@ -597,6 +637,7 @@ func set_arena_rect(rect: Rect2) -> void:
 ## Cancels an unresolved gesture, used before pausing or replacing the game screen.
 func cancel_active_aim() -> void:
 	_active_pointer = INVALID_POINTER
+	_last_tap_msec = -1
 	_buffer_remaining = 0.0
 	_hide_aim_preview()
 	if state == State.AIMING:
@@ -730,6 +771,28 @@ func heal(amount: int) -> bool:
 	return _health.heal(amount)
 
 
+## Brings a dead Wisp back where it fell (the rewarded-ad revive, owner 2026-10-05, ADR-0029): full
+## Soul Fragments, the spawn reform, then [param invulnerable_seconds] in which nothing hurts it.
+## Returns false unless the Wisp is dead.
+func revive(invulnerable_seconds: float) -> bool:
+	if state != State.DEAD:
+		return false
+	_health.reset()
+	_death_reported = false
+	velocity = Vector2.ZERO
+	_snap_to_nearest_edge()
+	_update_resting_normal()
+	_sprite.modulate = Color.WHITE
+	_sprite.scale = _base_sprite_scale
+	_sprite.rotation = 0.0
+	_sprite.play(&"reform")
+	state = State.SPAWNING
+	_state_time_remaining = tuning.spawn_duration
+	_invulnerability_remaining = maxf(invulnerable_seconds, tuning.spawn_duration)
+	_invulnerability_elapsed = 0.0
+	return true
+
+
 ## Plays a non-interactive boss-victory pulse before returning to edge-ready input.
 func play_victory(duration: float) -> void:
 	if state == State.DEAD or _health.is_depleted():
@@ -855,6 +918,12 @@ func _snap_to_polygon_edge() -> void:
 
 
 func _take_damage(safe_edge_position: Vector2) -> bool:
+	if _soul_ward_active:
+		clear_soul_ward()
+		_invulnerability_remaining = _ward_escape_seconds
+		_invulnerability_elapsed = 0.0
+		shield_broken.emit()
+		return true
 	_active_pointer = INVALID_POINTER
 	# A hit breaks the chain, just as it breaks the combo - including the landing it would chain from.
 	_momentum = 0.0
@@ -907,6 +976,7 @@ func _begin_pointer(screen_position: Vector2, pointer_id: int) -> void:
 	if state == State.DEAD or state == State.VICTORY:
 		return
 	_active_pointer = pointer_id
+	_tap_press_msec = Time.get_ticks_msec()
 	_drag_start = screen_position
 	_drag_current = screen_position
 	if state == State.WAITING_AT_EDGE:
@@ -933,7 +1003,23 @@ func _end_pointer(screen_position: Vector2, pointer_id: int) -> void:
 		_hide_aim_preview()
 		if state == State.AIMING:
 			_enter_waiting()
+		var now: int = Time.get_ticks_msec()
+		if now - _tap_press_msec <= tuning.tap_max_hold_msec:
+			if (
+				_last_tap_msec >= 0
+				and now - _last_tap_msec <= tuning.double_tap_interval_msec
+				and screen_position.distance_to(_last_tap_position) <= (
+					_minimum_swipe_distance() * tuning.double_tap_distance_factor)
+			):
+				_last_tap_msec = -1
+				shield_requested.emit()
+			else:
+				_last_tap_msec = now
+				_last_tap_position = screen_position
+		else:
+			_last_tap_msec = -1
 		return
+	_last_tap_msec = -1
 	_act_on_swipe(drag_vector)
 
 
@@ -1009,6 +1095,7 @@ func _cancel_pointer(pointer_id: int) -> void:
 	if pointer_id != _active_pointer:
 		return
 	_active_pointer = INVALID_POINTER
+	_last_tap_msec = -1
 	_hide_aim_preview()
 	if state == State.AIMING:
 		_enter_waiting()

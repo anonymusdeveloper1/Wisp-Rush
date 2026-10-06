@@ -1,6 +1,6 @@
 # ADR-0021: Layered arenas
 
-> **Status:** Accepted; the Vigil's floor and art were revised by [ADR-0022](0022-vigil-art-and-floor-revision.md); the arena scene contract is `ArenaVisual` since [ADR-0023](0023-3d-arenas.md) · **Date:** 2026-09-30 · **Deciders:** owner / Claude Code (Opus 5.5) ·
+> **Status:** **Superseded by [ADR-0027](0027-one-arena-simulation.md)** (2026-10-05: the Vigil and the layered-arena code removed; `ArenaVisual` stays, for SIMULATION; kept as history); Accepted; the Vigil's floor and art were revised by [ADR-0022](0022-vigil-art-and-floor-revision.md); the arena scene contract is `ArenaVisual` since [ADR-0023](0023-3d-arenas.md) · **Date:** 2026-09-30 · **Deciders:** owner / Claude Code (Opus 5.5) ·
 > **Amends:** [ADR-0017](0017-painted-arenas-with-bleed.md) (an arena is one painted image) and
 > [ADR-0020](0020-an-arena-may-bring-its-own-floor.md) (corrects its note on sizes)
 

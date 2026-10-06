@@ -21,7 +21,7 @@
 Wisp Rush is a fast, one-finger portrait survival game. Swipe and release to launch a small
 purple Wisp in a straight line, slice every enemy along that line, stop at the physical screen
 edge, then immediately redirect to build ricochet chains and survive escalating waves. Chase scores
-in Endless on arenas you unlock with Rift Points. (History: until 2026-09-25 the pitch also had five
+in Endless on SIMULATION, the game's one arena (§14 #78). (History: until 2026-09-25 the pitch also had five
 story Rifts, cleared level by level.)
 
 ## 2. Pillars
@@ -33,11 +33,10 @@ story Rifts, cleared level by level.)
 ## 3. Core loop
 
 - **Seconds:** aim → release → slice along the dash segment → wall impact → short focus → redirect.
-- **Minutes (Endless):** waves with no end; build score/combo, gain XP and choose run mutations; a
+- **Minutes (Endless):** waves with no end; build score/combo and collect temporary enemy drops; a
   boss from the Endless boss pool arrives every four waves, and each victory makes the next cycle
   harder. (History: the removed Rift levels were four waves and one boss that cleared the level.)
-- **Sessions:** earn Rift Points, unlock characters and Endless arenas, climb the Trials and play the
-  daily run.
+- **Sessions:** earn Rift Points, unlock characters, climb the Trials and play the daily run.
 
 This is explicitly **not** orbit, tap-to-reverse, ring-gap or slingshot movement.
 
@@ -49,7 +48,7 @@ This is explicitly **not** orbit, tap-to-reverse, ring-gap or slingshot movement
 | Dash | Release after ≥ 28 dp | Space | Swipe direction is travel direction (bent ≤ 6° by AIM ASSIST, §5.1); length does not change power |
 | Redirect | Swipe again while dashing | Direction + Space | Turns the live dash from wherever the Wisp is |
 | Pause / back | HUD button | Escape | Closes the top overlay first |
-| Open the upgrades (board arenas) | Tap the glowing character | — | While upgrades are ready the character has a light and the board shows it (BOARD 01's lanterns glow; SIMULATION's badge shows how many, §14 #73); a press that starts on him and lifts without a swipe opens the cards (owner, 2026-10-02, §14 #71–#72). Other arenas keep the UPGRADE button |
+| Activate Soul Ward | Double tap during gameplay | Double click | Spends one stored Ward and protects against the next fatal hit; available on every arena ([pickup items](systems/pickup_items.md)) |
 
 Input actions must match [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) §5.4. Only the first active
 pointer controls aiming; UI consumes its own input; interruptions cancel an active swipe.
@@ -105,17 +104,19 @@ the player waits.
 
 The dash corridor is the Wisp radius plus a configurable blade bonus. Normal enemies are sliced
 without stopping the Wisp and cannot deal contact damage during a successful dash. Kills award
-score, XP, combo and possible currency immediately. Multi-kill dashes escalate feedback. Normal
+score, combo, possible RP and an item-drop roll immediately. Multi-kill dashes escalate feedback. Normal
 kills use at most 20–35 ms hit-stop; heavy/boss hits may use 50–80 ms.
 
-The Wisp begins with **one** Soul Fragment and **death is final** — there is no revive (a rewarded-ad
-revive is the only one ever planned, and it is unbuilt). Contact damage removes one fragment, resets
+The Wisp begins with **one** Soul Fragment and **death is final**, except for the rewarded-ad revive:
+once per run, a real run that ends can be continued by watching an ad — the Wisp comes back where it
+fell with 2 s without damage (owner 2026-10-05, §14 #82, ADR-0029). Contact damage removes one fragment, resets
 combo and grants 750–1,000 ms invulnerability. At zero, play the death dissolve before results.
 Crowded hits reform the player at a safe edge.
 
 Nothing in a run adds a fragment (owner decision 2026-09-24): the rare **Soul Vessel** drop that
 added one was removed from the game, and with it **Reaper's Gift**, whose heal had nothing left to
-restore. One fragment, one life: the first contact ends the run. Only the Tutorial tops the Wisp
+restore. One fragment, one life: an unprotected fatal contact ends the run. Soul Ward blocks the next fatal
+hit without adding a fragment ([pickup items](systems/pickup_items.md), §14 #76–77). Only the Tutorial tops the Wisp
 up, so its lessons never end in death.
 
 ### 5.4 Enemies and hazards
@@ -143,7 +144,7 @@ Enemy arrivals telegraph for at least 450–700 ms, never spawn on the Wisp and 
 slightly smaller than the art. Obstacles remain sparse and formation validation preserves at least
 one viable dash and safe edge.
 
-### 5.5 Waves, upgrades and boss
+### 5.5 Waves, pickup items and boss
 
 An endless threat-budget director uses at least 20 handcrafted normalized formations with mirrored
 and rotated variants. Formations say where enemies arrive; which enemies come follows the Enemies v2
@@ -151,28 +152,22 @@ ramp: each run shuffles the enemies, starts with a few and adds another every fe
 random (§14 #62). Difficulty rises through combinations and decision time,
 not unrestricted random flooding.
 
-Kills fill XP; each level-up offers three uncapped choices from six: Wide Reap, Soul Hunger, Death
-Pulse, Soul Link, Cold Wake and Void Velocity. (Soul Vessel left the cards on 2026-09-19 and the game
-on 2026-09-24; Reaper's Gift left on 2026-09-24.)
+Run XP and mutation cards are replaced by seven enemy drops (owner, 2026-10-05, §14 #76–77):
 
-**Upgrade offer rules** (owner decision 2026-09-15 — upgrades came too fast and cut the player off):
-- **Level-ups are banked and never interrupt.** Several can bank. A glowing **UPGRADE button** (×N for
-  several) appears under the pause button, top-left; tapping it opens the cards at once. The cards also still open
-  by themselves at calm moments. The offer itself is just the cards and a timer (owner 2026-09-15).
-- **Cards are offered only at a calm moment:** a new wave starting, a boss just defeated (after the
-  victory beat), or the field clear of regular enemies — and only when it is free play (a tutorial
-  lesson only when it asks), no boss is active or pending, RUSH is off, the game is not paused, the
-  run is not over, the Wisp rests at an edge and no combo is running. Once the player sends the cards
-  away they return only at the next calm moment, so they never nag.
-- **No pause: slow-motion cards.** A compact card tray slides up from the bottom and the world runs
-  in slow motion (×0.3) while it is up. Enemies and hazards still move and can hurt; the pause menu
-  still works and hides the tray until Resume. Tap a card to take it (if more are banked, the next
-  three slide in at once, otherwise time returns to normal), or just keep playing: a swipe on the arena
-  sends the tray away and the level stays banked. The tray also leaves on its own after 6 seconds.
-  Card taps never dash and swipes never pick a card. Reduced Motion: the tray appears without sliding
-  and the world keeps normal speed.
-- Same in Endless and the daily run. Banked levels not picked by the end of a run are
-  lost; only picked levels count as run level.
+| Item | Helps the player |
+|---|---|
+| Soul Ward | Stored protection: double tap spends one copy; blocks the next fatal hit and grants brief escape immunity |
+| Rift Magnet | Temporarily attracts RP across the arena |
+| Fortune Star | Temporarily doubles earned score |
+| Stillglass | Temporarily slows regular enemies, attacks and projectiles; player speed stays normal |
+| Banish Bomb | Instantly destroys nearby regular enemies and their projectiles |
+| Reaper's Edge | Temporarily widens the damaging dash corridor |
+| Echo Wisp | Temporarily sends an extra strike to another regular enemy on each dash's first kill |
+
+The six non-Ward drops activate on collection. Ward drops and bought copies enter persistent stock.
+Repeated timed effects refresh duration; strength does not multiply. Provisional values and live
+behaviour: [pickup_items.md](systems/pickup_items.md), [ADR-0026](decisions/0026-pickup-items-and-consumable-packs.md).
+The former XP/cards flow is history ([mutations.md](systems/mutations.md)).
 
 The Reaper stops normal spawning and uses three readable phases: scythe sweep, teleport hunt and
 death corridors. Its core takes at most one hit per dash and is vulnerable only during exposed
@@ -211,7 +206,7 @@ Owner decision 2026-09-15: four base mechanics make a run feel faster, with no n
 - **RUSH.** Kills fill a RUSH meter; multi-kill dashes and boss hits fill it faster. When it is full,
   RUSH starts on its own: for 6 s dashes are 30 % faster, score doubles, the combo timer freezes, the
   Wisp takes no damage and the music peaks. Then the meter empties. RUSH never starts during a pause
-  or while the upgrade cards are up; it waits for them to close. In the Tutorial screen only the RUSH lesson has a
+  or after the run ends. In the Tutorial screen only the RUSH lesson has a
   live meter.
 - Reduced Motion keeps every mechanic but drops slow motion, speed lines, the RUSH screen glow and
   the soul-orb flights.
@@ -234,32 +229,34 @@ history; it had been out of the first release since 2026-09-24 (§14 #44).
 **Endless**
 - **PLAY always starts Endless**, open from the first launch (owner decision 2026-09-15). Every enemy
   mix and boss can appear from the start (owner decision 2026-09-15).
-  Plays until death on the shared floor template
-  ([ADR-0014](decisions/0014-endless-arenas-share-one-floor-template.md)) with the equipped arena skin;
-  no rule twists.
+  Plays until death on SIMULATION, the one arena (§14 #78,
+  [ADR-0027](decisions/0027-one-arena-simulation.md)); no rule twists.
 - Each wave uses one of Endless's five enemy mixes (`EndlessRoster`, named after and taken from the
   removed Rifts); each boss (every 4 waves) comes from those mixes' boss pool. Beating a boss starts a
   harder cycle. Endless owns the best score and wave.
 - Endless and the daily run pay the one-time depth milestones (waves 5/10/15/20/25).
 
-**Daily run** — Endless rules with the date seed, the base roster and the Reaper only, and an arena of
-the day that rotates through every Endless arena, owned or not. Missing days have no penalty.
+**Daily run** — Endless rules with the date seed, the base roster and the Reaper only, on SIMULATION.
+Missing days have no penalty.
 
-**Rift Points (RP)** — the only currency; earned only by playing, never bought.
+**Rift Points (RP)** — the only currency; earned by playing and sold in packs for real money in the
+Shop (owner 2026-10-05, §14 #78, [ADR-0028](decisions/0028-shop-bottom-navigation-and-rift-points-packs.md)).
 - Sources: pickups; a performance bonus from the run's score; level-clear bonuses (full on the first
   clear, reduced on repeats); boss rewards; Trials; daily challenges and the daily reward; depth
-  milestones; the opt-in "double RP" rewarded ad.
+  milestones; the opt-in "double RP" rewarded ad; the Shop's Rift Points packs.
 - Spent only in the Shop. There is **no permanent power**: the Soul Sanctum is removed, and permanent
-  progress is content access and cosmetics. Run-only power is the six mutations.
+  progress is content access, cosmetics and unspent consumable stock. Run-only power comes from
+  enemy pickups and spent copies ([ADR-0026](decisions/0026-pickup-items-and-consumable-packs.md)).
 
-**Shop** — cosmetics only; nothing changes scale, anchor, hitbox, timing or rules. Prices live in `data/`.
+**Shop** — two pages, CHARACTERS and SHOP, picked in its bottom navigation (§14 #78). Characters are
+cosmetic: nothing changes scale, anchor, hitbox, timing or rules. Prices live in `data/`.
 
-| Tab | Items | Paid with |
+| Page / section | Items | Paid with |
 |---|---|---|
-| Characters | **Patchvile** (the default character, always owned; §14 #47). Whole-frame sprite characters: Patchvile, Shade, Scarlet, Mothmere and Rook, the Bonewing (a rig until 2026-09-27, §14 #56). Animated rig: Morrow, the Runebound. Card order: Patchvile, Shade, Scarlet, Morrow, Rook, Mothmere. No character has a tier (§14 #53). Ilyra was replaced by Scarlet on 2026-09-26 (§14 #52). Every character plays exactly like the Wisp and costs 0 RP while the owner reviews them (§14 #31). Void, Eclipse, Veyra and Noxen were removed on 2026-09-25 (§14 #47) | RP |
-| Dashes | Trail styles: Soul (default) plus tints of the existing trail, never led by warning amber or rift magenta | RP |
-| Arenas | Painted Endless arenas, one image each to the arena contract (ADR-0017): the Quarry Titan, free and the default; the Stitched Doll Jungle, kept as painted with its own floor (ADR-0020), free for now (§14 #63). Stitchwarden's Vigil, a layered, animated arena (ADR-0021) with revised art and floor (ADR-0022), free (§14 #66). The Chained Colossus, kept as painted with its own floor, free for now (§14 #67). The Chained Colossus 3D, the owner's model live in 3D with its floor a little bigger than the Vigil's, free for now (§14 #68, ADR-0023). The 3D ZOOM ARENA, the same scene opening on the whole arena and zooming in until its floor fills the whole screen, a test slot (§14 #69–#70). BOARD 01 and BOARD 01 LIGHT, the full-screen pixel-art board with the HUD built into its frame, mid-dark and light floor, test slots (§14 #71–#72, ADR-0024). SIMULATION, the sci-fi simulation screen: the HUD in its graphite frame, the magenta boss meter and amber RUSH meter inside the screen, and its own enemy-arrival and boss-appearance effects, free (§14 #73, ADR-0025). Prices for later arenas _TBD_ (§14 #39) | RP |
-| No Ads | Remove Ads (no currency inside) and Restore Purchases | Real money ([ADR-0012](decisions/0012-store-surface-before-billing.md)) |
+| CHARACTERS | **Patchvile** (the default character, always owned; §14 #47). Whole-frame sprite characters: Patchvile, Shade, Scarlet, Mothmere and Rook, the Bonewing (a rig until 2026-09-27, §14 #56). Card order: Patchvile, Shade, Scarlet, Rook, Mothmere. Morrow, the Runebound (the last bone rig), was removed on 2026-10-05 (§14 #83). No character has a tier (§14 #53). Ilyra was replaced by Scarlet on 2026-09-26 (§14 #52). Every character plays exactly like the Wisp and costs 0 RP while the owner reviews them (§14 #31). Void, Eclipse, Veyra and Noxen were removed on 2026-09-25 (§14 #47) | RP |
+| SHOP: ITEMS | Soul Ward, Rift Magnet and Fortune Star; packs of 1, 5, 10 or 25. Select one owned Magnet/Star for the next run; one copy is spent when it starts. Ward is used by double tap during play. Prices: [pickup items](systems/pickup_items.md) | RP |
+| SHOP: NO ADS | Remove Ads (no currency inside) and Restore Purchases | Real money ([ADR-0012](decisions/0012-store-surface-before-billing.md)) |
+| SHOP: RIFT POINTS | 500, 1,200, 2,500 and 6,500 RP for 0.99, 1.99, 4.99 and 9.99 USD, placeholder prices (§14 #78); the buttons stay disabled until Google Play sells them (ADR-0030). The Shop's ARENAS tab was removed with the arenas on 2026-10-05 (§14 #78) | Real money ([ADR-0028](decisions/0028-shop-bottom-navigation-and-rift-points-packs.md)) |
 
 **Local goals** — Endless best score and wave, highest combo, the collection, Trials and three
 rotating daily challenges.
@@ -317,32 +314,34 @@ its painterly rendering is superseded.
   [character_creation.md](guides/character_creation.md) (Patchvile is the worked example), on the same
   collision circle for everyone. **They are drawn exactly like Patchvile** (§14 #46): no outline, and
   the colours and soft edges AutoSprite's pixel filter gives, so the outline, palette and
-  anti-aliasing rules above do not apply to them. The owner is reworking the whole roster onto it (2026-09-24). Until
-  then Morrow is still a bone rig. Patchvile, Shade, Mothmere, Scarlet and Rook (2026-09-27) are on the recipe.
+  anti-aliasing rules above do not apply to them. The owner reworked the whole roster onto it (2026-09-24 on):
+  Patchvile, Shade, Mothmere, Scarlet and Rook (2026-09-27) are on the recipe; Morrow, the last bone rig, was
+  removed on 2026-10-05 (§14 #83).
 - Runtime art is generated from the concept sheets by `tools/art/extract_redesign.py`; the previous
   violet art is archived in `assets/legacy_v1/` and never ships.
-- Floors: every Endless arena is one pixel-art image to the arena contract, with the floor always in the same
-  place ([ADR-0017](decisions/0017-painted-arenas-with-bleed.md), [arena_art.md](guides/arena_art.md)).
-  The drawn rim marks the playable area, with no code-drawn edge line.
+- Floors: the one arena, SIMULATION, is a board built from Codex's pixel-art kit
+  ([ADR-0025](decisions/0025-sci-fi-board-and-arena-spawn-effects.md)); its drawn rim marks the playable
+  area, with no code-drawn edge line. The painted, layered and 3D arenas were removed on 2026-10-05
+  (§14 #78, [ADR-0027](decisions/0027-one-arena-simulation.md)).
 
 ## 10. Audio direction
 
 Minimal dark electronic ambience grows with threat/combo; boss music deepens without medieval or
 metal styling. Separate Master, Music, SFX and UI buses. Required cues cover aim, dash, slice and
-multi-kill pitch steps, impact, pickup, damage/death, upgrades, Reaper actions and UI feedback. If
+multi-kill pitch steps, impact, pickup, damage/death, item activations, Reaper actions and UI feedback. If
 final files remain unavailable, use carefully tuned runtime synthesis rather than placeholder beeps.
 
 ## 11. UI & screen flow
 
-`Loading → (first launch) Tutorial → Home → Endless run → Upgrade/Pause overlays → Results →
+`Loading → (first launch) Tutorial → Home → Endless run → Pause overlay → Results →
 Play again / Home`. Home also reaches the Shop, Trials, Daily, Statistics and Settings.
 
 **Tutorial** (owner decision 2026-09-15; replaces the in-run first-run lesson — real runs never teach):
 a separate screen that teaches every base mechanic, easiest first — aim & dash, slice, chain,
-mid-dash redirect, blockers, danger & Soul Fragments, Rift Points & XP with the upgrade choice, RUSH,
+mid-dash redirect, blockers, danger & Soul Fragments, pickup collection & double-tap Soul Ward, RUSH,
 and a boss with reduced health. Each lesson shows, then you try: a ghost hand demonstrates the gesture
-(press, drag with the aim arrow, release) while the real Wisp performs it in a placeholder arena (the
-Endless floor template under the default skin); then the player repeats it, and the lesson passes
+(press, drag with the aim arrow, release) while the real Wisp performs it on SIMULATION, the one arena
+(§14 #78); then the player repeats it, and the lesson passes
 only on success (short callout and sound). One-line caption, step counter and progress dots; a miss or
 hit simply retries, and the tutorial never ends in death. SKIP is always visible and asks "SKIP THE
 TUTORIAL?" (Android back / Escape open the same confirm). First launch (tutorial not completed): after
@@ -354,8 +353,8 @@ Motion stills the decoration; the hand gesture still plays because it is informa
 **Home** (owner decision 2026-09-13, revised the same day; content updated by ADR-0013 on 2026-09-14):
 pixel-art dark stone with restrained warm stitching, amber light and cyan rune accents; no bottom navigation.
 - **Top:** slim top bar (Rift Points, best, Statistics, Settings) and the logo. Best is the Endless best.
-- **Middle:** the equipped character rests above the central stone dais in an empty stage pocket; **tapping it opens the Shop's Characters tab**. Left column: Trials,
-  Daily. Right column: Shop, Remove Ads (hidden once ads are removed).
+- **Middle:** the equipped character rests above the central stone dais in an empty stage pocket; **tapping it opens the Shop's CHARACTERS page**. Left column: Trials,
+  Daily. Right column: Shop, Remove Ads (opens the Shop's SHOP page; hidden once ads are removed).
 - **Under the character**, at least 50 px below its lowest animated pixel: a caption (`ENDLESS`, or
   `ENDLESS • BEST WAVE n`), then a large animated PLAY (not full width), centred, that starts
   Endless. The pair sits a further 80 px down where the screen has room (owner, 2026-09-24: "move the
@@ -365,25 +364,27 @@ pixel-art dark stone with restrained warm stitching, amber light and cyan rune a
   the background comes alive (brazier flicker, rune pulse, mist, rising motes) over the pixel-art stone plate;
   PLAY breathes with a glow pulse and a periodic light sweep. No
   animation ever passes over a button. Reduced Motion stills it all.
-- **Shop** has three tabs: Characters, Arenas (Endless arenas, the same card pager) and No Ads (Dashes was removed
-  2026-09-19 — a dash belongs to its character). The first two spend
-  Rift Points; No Ads (Remove Ads + Restore Purchases) stays disabled until billing exists
-  ([ADR-0012](decisions/0012-store-surface-before-billing.md)).
+- **Shop** (owner 2026-10-05, §14 #78): the back button at the top and a bottom navigation with two
+  pages. **CHARACTERS** is the character card picker. **SHOP** holds the deals in one scrolling list:
+  NO ADS (Remove Ads + Restore Purchases), ITEMS (consumable packs and next-run boost selection) and
+  RIFT POINTS (packs sold for real money). Characters and Items spend Rift Points; Remove Ads,
+  Restore Purchases and the Rift Points packs stay disabled until billing exists
+  ([ADR-0012](decisions/0012-store-surface-before-billing.md),
+  [ADR-0028](decisions/0028-shop-bottom-navigation-and-rift-points-packs.md)). (History: the Arenas
+  tab was removed with the arenas on 2026-10-05, Dashes on 2026-09-19 — a dash belongs to its
+  character.)
 
-**Shop tabs** are vertical card pickers: one big tall focused card in the centre, raised and framed,
+**The CHARACTERS page** is a vertical card picker: one big tall focused card in the centre, raised and framed,
 neighbours peeking in dimmed; swipe sideways to browse; a description and one main button below.
 Locked items stay previewable.
 
 **Results:** Endless and the daily run show wave, score and best and the Rift Points breakdown, with
 PLAY AGAIN first.
 
-HUD (owner decision 2026-09-24): pause top-left, with the UPGRADE button under it when a level-up is
-banked. Top-right: the Rift Points counter with its icon on the right, and the score under it with no
-frame. Centred at the very top: the SOUL LEVEL (XP) bar with its label, then the RUSH bar, then the
-boss line. There is no wave line, no "ENDLESS · WAVE n · THREAT n" (owner, 2026-09-24); wave and
-boss beats are the centre callouts. There is no lives readout, since a run has exactly one fragment.
-Contextual combo and focus callouts sit in the arena. Only UI respects safe-area insets; the world continues behind cutouts. All controls are
-large, focusable and have visible desktop/controller focus styling.
+HUD: SIMULATION, the one arena, is a board with the HUD in its frame
+([ADR-0024](decisions/0024-board-arenas.md), [ADR-0025](decisions/0025-sci-fi-board-and-arena-spawn-effects.md)):
+the pause button, score, RP, Ward protection and stock, RUSH and the boss meter; active pickup icons
+below the top hardware and the Ward hint in the bottom frame. No XP, level or upgrade controls.
 
 ## 12. Platforms & technical targets
 
@@ -394,18 +395,23 @@ large, focusable and have visible desktop/controller focus styling.
 - 1080×1920 design coordinates, `canvas_items` + `expand`, full physical display with no letterbox,
   card, border or fixed SubViewport. Edge-to-edge means the *presentation*: since redesign v1 the
   dashable playfield is inset to the painted stone floor ([ADR-0006](decisions/0006-inset-playfield-and-larger-sprites.md)).
-- Walls: every Endless arena paints its floor in
-  the one shared place (`EndlessCatalog.floor_rect`, ADR-0017), so an arena can never change the playfield.
+- Walls: the playfield is SIMULATION's screen, `[48, top + 64, 444, H − top − bottom − 128]` art
+  pixels with one art pixel = view width / 540 (ADR-0025).
 - Stable 60 FPS on a mid-range Android phone and recent iPhone; interactive Home appears quickly.
-- Offline base game, no account/backend/data collection; versioned local save under `user://`.
-- QA sizes (phones only — owner decision 2026-09-11): 320×568, 360×800, 375×812, 390×844, 412×915.
-  Tablets and desktop are not targets; desktop stays a debug convenience.
+- No account of its own and no backend; versioned local save under `user://`, also kept on the
+  player's Google account through Google Play Games Saved Games when they are signed in (owner
+  2026-10-05, §14 #84, ADR-0030). The game plays offline; on Android the AdMob SDK uses the network
+  and collects ad data, with Google's consent form where it is required (§14 #82, ADR-0029), and
+  purchases go through Google Play Billing (ADR-0030).
+- QA sizes: phones (owner decision 2026-09-11) 320×568, 360×800, 375×812, 390×844, 412×915; **tablets
+  are targets too**, in portrait (owner, 2026-10-05, §14 #79; the loading screens were checked at
+  1200×1920 and 1440×1920). Desktop is not a target; it stays a debug convenience.
 
 ## 13. Scope
 
 | Release MVP | Explicitly later / provider-dependent |
 |---|---|
-| Tutorial; Endless mode with painted arenas; 20+ formations; 3+ enemies; 3+ hazards; 6 mutations; 3-phase boss encounters; Rift Points Shop (6 characters: Patchvile, the default, Shade, Scarlet, Rook, Morrow and Mothmere; arena skins); daily/challenges; complete screen flow; local save/statistics/settings; final feedback; unsigned Android/iOS export configuration | Real ads, analytics, IAP/store verification, cloud saves, accounts, backend, signed store builds; paid cosmetics (custom Wisps, characters); Endless events built from the Rift twists; **Rift story mode (5 Rifts × 8 levels)** — removed from the game 2026-09-25 (§14 #48) |
+| Tutorial; Endless mode on SIMULATION, the one arena; 20+ formations; 3+ enemies; 3+ hazards; 7 enemy pickup items; 3-phase boss encounters; Rift Points Shop (5 characters: Patchvile, the default, Shade, Scarlet, Rook and Mothmere); daily/challenges; complete screen flow; local save/statistics/settings; final feedback; unsigned Android/iOS export configuration | Real ads, analytics, IAP/store verification, cloud saves, accounts, backend, signed store builds; paid cosmetics (custom Wisps, characters); Endless events built from the Rift twists; **Rift story mode (5 Rifts × 8 levels)** — removed from the game 2026-09-25 (§14 #48) |
 
 Release contains no dead buttons, placeholder/debug panels, fake purchases, required network calls
 or legacy art. Monetisation integration stays hidden unless backed by a real platform provider —
@@ -416,6 +422,15 @@ except the Shop and Remove Ads entry points, visible with purchases disabled dur
 
 | # | Question / ASSUMPTION | Status |
 |---|---|---|
+| 84 | Owner 2026-10-05: "how can we integrate fro google and apple a way to keep data persistant for example the user buys RP from store if i store them locally the user losses them so how can i store them with their google or appple account and also the perchuse of the no ads package that shall go thru google play or apple store". Claude explained the options; the owner: "yes go with platform cloud save, android first", then picked: both plugins may be downloaded; no Play Console app yet; **the newest save wins** when the phone and the cloud differ; sign-in **automatic at launch, plus Settings**. | Built 2026-10-05 ([ADR-0030](decisions/0030-play-billing-and-play-games-cloud-save.md)): Google Play Billing (Remove Ads acknowledged, RP packs saved then consumed, delivery at start, pending payments, Google's prices in the Shop) and the Play Games cloud save (`CloudSave`, the Settings card). Claude's rule: a phone that never synced takes the cloud save. Waits for Play Console ([checklist](guides/play_console_setup.md)); the Play Games plugin stays disabled until its project ID exists |
+| 83 | Owner 2026-10-05: "remov the morrow chracter now completly he is not need". | Done 2026-10-05: Morrow's scene and script, form and dash-effect data, rig art and concept sources removed (as Ilyra's were, #52); the catalog holds five characters; a save that owned or equipped Morrow falls back to Patchvile (unknown ids are dropped). No bone rig is left in the game |
+| 82 | Owner 2026-10-05: "implemnt goole ads in the game with test ads keys the game shall have intersteial ads, rewarded ads and what more i think those are enough". From Claude's options the owner picked: an **interstitial after every second run, before Results**; rewarded ads for a **revive once per run** and to **double the run's Rift Points** on Results; **Remove Ads removes all ads**; the **Poing Studios AdMob plugin with Google's consent form**, downloads approved. This replaces #11's "never interstitials". | Implemented 2026-10-05 ([ADR-0029](decisions/0029-admob-interstitial-and-rewarded-ads.md)) on Google's test App ID and ad units: `AdMobProvider` on Android only, the Gradle Android build, the revive offer (CONTINUE? WATCH AD / NO THANKS), WATCH AD • DOUBLE RP on Results. Claude's choices, for the owner to change: the offer's wording, 2 s of revive protection, doubling collected + performance only, counting runs per session, retrying a failed load after 30 s. Before release: the owner's AdMob App ID and ad units, a privacy policy |
+| 81 | Owner 2026-10-05, on Home's tiles: "remove that line just above the shop or daily or trails and no ads and add more padding to the icons". | Done 2026-10-05: the seam (the bar with a diamond above the caption) removed from the tiles in every state, through the theme builder; the SHOP, DAILY and TRIALS icons drawn in a 72 px box instead of 96 (Claude's value; 1.5 screen px per icon pixel). The NO ADS tile shows text ("AD" with a strike), not an icon, and keeps its size |
+| 80 | Owner 2026-10-05: "When i switch from shop to characters the chracters dissapear just the glow is left and use codex to generate new icons for the shop, daily, trials and remove the restart run when the gameplay is paused". | Done 2026-10-05: the character fix (an AnimationTree turned back on restarted at its empty Start state; it now resumes); the pause menu has no RESTART RUN (Results' PLAY AGAIN still replays a run); Codex drew new SHOP, DAILY and TRIALS icons for Home's tiles (`concept_art/home_icons_v1/`, runtime `assets/art/ui/home_icons/`). Claude's choices: each icon keeps its old meaning (a bag, a sun, a star), redrawn in the pickup icons' style; only Home's tiles changed — the Daily screen and Results keep the kit's sun glyph |
+| 79 | Owner 2026-10-05, while the loading screens were checked: "Yes tablets are target", and the game stays portrait only, never landscape. Asked whether §12, which still said tablets are not targets, should change: "yes". | Recorded in §12 (2026-10-05) |
+| 78 | Owner 2026-10-05: "remove the arena toogle and remove all the arens from the game from the code as well just leave the simulation arena which is the main arena or playuable board for the user"; in the Shop, **a bottom navigation instead of the top navigation**, with **the back button at the top**; one page for the characters and the other, **SHOP**, with all the shop deals — "like remove ads, buy game stuff, buy bundles later im gonna sell like a character and monmey etc" — and **a place where the users can buy RP**; Codex may generate any image needed. From Claude's options the owner picked: the characters page named **CHARACTERS**; **ITEMS a section of SHOP**; Claude's suggested Rift Points packs, **500 / 1,200 / 2,500 / 6,500 RP for 0.99 / 1.99 / 4.99 / 9.99 USD**, as placeholders, their buttons disabled until billing exists; and **all of it** for the arenas: the tutorial moves to SIMULATION, the other arenas' scenes, scripts, shaders and runtime art and the painted-background path are removed, saves holding a removed arena fall back to SIMULATION, and the source art in `concept_art/` stays as history. | Implemented 2026-10-05 ([ADR-0027](decisions/0027-one-arena-simulation.md), [ADR-0028](decisions/0028-shop-bottom-navigation-and-rift-points-packs.md)): the catalog, the save and the tutorial hold SIMULATION only; the Shop's two pages; `RiftPointsPack` / `RiftPointsPackCatalog` (`data/shop/rift_points_packs.tres`) and `MonetisationService.purchase_rift_points`; the four pack icons by Codex (`concept_art/rp_packs_v1/`). Claude's choices, for the owner to change: SHOP's order NO ADS → ITEMS → RIFT POINTS; COMING SOON on a disabled pack's button; the Remove Ads card's line "No ads, ever." (it said everything else is earned by playing, no longer true); the arena-only tools removed with the arenas. Then the owner: "make the bottom naviugation bigger its too small" — each tab 160 px tall (was 104) with size-48 text (was 33), Claude's values. Then: "The shop is not scrollable on mobile devies and remove the side scroll in the shop and optimize it for mobile devies" — the SHOP page scrolls by swiping, also on its cards and buttons, and draws no scroll bar, as Settings does (#50) |
+| 76 | Owner-approved pickup designs (2026-10-05): **Soul Ward** blocks the next fatal hit, then breaks with a brief escape window; **Rift Magnet** temporarily pulls RP pickups across the arena; **Fortune Star** temporarily doubles earned score; **Stillglass** temporarily slows enemy movement, attacks and projectiles while the player keeps normal speed; **Banish Bomb** immediately destroys nearby regular enemies and their projectiles; **Reaper's Edge** temporarily widens dash damage; **Echo Wisp** temporarily makes each dash's first kill send a friendly spirit to another regular enemy. The six other items activate on collection. **Soul Ward is stored**, whether dropped by an enemy or bought with RP; double tapping during gameplay spends one copy and activates it. The owner requested the seven icons next. | Source icon designs in [pickup_items_v1](../concept_art/pickup_items_v1/README.md). The icon request was source-only at this point; implementation and provisional tuning follow in #77. |
+| 77 | Owner requested replacing run upgrades with the accepted seven drops and an Items Shop page, with packs of **1, 5, 10 and 25** costing more RP as quantity rises. Shop items: **Soul Ward, Rift Magnet, Fortune Star**; bought Magnet/Star copies can be selected as a one-use starting boost. RUSH stays separate. The owner explicitly approved choosing and testing provisional prices, durations and drop rates (2026-10-05). | Implemented: [pickup items](systems/pickup_items.md), [ADR-0026](decisions/0026-pickup-items-and-consumable-packs.md). Balance values are provisional and need the owner’s device feel pass. |
 | 75 | Owner decision 2026-10-05: the green lantern ranged boss stays in the middle and summons his own green wisps; the discussed Green Flame Volley and Lantern Sweep are included. Soul Recall heals him by recalling surviving wisps, with its own first frame. Generate the four cast starts, idle and a slumped death pose with the lantern extinguished; keep pixel art. No separate recovery pose, implementation or tests. This replaces the earlier no-summons draft for this ranged boss only. | Design and six pose images with AutoSprite prompts prepared: [boss_ranged.md](specs/enemies_v2/boss_ranged.md); animation sheets, tuning and runtime pending |
 | 1 | Confirm the owner-supplied artwork's production/distribution license. | Open; not supplied in ZIP |
 | 2 | `com.cognitix.wisprush` is configured in the Android debug export preset for on-device testing; iOS bundle id and store/release config stay deferred. | Partly settled |
@@ -426,7 +441,7 @@ except the Shop and Remove Ads entry points, visible with purchases disabled dur
 | 7 | ASSUMPTION: a boss arrives every four waves (first at wave 4, about 66 seconds). In a Rift the level's final boss ends the run (#12); in Endless and the daily run each victory resumes a harder cycle. | Milestone 3 default; revised 2026-09-14 (ADR-0013) |
 | 8 | ASSUMPTION: a completed daily run grants 10 Rift Points once per local date; three date-seeded challenges grant 10–25 once each and accumulate across that date's runs. | Milestone 3 default; currency renamed 2026-09-14 |
 | 9 | ASSUMPTION: five Rifts, each with one rule twist (portals, shrinking floor, drift, boss rush). The GDD never specified arenas. Their wave gates 0/5/10/15/20 are superseded by level clears (#13). | Ladder, map and twists shipped ([ADR-0007](decisions/0007-rifts-as-rule-variant-arenas.md)); unlock rule superseded 2026-09-14 |
-| 11 | Monetisation model chosen: free with opt-in rewarded video (revive, double Rift Points, upgrade reroll) plus one Remove Ads IAP with no currency inside; never interstitials. Plumbing ships behind a null provider, so §12's offline/no-data-collection promise still holds today. §12 and §13 must be amended **before** a build with a real ad SDK ships. Home's Shop and Remove Ads open a Shop whose purchases stay disabled until then. | Settled 2026-09-12 ([ADR-0009](decisions/0009-monetisation-model.md), Shop surface [ADR-0012](decisions/0012-store-surface-before-billing.md)); shard pack removed 2026-09-14 ([ADR-0013](decisions/0013-rift-story-levels-endless-mode-and-rift-points.md)); SDK, privacy policy and store config still owner-side |
+| 11 | Monetisation model chosen: free with opt-in rewarded video (revive, double Rift Points, upgrade reroll) plus one Remove Ads IAP with no currency inside; never interstitials (interstitials added by the owner 2026-10-05, #82, ADR-0029). Plumbing ships behind a null provider, so §12's offline/no-data-collection promise still holds today. §12 and §13 must be amended **before** a build with a real ad SDK ships. Home's Shop and Remove Ads open a Shop whose purchases stay disabled until then. | Settled 2026-09-12 ([ADR-0009](decisions/0009-monetisation-model.md), Shop surface [ADR-0012](decisions/0012-store-surface-before-billing.md)); shard pack removed 2026-09-14 ([ADR-0013](decisions/0013-rift-story-levels-endless-mode-and-rift-points.md)); SDK, privacy policy and store config still owner-side |
 | 10 | ASSUMPTION: three new enemies (Cinder Shade splits on death, Warden is shielded on one face, Rift Spawn is a tethered pair) and a second boss (The Hollow Choir, a static three-core structure) extend the roster. Invented to fill the M8 art pack; not in the owner prompt. | Art generated only — no tuning, behaviour or scene; owner may reject or redesign |
 | 12 | ASSUMPTION: a Rift run plays exactly one level and ends on the level's final boss (victory) or on death. The owner split "story" Rifts from Endless; finite levels keep the two modes distinct. | Owner approved 2026-09-15 · implemented 2026-09-15 (phase 2) |
 | 13 | ASSUMPTION: Rift N+1 opens after Rift N level 1 is cleared; ~~Endless opens after Obsidian Garden level 1~~ superseded 2026-09-15: Endless is PLAY and always open; a newly opened Rift becomes the selection. | Owner approved 2026-09-15 · Rift chain implemented 2026-09-15 (phase 2); Endless unlock implemented 2026-09-15 (phase 3) |
@@ -497,6 +512,15 @@ except the Shop and Remove Ads entry points, visible with purchases disabled dur
 
 | Date | Change | Source |
 |---|---|---|
+| 2026-10-05 | Purchases through Google Play Billing and the save on the player's Google account (Play Games), newest save wins (§12, §14 #84, ADR-0030) | Owner |
+| 2026-10-05 | Morrow removed; five characters, all whole-frame (§6, §9, §13, §14 #83) | Owner |
+| 2026-10-05 | Google AdMob on test units: an interstitial after every second run, rewarded revive and double RP, Remove Ads removes all ads; §5.3 revive, §12 data collection (§14 #82, ADR-0029) | Owner |
+| 2026-10-05 | Home's tiles: no seam above the caption, more padding around the icons (§14 #81) | Owner |
+| 2026-10-05 | The pause menu has no RESTART RUN; new Home icons for SHOP, DAILY and TRIALS (§14 #80) | Owner |
+| 2026-10-05 | Tablets are targets too, in portrait (§12, §14 #79) | Owner |
+| 2026-10-05 | One arena, SIMULATION: every other arena and the Shop's ARENAS tab removed; the Shop's bottom navigation (CHARACTERS, SHOP) and Rift Points packs sold for real money, disabled until billing (§1, §3, §6, §9, §11–§13, §14 #78; ADR-0027, ADR-0028) | Owner |
+| 2026-10-05 | Seven enemy drops replace run upgrades; stored double-tap Ward, Items packs, next-run boosts and pickup tutorial (§14 #76–77, ADR-0026) | Owner direction; provisional tuning delegated to Codex |
+| 2026-10-05 | Seven pickup concepts approved; Soul Ward stored for double-tap activation, the other six activate on pickup (§14 #76); source icons generated | Owner |
 | 2026-10-05 | Green lantern boss's central ranged fight, own green wisps, healing recall, six body poses and AutoSprite prompt pack (§5.5, §14 #75); design/art only | Owner |
 | 2026-10-04 | SIMULATION's top and bottom caps: Codex prompt for pieces that continue the frame into the phone's safe bands (§14 #74) | Owner |
 | 2026-10-04 | SIMULATION, the sci-fi board from Codex's kit: the HUD in its frame, the boss and RUSH meters in the screen, its own enemy-arrival and boss-appearance effects (§4, §6, §14 #73; ADR-0025) | Owner |

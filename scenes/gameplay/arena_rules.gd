@@ -1,42 +1,23 @@
 class_name ArenaRules
 extends RefCounted
-## The one seam GameWorld reads for everything an arena decides: backdrop, floor, boss cadence
-## and pick, and difficulty. Which enemies come is the run's `EnemyRamp`, not the arena's.
+## The one seam GameWorld reads for everything an arena decides: its scene (and so its floor), boss
+## cadence and pick, and difficulty. Which enemies come is the run's `EnemyRamp`, not the arena's.
 ##
 ## Built by `RunProfile.create_arena_rules()`. `EndlessArenaRules` wraps the Endless catalog, a skin
 ## and a pool (Endless, the daily run and the tutorial). This base class is the neutral arena used
-## when a run has no profile (F6 runs, fixtures): the scene's own backdrop, the legacy floor
-## rectangle, the Reaper every four waves.
+## when a run has no profile (F6 runs, fixtures): the game's one arena, SIMULATION (owner 2026-10-05,
+## ADR-0027), and the Reaper every four waves.
 
 ## Boss cadence of the neutral arena.
 const DEFAULT_BOSS_WAVE_INTERVAL: int = 4
+## The game's one arena (SIMULATION), which the neutral arena plays on too. Loaded when asked, not
+## preloaded: its script names GameWorld, which names this class.
+const DEFAULT_ARENA_PATH: String = "res://scenes/arenas/sci_fi_simulation_v1.tscn"
 
 
-## Full-bleed backdrop, or null to keep the scene's own.
-func get_background() -> Texture2D:
-	return null
-
-
-## A layered or 3D arena's scene (an `ArenaVisual`, ADR-0021, ADR-0023), shown instead of the
-## background and giving the floor; null (a painted backdrop) by default.
+## The arena's scene (an `ArenaVisual`), which a run shows and takes its floor from.
 func get_visual_scene() -> PackedScene:
-	return null
-
-
-## Animated scenery over the background (`ArenaAmbience`); null (none) by default.
-func get_scenery() -> ArenaSceneryData:
-	return null
-
-
-## Playable floor in background UV space; empty means the legacy rectangle.
-func get_floor_polygon() -> PackedVector2Array:
-	return PackedVector2Array()
-
-
-## Rectangle formations, hazards and the playfield's scale are laid out over, in background UV
-## space. Empty means `GameWorld.ARENA_FLOOR_UV`, measured on the arenas' shared 941x1672 canvas.
-func get_floor_rect_uv() -> Rect2:
-	return Rect2()
+	return load(DEFAULT_ARENA_PATH) as PackedScene
 
 
 ## Waves between boss encounters; the boss arrives on every multiple.

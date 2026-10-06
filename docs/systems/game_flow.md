@@ -57,7 +57,7 @@ HomeScreen (Control)
 | `HomeScreen.setup(snapshot, equipped_form)` | method | Best, Rift Points, equipped form, Reduced Motion, `ads_removed` and the Endless best wave for PLAY's caption. |
 | `HomeScreen.get_orbits()` / `is_animating()` / `get_play_caption()` / `get_hero_motion_rect()` | methods | Test helpers: orbit halves, motion state, caption text, bounds of every hero animation. |
 | `ShopScreen.setup(rift_points, ads_removed, store_available)` / `show_feedback()` / `can_buy()` | methods | See [monetisation.md](monetisation.md). |
-| `GameWorld.home_requested` / `restart_requested` / `run_ended(summary)` | signals | Leave, restart or finish a run. |
+| `GameWorld.home_requested` / `run_ended(summary)` | signals | Leave or finish a run (the pause menu's restart was removed 2026-10-05). |
 | `ResultsScreen.restart/home/wisps_requested` | signals | Post-run navigation; `restart_requested` replays the same profile; `wisps_requested` opens Shop CHARACTERS, whose Back re-shows these Results (its button is hidden today). |
 | `ResultsScreen.setup(summary)` / `get_displayed_rp_total()` / `get_primary_text()` | methods | Run values plus `rp_collected`, `rp_performance`, `rp_rewards`, `rp_earned`, `rift_points_total`, and Main's `mode`, `arena_name`, `best_score`, `depth_reward`; test helpers. |
 | `handle_back() -> bool` | optional method | A screen consumes back first (GameWorld, SettingsScreen, TutorialScreen → skip confirm). |
@@ -73,6 +73,10 @@ SaveManager (snapshot, runs, forms, challenges), Audio via `SoundFx` (music stat
 ChallengeTracker, FormCatalog. The run: [core_run.md](core_run.md), [game_feel.md](game_feel.md).
 
 ## Rules & behaviour
+
+Main persists Items Shop pack/selection signals, Ward drops and double-tap consumption.
+`GameWorld.run_started` spends and clears the selected boost after the held run and arena intro;
+prewarm does not consume stock. API and verification: [pickup_items.md](pickup_items.md).
 - Every screen is styled through the project Theme's type variations ([ui_design_system.md](ui_design_system.md)). Home uses `home_background.png`; Shop, Daily Run, Trials and Results use their dedicated nearest-filtered pixel-art images in `assets/art/environment/menu_screens/` ([source pack](../../concept_art/menu_backgrounds_v1/README.md)). Other menus retain `menu_background.png`.
 - **Home layout** (owner decision 2026-09-13, GDD §11; the bottom navigation bar is gone): top bar
   (Rift Points, best, Statistics, Settings) and logo; the equipped character above the central stone dais — **tap it for
@@ -89,7 +93,7 @@ ChallengeTracker, FormCatalog. The run: [core_run.md](core_run.md), [game_feel.m
   `TutorialCatalog.arena_skin_id` skin with the equipped form. The Tutorial never glides in.
 - **Run routes**: Main builds every `RunProfile`. PLAY → `endless` profile (always open; equipped
   arena, every enemy mix and boss from `EndlessCatalog`). Real runs never teach. DAILY → `daily`
-  profile (daily pool, arena of the day). Restart (pause menu or Results) replays the same profile.
+  profile (daily pool, arena of the day). Results' restart replays the same profile (the pause menu has none since 2026-10-05, owner).
   (History: story runs — Rift Map ENTER, Results' NEXT LEVEL / ENTER <RIFT> / RETRY — were removed with
   the Rifts on 2026-09-25.)
 - **Buttons → signal:** TRIALS → `trials_requested`, DAILY → `daily_requested`, SHOP →
@@ -139,7 +143,7 @@ ChallengeTracker, FormCatalog. The run: [core_run.md](core_run.md), [game_feel.m
   reveals that same run. Nothing is instantiated after the bar. Restart / Results follow-ups / Daily
   build under the veil without a loading screen.
 - **Loading screen** (boot and run share it, redesign 2026-09-16): a random portrait pixel-art illustration from
-  `LoadingScreen.BACKGROUND_POOL` (five playable characters except Morrow, Grimgrin and the supplied new
+  `LoadingScreen.BACKGROUND_POOL` (the five playable characters, Grimgrin and the supplied new
   lantern boss; [source pack](../../concept_art/loading_screens_v2/README.md)). Runtime files are generated
   in `assets/art/environment/loading_screens/`, nearest-filtered, shown at once if cached, otherwise
   loaded threaded and faded in over void charcoal, then cover-scaled with the existing slow Ken Burns
@@ -154,7 +158,9 @@ ChallengeTracker, FormCatalog. The run: [core_run.md](core_run.md), [game_feel.m
   (logcat on device) — use it to find navigation hitches.
 - Back (Android) / Escape: the screen's `handle_back()` first, otherwise Home; on Home, mobile quits.
 - Returning Home clears the tree pause state and calms the music.
-- Run end records the run and challenge rewards in SaveManager before Results appears.
+- Run end records the run and challenge rewards in SaveManager before Results appears. Then, on every
+  second finished run, an interstitial ad shows before Results (Android, ADR-0029); Results offers
+  WATCH AD • DOUBLE RP when a rewarded ad is ready and the run earned Rift Points.
 - **Results outcome:** banner `WAVE w`, `ENDLESS  •  <ARENA>` / `DAILY RUN  •  <ARENA>`, best = Endless
   best / today's daily best, a `DEPTH REWARD` banner when one paid, primary **PLAY AGAIN**, secondary
   RETURN HOME. (History: a Rift level showed `LEVEL n CLEARED` / `FAILED`, unlock banners and
@@ -210,6 +216,9 @@ ChallengeTracker, FormCatalog. The run: [core_run.md](core_run.md), [game_feel.m
 
 | Date | Change |
 |---|---|
+| 2026-10-05 | Ads (owner, ADR-0029): Main counts finished runs and shows the interstitial before Results when due; Results' double-RP button and Main's reward |
+| 2026-10-05 | Home's SHOP, DAILY and TRIALS tiles show new icons by Codex (`assets/art/ui/home_icons/`, owner, GDD §14 #80); Main no longer listens for a pause-menu restart |
+| 2026-10-05 | Main connects pack purchases, saved Ward drops/double taps and starting boosts consumed on actual run start |
 | 2026-10-05 | Owner-requested Shop, Daily Run, Trials and death/results pixel-art backgrounds connected to the existing scenes, with nearest filtering and aspect-preserving cover |
 | 2026-10-04 | Owner-requested loading illustrations implemented: seven character/boss pixel-art scenes in the existing random boot/PLAY pool, nearest filtering; source generation and runtime copies through the loading pack builder |
 | 2026-09-27 | Every character stands centred on the dais (owner, GDD §14 #57); Rook's `menu_offset` puts his feet on its centre |

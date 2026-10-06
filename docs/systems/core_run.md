@@ -1,11 +1,11 @@
 # System: Core run
 
-> **Status:** ✅ done · **Last updated:** 2026-10-04 · **GDD section:** §3, §5–7, §11
+> **Status:** ✅ done · **Last updated:** 2026-10-05 · **GDD section:** §3, §5–7, §11
 
 ## Purpose
 
 Coordinate the live full-bleed arena, Wisp, wave requests, enemies, hazards, pickups, combat,
-mutations, run-local statistics and HUD without making child systems depend on each other. It also
+temporary item effects, run-local statistics and HUD without making child systems depend on each other. It also
 hosts the Tutorial screen's scripted arena ([tutorial.md](tutorial.md)); real runs never teach.
 
 ## Files
@@ -13,13 +13,13 @@ hosts the Tutorial screen's scripted arena ([tutorial.md](tutorial.md)); real ru
 | Path | Role |
 |---|---|
 | `res://scenes/gameplay/game_world.tscn` | Arena, layers, HUD and pause overlay |
-| `res://scenes/gameplay/game_world.gd` | Spawn/combat routing, statistics, upgrade effects and feedback |
+| `res://scenes/gameplay/game_world.gd` | Spawn/combat routing, statistics, pickup effects and feedback |
 
 ## Scene / node structure
 
 ```text
 GameWorld (Control)  game_world.gd
-├── %FullBleedBackground (TextureRect)
+├── ArenaVisual (the arena scene, SIMULATION, added first when a run is configured)
 ├── %EnemyLayer (Node2D)
 ├── %HazardLayer (Node2D)
 ├── %PickupLayer (Node2D)
@@ -27,12 +27,10 @@ GameWorld (Control)  game_world.gd
 │   └── WispPlayer
 ├── %EffectsLayer (Node2D)
 ├── %WaveDirector (Node)
-├── %RunProgression (Node)
+├── %RunItems (Node)
 └── HUD (CanvasLayer)
-    ├── SafeHud: %PauseButton + %UpgradeButton top-left · %StatsColumn (Rift Points line, icon on the
-    │   right, then the unframed %ScoreLabel) top-right · %XPBar, %RunLevelLabel, %RushRow, %BossHud
-    │   centred at the top; no wave line (owner, 2026-09-24; `_layout_safe_hud()`)
-    ├── UpgradeTray (bottom card tray, [mutations.md](mutations.md))
+    ├── SafeHud: pause, RP/score, Ward stock, timed item icons, RUSH and boss HUD
+    ├── %RunItemHud (Control): stock/protection hint and remaining seconds
     └── PauseOverlay
 ```
 
@@ -41,9 +39,9 @@ GameWorld (Control)  game_world.gd
 | Member | Kind | Description |
 |---|---|---|
 | `home_requested` | signal | The paused run requests Home navigation. |
-| `run_ended(summary)` | signal | The death dissolve finished: score, kills, best combo, wave, multi-reaps, rapid ricochets, bosses, `rp_collected`, `rp_performance`, `run_level`, `daily_date`, `is_daily`, `mode`, `skin_id`, `cycle` and `rush_count` (RUSH activations; no save field). |
-| `dash_launched(from_redirect)` / `dash_resolved(kills, ended_by)` / `enemy_defeated(world_position, dash_kill_index)` / `player_damaged(current_health)` / `upgrade_chosen(mutation_id)` / `rush_started` / `boss_defeated` | signals | Run events for observers (the tutorial director). `ended_by`: `&"wall"`, `&"redirect"`, `&"obstacle"`. `upgrade_chosen` fires on a tray card pick. |
-| `run_seed` | export | Deterministic wave and upgrade seed; zero derives a clock seed. |
+| `run_ended(summary)` | signal | The death dissolve finished: score, kills, best combo, wave, multi-reaps, rapid ricochets, bosses, `rp_collected`, `rp_performance`, `daily_date`, `is_daily`, `mode`, `skin_id`, `cycle` and `rush_count` (RUSH activations; no save field). |
+| `dash_launched(from_redirect)` / `dash_resolved(kills, ended_by)` / `enemy_defeated(world_position, dash_kill_index)` / `player_damaged(current_health)` / `rush_started` / `boss_defeated` | signals | Run events for observers (the tutorial director). `ended_by`: `&"wall"`, `&"redirect"`, `&"obstacle"`. |
+| `run_seed` | export | Deterministic wave and drop seed; zero derives a clock seed. |
 | `cancel_player_aim()` | method | Drops the Wisp's gesture and aim preview (host modals). GameWorld also owns the aim preview: `AimGuide`, enemy highlights and the aim-assist counter ([player_dash.md](player_dash.md)). |
 | `get_score()` | method | Current run score for results/tests. |
 | `get_combo()` | method | Current combo before timeout. |
@@ -59,9 +57,8 @@ GameWorld (Control)  game_world.gd
 | `hold_start()` / `is_start_held()` / `warm_up_render()` / `release_start()` | methods | Main's cover and run prewarm (2026-09-16): a held run builds and draws but its start (`_begin_run`: waves, instructions, scripted hand-off) and focus-loss pause wait for `release_start()`; `warm_up_render()` draws one of every enemy kind + a VFX sprite while held (freed on release). Main keeps a held run `PROCESS_MODE_DISABLED`. |
 | `get_run_mode()` | method | Profile mode. |
 | `get_multi_kill_dashes()` | method | Dashes that defeated at least two enemies. |
-| `add_experience(amount)` | method | Test/debug route into normal run progression. |
-| `get_mutation_level(id)` | method | Current level of one run-only mutation. |
-| Scripted-run hooks | methods | For `MODE_TUTORIAL` only: `is_scripted`, `arena_to_world(uv, margin)`, `spawn_scripted_enemy/hazard(kind, uv)`, `clear_scripted_arena`, `start_scripted_boss(health)`, `is_boss_core_exposed`, `find_nearest_target`, `set_experience_enabled`, `set_experience_share(share)`, `set_rush_enabled`, `set_rush_meter`, `refill_health`, `hit_player_at(uv)`, `place_player(uv)`, `set_player_input_enabled`, `is_player_ready/dashing`, `get_player_position`, `demo_aim/demo_swipe(drag)`, `spawn_scripted_shard`, `sweep_shards`, `get_hud_rect(&"xp"/&"rush")`, `get_safe_margins`, `show_callout`; upgrade tray: `request_upgrade_calm_moment`, `has_upgrade_calm_request`, `get_banked_upgrades`, `is_upgrade_tray_open/settled`, `get_upgrade_card_rect`, `choose_upgrade_card`, `set_upgrade_tray_lift` ([mutations.md](mutations.md)). Reuses `debug_spawn_enemy`, `debug_quiet_arena`, `debug_live_enemy_count`. |
+| Scripted-run hooks | methods | Tutorial placement/spawns, demo aim/swipes, health refill, RUSH control, HUD focus; `spawn_scripted_item`, local Ward stock and `shield_activated` replace XP/cards ([tutorial.md](tutorial.md)). |
+| Pickup API | methods/signals | `activate_item`, `get_run_items`, Ward stock/activation, `item_collected`, `shield_requested`, `shield_activated`, `run_started`; [pickup_items.md](pickup_items.md). |
 
 ## Data & tuning
 
@@ -72,7 +69,7 @@ windows and presentation constants that coordinate multiple systems.
 ## Dependencies
 
 [player_dash.md](player_dash.md), [player_health.md](player_health.md), [enemies.md](enemies.md),
-[wave_director.md](wave_director.md), [hazards.md](hazards.md), [mutations.md](mutations.md),
+[wave_director.md](wave_director.md), [hazards.md](hazards.md), [pickup_items.md](pickup_items.md),
 [rush_mode.md](rush_mode.md) and production world/UI art; [tutorial.md](tutorial.md) drives the scripted mode. It has no autoload.
 
 ## Rules & behaviour
@@ -81,9 +78,9 @@ windows and presentation constants that coordinate multiple systems.
   launch burst (`DASH_TRAIL_SHORT`, `burst_tint`) and the long impact trail (`DASH_TRAIL_LONG`,
   `trail_tint`). SOUL (`uses_form_tint`) keeps the form tint. Timing, collision, sound and haptics
   never read it.
-- The playfield is not the whole screen: `GameWorld._compute_arena_rect()` maps `ARENA_FLOOR_UV`
-  (the painted stone floor) through the backdrop's cover-scale into screen space, so the Wisp always
-  rests on stone, below the HUD ([ADR-0006](../decisions/0006-inset-playfield-and-larger-sprites.md)).
+- The playfield is the arena's floor: `GameWorld._compute_arena_rect()` gives the arena scene the
+  bottom safe margin, calls its `fit()` and uses the floor it draws (SIMULATION's screen, ADR-0027);
+  the rect's corners are the walls. With no arena scene the rect is the whole view.
   Everything else — formations, spawn distances, hazard placement, the safest-edge search — is
   arena-relative and follows automatically.
 - World art covers the viewport; only HUD uses safe-area padding.
@@ -96,10 +93,9 @@ windows and presentation constants that coordinate multiple systems.
 - Combo increases on kills, times out after 2.2 s and survives wall impact; empty dashes shorten it.
   RUSH freezes both the timeout and the empty-dash decay.
 - **RUSH meter** ([rush_mode.md](rush_mode.md), GDD §5.6): `_on_enemy_killed` adds `per_kill` (+
-  `per_extra_dash_kill` after a dash's first kill) and sends a soul orb to `%RushBar` (under SOUL
-  LEVEL; hidden and frozen while `set_rush_enabled(false)` — tutorial lessons other than RUSH); boss
-  health loss adds `per_boss_hit`. A full meter starts RUSH in free play: ×1.3 dash speed, ×2 score inside `_apply_velocity_score_bonus` (the score choke
-  point, after Void Velocity), no damage, peak music, 6 game seconds.
+  `per_extra_dash_kill` after a dash's first kill) and sends a soul orb to `%RushBar` (below the active item indicators; hidden and frozen while `set_rush_enabled(false)` — tutorial lessons other than RUSH); boss
+  health loss adds `per_boss_hit`. A full meter starts RUSH in free play: ×1.3 dash speed, ×2 score inside `_apply_item_score_bonus` (the score choke
+  point, multiplying Fortune Star and RUSH), no damage, peak music, 6 game seconds.
 - **Auto-collect sweep:** `_sweep_floor_shards()` flies every floor shard to the Wisp
   (`SoulShardPickup.sweep_to`) on wave start, boss encounter start, boss defeat and the fatal hit;
   `_emit_run_end()` collects anything left before building the summary. Awards still pass only
@@ -109,17 +105,9 @@ windows and presentation constants that coordinate multiple systems.
   one RP per three kills in a multi-reap, and the boss `rp_reward` (doubled in Reaper's Court). The
   HUD shows it as `12 RP`. At run end the summary carries `rp_collected` and `rp_performance`
   (`score / score_per_rift_point`, integer division); SaveManager adds both once.
-- **No permanent power** (ADR-0013): a run starts at the no-bonus baseline — 1 Soul Fragment, base
-  invulnerability, no starting mutation, every blade, speed, XP, pickup and attraction multiplier 1.0,
-  combo grace `COMBO_TIMEOUT`. Run-only power is the six mutations (the Soul Vessel and Reaper's Gift
-  were removed 2026-09-24).
-- **Upgrades never pause** (owner decision 2026-09-15, [mutations.md](mutations.md)): level-ups bank
-  silently; the bottom `UpgradeTray` slides up only at a calm moment —
-  a wave start, a boss beaten (after the victory beat) or a field clear — when the Wisp rests with no
-  combo, boss or RUSH, and the world runs at ×0.3 while it is up. A tap picks (next banked set slides
-  in), a dash dismisses, 6 real seconds time out; dismissed levels stay banked for the next calm moment
-  and are lost at run end. A pending boss waits for an open tray; boss start closes it. Selected
-  mutation effects remain run-local.
+- **Pickup powers:** seven regular-enemy drops replace XP/cards. Effects are run-local; stock is
+  saved by Main. A selected boost is consumed on `run_started`, after hold/intro. Definitions,
+  provisional tuning, refresh/expiry and double-tap protection: [pickup_items.md](pickup_items.md).
 - Contact resets combo; the death-dissolve signal freezes the run and emits its summary once.
 - **Only death ends a run.** (History: a story Rift level ended in victory on its final boss, with a
   level-clear bonus; removed with the Rifts on 2026-09-25.)
@@ -131,21 +119,21 @@ windows and presentation constants that coordinate multiple systems.
 - **Tutorial mode** (`RunProfile.MODE_TUTORIAL`, owner decision 2026-09-15): `_begin_run` starts no
   waves, hides the pause button and instruction; no boss cadence, run end or recording (nobody
   listens to `run_ended`); focus loss never pauses and back/Escape go to the host screen; a boss
-  defeat reads `TUTORIAL • BOSS DEFEATED`. XP and RUSH are switched per lesson through the hooks.
+  defeat reads `TUTORIAL • BOSS DEFEATED`. Item drops and RUSH are controlled per lesson through the hooks.
   The old in-run lesson (`TutorialStep`, `TutorialOverlay`, `tutorial_enabled`) is gone.
-- **Arena opening shot** (owner 2026-10-01, GDD §14 #69, ADR-0023): when the arena scene
-  `has_intro()` (the 3D ZOOM ARENA), `_begin_run` hides the Wisp and the HUD, turns steering off and
-  plays it; a tap skips it; on `intro_finished` the Wisp and the HUD fade in (0.35 s) and the waves
-  start. The arena rect is the zoomed-in floor from the start, so nothing is laid out twice. A run
-  Main builds from its restart (Results' PLAY AGAIN, the pause menu's restart) has
-  `play_arena_intro` off: the arena starts zoomed in and the waves start at once (owner, #70).
-- **Board HUD** (owner 2026-10-02, GDD §14 #71–#72, ADR-0024): when the arena scene `has_board_hud()`
-  (BOARD 01), `_apply_board_hud` moves the pause and UPGRADE buttons, the stats column, the XP bar,
-  the level label, the RUSH row and the boss HUD under a hidden holder (they keep being updated) and
-  `_update_board_hud` feeds their values to the board every frame; the board's pause emits
-  `hud_pause_pressed`. While upgrades are ready an `UpgradeGlow` lights the character, and `_input`
-  opens the cards on a tap that starts on him (within 2.4 × his radius, under the minimum swipe
-  distance and 450 ms).
+- **Revive offer** (owner 2026-10-05, ADR-0029): when the Wisp's death is reported in a real run and
+  Monetisation can offer the `revive` placement, `_on_player_died` freezes the run under
+  `ReviveOverlay` (CONTINUE? WATCH AD / NO THANKS; back = NO THANKS) instead of ending it. An earned
+  reward calls `WispPlayer.revive(REVIVE_INVULNERABLE_SECONDS)` (2 s) and the run goes on; otherwise
+  `_finish_death` ends it as before. The focus-loss pause skips while the tree is paused or the run
+  is over, so an ad never opens the pause menu behind it.
+- **Board HUD:** SIMULATION, the one arena, is a board, so every run takes this path.
+  `_apply_board_hud` hides the ordinary pause/stats/RUSH/boss widgets; the board
+  renders those values plus Ward stock and protection through `_update_board_hud`, which also tells
+  it whether to show its pause button (`pause`: hidden in the Tutorial). Its pause emits
+  `hud_pause_pressed`. `get_hud_rect(element)` asks the board first (`ArenaVisual.get_hud_rect`:
+  `rush`, `items`), so the Tutorial's callouts point at the board's own meters. Timed pickup icons remain visible below the top hardware; the Ward hint sits
+  in the bottom frame. Double tap uses the same Wisp gesture on every arena.
 - **Spawn effects drawn by the arena** (owner 2026-10-04, GDD §14 #73, ADR-0025): `_spawn_enemy`
   hands every new enemy to `ArenaVisual.show_enemy_arrival(enemy, enemy.get_arrival_progress)`; when
   the arena draws it (SIMULATION) the enemy's amber ring is turned off
@@ -154,17 +142,15 @@ windows and presentation constants that coordinate multiple systems.
   `clear_spawn_effects()`. Before `fit()`, `_compute_arena_rect` gives the arena the bottom safe
   margin (`set_safe_bottom`).
 - Focus changes enemy and hazard simulation only, never input or UI speed.
-- Pause consumes input, freezes gameplay and always restores normal tree state on navigation; it
-  hides an open upgrade tray and drops its slow motion, and Resume brings both back. Back/Escape
-  toggle pause even while the tray is up.
+- Pause consumes input, freezes gameplay and always restores normal tree state on navigation; Back/Escape
+  toggle pause. Item timers and physical drops freeze with the rest of the run.
 - Mobile focus loss opens Pause; desktop focus loss stays live so automated visual capture works.
 
 ## How to test
 
-- Run main (tutorial completed), continue through escalating waves; bank a level mid-combo and pick
-  it from the tray at the next wave start.
-- Run the wave, enemy, hazard, progression, mutation and gameplay scripts listed in README.
-- Confirm background reaches all edges at every GDD §12 QA size.
+- Run main (tutorial completed), collect drops, double tap a stocked Ward and play through waves.
+- Run the wave, enemy, hazard, pickup and gameplay scripts listed in README.
+- Confirm the arena reaches all edges at every GDD §12 QA size.
 - Pause/resume, then Pause/Home; no swipe leaks through UI.
 
 ## Known issues / TODO
@@ -176,6 +162,8 @@ windows and presentation constants that coordinate multiple systems.
 
 | Date | Change |
 |---|---|
+| 2026-10-05 | One arena (owner, GDD §14 #78, ADR-0027): the painted background (`FullBleedBackground`), the ambience, the arena opening shot and `play_arena_intro` removed; the arena rect is the arena's `fit()`; the board's pause follows GameWorld's; `get_hud_rect` asks the board first |
+| 2026-10-05 | Seven item drops replace XP/cards; Ward stock/protection, timer HUD, Main persistence hooks and board counters |
 | 2026-10-04 | Spawn effects drawn by the arena (ADR-0025): `_spawn_enemy`, `_start_boss_encounter` and the death hand enemies and bosses to the arena; the arena gets the bottom safe margin |
 | 2026-09-25 | Story Rifts removed (owner): no `story` mode, level victory or clear bonus; the summary loses `level`, `victory`, `level_cleared`, `first_clear`, `rp_clear_bonus`, `level_clears`, `rift_levels_cleared` and `rift`; `get_rift_level()` / `is_level_cleared()` and `RiftArenaRules` removed; `RunProfile.rosters` (`EndlessRoster`) replaces `roster_rifts` |
 | 2026-09-15 | Upgrades bank and offer a slow-motion bottom `UpgradeTray` at calm moments; no pause; tray hooks for the tutorial |

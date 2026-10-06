@@ -4,6 +4,260 @@
 > [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) §7.6. Keep entries short — details belong in the docs
 > they changed.
 
+## 2026-10-05 — Google Play Billing and the cloud save on the player's Google account
+- **Who:** Claude Code (Opus 5.5)
+- **Did:** Owner: purchases through Google Play and progress kept with the player's Google account
+  (platform cloud save, Android first; both plugins approved; no Play Console app yet; the newest
+  save wins; automatic sign-in plus Settings). Installed `godot-google-play-billing.zip` 3.3.0 (43 KB,
+  enabled) and Play Games Services `addons.zip` v3.4.0 (204 KB, disabled until its project ID exists).
+  `MonetisationService` gained a separate `StoreProvider` seam and `PlayBillingStore`: async
+  purchases (`purchased` / `pending` / `cancelled` / `failed`), RP saved then consumed, Remove Ads
+  acknowledged, everything the account owns delivered at start (restore after reinstall, crash
+  recovery), late pending payments delivered, Google's prices in the Shop. New `CloudSave` autoload
+  with the Play Games provider (the plugin's singleton called directly): silent sign-in, newest real
+  change wins (consent and play time do not count), a never-synced phone takes the cloud save, upload
+  5 s after a change and on pause; `SaveManager.export_cloud_save` / `import_cloud_save`; the Settings
+  CLOUD SAVE card; Home rebuilt after a restore. The About privacy text corrected (it still said no
+  ads, no accounts, data only on the device). The pack-card comment left above the wrong function by
+  the scroll fix moved back.
+- **Files/systems:** `addons/GodotGooglePlayBilling/`, `addons/GodotPlayGameServices/`, `project.godot`,
+  `scripts/autoload/{monetisation_service,cloud_save_service,save_manager}.gd`,
+  `scripts/monetisation/play_billing_store.gd`, `scripts/cloud/play_games_cloud_provider.gd`,
+  `scenes/main/main.gd`, `scenes/screens/{shop_screen,settings_screen}.gd`,
+  `tools/godot/{test_monetisation,test_cloud_save}.gd`; docs: ADR-0030, GDD §12 and §14 #84, cloud_save
+  (new), monetisation, shop, settings, save_manager, PROJECT_CONTEXT, ROADMAP, the Play Console guide.
+- **Verified:** `tools/validate.sh`: `VALIDATE: OK`. `test_monetisation` (store purchases, pending, a
+  late payment, crash recovery, restore at start) and the new `test_cloud_save` pass. A scratch run
+  through Main: the store's prices on the packs and Remove Ads, a purchase (+1,200 RP), a pending one
+  then completing (+500 RP), the Settings card going OFF → ON (0 failures). The plugin's dictionary
+  keys were read from its own classes (`one_time_purchase_offer_details_list`, `product_id`). The
+  Android build includes Google's billing library. Installed on RFCX2035YHT: `[Main] boot ok`,
+  `[Store] Google Play Billing connected | 0 of 5 products known` (no Play Console app yet), no errors.
+- **Follow-ups:** the owner's Play Console setup (guide); then the Play Games project ID, enabling
+  that plugin and testing real purchases and sign-in on the phone. iOS later.
+
+## 2026-10-05 — Unused bone-rig code removed
+- **Who:** Claude Code (Opus 5.5)
+- **Did:** Owner: remove the rig code Morrow left unused. Removed `scenes/player/visuals/chain_spring.gd`
+  (`ChainSpring`) and `ribbon_chain.gd` (`RibbonChain`), `tools/art/build_character_rig.py`, the
+  layered-rig intake of `tools/art/extract_playable_characters.py` (fixed-cell layer cuts, part packs,
+  ribbon spines, and the imports only they used, scipy among them), the ribbon check in
+  `test_playable_character_visual` and the skinned-mesh branch of `PlayableCharacterVisual.get_layer_bounds`.
+  Kept: `PlayableCharacterVisual` (the whole-frame characters build on it) and `CharacterAura` (Rook's).
+- **Verified:** `tools/validate.sh`: `VALIDATE: OK` (111 scripts). `extract_playable_characters.py
+  patchvile` re-packed all 25 of Patchvile's outputs byte-identical (hash compare). Tests pass:
+  `playable_character_visual`, `patchvile_visual`, `rook_visual`, `mothmere_visual`, `dash_effects`,
+  `form_catalog`, `game_flow`.
+- **Follow-ups:** the pose, ornament, puppet and frame packs in the extractor (Ilyra's intake, empty
+  since 2026-09-26) are not rig code and were left.
+
+## 2026-10-05 — Morrow removed
+- **Who:** Claude Code (Opus 5.5)
+- **Did:** Owner: remove Morrow completely. Removed, as Ilyra was: `scenes/player/visuals/morrow_visual.*`,
+  `data/forms/morrow.tres`, `data/characters/dash_effects/morrow.tres`, his 12 rig layers in
+  `assets/art/characters/playable/morrow/`, `concept_art/morrow_autosprite_v1/` and his two images in
+  `concept_art/wisp_rush_playable_characters_v1/`. The catalog lists five characters
+  (`REQUIRED_FORM_COUNT` 5); `morrow` left `VALID_FORM_IDS`, so a save that owned or equipped him
+  drops the id and equips Patchvile. Tests and fixtures that used him now use Rook or Mothmere;
+  `extract_playable_characters.py` lost his fixed cells and ribbon spines.
+- **Files/systems:** the above, `data/forms/default_catalog.tres`, `scripts/resources/form_catalog.gd`,
+  `scripts/autoload/save_manager.gd`, `scenes/screens/loading_screen.gd` (comment), `tools/godot/`
+  (`test_form_catalog`, `test_playable_character_visual`, `test_dash_effects`, `bench_character_previews`,
+  two fixture comments), `tools/art/extract_playable_characters.py`; docs: GDD §6, §9, §13, §14 #83,
+  PROJECT_CONTEXT, forms, playable_character_visuals, shop, game_flow, ASSETS, ROADMAP, ADR-0015, the rig
+  guide and AGENTS.md (no rig left), the art-tools README, a video plan and the AutoSprite workflow note.
+- **Verified:** `tools/validate.sh`: `VALIDATE: OK`. `test_form_catalog` (5 characters validated),
+  `test_playable_character_visual`, `test_dash_effects`, `test_patchvile_visual`, `test_rook_visual`,
+  `test_mothmere_visual`, `test_game_flow`, `test_pickup_shop_flow`, `test_m4_systems`,
+  `test_focus_carousel`: pass. Installed on RFCX2035YHT: `[Main] boot ok`.
+- **Follow-ups:** the shared rig code (`ChainSpring`, `RibbonChain`, the rig parts of
+  `PlayableCharacterVisual`) has no rig left to drive; `CharacterAura` is still Rook's. Not removed
+  (not asked).
+
+## 2026-10-05 — Google AdMob on test ad units: interstitials, rewarded revive and double RP
+- **Who:** Claude Code (Opus 5.5)
+- **Did:** Owner: Google ads with test keys, interstitial and rewarded. From Claude's options the owner
+  picked an interstitial after every second run (before Results), rewarded revive once per run and
+  double the run's RP, Remove Ads removes all ads, and the Poing Studios plugin with Google's consent
+  form (downloads approved). Installed `poing-godot-admob-v5.1.0.zip` (2.9 MB) as `addons/admob/` and
+  its Android ads library from `android-template-v4.7.2.zip` (359 KB) into `addons/admob/android/bin/`
+  (now tracked in git); `addons/admob/csharp/.gdignore`; the plugin enabled with Google's test App ID.
+  The Android export is a Gradle build with compressed native libraries; Godot's build template
+  installed with `--install-android-build-template`. During that first headless export the plugin
+  downloaded its iOS libraries from the same release by itself (git-ignored, kept). New
+  `AdMobProvider` (consent form, initialise, one interstitial and one rewarded ad kept loaded on
+  Google's test units); `MonetisationService` installs it on Android only, its provider contract is
+  now async, and it counts finished runs for the interstitial. GameWorld's revive offer (CONTINUE?
+  WATCH AD / NO THANKS), `WispPlayer.revive`, Results' WATCH AD • DOUBLE RP, Main's interstitial before
+  Results and the double reward.
+- **Files/systems:** `addons/admob/`, `project.godot`, `export_presets.cfg`,
+  `scripts/autoload/monetisation_service.gd`, `scripts/monetisation/admob_provider.gd`,
+  `scenes/gameplay/game_world.{gd,tscn}`, `scenes/player/wisp_player.gd`,
+  `scenes/screens/results_screen.{gd,tscn}`, `scenes/main/main.gd`, `tools/godot/test_monetisation.gd`;
+  docs: ADR-0029, ADR-0009 status, GDD §5.3, §12, §14 #11 and #82, monetisation, player_health,
+  core_run, game_flow, PROJECT_CONTEXT, ROADMAP M9, AGENTS.md §4 (Gradle build note).
+- **Verified:** `tools/validate.sh`: `VALIDATE: OK` (114 scripts). `test_monetisation` passes with the
+  interstitial cadence and Remove Ads checks added. A scratch run through Main with a stand-in
+  provider: the offer on death, watching revives and the run goes on, a second death ends it, NO
+  THANKS ends it, the interstitial shows on the second run end only, doubling adds the run's 40 RP
+  (0 failures). Full suite: 33 passed, 10 failed — the same ten stale tests. The Gradle APK
+  (138 MB; the first, with the engine library uncompressed, was 187 MB) installed on RFCX2035YHT:
+  `[Ads] consent: ads allowed`, `[Ads] AdMob initialised (test ad units)`, and a rewarded revive
+  played on the phone with `earned=true`.
+- **Follow-ups:** the owner's phone test of the interstitial and the double. Before release: the
+  owner's AdMob App ID and ad units, a privacy policy, a privacy-options entry in Settings. Claude's
+  values to confirm: the offer wording, 2 s revive protection, doubling collected + performance only,
+  counting runs per session.
+
+## 2026-10-05 — Home tiles: seam removed, icons padded
+- **Who:** Claude Code (Opus 5.5)
+- **Did:** Owner: remove the line just above the SHOP, DAILY, TRIALS and NO ADS captions, and add
+  more padding to the icons. `assets/ui/theme/tools/build_theme_textures.py` now replaces the kit's
+  seam rows (112–131 of 164: the bar and its diamond) with the plain interior for
+  `caption_tile_normal`, `caption_tile_disabled` and `caption_tile_focus` (`erase_seam`); rebuilt.
+  The three image icons on Home draw in a 72 px box (y 30–102) instead of 96 (Claude's value). The
+  NO ADS tile is text, not an icon, and is unchanged.
+- **Files/systems:** `assets/ui/theme/tools/build_theme_textures.py`,
+  `assets/ui/theme/textures/caption_tile_{normal,disabled,focus_ring}.png`,
+  `scenes/screens/home_screen.tscn`; docs: GDD §14 #81, ui_design_system, ASSETS.
+- **Verified:** the rebuild changed only the three caption-tile textures (every other theme PNG and
+  `slices.json` byte-identical, compared by hash); the three textures checked as images (no seam,
+  the top accent line kept). `tools/validate.sh`: `VALIDATE: OK`. Installed on RFCX2035YHT.
+- **Follow-ups:** the owner's phone check of the tiles.
+
+## 2026-10-05 — CHARACTERS after SHOP fixed; no pause-menu restart; new Home icons
+- **Who:** Claude Code (Opus 5.5), with Codex as a tool (the icons)
+- **Did:**
+  - Owner: on the Shop, switching from SHOP to CHARACTERS left only the glow. Measured: the hidden
+    card's AnimationTree is turned off, and turned back on its state machine restarted at Start,
+    which plays nothing and left `MotionRoot` at scale 0.00001 and black.
+    `PlayableCharacterVisual._set_tree_active` now resumes the current state where it was.
+  - Owner: RESTART RUN removed from the pause menu (button, `GameWorld.restart_requested`, the
+    confirm's restart branch, Main's hookup); Results' PLAY AGAIN still replays a run.
+    `test_m4_systems` now checks that the button is gone and that Home still confirms.
+  - Owner: new icons for Home's SHOP, DAILY and TRIALS tiles. Codex generated the three sources and
+    the builder (`concept_art/home_icons_v1/`); Claude ran `build_icons.py` (`HOME ICONS: OK`) and
+    pointed the tiles at `assets/art/ui/home_icons/` with nearest filtering. Claude's choices: each
+    keeps its old meaning (bag, sun, star); only Home's tiles changed.
+- **Files/systems:** `scenes/player/visuals/playable_character_visual.gd`,
+  `scenes/gameplay/game_world.{gd,tscn}`, `scenes/main/main.gd`, `scenes/screens/home_screen.tscn`,
+  `tools/godot/test_m4_systems.gd`, `concept_art/home_icons_v1/`, `assets/art/ui/home_icons/`; docs:
+  GDD §14 #80, game_feel, game_flow, playable_character_visuals, ui_design_system, ASSETS.
+- **Verified:** `tools/validate.sh`: `VALIDATE: OK`. A scratch run of the Shop: after three
+  SHOP/CHARACTERS switches the live cards are at scale 1 in `idle_hover`, and a render shows the
+  character. `test_m4_systems`, `test_game_flow`, `test_gameplay_slice`, `test_patchvile_visual`,
+  `test_rook_visual`, `test_mothmere_visual`, `test_pickup_shop_flow`: pass.
+  `test_playable_character_visual`: 4/4 passes with the final fix; two earlier runs failed on a
+  one-frame jump (Scarlet's scale, then Patchvile's body) while Codex was running beside them, and a
+  logged run showed the tree never resumes during those motion checks. The APK was installed on
+  RFCX2035YHT and launched: `[Main] boot ok`.
+- **Follow-ups:** the owner's phone test of the Shop's CHARACTERS page, the pause menu and the icons.
+  `07_restart.png` is still used by the Daily screen and Results.
+
+## 2026-10-05 — One arena, SIMULATION; the Shop's bottom navigation and Rift Points packs
+- **Who:** Claude Code (Opus 5.5), with Codex as a tool (the two loading refinements in the entry below, the RP pack icons)
+- **Did:**
+  - Loading fix: ran `concept_art/loading_screens_v2/build_backgrounds.py` on Codex's two refinements
+    (entry below); only `loading_grimgrin.png` and `loading_new_boss.png` changed, in the pack and in
+    `assets/art/environment/loading_screens/`.
+  - One arena (owner, GDD §14 #78, ADR-0027): every arena but SIMULATION removed with its skin data,
+    scenes, scripts, shaders, runtime art and the arena-only tools; GameWorld loses the painted
+    background, the ambience and the zoom intro; `ArenaSkinData` keeps id, name, description and
+    scene; the Tutorial and neutral rules play on SIMULATION; removed ids fall back to it in the save.
+    The board hides its pause button when GameWorld's is hidden, and `ArenaVisual.get_hud_rect` lets
+    the Tutorial's callouts point at the board's meters.
+  - The Shop (owner, ADR-0028): BACK at the top, a bottom navigation, CHARACTERS and SHOP; SHOP is one
+    scrolling list of NO ADS, ITEMS (now a section) and RIFT POINTS: four packs
+    (`data/shop/rift_points_packs.tres`), bought through `MonetisationService.purchase_rift_points`,
+    disabled until billing. Codex made the four pack icons; Claude ran its `build_icons.py`. The
+    Remove Ads line is now "No ads, ever." (it said everything else is earned by playing).
+  - Then, owner: the bottom navigation bigger (tabs 160 px with size-48 text; were 104 and 33); the
+    SHOP page scrolls by swiping on phones and draws no scroll bar. Its cards and buttons stopped the
+    touch; now they pass it on (`_pass_touches_to_scroll`), as Settings does.
+  - Tests and tools brought to the change: `test_endless_catalog` rewritten for the one arena;
+    `test_dash_geometry` measures SIMULATION's floor; `test_movement` waits 4 physics frames before
+    its redirect (on the first frame the Wisp is still on the wall line); `test_game_flow` and
+    `test_gameplay_slice` press the board's pause; `test_pickup_shop_flow`, `qa_capture.gd`,
+    `qa_matrix.sh` (`shop_wisps`, `shop_deals`), `render_devlog_tour.gd`, `render_pickup_showcase.gd`
+    and `render_character_select_showcase.gd` updated; `make_board.py`'s docstring.
+- **Files/systems:** `scenes/arenas/`, `scenes/gameplay/{game_world,arena_rules,endless_arena_rules}.*`,
+  `scenes/main/main.gd`, `scenes/screens/{shop_screen.*,run_item_shop_page.gd}`,
+  `scripts/autoload/{save_manager,monetisation_service}.gd`, `scripts/resources/{arena_skin_data,
+  endless_catalog,economy_tuning,tutorial_catalog,rift_points_pack,rift_points_pack_catalog}.gd`,
+  `data/endless/`, `data/shop/`, `data/tutorial/default_tutorial.tres`, `assets/art/ui/rp_packs/`;
+  docs: GDD (§1, §3, §6, §9, §11–§13, §14 #78), ADR-0027, ADR-0028 and the status lines of
+  ADR-0009/0012/0013/0014/0017/0020–0025, PROJECT_CONTEXT, ASSETS, ROADMAP (Milestone 16), the
+  endless_mode, shop, monetisation, core_run, tutorial and pickup_items pages, the arena guide's
+  note, `tools/art/README.md`, `tools/video/README.md`, the devlog video brief and recipe.
+- **Verified:** `tools/validate.sh`: `VALIDATE: OK`. `tools/run_tests.sh`: 33 passed, 10 failed — the
+  same ten stale failures as before the change (removed enemies, the Forms screen, dev unlock, the
+  old save API; `save_manager` times out). Scratch checks through Main: Home's SHOP opens CHARACTERS
+  and NO ADS opens SHOP; with no store every real-money button reads COMING SOON, disabled; with a
+  stand-in store `rp_pack_1200` adds 1,200 RP and shows `+1,200 RP` (0 failures). Touch scroll on
+  1080 × 2340 with simulated touch input: a swipe from the Remove Ads card or a pack button scrolls
+  the page and buys nothing, a tap still presses, no bar drawn, no sideways scroll (0 failures);
+  with the old mouse filters the same swipe scrolled 0 px. `render_devlog_tour.gd`,
+  `render_character_select_showcase.gd`, `render_pickup_showcase.gd` and `qa_capture.gd` parse. The
+  APK was built, installed on RFCX2035YHT and launched: `[Main] boot ok`, no errors in the log.
+- **Follow-ups:** the owner's phone test of SIMULATION, the Shop, its bottom navigation and its
+  scrolling. Billing for Remove Ads and the packs (ADR-0012). Asked afterwards, the owner said yes to both: GDD §12
+  now has tablets as targets, in portrait (§14 #79), and AGENTS.md §1 5d points arena work to
+  SIMULATION's board instead of the painted-arena guide. The ten stale tests are unchanged.
+
+## 2026-10-05 — Tablet loading refinements generated; rebuild blocked
+- **Who:** Codex
+- **Did:** Generated lower compositions for Grimgrin and the lantern boss from their existing loading artwork, for the owner's 1200×1920 and 1440×1920 portrait tablets and y=1140 face-top boundary. Preserved the two unchanged generated outputs as `raw/loading_grimgrin_source_v2.png` and `raw/loading_new_boss_source_v3.png`, their exact prompts and generation records. The builder now selects the last recorded refinement, preserving the boss's previous v2 source and prompt.
+- **Files/systems:** `concept_art/loading_screens_v2/` source pack and asset registry; no runtime PNG, game code, scene or data changes yet.
+- **Verified:** Both new raw files match the generated originals byte-for-byte; all 11 existing raw generations and all seven final/runtime PNGs retain their starting hashes. A 1581-file game snapshot has no changes. Builder syntax and the scratch tablet capture script parse successfully. `validate.sh` parses 121 scripts with 0 failures and boots Main, but fails on sandbox access to Windows certificates, user storage, editor settings and adb; redirecting user storage into `logs/` allows Main and Loading to run, with the certificate-store error remaining. Full `run_tests.sh`: 0 passed, 43 failed; successful test bodies are rejected for that certificate-store error, alongside the documented stale API/resource failures and save-test timeout.
+- **Follow-ups:** Pillow and NumPy are not accessible to this sandbox, and pip downloads are blocked. Requested a workspace-local copy of these existing builder dependencies. Rebuild, final face measurements, tablet captures, metadata and the two runtime replacements remain pending.
+
+## 2026-10-05 — Codex as a tool, through its command line
+- **Who:** Claude Code (Opus 5.5)
+- **Owner:** "write in the project and agent files to use codex as a tool, but not sprite sheet creation
+  since that is done by autosprite"; then "codex can be used for simple sprite sheets".
+- **Did:** the rule in AGENTS.md §2, the command in AGENTS.md §4 (Windows), a pointer in CLAUDE.md and
+  PROJECT_CONTEXT §6. Found the CLI: the Codex app bundles `codex.exe` (`codex-cli 0.160.0`) in its
+  WindowsApps folder, not on the PATH; `codex exec` runs one task non-interactively; it is logged in
+  with ChatGPT; `codex features list` shows `image_generation` on.
+- **Files/systems:** `AGENTS.md`, `CLAUDE.md`, `docs/PROJECT_CONTEXT.md`.
+- **Verified:** `codex.exe --version`, `exec --help`, `features list` and `login status` read; no task run.
+- **Follow-ups:** none.
+
+## 2026-10-05 — Pickup documentation reviewed
+- **Who:** Codex
+- **Did:** Checked the completed [pickup system documentation](systems/pickup_items.md), [GDD decisions #76–77](GDD.md), [project registries](PROJECT_CONTEXT.md), [M15 roadmap](ROADMAP.md) and phone deployment entry below. These record the seven effects, stored/double-tap Ward, item packs, starting boosts, provisional tuning, implementation checks and remaining device review.
+- **Files/systems:** documentation review and `docs/DEVLOG.md`; no game code changed.
+- **Verified:** project map check passes and `git diff --check` is clean. The phone deployment record distinguishes successful APK export/install and launcher dispatch from unconfirmed on-screen startup after USB disconnection.
+- **Follow-ups:** phone startup confirmation and the owner's balance/feel pass remain pending; existing test failures are recorded in the implementation entry below.
+
+## 2026-10-05 — Pickup build installed on the connected phone
+- **Who:** Codex
+- **Did:** Exported the current Android debug build with the pickup/items changes and installed it on the connected Galaxy S24 (`RFCX2035YHT`) using `adb install -r -t`. Sent the documented launcher command through `monkey`.
+- **Files/systems:** generated `build/android/wisp_rush_debug.apk`; deployment record only, no game code changed.
+- **Verified:** Godot's Android export exits 0 after signing and verifying the APK; installation reports `Success`; launcher reports one event injected and exits 0. The USB device disconnected during the subsequent startup/log/screenshot check, so on-screen startup is not confirmed. The preceding implementation session records `VALIDATE: OK` and the passing pickup checks.
+- **Follow-ups:** confirm startup when the phone reconnects; owner device/feel pass remains pending.
+
+## 2026-10-05 — Enemy pickups and consumable item packs implemented
+- **Who:** Codex
+- **Did:**
+  - Replaced live XP, level HUD and upgrade cards with the seven accepted enemy drops. Added temporary effect timers, refresh/expiry, Magnet attraction, Star score multiplication, Stillglass slowdown, Bomb banishment and one Echo strike per dash. RUSH stays separate.
+  - Added saved Ward stock and double-tap activation; protection blocks one hit, preserves the single fragment and grants brief escape immunity. Item stock and RP changes roll back if persistence fails; tutorial stock stays local.
+  - Added the Items Shop tab: Ward, Magnet and Star packs of 1/5/10/25; stock, affordability and one-use next-run boost selection. Selected copies are spent when waves start, after prewarm/intro. Unit prices 40/20/30 RP, timed effects 10 s and regular-kill drop chance 10% are provisional values chosen with the owner's authorization.
+  - Packed the seven unchanged generated originals into 256² RGBA icons on an exact 4 px grid with binary alpha and the project palette; source/runtime copies match. Added pixel shell/burst feedback, ordinary/board HUDs and the tutorial's pickup/shield lesson; updated affected QA/capture tools and required docs/registries.
+- **Files/systems:** `data/items/`, `scripts/resources/run_item_*`, `scripts/components/run_items.gd`, `soul_ward_visual.gd`, `scenes/pickups/run_item_pickup.*`, gameplay/player/Main/Shop/tutorial scenes, both board visuals, SaveManager v10, `concept_art/pickup_items_v1/` and `assets/art/ui/items/`; [pickup system](systems/pickup_items.md), GDD #77 and ADR-0026.
+- **Verified:** `tools/validate.sh`: `VALIDATE: OK`, 121 scripts checked, 0 failed, main boot OK, map refreshed. `tools/run_tests.sh pickup`: 4 passed, 0 failed (seven live effects, independent RP/item drops, timer pause/expiry, pack prices and invalid requests, v9 migration/reload/rollback, real Main/Shop buttons, held starting boost, emulated double taps and tutorial demo/try isolation). `gameplay_slice`: passed. Full suite: 33 passed, 10 pre-existing stale failures, compared with the starting 29/11 baseline; the obsolete mutation-effects test was replaced by pickup coverage. `qa_matrix shop_items pickups`: 5/5 portrait sizes each, both sheets reviewed; short phones scroll to the last item. Reviewed the seven-icon pack, normal gameplay and BOARD 01/SIMULATION HUD fixtures at 390×844, plus `screenshot.sh` for the Shop's four-tab bar. Windowed fixtures and headless live-scene checks report no new errors. Godot MCP was unavailable; CLI checks and viewport captures used isolated saves.
+- **Follow-ups:** owner phone/feel pass for prices, durations and drop chance. Ten stale tests remain outside this change: dev unlock, removed enemy families, old Forms screens and the old `purchase_form` save call (120 s timeout). No commits, pushes or APK deployment requested.
+
+
+## 2026-10-05 — Seven pickup item icon designs
+- **Who:** Codex
+- **Did:**
+  - Generated Soul Ward, Rift Magnet, Fortune Star, Stillglass, Banish Bomb, Reaper's Edge and Echo Wisp as separate transparent icon designs with the built-in image generator. Used the current pixel UI glyph sheet for palette/readability and Soul Ward as the sibling style reference.
+  - Saved the seven unchanged PNGs, exact prompts, generation record, measured metadata and a browser review page in `concept_art/pickup_items_v1/`. Registered the pack and recorded the accepted item effects and stored/double-tap shield activation in GDD §14 #76.
+- **Files/systems:** source art pack, `docs/ASSETS.md`, `docs/GDD.md`; no runtime files changed.
+- **Verified:** all seven originals are 1254×1254 RGBA, have transparent pixels and match the generated files byte-for-byte. Visually reviewed the seven silhouettes at 256/64/48/32 px and on a light surface; all 35 review images loaded, no page overflow or browser errors. `tools/validate.sh`: `VALIDATE: OK`, 114 scripts checked, 0 failed, main boot OK; project map refreshed and `--check` passes. Full `tools/run_tests.sh`: 29 passed, 11 failed, matching the documented baseline count; failures reference removed enemy/Forms/dev-unlock/save APIs, with the mutation and save tests timing out.
+- **Follow-ups:** the originals contain extra shades and partial-alpha edges. Exact pixel-grid/palette packing is awaiting the owner's response to the processing question. Gameplay, upgrade replacement and shop integration are separate work; the 11 existing test failures were not changed.
+
 ## 2026-10-05 — Dedicated Shop, Daily, Trials and Results backgrounds
 - **Who:** Codex
 - **Did:**

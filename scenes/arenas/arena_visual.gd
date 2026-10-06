@@ -1,31 +1,22 @@
 class_name ArenaVisual
 extends Control
-## An Endless arena drawn as a scene instead of one painting: layered sprites, a 3D model or a board.
+## The arena a run is played on, drawn as a scene: the game's one arena is SIMULATION, a
+## [SciFiBoardVisual] (owner 2026-10-05, ADR-0027).
 ##
-## GameWorld shows it in place of the painted backdrop when the equipped arena has one
-## ([member ArenaSkinData.visual_scene_path]; ADR-0021, ADR-0023, ADR-0024). [method fit] lays it out
-## for the screen and returns the floor exactly as drawn, and GameWorld takes the walls, enemy
-## placement and dash collision from that rectangle, so play never leaves the drawn floor.
-## Subclasses: [LayeredArenaVisual] (sprites on a texel grid), [ModelArenaVisual] (a 3D model),
-## [BoardArenaVisual] (a full-screen pixel-art board with the HUD built in) and [SciFiBoardVisual] (a
-## sci-fi screen with the HUD built in and its own spawn effects, ADR-0025). Pausable; the arena
-## stills its motion under Reduced Motion ([method set_reduced_motion]).
+## GameWorld shows the arena's scene ([member ArenaSkinData.visual_scene_path]) under everything else.
+## [method fit] lays it out for the screen and returns the floor exactly as drawn, and GameWorld takes
+## the walls, enemy placement and dash collision from that rectangle, so play never leaves the drawn
+## floor. Pausable; the arena stills its motion under Reduced Motion ([method set_reduced_motion]).
 ##
-## An arena may draw enemy arrivals and a boss's appearance itself ([method show_enemy_arrival],
-## [method show_boss_appearance]); GameWorld hands it each spawn, and the arena only reads the actor's
-## own progress, so the effect never changes when anything arrives.
-##
-## An arena may have an opening shot before play ([method has_intro]): GameWorld then plays it with
-## the Wisp and the HUD hidden and starts the run on [signal intro_finished] (the zoom of a 3D arena,
-## ADR-0023).
+## An arena may draw the run's HUD in itself ([method has_board_hud], ADR-0024), and enemy arrivals
+## and a boss's appearance ([method show_enemy_arrival], [method show_boss_appearance], ADR-0025);
+## GameWorld hands it each spawn, and the arena only reads the actor's own progress, so the effect
+## never changes when anything arrives.
 
-## The opening shot has ended, played through or skipped; the floor is now drawn where [method fit]
-## said.
-signal intro_finished
 ## A board arena's own pause button was pressed ([method has_board_hud], ADR-0024).
 signal hud_pause_pressed
 
-## Design pixels the backdrop reaches past the screen, so screen shake never shows its edge
+## Design pixels the arena reaches past the screen, so screen shake never shows its edge
 ## (GameWorld's BACKGROUND_OVERSCAN).
 @export var backdrop_overscan: float = 16.0
 
@@ -47,44 +38,23 @@ func get_floor_rect() -> Rect2:
 	return _floor_rect
 
 
-## The floor as it is drawn right now: [method get_floor_rect], except during an opening shot.
-func get_drawn_floor_rect() -> Rect2:
-	return _floor_rect
-
-
-## Whether the arena opens with a shot before play.
-func has_intro() -> bool:
-	return false
-
-
-## Starts the opening shot; [signal intro_finished] follows when it ends (at once when there is none).
-func play_intro() -> void:
-	intro_finished.emit()
-
-
-## Ends the opening shot now, or before it starts (the player tapped, or the run skips it);
-## [signal intro_finished] follows.
-func skip_intro() -> void:
-	pass
-
-
 ## Whether the arena draws the run's HUD in itself (a board arena, ADR-0024): GameWorld then hides its
-## own HUD bars and buttons, feeds [method set_board_hud] each frame, and opens the upgrades when the
-## glowing character is tapped.
+## own HUD bars and buttons and feeds [method set_board_hud] each frame.
 func has_board_hud() -> bool:
 	return false
 
 
 ## The run's HUD values for a board arena to show. Keys: `score` and `rift_points` (text), `rp_icon`
-## and `boss_icon` (Texture2D), `level` (int), `soul`, `rush` and `boss_health` (0..1), `boss`
-## (bool, a boss fight is on), `upgrades` (int, banked upgrades ready to open).
+## and `boss_icon` (Texture2D), `ward_stock` (int), `ward_active` (bool), `rush` and `boss_health`
+## (0..1), `boss` (bool, a boss fight is on), `pause` (bool, the pause button is offered).
 func set_board_hud(_state: Dictionary) -> void:
 	pass
 
 
-## Where the Wisp is, in this node's coordinates, for scenery that reacts to play.
-func set_focus_point(_point: Vector2) -> void:
-	pass
+## Where a board arena draws a HUD [param element] (`rush`, `items`), in this node's coordinates, for a
+## host that points at it (the Tutorial); empty when the arena does not draw it.
+func get_hud_rect(_element: StringName) -> Rect2:
+	return Rect2()
 
 
 ## The screen's bottom safe inset in design pixels, given before [method fit]; an arena that keeps

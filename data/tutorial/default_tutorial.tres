@@ -84,21 +84,21 @@ demo_swipes = PackedVector2Array(0, -1, 0, 0)
 demo_shows_hit = true
 demo_hit_reform = Vector2(1, 0.7)
 
-[sub_resource type="Resource" id="Resource_growth"]
+[sub_resource type="Resource" id="Resource_pickups"]
 script = ExtResource("2_lesson")
-lesson_id = &"growth"
-title = "RIFT POINTS & XP"
-demo_caption = "Kills fill XP. Level-ups wait for a calm moment, then cards slide up."
-try_caption = "Reap the souls. When the cards slide up, tap one."
-success_callout = "UPGRADED"
-goal = &"upgrade"
+lesson_id = &"pickups"
+title = "PICKUPS & PROTECTION"
+demo_caption = "Collect the Soul Ward, then double tap to protect yourself."
+try_caption = "Slice the enemy, collect its Ward, then double tap."
+success_callout = "PROTECTED"
+goal = &"shield"
 player_start = Vector2(0.5, 1)
-enemy_positions = PackedVector2Array(0.5, 0.3, 0.5, 0.5, 0.5, 0.7)
+enemy_positions = PackedVector2Array(0.5, 0.5)
 demo_swipes = PackedVector2Array(0, 0)
 retry_on_miss = true
-hud_focus = &"xp"
-experience_enabled = true
-demo_upgrade_tap = true
+hud_focus = &"items"
+drops_item = &"soul_ward"
+demo_shield_tap = true
 drops_shards = true
 
 [sub_resource type="Resource" id="Resource_rush"]
@@ -134,7 +134,7 @@ reset_after_demo = false
 
 [resource]
 script = ExtResource("1_catalog")
-lessons = Array[ExtResource("2_lesson")]([SubResource("Resource_aim_dash"), SubResource("Resource_slice"), SubResource("Resource_chain"), SubResource("Resource_redirect"), SubResource("Resource_blockers"), SubResource("Resource_danger"), SubResource("Resource_growth"), SubResource("Resource_rush"), SubResource("Resource_boss")])
-arena_skin_id = &"quarry_titan"
+lessons = Array[ExtResource("2_lesson")]([SubResource("Resource_aim_dash"), SubResource("Resource_slice"), SubResource("Resource_chain"), SubResource("Resource_redirect"), SubResource("Resource_blockers"), SubResource("Resource_danger"), SubResource("Resource_pickups"), SubResource("Resource_rush"), SubResource("Resource_boss")])
+arena_skin_id = &"sci_fi_simulation_v1"
 hold_seconds = 0.4
 boss_health = 3

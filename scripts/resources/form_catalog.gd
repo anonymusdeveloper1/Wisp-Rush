@@ -1,11 +1,12 @@
 class_name FormCatalog
 extends Resource
-## Ordered registry of the playable characters: the whole-frame and rigged characters.
+## Ordered registry of the playable characters, all whole-frame sprite characters since Morrow, the
+## last bone rig, was removed (owner 2026-10-05).
 ##
 ## Every entry is cosmetic only - collision, stats and controls never change with the character.
 
 ## Number of catalog entries; the Statistics screen counts collected characters against it.
-const REQUIRED_FORM_COUNT: int = 6
+const REQUIRED_FORM_COUNT: int = 5
 ## The character every save owns and equips first, and the fallback for an unknown id: Patchvile
 ## (owner, 2026-09-25; Void held this until it was removed).
 const DEFAULT_FORM_ID: StringName = &"patchvile"

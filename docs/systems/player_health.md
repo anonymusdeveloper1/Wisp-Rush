@@ -1,7 +1,7 @@
 # System: Player health
 
-> **Status:** ✅ done · one fragment, no revive, nothing adds one: the Soul Vessel and Reaper's Gift
-> were removed and the HUD shows no count (2026-09-24) · **Last updated:** 2026-09-24 · **GDD section:** §5.3
+> **Status:** ✅ done · one fragment, nothing adds one, one rewarded-ad revive per run (2026-10-05): the Soul Vessel and Reaper's Gift
+> were removed and the HUD shows no count (2026-09-24) · **Last updated:** 2026-10-05 · **GDD section:** §5.3
 
 ## Purpose
 
@@ -9,11 +9,12 @@ Track the Wisp's Soul Fragments independently from movement, and turn valid enem
 readable hurt/invulnerability/death sequence. GameWorld selects a safe reform edge; WispPlayer owns
 the state and visuals.
 
-A run starts on **one** fragment and death is final. The maximum is a starting value, not a
-ceiling: each [SoulVesselPickup](../../scenes/pickups/soul_vessel_pickup.gd) collected raises it by
-one and fills it, with no cap, so how long a run survives is how many vessels it found. Nothing
-revives the player — `MonetisationService.PLACEMENT_REVIVE` is plumbing with no UI and stays
-unbuilt ([monetisation.md](monetisation.md)).
+A run starts on **one** fragment and death is final. Soul Ward protects that fragment by blocking
+the next fatal hit, then breaks and grants brief escape immunity. It never adds or heals health.
+Activation, stock and provisional timing: [pickup_items.md](pickup_items.md). The only revive is
+the rewarded ad (owner 2026-10-05, ADR-0029): once per run, `WispPlayer.revive(seconds)` brings a dead
+Wisp back where it fell with full Soul Fragments, the spawn reform and that many seconds without
+damage (GameWorld passes 2) ([monetisation.md](monetisation.md)).
 
 ## Files
 
@@ -23,8 +24,6 @@ unbuilt ([monetisation.md](monetisation.md)).
 | `res://scenes/player/wisp_player.tscn` | Composes HealthComponent under the Wisp |
 | `res://scenes/player/wisp_player.gd` | Vulnerability rules and hurt/death presentation |
 | `res://data/player/default_player_tuning.tres` | Starting fragments (1), hurt, invulnerability and death timing |
-| `res://scenes/pickups/soul_vessel_pickup.gd` / `.tscn` | The rare floor drop that adds a fragment; a `SoulShardPickup` with the vessel icon, so it attracts, sweeps and expires the same way |
-| `res://data/progression/default_run_progression.tres` | `soul_vessel_drop_chance` — how often a kill drops one |
 
 ## Scene / node structure
 
@@ -70,6 +69,9 @@ authoritative for vulnerability; HUD observes player health signals.
 
 ## Rules & behaviour
 
+- `activate_soul_ward`, `has_soul_ward`, `clear_soul_ward`, `shield_requested`, `shield_broken`: protection
+  API. RUSH immunity takes priority; Ward blocks without teleport, health loss or combo reset.
+
 - The HUD shows no lives readout (2026-09-24): a run has exactly one fragment.
 - Normal enemies cannot hurt the Wisp during spawn, dash, wall impact, hurt, death or victory.
 - Telegraphing hazards can hurt during a dash only while their visible geometry is dangerous.
@@ -79,6 +81,9 @@ authoritative for vulnerability; HUD observes player health signals.
 - Zero health enters DEAD immediately, then emits `died` only after the dissolve duration.
 
 ## How to test
+
+- `tools/run_tests.sh pickup_effects`: Ward break, retained health, escape immunity, next fatal hit
+  and RUSH preserving the shield. `pickup_shop_flow` verifies one saved copy spent by double tap.
 
 - Unit: `tools/godot/test_health_component.gd` checks clamp, heal and depletion behavior.
 - Live: `tools/godot/test_player_health_flow.gd` checks contact, i-frames, 3→0, dissolve and summary.
@@ -91,6 +96,8 @@ authoritative for vulnerability; HUD observes player health signals.
 
 | Date | Change |
 |---|---|
+| 2026-10-05 | `WispPlayer.revive(invulnerable_seconds)` for the rewarded-ad revive (ADR-0029) |
+| 2026-10-05 | Soul Ward blocks one hit without losing the single fragment, then grants escape immunity |
 | 2026-09-12 | Restyled to redesign v1 (ADR-0005) |
 | 2026-09-11 | Added hazard damage and mutation-driven maximum health/healing |
 | 2026-09-11 | Implemented component, contact rules, safe reform, HUD, i-frames and death sequence |

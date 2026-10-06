@@ -3,6 +3,9 @@
 [ext_resource type="Script" path="res://scripts/resources/player_tuning.gd" id="1_player_tuning"]
 
 [resource]
+double_tap_interval_msec = 350
+tap_max_hold_msec = 450
+double_tap_distance_factor = 3.0
 script = ExtResource("1_player_tuning")
 design_width = 1080.0
 dash_speed = 3168.0

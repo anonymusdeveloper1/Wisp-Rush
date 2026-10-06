@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="RunItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/run_item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+item_id = &"echo_wisp"
+display_name = "ECHO WISP"
+description = "Each dash's first kill sends an extra soul strike for 10 seconds."
+icon_path = "res://assets/art/ui/items/echo_wisp.png"
+duration_seconds = 10.0
+

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="RunItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/run_item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+item_id = &"soul_ward"
+display_name = "SOUL WARD"
+description = "Blocks one fatal hit. Double tap during play to activate."
+icon_path = "res://assets/art/ui/items/soul_ward.png"
+shop_enabled = true
+unit_price = 40
+

@@ -53,7 +53,12 @@ metadata. Runtime PNGs are generated files.
 [generation.json](generation.json) records the original input paths and generated outputs.
 Every exact initial prompt is in [prompts/](prompts/). Four loading-layout refinements lower the
 new boss, Shade, Scarlet and Rook to clear the existing logo and arena heading; their inputs and
-prompts are recorded in [refinements.json](refinements.json). Initial and refined generations
-remain unchanged in `raw/`; the builder selects a `_source_v2.png` where present.
+prompts are recorded in [refinements.json](refinements.json). Two further refinements on 2026-10-05
+lower Grimgrin and the lantern boss for the owner's 1200×1920 and 1440×1920 portrait tablets:
+the eye, grin and skull tops must be at or below y=1140 in the final 1080×2400 image, with the
+faces above approximately y=1580. Initial and refined generations remain unchanged in `raw/`,
+including the boss's earlier `_source_v2.png`; its new generation is `_source_v3.png`.
+The builder selects the last refinement recorded for each image and records its exact prompt
+and measured face positions in [metadata.json](metadata.json).
 
 The source folder remains under `concept_art/.gdignore`; the game uses the runtime copies.

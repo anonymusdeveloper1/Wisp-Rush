@@ -2,4 +2,4 @@
 [ext_resource type="Script" path="res://scripts/resources/form_catalog.gd" id="1"]
 [resource]
 script = ExtResource("1")
-form_paths = PackedStringArray("res://data/forms/patchvile.tres", "res://data/forms/verdant_shade.tres", "res://data/forms/scarlet.tres", "res://data/forms/morrow.tres", "res://data/forms/rook.tres", "res://data/forms/mothmere.tres")
+form_paths = PackedStringArray("res://data/forms/patchvile.tres", "res://data/forms/verdant_shade.tres", "res://data/forms/scarlet.tres", "res://data/forms/rook.tres", "res://data/forms/mothmere.tres")

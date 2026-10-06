@@ -4,7 +4,7 @@ extends RefCounted
 ## Shared by `render_gameplay_clip.gd` (a bare run) and `render_devlog_tour.gd` (the real Main flow);
 ## the host calls [method step] once per frame. The bot aims at the line through the most enemies and
 ## holds the aim arrow (lit targets, ×N) before multi-kills, redirects mid-dash when a clearly better
-## line opens, looks at upgrade cards before picking one, and with `survive` refills Soul Fragments
+## line opens, and with `survive` refills Soul Fragments
 ## after hits so a run keeps going. Tooling only; it reads GameWorld/WispPlayer internals on purpose.
 ##
 ## Options (strings, as parsed from `key=value` command-line arguments):
@@ -13,7 +13,7 @@ extends RefCounted
 ##   dash_speed=<px/s override for before/after shots; the player's tuning is duplicated, never saved>
 
 ## Emitted for moments worth cutting to: multi_kill, redirect, rush_started, boss_start,
-## boss_defeated, hit, upgrade, run_ended.
+## boss_defeated, hit, item_collected, run_ended.
 signal event_logged(event: StringName, fields: Dictionary)
 
 ## Directions sampled when the bot looks for the line through the most enemies.
@@ -31,8 +31,6 @@ const IDLE_REPOSITION_SECONDS: float = 1.2
 ## A redirect needs this much dash progress and this gap since the last redirect (game seconds).
 const REDIRECT_MIN_DASH_AGE: float = 0.08
 const REDIRECT_COOLDOWN_SECONDS: float = 1.0
-## Movie seconds the upgrade cards stay on screen before the bot picks one.
-const UPGRADE_LOOK_SECONDS: float = 1.1
 ## Game seconds before Soul Fragments refill after a non-critical hit (the tutorial uses 0.6 s).
 const HEAL_DELAY_SECONDS: float = 0.6
 
@@ -46,7 +44,6 @@ var run_ended_at: float = -1.0
 var _options: Dictionary = {}
 var _fps: float = 60.0
 var _random := RandomNumberGenerator.new()
-var _tray: UpgradeTray
 var _started_at: float = -1.0
 var _boss_called: bool = false
 var _hold_seconds: float = 0.34
@@ -55,7 +52,6 @@ var _decide_in: float = 0.0
 var _aim_left: float = -1.0
 var _aim_direction := Vector2.ZERO
 var _idle_time: float = 0.0
-var _upgrade_time: float = 0.0
 var _heal_in: float = -1.0
 var _dash_age: float = 0.0
 var _last_redirect_game_time: float = -INF
@@ -71,7 +67,6 @@ func _init(target: GameWorld, options: Dictionary, fps: float, seed_value: int) 
 	_options = options
 	_fps = maxf(fps, 1.0)
 	_random.seed = seed_value * 13 + 5
-	_tray = target.get_node("HUD/UpgradeTray") as UpgradeTray
 	_hold_seconds = option_float(options, "hold", 0.34)
 	_redirects = option_bool(options, "redirects", true)
 	_boss_called = option_float(options, "boss_at", 0.0) <= 0.0
@@ -82,8 +77,8 @@ func _init(target: GameWorld, options: Dictionary, fps: float, seed_value: int) 
 	game.player_damaged.connect(_on_player_damaged)
 	game.rush_started.connect(func() -> void: event_logged.emit(&"rush_started", {}))
 	game.boss_defeated.connect(func() -> void: event_logged.emit(&"boss_defeated", {}))
-	game.upgrade_chosen.connect(
-		func(mutation_id: StringName) -> void: event_logged.emit(&"upgrade", {"mutation": mutation_id})
+	game.item_collected.connect(
+		func(item_id: StringName) -> void: event_logged.emit(&"item_collected", {"item": item_id})
 	)
 	game.run_ended.connect(_on_run_ended)
 	player.dash_started.connect(func(_direction: Vector2, _dash_id: int) -> void: _dash_age = 0.0)
@@ -98,14 +93,6 @@ func step(movie_seconds: float) -> void:
 		return
 	if _started_at < 0.0:
 		_started_at = movie_seconds
-	if _tray.is_open():
-		_upgrade_time += 1.0 / _fps
-		_aim_left = -1.0
-		if _upgrade_time >= UPGRADE_LOOK_SECONDS:
-			_tray.choose_index(_random.randi_range(0, 2))
-			_upgrade_time = 0.0
-		return
-	_upgrade_time = 0.0
 	if game.get_tree().paused:
 		return
 

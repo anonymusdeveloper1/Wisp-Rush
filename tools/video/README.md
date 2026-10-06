@@ -12,9 +12,8 @@ the game itself**, **Kokoro** voices, **game first, open about AI**. EP01-EP04 w
 | Path | What |
 |---|---|
 | `tools/godot/render_gameplay_clip.gd` | Bot plays a real run while Godot's MovieWriter records 1080×1920 video + game audio; writes `<movie>.events.jsonl` |
-| `tools/godot/render_devlog_tour.gd` | Drives the real `Main` through a scripted tour and records it: `tour=menus` (boot → Home → Shop WISPS/DASHES/ARENAS → PLAY → run loading screen → Endless run on `skin`; the Rift Map step and `tour=story` went with the story Rifts on 2026-09-25). Own isolated save, real veil/glide/loading screens |
+| `tools/godot/render_devlog_tour.gd` | Drives the real `Main` through a scripted tour and records it: `tour=menus` (boot → Home → Shop CHARACTERS, then its SHOP page → PLAY → run loading screen → Endless run on SIMULATION; the Rift Map step and `tour=story` went with the story Rifts on 2026-09-25). Own isolated save, real veil/glide/loading screens |
 | `tools/godot/render_feel_showcase.gd` | Scripted feel shots in a quiet tutorial arena (aim rings sweep, AIM ASSIST off/on, 8-kill finisher, 5-kill finisher, RUSH with the bot); event log marks shots, releases and kills |
-| `tools/godot/render_arena_showcase.gd` | Endless arena skins back to back with live scenery and no enemies (a real GameWorld whose run start is held); event log marks `segment_start` / `segment_end` per skin |
 | `tools/godot/render_character_motion.gd` | One playable character through a scripted gameplay timeline on a plain arena; `WISP_MOTION_CLIP=1` runs the dash showcase (aim hold → dive → kill accent → mid-dash turn → ceiling and floor landings) with a trailing camera and a state caption, `WISP_MOTION_SCALE=0.25` makes it 4× slow motion |
 | `tools/godot/render_character_{lineup,select_showcase,home_showcase,gameplay_showcase}.gd` | Reference art vs live rig; one character in the Shop's CHARACTERS tab, on Home, and mid-dash in a real run |
 | `tools/godot/devlog_bot.gd` | The bot both recorders share: best-line aim with a held arrow before multi-kills, mid-dash redirects, upgrade picks, Soul Fragment refills, `dash_speed=` override (duplicated tuning) for before/after shots |
@@ -66,12 +65,8 @@ Run from the repo root; `GODOT=/Users/dimitarslezenkovski/Desktop/Godot.app/Cont
      --script res://tools/godot/render_feel_showcase.gd -- skin=world_tree_crown shots=rings,assist,finisher,five,rush \
      events="$PWD/video/footage/feel.events.jsonl"
    ```
-   Arena scenery without enemies or HUD (cut on the event log's `segment_start` / `segment_end`):
-   ```bash
-   WISP_ISOLATED_SAVE=1 "$GODOT" --path . --resolution 540x960 --write-movie "$PWD/video/footage/arena_showcase.avi" \
-     --script res://tools/godot/render_arena_showcase.gd -- skins=eclipse_sanctum,dragon_skull_throne seconds=5 \
-     events="$PWD/video/footage/arena_showcase.events.jsonl"
-   ```
+   (`render_arena_showcase.gd`, the arena scenery footage, was removed with the arenas on 2026-10-05,
+   ADR-0027.)
 3. **Transcode** for import (Palmier takes mp4/mov, not AVI; `-ss RUN_START` trims to the run):
    ```bash
    ffmpeg -i NAME.avi -vf "scale=in_range=pc:out_range=tv:in_color_matrix=bt601:out_color_matrix=bt709,format=yuv420p" \

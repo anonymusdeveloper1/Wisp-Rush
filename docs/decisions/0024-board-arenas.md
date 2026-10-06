@@ -1,6 +1,6 @@
 # ADR-0024: Board arenas — a full-screen board with the HUD in its frame
 
-> **Status:** Accepted · **Date:** 2026-10-02 · **Deciders:** owner / Claude Code (Opus 5.5) ·
+> **Status:** **BOARD 01 superseded by [ADR-0027](0027-one-arena-simulation.md)** (2026-10-05: BOARD 01 and BOARD 01 LIGHT removed; the board HUD path in GameWorld stands, for SIMULATION); Accepted · **Date:** 2026-10-02 · **Deciders:** owner / Claude Code (Opus 5.5) ·
 > **Builds on:** [ADR-0021](0021-layered-arenas.md) and [ADR-0023](0023-3d-arenas.md) (an arena may be a
 > scene, an `ArenaVisual`)
 
